@@ -23,7 +23,7 @@ function set_tmp(name,text)
     end
 end
 function to_pos(s)
-    local pos = {-1,-1,-1}
+    local pos = {0,0,0}
     i = 1
     string.gsub(s,"{(.-)}", function(a)
         pos[i] = tonumber(a)
@@ -92,17 +92,17 @@ function sort_pos(pos1,pos2)
     end
     return {pos1,pos2}
 end
+function get_we_pos(pname)
+    return to_pos(get_tmp("pos1_"..pname)),to_pos(get_tmp("pos2_"..pname))
+end
 -- Other Code
-set_tmp("pos1", to_pos_str(0,0,0))
-set_tmp("pos2", to_pos_str(0,0,0))
-set_tmp("postoset", "-1")
 minetest.register_on_chat_message(function(name, message)
     local cmd = "//pos1"
     if message:sub(0, #cmd) == cmd then
         if check_player_we_perms(name) then
             local pl = minetest.env:get_player_by_name(name)
             local p = pl:getpos()
-            set_tmp("pos1", to_pos_str(p.x,p.y,p.z))
+            set_tmp("pos1_"..name, to_pos_str(p.x,p.y,p.z))
             minetest.chat_send_player(name, 'P1 was set to '..to_pos_userstr({p.x,p.y,p.z}))
         else
             minetest.chat_send_player(name, 'You havent got the Permission for that')
@@ -114,7 +114,7 @@ minetest.register_on_chat_message(function(name, message)
         if check_player_we_perms(name) then
             local pl = minetest.env:get_player_by_name(name)
             local p = pl:getpos()
-            set_tmp("pos2", to_pos_str(p.x,p.y,p.z))
+            set_tmp("pos2_"..name, to_pos_str(p.x,p.y,p.z))
             minetest.chat_send_player(name, 'P2 was set to '..to_pos_userstr({p.x,p.y,p.z}))
         else
             minetest.chat_send_player(name, 'You havent got the Permission for that')
@@ -130,14 +130,13 @@ minetest.register_on_chat_message(function(name, message)
                 return true
             end
             if ope == "get" then
-                local pos1 = to_pos(get_tmp("pos1"))
-                local pos2 = to_pos(get_tmp("pos2"))
-                minetest.chat_send_player(name, "P1: ("..pos1[1]..","..pos1[2]..","..pos1[3]..")")
-                minetest.chat_send_player(name, "P2: ("..pos2[1]..","..pos2[2]..","..pos2[3]..")")
+                local pos1,pos2 = get_we_pos(name)
+                minetest.chat_send_player(name, "P1: "..to_pos_userstr(pos1))
+                minetest.chat_send_player(name, "P2: "..to_pos_userstr(pos2))
                 return true
             end
             if ope == "set" then
-                set_tmp("postoset", "0")
+                set_tmp("postoset_"..name, "0")
                 minetest.chat_send_player(name, "Please select P1 and P2")
                 return true
             end
@@ -154,7 +153,8 @@ minetest.register_on_chat_message(function(name, message)
                 minetest.chat_send_player(name, 'usage: '..cmd..' [nodename]')
                 return true
             end
-            local temp = sort_pos(to_pos(get_tmp("pos1")),to_pos(get_tmp("pos2")))
+            pos1,pos2 = get_we_pos(name)
+            local temp = sort_pos(pos1,pos2)
             pos1 = temp[1]
             pos2 = temp[2]
             temp = nil
@@ -186,7 +186,8 @@ minetest.register_on_chat_message(function(name, message)
                 minetest.chat_send_player(name, 'usage: '..cmd..' [nodename],[nodename2]')
                 return true
             end
-            local temp = sort_pos(to_pos(get_tmp("pos1")),to_pos(get_tmp("pos2")))
+            pos1,pos2 = get_we_pos(name)
+            local temp = sort_pos(pos1,pos2)
             pos1 = temp[1]
             pos2 = temp[2]
             temp = nil
@@ -222,7 +223,8 @@ minetest.register_on_chat_message(function(name, message)
                 minetest.chat_send_player(name, 'Valid Directions are: x+ x- y+ y- z+ z-')
                 return true
             end
-            local temp = sort_pos(to_pos(get_tmp("pos1")),to_pos(get_tmp("pos2")))
+            pos1,pos2 = get_we_pos(name)
+            local temp = sort_pos(pos1,pos2)
             pos1 = temp[1]
             pos2 = temp[2]
             local bc = 0
@@ -331,7 +333,8 @@ minetest.register_on_chat_message(function(name, message)
         data = {}
         datai = 1
         ----------
-        local temp = sort_pos(to_pos(get_tmp("pos1")),to_pos(get_tmp("pos2")))
+        pos1,pos2 = get_we_pos(name)
+        local temp = sort_pos(pos1,pos2)
         pos1 = temp[1]
         pos2 = temp[2]
         temp = nil
@@ -371,7 +374,7 @@ minetest.register_on_chat_message(function(name, message)
         data = table.load(fn)
         print(dump(data))
         ----------
-        pos1 = to_pos(get_tmp("pos1"))
+        pos1 = to_pos(get_tmp("pos1_"..name))
         local bp = 0
         for i = 1, #data, 1 do
             local d = data[i]
@@ -380,22 +383,22 @@ minetest.register_on_chat_message(function(name, message)
             bp = bp + 1
         end
         ----------
-        minetest.chat_send_player(name, bp..' Blocks pasted at P1')
+        minetest.chat_send_player(name, bp..' Blocks pasted at '..to_pos_userstr(pos1))
         return true
     end
 end)
 minetest.register_on_punchnode(function(p, node, puncher)
 	if puncher:get_player_name() ~= nil then
 		local pn = puncher:get_player_name()
-		if check_player_we_perms(pn) == false then minetest.chat_send_player(pn, 'You havent got the Permission for that') return end
-		if get_tmp("postoset") == "1" then
-			set_tmp("pos2", to_pos_str(p.x,p.y,p.z))
-			set_tmp("postoset", "-1")
+		if check_player_we_perms(pn) == false then return end
+		if get_tmp("postoset_"..pn) == "1" then
+			set_tmp("pos2_"..pn, to_pos_str(p.x,p.y,p.z))
+			set_tmp("postoset_"..pn, "-1")
             minetest.chat_send_player(pn, 'P2 was set to '..to_pos_userstr({p.x,p.y,p.z}))
 		end
-		if get_tmp("postoset") == "0" then
-			set_tmp("pos1", to_pos_str(p.x,p.y,p.z))
-			set_tmp("postoset", "1")
+		if get_tmp("postoset_"..pn) == "0" then
+			set_tmp("pos1_"..pn, to_pos_str(p.x,p.y,p.z))
+			set_tmp("postoset_"..pn, "1")
             minetest.chat_send_player(pn, 'P1 was set to '..to_pos_userstr({p.x,p.y,p.z}))
 		end
 	end
