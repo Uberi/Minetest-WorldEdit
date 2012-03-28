@@ -44,7 +44,7 @@ do
 		file:write( "return {"..charE )
 
 		for idx,t in ipairs( tables ) do
-			file:write( "-- Table: {"..idx.."}"..charE )
+			--file:write( "-- Table: {"..idx.."}"..charE )
 			file:write( "{"..charE )
 			local thandled = {}
 

@@ -5,7 +5,7 @@ assert(table.save ~= nil)
 assert(table.load ~= nil)
 -- Functions
 function get_tmp(name)
-    local f = io.open("wetemp_" .. name .. ".txt", "r")
+    local f = io.open(minetest.get_modpath("worldedit").."/wetemp_" .. name .. ".txt", "r")
     if f == nil then
         return ""
     else
@@ -13,7 +13,7 @@ function get_tmp(name)
     end
 end
 function set_tmp(name,text)
-    local f = io.open("wetemp_" .. name .. ".txt", "w")
+    local f = io.open(minetest.get_modpath("worldedit").."/wetemp_" .. name .. ".txt", "w")
     if f == nil then
         return false
     else
@@ -51,7 +51,7 @@ function string:split(delimiter)
 end
 function check_player_we_perms(pname)
     local fi = ""
-    local f = io.open("weperms.txt", "r")
+    local f = io.open(minetest.get_worldpath().."/weperms.txt", "r")
     if f ~= nil then
         fi = f:read("*all")
         f:close()
@@ -330,6 +330,7 @@ minetest.register_on_chat_message(function(name, message)
             minetest.chat_send_player(name, 'usage: '..cmd..' [filename]')
             return true
         end
+        fn = fn .. ".we"
         data = {}
         datai = 1
         ----------
@@ -346,6 +347,8 @@ minetest.register_on_chat_message(function(name, message)
                     local np_rel = {x=pos1[1]-x, y=pos1[2]-y, z=pos1[3]-z} -- Relative Position
                     local n = minetest.env:get_node(np)
                     if n.name ~= "air" then -- Don't Save air
+                        if n.param1 == 0 then n.param1 = nil end
+                        if n.param2 == 0 then n.param2 = nil end
                         data[datai] = {np_rel,n} -- data[index] = {position,node_data}
                         datai = datai + 1
                         bs = bs + 1
@@ -354,8 +357,8 @@ minetest.register_on_chat_message(function(name, message)
             end
         end
         ----------
-        print(dump(data))
-        table.save(data, fn)
+        --print(dump(data))
+        table.save(data, minetest.get_modpath("worldedit").."/"..fn)
         minetest.chat_send_player(name, bs..' Blocks saved to '..fn)
         return true
     end
@@ -370,9 +373,10 @@ minetest.register_on_chat_message(function(name, message)
             minetest.chat_send_player(name, 'usage: '..cmd..' [filename]')
             return true
         end
+        fn = fn .. ".we"
         data = {}
-        data = table.load(fn)
-        print(dump(data))
+        data = table.load(minetest.get_modpath("worldedit").."/"..fn)
+        --print(dump(data))
         ----------
         pos1 = to_pos(get_tmp("pos1_"..name))
         local bp = 0
