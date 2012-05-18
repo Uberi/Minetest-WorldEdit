@@ -417,7 +417,7 @@ minetest.register_on_chat_message(function(name, message)
         end
         data = {}
         data,err = table.load(minetest.get_modpath("worldedit").."/"..fn)
-        if err not == nil then
+        if not err == nil then
             minetest.chat_send_player(name, "Cound not load '"..fn.."'")
         end
         --print(dump(data))
