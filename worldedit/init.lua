@@ -3,6 +3,7 @@ print("[WorldEdit] Loading Table-Save/Load Library...")
 dofile(minetest.get_modpath("worldedit").."/table_save-load.lua")
 assert(table.save ~= nil)
 assert(table.load ~= nil)
+minetest.register_privilege("worldedit", "Ability to use WorldEdit")
 worldedit = {}
 -- Functions
 function get_tmp(name)
@@ -21,6 +22,23 @@ function set_tmp(name,text)
         f:write(text)
         f:close()
         return true
+    end
+end
+function check_if_dir(path)
+    f = io.open(path, "r")
+    if f == nil then
+        return false -- Doesn't exists
+    end
+    local ok, err, code = f:read("*a")
+    f:close()
+    if code == 21 then
+        return true
+    end
+    return false
+end
+function check_schematic_dir(worldpath)
+    if not check_if_dir(worldpath .. "/schems") then
+        os.execute("mkdir " .. worldpath .. "/schems") --Dirty hack
     end
 end
 function to_pos(s)
@@ -51,6 +69,9 @@ function string:split(delimiter)
   return result
 end
 function check_player_we_perms(pname)
+    if minetest.get_player_privs(pname).worldedit then
+        return true
+    end
     local fi = ""
     local f = io.open(minetest.get_worldpath().."/weperms.txt", "r")
     if f ~= nil then
@@ -372,7 +393,9 @@ minetest.register_on_chat_message(function(name, message)
             minetest.chat_send_player(name, 'usage: '..cmd..' [filename]')
             return true
         end
-        fn = fn .. ".we"
+        fn = minetest.get_worldpath().."/schems/"..fn..".we"
+        check_schematic_dir(minetest.get_worldpath()) -- Make sure WORLDDIR/schems exists
+        
         data = {}
         datai = 1
         ----------
@@ -400,7 +423,7 @@ minetest.register_on_chat_message(function(name, message)
         end
         ----------
         --print(dump(data))
-        table.save(data, minetest.get_modpath("worldedit").."/"..fn)
+        table.save(data, fn)
         minetest.chat_send_player(name, bs..' Blocks saved to '..fn)
         return true
     end
@@ -415,10 +438,13 @@ minetest.register_on_chat_message(function(name, message)
             minetest.chat_send_player(name, 'usage: '..cmd..' [filename]')
             return true
         end
+        fn = minetest.get_worldpath().."/schems/"..fn
+        check_schematic_dir(minetest.get_worldpath()) -- Make sure WORLDDIR/schems exists
         data = {}
-        data,err = table.load(minetest.get_modpath("worldedit").."/"..fn)
-        if not err == nil then
+        data,err = table.load(fn)
+        if data == nil then
             minetest.chat_send_player(name, "Cound not load '"..fn.."'")
+            return true
         end
         --print(dump(data))
         ----------
@@ -432,6 +458,33 @@ minetest.register_on_chat_message(function(name, message)
         end
         ----------
         minetest.chat_send_player(name, bp..' Blocks pasted at '..to_pos_userstr(pos1))
+        return true
+    end
+    local cmd = "//light"
+    if message:sub(0, #cmd) == cmd then
+        if check_player_we_perms(name) then
+            pos1,pos2 = get_we_pos(name)
+            local temp = sort_pos(pos1,pos2)
+            pos1 = temp[1]
+            pos2 = temp[2]
+            temp = nil
+            local bl = 0
+            for x = pos1[1], pos2[1], 1 do
+                for y = pos1[2], pos2[2], 1 do
+                    for z = pos1[3], pos2[3], 1 do
+                        local np = {x=x, y=y, z=z}
+                        local no = minetest.env:get_node(np)
+                        no.param1 = 13
+                        minetest.env:add_node(np, no)
+                        bl = bl + 1
+                    end
+                end
+            end
+            minetest.chat_send_player(name, bl..' Blocks lighted')
+            return true
+        else
+            minetest.chat_send_player(name, 'You havent got the Permission for that')
+        end
         return true
     end
 end)
