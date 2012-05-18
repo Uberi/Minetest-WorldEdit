@@ -3,6 +3,7 @@ print("[WorldEdit] Loading Table-Save/Load Library...")
 dofile(minetest.get_modpath("worldedit").."/table_save-load.lua")
 assert(table.save ~= nil)
 assert(table.load ~= nil)
+worldedit = {}
 -- Functions
 function get_tmp(name)
     local f = io.open(minetest.get_modpath("worldedit").."/wetemp_" .. name .. ".txt", "r")
@@ -95,6 +96,47 @@ end
 function get_we_pos(pname)
     return to_pos(get_tmp("pos1_"..pname)),to_pos(get_tmp("pos2_"..pname))
 end
+-- API 0.1
+worldedit.apiversion = "0.1"
+-- mtpos is something like {x=1,y=2,z=3}
+-- wepos is something like {1,2,3}
+-- Returns the Positions a Player selected
+function worldedit.get_selected_positions_of_player(playername)
+    local pos1,pos2 = get_we_pos(playername)
+    return pos1,pos2
+end
+-- Sort 2 Positions, so p1.x < p2.x (same with y and z)
+function worldedit.sort_positions(pos1, pos2)
+    local ps = sort_pos(pos1,pos2)
+    return ps[1],ps[2]
+end
+-- Converts a Position used by WorldEdit to a Position used by Minetest
+function worldedit.wepos_to_mtpos(wepos)
+    return {x=wepos[1],y=wepos[2],z=wepos[3]}
+end
+-- Converts a Position used by Minetest to a Position used by WorldEdit
+function worldedit.mtpos_to_wepos(mtpos)
+    return {mtpos.x,mtpos.y,mtpos.z}
+end
+-- Returns an Userreadable-String representing a Position used by WorldEdit
+function worldedit.wepos_to_user_readable(wepos)
+    return to_pos_userstr(wepos)
+end
+-- Returns an Userreadable-String representing a Position used by Minetest
+function worldedit.mtpos_to_user_readable(mtpos)
+    return to_pos_userstr(worldedit.mtpos_to_wepos(mtpos))
+end
+-- Floors the x,y and z of a Position used by Minetest
+function worldedit.floor_mtpos(mtpos)
+    return {x=math.floor(mtpos.x),y=math.floor(mtpos.y),z=math.floor(mtpos.z)}
+end
+-- Floors the x,y and z of a Position used by WorldEdit
+function worldedit.floor_wepos(wepos)
+    return {math.floor(wepos[1]),math.floor(wepos[2]),math.floor(wepos[3])}
+end
+-- Make sure the API works
+assert(worldedit.wepos_to_mtpos({1,2,3}).x == 1)
+assert(worldedit.mtpos_to_wepos({x=1,y=2,z=3})[3] == 3)
 -- Other Code
 minetest.register_on_chat_message(function(name, message)
     local cmd = "//pos1"
@@ -373,9 +415,11 @@ minetest.register_on_chat_message(function(name, message)
             minetest.chat_send_player(name, 'usage: '..cmd..' [filename]')
             return true
         end
-        fn = fn .. ".we"
         data = {}
-        data = table.load(minetest.get_modpath("worldedit").."/"..fn)
+        data,err = table.load(minetest.get_modpath("worldedit").."/"..fn)
+        if err not == nil then
+            minetest.chat_send_player(name, "Cound not load '"..fn.."'")
+        end
         --print(dump(data))
         ----------
         pos1 = to_pos(get_tmp("pos1_"..name))
