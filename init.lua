@@ -112,8 +112,8 @@ minetest.register_chatcommand("/set", {
 			return
 		end
 
-		local count = worldedit.fill(pos1, pos2, param)
-		minetest.chat_send_player(name, count .. " nodes filled")
+		local count = worldedit.set(pos1, pos2, param)
+		minetest.chat_send_player(name, count .. " nodes set")
 	end,
 })
 

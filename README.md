@@ -101,6 +101,64 @@ Load nodes from "(world folder)/schems/<file>.we" with position 1 of the current
     //load some random filename
     //load huge_base
 
+WorldEdit API
+-------------
+WorldEdit exposes all significant functionality in a simple interface. Adding WorldEdit to the file "depends.txt" in your mod gives you access to all of the `worldedit` functions. These are useful if you're looking for high-performance node manipulation without all the hassle of writing tons of code.
+
+### worldedit.volume(pos1, pos2)
+
+Determines the volume of the region defined by positions `pos1` and `pos2`.
+
+Returns the volume.
+
+### worldedit.set(pos1, pos2, nodename)
+
+Sets a region defined by positions `pos1` and `pos2` to `nodename`. To clear to region, use "air" as the value of `nodename`.
+
+Returns the number of nodes set.
+
+### worldedit.replace(pos1, pos2, searchnode, replacenode)
+
+Replaces all instances of `searchnode` with `replacenode` in a region defined by positions `pos1` and `pos2`.
+
+Returns the number of nodes replaced.
+
+### worldedit.copy(pos1, pos2, axis, amount)
+
+Copies the region defined by positions `pos1` and `pos2` along the `axis` axis ("x" or "y" or "z") by `amount` nodes.
+
+Returns the number of nodes copied.
+
+### worldedit.move(pos1, pos2, axis, amount)
+
+Moves the region defined by positions `pos1` and `pos2` along the `axis` axis ("x" or "y" or "z") by `amount` nodes.
+
+Returns the number of nodes moved.
+
+### worldedit.stack(pos1, pos2, axis, count)
+
+duplicates the region defined by positions `pos1` and `pos2` along the `axis` axis ("x" or "y" or "z") `count` times.
+
+Returns the number of nodes stacked.
+
+### worldedit.dig(pos1, pos2)
+
+Digs a region defined by positions `pos1` and `pos2`.
+
+Returns the number of nodes dug.
+
+### worldedit.serialize(pos1, pos2)
+
+Converts the region defined by positions `pos1` and `pos2` into a single string.
+
+Returns the serialized data and the number of nodes serialized.
+
+### worldedit.deserialize(originpos, value)
+
+Loads the nodes represented by string `value` at position `originpos`.
+
+Returns the number of nodes deserialized.
+
 License
 -------
 Copyright 2012 sfan5 and Anthony Zhang (Temperest)

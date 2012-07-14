@@ -20,8 +20,8 @@ worldedit.volume = function(pos1, pos2)
 	return (pos2.x - pos1.x + 1) * (pos2.y - pos1.y + 1) * (pos2.z - pos1.z + 1)
 end
 
---fills a region defined by positions `pos1` and `pos2` with `nodename`, returning the number of nodes filled
-worldedit.fill = function(pos1, pos2, nodename)
+--sets a region defined by positions `pos1` and `pos2` to `nodename`, returning the number of nodes filled
+worldedit.set = function(pos1, pos2, nodename)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 	local env = minetest.env
 
@@ -72,7 +72,7 @@ worldedit.replace = function(pos1, pos2, searchnode, replacenode)
 	return count
 end
 
---copies the region defined by positions `pos1` and `pos2` along the `axis` axis by `amount` nodes, returning the number of nodes copied
+--copies the region defined by positions `pos1` and `pos2` along the `axis` axis ("x" or "y" or "z") by `amount` nodes, returning the number of nodes copied
 worldedit.copy = function(pos1, pos2, axis, amount)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 	local env = minetest.env
@@ -117,7 +117,7 @@ worldedit.copy = function(pos1, pos2, axis, amount)
 	return worldedit.volume(pos1, pos2)
 end
 
---moves the region defined by positions `pos1` and `pos2` along the `axis` axis by `amount` nodes, returning the number of nodes moved
+--moves the region defined by positions `pos1` and `pos2` along the `axis` axis ("x" or "y" or "z") by `amount` nodes, returning the number of nodes moved
 worldedit.move = function(pos1, pos2, axis, amount)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 	local env = minetest.env
@@ -164,7 +164,7 @@ worldedit.move = function(pos1, pos2, axis, amount)
 	return worldedit.volume(pos1, pos2)
 end
 
---duplicates the region defined by positions `pos1` and `pos2` along the `axis` axis `count` times, returning the number of nodes stacked
+--duplicates the region defined by positions `pos1` and `pos2` along the `axis` axis ("x" or "y" or "z") `count` times, returning the number of nodes stacked
 worldedit.stack = function(pos1, pos2, axis, count)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 	local length = pos2[axis] - pos1[axis] + 1
