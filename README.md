@@ -12,8 +12,20 @@ WorldEdit has a huge potential for abuse by untrusted players. Therefore, users 
 
 For in-game information about these commands, type `/help <command name>` in the chat. For example, to learn more about the `//copy` command, simply type `/help /copy` to display information relevant to copying a region.
 
+Regions
+-------
+Most WorldEdit commands operate on regions. Regions are a set of two positions that define a 3D cube. They are local to each player and chat commands affect only the region for the player giving the commands.
+
+Each positions together define two opposing corners of the cube. With two opposing corners it is possible to determine both the location and dimensions of the region.
+
+Regions are not saved between server restarts. They start off as empty regions, and cannot be used with most WorldEdit commands until they are set to valid values.
+
 Commands
 --------
+
+### //reset
+
+Reset the region so that it is empty.
 
 ### //pos1
 

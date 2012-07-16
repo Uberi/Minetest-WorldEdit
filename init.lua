@@ -1,25 +1,42 @@
 minetest.register_privilege("worldedit", "Can use WorldEdit commands")
 
-worldedit = {}
+--wip: check to make sure player positions are set before doing editing
+--wip; fix meseconedit to export to new WorldEdit format
 
-dofile(minetest.get_modpath("worldedit") .. "/functions.lua")
+worldedit = {}
 
 worldedit.set_pos = {}
 
 worldedit.pos1 = {}
 worldedit.pos2 = {}
 
+dofile(minetest.get_modpath("worldedit") .. "/functions.lua")
+dofile(minetest.get_modpath("worldedit") .. "/mark.lua")
+
 --determines whether `nodename` is a valid node name, returning a boolean
 worldedit.node_is_valid = function(temp_pos, nodename)
-	local originalnode = minetest.env:get_node(temp_pos)
-	minetest.env:add_node(temp_pos, {name=nodename})
-	local value = minetest.env:get_node(temp_pos).name
-	local equal = value == nodename or value == "default:" .. nodename
-	minetest.env:add_node(temp_pos, originalnode)
-	return equal
+	local originalnode = minetest.env:get_node(temp_pos) --save the original node to restore later
+	minetest.env:add_node(temp_pos, {name=nodename}) --attempt to add the node
+	local value = minetest.env:get_node(temp_pos).name --obtain the name of the newly added node
+	if value == nodename or value == "default:" .. nodename then --successfully added node
+		minetest.env:add_node(temp_pos, originalnode) --restore the original node
+		return true --node is valid
+	end
+	return false --node is not valid
 end
 
---wip: check to make sure player positions are set before doing editing
+minetest.register_chatcommand("/reset", {
+	params = "",
+	description = "Reset the region so that it is empty",
+	privs = {worldedit=true},
+	func = function(name, param)
+		worldedit.pos1[name] = nil
+		worldedit.pos2[name] = nil
+		worldedit.mark_pos1(name)
+		worldedit.mark_pos2(name)
+		minetest.chat_send_player(name, "WorldEdit region reset")
+	end,
+})
 
 minetest.register_chatcommand("/pos1", {
 	params = "",
@@ -31,6 +48,7 @@ minetest.register_chatcommand("/pos1", {
 		pos.y = math.floor(pos.y)
 		pos.z = math.floor(pos.z)
 		worldedit.pos1[name] = pos
+		worldedit.mark_pos1(name)
 		minetest.chat_send_player(name, "WorldEdit position 1 set to (" .. pos.x .. "," .. pos.y .. "," .. pos.z .. ")")
 	end,
 })
@@ -42,6 +60,7 @@ minetest.register_chatcommand("/pos2", {
 	func = function(name, param)
 		local pos = minetest.env:get_player_by_name(name):getpos()
 		worldedit.pos2[name] = pos
+		worldedit.mark_pos2(name)
 		minetest.chat_send_player(name, "WorldEdit position 2 set to (" .. pos.x .. "," .. pos.y .. "," .. pos.z .. ")")
 	end,
 })
@@ -71,10 +90,12 @@ minetest.register_on_punchnode(function(pos, node, puncher)
 		if worldedit.set_pos[name] == 1 then --setting position 1
 			worldedit.set_pos[name] = 2 --set position 2 on the next invocation
 			worldedit.pos1[name] = pos
+			worldedit.mark_pos1(name)
 			minetest.chat_send_player(name, "WorldEdit region position 1 set to (" .. pos.x .. "," .. pos.y .. "," .. pos.z .. ")")
 		else --setting position 2
 			worldedit.set_pos[name] = nil --finished setting positions
 			worldedit.pos2[name] = pos
+			worldedit.mark_pos2(name)
 			minetest.chat_send_player(name, "WorldEdit region position 2 set to (" .. pos.x .. "," .. pos.y .. "," .. pos.z .. ")")
 		end
 	end
