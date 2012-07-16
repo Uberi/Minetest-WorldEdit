@@ -20,12 +20,20 @@ Each positions together define two opposing corners of the cube. With two opposi
 
 Regions are not saved between server restarts. They start off as empty regions, and cannot be used with most WorldEdit commands until they are set to valid values.
 
+Markers
+-------
+Entities are used to mark the location of the WorldEdit regions. They appear as boxes containing the number 1 or 2, and represent position 1 and 2 of the WorldEdit region, respectively.
+
+To remove the entities, simply punch them. This does not reset the positions themselves.
+
 Commands
 --------
 
 ### //reset
 
 Reset the region so that it is empty.
+
+    //reset
 
 ### //pos1
 
