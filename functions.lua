@@ -204,6 +204,7 @@ end
 
 --converts the region defined by positions `pos1` and `pos2` into a single string, returning the serialized data and the number of nodes serialized
 worldedit.serialize = function(pos1, pos2)
+	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 	local pos = {x=pos1.x, y=0, z=0}
 	local count = 0
 	local result = {}
