@@ -59,6 +59,9 @@ minetest.register_chatcommand("/pos2", {
 	privs = {worldedit=true},
 	func = function(name, param)
 		local pos = minetest.env:get_player_by_name(name):getpos()
+		pos.x = math.floor(pos.x)
+		pos.y = math.floor(pos.y)
+		pos.z = math.floor(pos.z)
 		worldedit.pos2[name] = pos
 		worldedit.mark_pos2(name)
 		minetest.chat_send_player(name, "WorldEdit position 2 set to (" .. pos.x .. "," .. pos.y .. "," .. pos.z .. ")")
