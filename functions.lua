@@ -247,3 +247,34 @@ worldedit.deserialize = function(originpos, value)
 	end
 	return count
 end
+
+--loads the nodes represented by string `value` at position `originpos`, returning the number of nodes deserialized
+--based on [table.save/table.load](http://lua-users.org/wiki/SaveTableToFile) by ChillCode, available under the MIT license (GPL compatible)
+worldedit.deserialize_old = function(originpos, value)
+	--obtain the node table
+	local count = 0
+	local get_tables = loadstring(value)
+	if get_tables == nil then --error loading value
+		return count
+	end
+	local tables = get_tables()
+
+	--transform the node table into an array of nodes
+	for i = 1, #tables do
+		for j, v in pairs(tables[i]) do
+			if type(v) == "table" then
+				tables[i][j] = tables[v[1]]
+			end
+		end
+	end
+
+	--load the node array
+	local env = minetest.env
+	for i, v in ipairs(tables[1]) do
+		local pos = v[1]
+		pos.x, pos.y, pos.z = originpos.x + pos.x, originpos.y + pos.y, originpos.z + pos.z
+		env:add_node(pos, v[2])
+		count = count + 1
+	end
+	return count
+end

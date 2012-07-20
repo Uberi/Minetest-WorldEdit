@@ -1,8 +1,5 @@
 minetest.register_privilege("worldedit", "Can use WorldEdit commands")
 
---wip: check to make sure player positions are set before doing editing
---wip; fix meseconedit to export to new WorldEdit format
-
 worldedit = {}
 
 worldedit.set_pos = {}
@@ -312,7 +309,12 @@ minetest.register_chatcommand("/load", {
 		local value = file:read("*a")
 		file:close()
 
-		local count = worldedit.deserialize(pos1, value)
+		local count
+		if value:find("{") then --old WorldEdit format
+			count = worldedit.deserialize_old(pos1, value)
+		else --new WorldEdit format
+			count = worldedit.deserialize(pos1, value)
+		end
 
 		minetest.chat_send_player(name, count .. " nodes loaded")
 	end,

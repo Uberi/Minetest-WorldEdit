@@ -179,6 +179,14 @@ Loads the nodes represented by string `value` at position `originpos`.
 
 Returns the number of nodes deserialized.
 
+### worldedit.deserialize_old(originpos, value)
+
+Loads the nodes represented by string `value` at position `originpos`, using the older table-based WorldEdit format.
+
+This function is deprecated, and should not be used unless there is a need to support legacy WorldEdit save files.
+
+Returns the number of nodes deserialized.
+
 License
 -------
 Copyright 2012 sfan5 and Anthony Zhang (Temperest)
