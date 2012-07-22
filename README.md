@@ -35,6 +35,12 @@ Reset the region so that it is empty.
 
     //reset
 
+### //mark
+
+Show markers at the region positions.
+
+    //mark
+
 ### //pos1
 
 Set WorldEdit region position 1 to the player's location.

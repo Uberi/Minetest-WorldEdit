@@ -35,6 +35,17 @@ minetest.register_chatcommand("/reset", {
 	end,
 })
 
+minetest.register_chatcommand("/mark", {
+	params = "",
+	description = "Show markers at the region positions",
+	privs = {worldedit=true},
+	func = function(name, param)
+		worldedit.mark_pos1(name)
+		worldedit.mark_pos2(name)
+		minetest.chat_send_player(name, "WorldEdit region marked")
+	end,
+})
+
 minetest.register_chatcommand("/pos1", {
 	params = "",
 	description = "Set WorldEdit region position 1 to the player's location",
