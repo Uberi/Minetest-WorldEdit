@@ -41,12 +41,10 @@ minetest.register_chatcommand("/pos1", {
 	privs = {worldedit=true},
 	func = function(name, param)
 		local pos = minetest.env:get_player_by_name(name):getpos()
-		pos.x = math.floor(pos.x)
-		pos.y = math.floor(pos.y)
-		pos.z = math.floor(pos.z)
+		pos.x, pos.y, pos.z = math.floor(pos.x), math.floor(pos.y), math.floor(pos.z)
 		worldedit.pos1[name] = pos
 		worldedit.mark_pos1(name)
-		minetest.chat_send_player(name, "WorldEdit position 1 set to (" .. pos.x .. "," .. pos.y .. "," .. pos.z .. ")")
+		minetest.chat_send_player(name, "WorldEdit position 1 set to " .. minetest.pos_to_string(pos))
 	end,
 })
 
@@ -56,12 +54,10 @@ minetest.register_chatcommand("/pos2", {
 	privs = {worldedit=true},
 	func = function(name, param)
 		local pos = minetest.env:get_player_by_name(name):getpos()
-		pos.x = math.floor(pos.x)
-		pos.y = math.floor(pos.y)
-		pos.z = math.floor(pos.z)
+		pos.x, pos.y, pos.z = math.floor(pos.x), math.floor(pos.y), math.floor(pos.z)
 		worldedit.pos2[name] = pos
 		worldedit.mark_pos2(name)
-		minetest.chat_send_player(name, "WorldEdit position 2 set to (" .. pos.x .. "," .. pos.y .. "," .. pos.z .. ")")
+		minetest.chat_send_player(name, "WorldEdit position 2 set to " .. minetest.pos_to_string(pos))
 	end,
 })
 
@@ -74,10 +70,16 @@ minetest.register_chatcommand("/p", {
 			worldedit.set_pos[name] = 1
 			minetest.chat_send_player(name, "Select positions by punching two nodes")
 		elseif param == "get" then --display current WorldEdit positions
-			local pos = worldedit.pos1[name]
-			minetest.chat_send_player(name, "WorldEdit position 1: (" .. pos.x .. "," .. pos.y .. "," .. pos.z .. ")")
-			local pos = worldedit.pos2[name]
-			minetest.chat_send_player(name, "WorldEdit position 2: (" .. pos.x .. "," .. pos.y .. "," .. pos.z .. ")")
+			if worldedit.pos1[name] ~= nil then
+				minetest.chat_send_player(name, "WorldEdit position 1: " .. minetest.pos_to_string(worldedit.pos1[name]))
+			else
+				minetest.chat_send_player(name, "WorldEdit position 1 not set")
+			end
+			if worldedit.pos2[name] ~= nil then
+				minetest.chat_send_player(name, "WorldEdit position 2: " .. minetest.pos_to_string(worldedit.pos2[name]))
+			else
+				minetest.chat_send_player(name, "WorldEdit position 2 not set")
+			end
 		else
 			minetest.chat_send_player(name, "Unknown subcommand: " .. param)
 		end
@@ -91,12 +93,12 @@ minetest.register_on_punchnode(function(pos, node, puncher)
 			worldedit.set_pos[name] = 2 --set position 2 on the next invocation
 			worldedit.pos1[name] = pos
 			worldedit.mark_pos1(name)
-			minetest.chat_send_player(name, "WorldEdit region position 1 set to (" .. pos.x .. "," .. pos.y .. "," .. pos.z .. ")")
+			minetest.chat_send_player(name, "WorldEdit region position 1 set to " .. minetest.pos_to_string(pos))
 		else --setting position 2
 			worldedit.set_pos[name] = nil --finished setting positions
 			worldedit.pos2[name] = pos
 			worldedit.mark_pos2(name)
-			minetest.chat_send_player(name, "WorldEdit region position 2 set to (" .. pos.x .. "," .. pos.y .. "," .. pos.z .. ")")
+			minetest.chat_send_player(name, "WorldEdit region position 2 set to " .. minetest.pos_to_string(pos))
 		end
 	end
 end)
