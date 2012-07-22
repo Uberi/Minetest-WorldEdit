@@ -10,6 +10,7 @@ worldedit.mark_pos1 = function(name)
 	end
 	if pos ~= nil then --add marker
 		worldedit.marker1[name] = minetest.env:add_entity(pos, "worldedit:pos1")
+		worldedit.marker1[name]:get_luaentity().active = true
 	end
 end
 
@@ -22,6 +23,7 @@ worldedit.mark_pos2 = function(name)
 	end
 	if pos ~= nil then --add marker
 		worldedit.marker2[name] = minetest.env:add_entity(pos, "worldedit:pos2")
+		worldedit.marker2[name]:get_luaentity().active = true
 	end
 end
 
@@ -34,6 +36,11 @@ minetest.register_entity("worldedit:pos1", {
 			"worldedit_pos1.png", "worldedit_pos1.png"},
 		collisionbox = {-0.55, -0.55, -0.55, 0.55, 0.55, 0.55},
 	},
+	on_step = function(self, dtime)
+		if self.active == nil then
+			self.object:remove()
+		end
+	end,
 	on_punch = function(self, hitter)
 		self.object:remove()
 		local name = hitter:get_player_name()
@@ -50,6 +57,11 @@ minetest.register_entity("worldedit:pos2", {
 			"worldedit_pos2.png", "worldedit_pos2.png"},
 		collisionbox = {-0.55, -0.55, -0.55, 0.55, 0.55, 0.55},
 	},
+	on_step = function(self, dtime)
+		if self.active == nil then
+			self.object:remove()
+		end
+	end,
 	on_punch = function(self, hitter)
 		self.object:remove()
 		local name = hitter:get_player_name()
