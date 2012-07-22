@@ -107,6 +107,30 @@ Stack the current WorldEdit region along the x/y/z axis <count> times.
     //stack y -1
     //stack z +5
 
+### //transpose x/y/z x/y/z
+
+Transpose the current WorldEdit region along the x/y/z and x/y/z axes.
+
+    //transpose x y
+    //transpose x z
+    //transpose y z
+
+### //flip x/y/z
+
+Flip the current WorldEdit region along the x/y/z axis.
+
+   //flip x
+   //flip y
+   //flip z
+
+### //rotate
+
+Rotate the current WorldEdit region around the y axis by angle <angle> (90 degree increment).
+
+    //rotate 90
+    //rotate 180
+    //rotate 270
+
 ### //dig
 
 Dig the current WorldEdit region.
@@ -163,9 +187,27 @@ Returns the number of nodes moved.
 
 ### worldedit.stack(pos1, pos2, axis, count)
 
-duplicates the region defined by positions `pos1` and `pos2` along the `axis` axis ("x" or "y" or "z") `count` times.
+Duplicates the region defined by positions `pos1` and `pos2` along the `axis` axis ("x" or "y" or "z") `count` times.
 
 Returns the number of nodes stacked.
+
+### worldedit.transpose(pos1, pos2, axis1, axis2)
+
+Transposes a region defined by the positions `pos1` and `pos2` between the `axis1` and `axis2` axes ("x" or "y" or "z").
+
+Returns the number of nodes transposed.
+
+### worldedit.flip(pos1, pos2, axis)
+
+Flips a region defined by the positions `pos1` and `pos2` along the `axis` axis ("x" or "y" or "z").
+
+Returns the number of nodes flipped.
+
+### worldedit.rotate(pos1, pos2, angle)
+
+Rotates a region defined by the positions `pos1` and `pos2` by `angle` degrees clockwise around the y axis (supporting 90 degree increments only).
+
+Returns the number of nodes rotated.
 
 ### worldedit.dig(pos1, pos2)
 

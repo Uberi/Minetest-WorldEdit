@@ -162,7 +162,7 @@ minetest.register_chatcommand("/replace", {
 			return
 		end
 
-		local found, _, searchnode, replacenode = param:find("([^%s]+)%s+([^%s]+)")
+		local found, _, searchnode, replacenode = param:find("^([^%s]+)%s+([^%s]+)$")
 		if found == nil then
 			minetest.chat_send_player(name, "Invalid usage: " .. param)
 			return
@@ -192,7 +192,7 @@ minetest.register_chatcommand("/copy", {
 			return
 		end
 
-		local found, _, axis, amount = param:find("([xyz])%s+([+-]?%d+)")
+		local found, _, axis, amount = param:find("^([xyz])%s+([+-]?%d+)$")
 		if found == nil then
 			minetest.chat_send_player(name, "Invalid usage: " .. param)
 			return
@@ -214,7 +214,7 @@ minetest.register_chatcommand("/move", {
 			return
 		end
 
-		local found, _, axis, amount = param:find("([xyz])%s+([+-]?%d+)")
+		local found, _, axis, amount = param:find("^([xyz])%s+([+-]?%d+)$")
 		if found == nil then
 			minetest.chat_send_player(name, "Invalid usage: " .. param)
 			return
@@ -236,7 +236,7 @@ minetest.register_chatcommand("/stack", {
 			return
 		end
 
-		local found, _, axis, count = param:find("([xyz])%s+([+-]?%d+)")
+		local found, _, axis, count = param:find("^([xyz])%s+([+-]?%d+)$")
 		if found == nil then
 			minetest.chat_send_player(name, "Invalid usage: " .. param)
 			return
@@ -244,6 +244,79 @@ minetest.register_chatcommand("/stack", {
 
 		local count = worldedit.stack(pos1, pos2, axis, tonumber(count))
 		minetest.chat_send_player(name, count .. " nodes stacked")
+	end,
+})
+
+minetest.register_chatcommand("/transpose", {
+	params = "x/y/z x/y/z",
+	description = "Transpose the current WorldEdit region along the x/y/z and x/y/z axes",
+	privs = {worldedit=true},
+	func = function(name, param)
+		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
+		if pos1 == nil or pos2 == nil then
+			minetest.chat_send_player(name, "No WorldEdit region selected")
+			return
+		end
+
+		local found, _, axis1, axis2 = param:find("^([xyz])%s+([xyz])$")
+		if found == nil then
+			minetest.chat_send_player(name, "Invalid usage: " .. param)
+			return
+		end
+		if axis1 == axis2 then
+			minetest.chat_send_player(name, "Invalid usage: axes are the same")
+			return
+		end
+
+		local count = worldedit.transpose(pos1, pos2, axis1, axis2)
+		minetest.chat_send_player(name, count .. " nodes transposed")
+	end,
+})
+
+minetest.register_chatcommand("/flip", {
+	params = "x/y/z",
+	description = "Flip the current WorldEdit region along the x/y/z axis",
+	privs = {worldedit=true},
+	func = function(name, param)
+		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
+		if pos1 == nil or pos2 == nil then
+			minetest.chat_send_player(name, "No WorldEdit region selected")
+			return
+		end
+
+		if param ~= "x" and param ~= "y" and param ~= "z" then
+			minetest.chat_send_player(name, "Invalid usage: " .. param)
+			return
+		end
+
+		local count = worldedit.flip(pos1, pos2, param)
+		minetest.chat_send_player(name, count .. " nodes flipped")
+	end,
+})
+
+minetest.register_chatcommand("/rotate", {
+	params = "<angle>",
+	description = "Rotate the current WorldEdit region around the y axis by angle <angle> (90 degree increment)",
+	privs = {worldedit=true},
+	func = function(name, param)
+		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
+		if pos1 == nil or pos2 == nil then
+			minetest.chat_send_player(name, "No WorldEdit region selected")
+			return
+		end
+
+		angle = tonumber(param)
+		if angle == nil then
+			minetest.chat_send_player(name, "Invalid usage: " .. param)
+			return
+		end
+		if angle % 90 ~= 0 then
+			minetest.chat_send_player(name, "Invalid usage: angle must be multiple of 90")
+			return
+		end
+
+		local count = worldedit.rotate(pos1, pos2, angle)
+		minetest.chat_send_player(name, count .. " nodes rotated")
 	end,
 })
 
