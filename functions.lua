@@ -86,7 +86,7 @@ worldedit.copy = function(pos1, pos2, axis, amount)
 				while pos.z <= pos2.z do
 					local node = env:get_node(pos)
 					local value = pos[axis]
-					pos[axis] = value - amount
+					pos[axis] = value + amount
 					env:add_node(pos, node)
 					pos[axis] = value
 					pos.z = pos.z + 1
@@ -132,7 +132,7 @@ worldedit.move = function(pos1, pos2, axis, amount)
 					local node = env:get_node(pos)
 					env:remove_node(pos)
 					local value = pos[axis]
-					pos[axis] = value - amount
+					pos[axis] = value + amount
 					env:add_node(pos, node)
 					pos[axis] = value
 					pos.z = pos.z + 1
