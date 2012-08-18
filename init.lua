@@ -12,14 +12,8 @@ dofile(minetest.get_modpath("worldedit") .. "/mark.lua")
 
 --determines whether `nodename` is a valid node name, returning a boolean
 worldedit.node_is_valid = function(temp_pos, nodename)
-	local originalnode = minetest.env:get_node(temp_pos) --save the original node to restore later
-	minetest.env:add_node(temp_pos, {name=nodename}) --attempt to add the node
-	local value = minetest.env:get_node(temp_pos).name --obtain the name of the newly added node
-	if value == nodename or value == "default:" .. nodename then --successfully added node
-		minetest.env:add_node(temp_pos, originalnode) --restore the original node
-		return true --node is valid
-	end
-	return false --node is not valid
+	return minetest.registered_nodes[nodename] ~= nil
+	or minetest.registered_nodes["default:" .. nodename] ~= nil
 end
 
 minetest.register_chatcommand("/reset", {
@@ -178,6 +172,58 @@ minetest.register_chatcommand("/replace", {
 
 		local count = worldedit.replace(pos1, pos2, searchnode, replacenode)
 		minetest.chat_send_player(name, count .. " nodes replaced")
+	end,
+})
+
+minetest.register_chatcommand("/hollowcylinder", {
+	params = "x/y/z <length> <radius> <node>",
+	description = "Add hollow cylinder at WorldEdit position 1 along the x/y/z axis with length <length> and radius <radius>, composed of <node>",
+	privs = {worldedit=true},
+	func = function(name, param)
+		local pos = worldedit.pos1[name]
+		if pos == nil then
+			minetest.chat_send_player(name, "No WorldEdit region selected")
+			return
+		end
+
+		local found, _, axis, length, radius, nodename = param:find("^([xyz])%s+([+-]?%d+)%s+(%d+)%s+([^%s]+)$")
+		if found == nil then
+			minetest.chat_send_player(name, "Invalid usage: " .. param)
+			return
+		end
+		if not worldedit.node_is_valid(pos, nodename) then
+			minetest.chat_send_player(name, "Invalid node name: " .. param)
+			return
+		end
+
+		local count = worldedit.hollow_cylinder(pos, axis, tonumber(length), tonumber(radius), nodename)
+		minetest.chat_send_player(name, count .. " nodes added")
+	end,
+})
+
+minetest.register_chatcommand("/cylinder", {
+	params = "x/y/z <length> <radius> <node>",
+	description = "Add cylinder at WorldEdit position 1 along the x/y/z axis with length <length> and radius <radius>, composed of <node>",
+	privs = {worldedit=true},
+	func = function(name, param)
+		local pos = worldedit.pos1[name]
+		if pos == nil then
+			minetest.chat_send_player(name, "No WorldEdit region selected")
+			return
+		end
+
+		local found, _, axis, length, radius, nodename = param:find("^([xyz])%s+([+-]?%d+)%s+(%d+)%s+([^%s]+)$")
+		if found == nil then
+			minetest.chat_send_player(name, "Invalid usage: " .. param)
+			return
+		end
+		if not worldedit.node_is_valid(pos, nodename) then
+			minetest.chat_send_player(name, "Invalid node name: " .. param)
+			return
+		end
+
+		local count = worldedit.cylinder(pos, axis, tonumber(length), tonumber(radius), nodename)
+		minetest.chat_send_player(name, count .. " nodes added")
 	end,
 })
 

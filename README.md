@@ -83,6 +83,22 @@ Replace all instances of <search node> with <place node> in the current WorldEdi
     //replace dirt flowers:flower_waterlily
     //replace flowers:flower_rose flowers:flower_tulip
 
+### //hollowcylinder x/y/z <length> <radius> <node>
+
+Add hollow cylinder at WorldEdit position 1 along the x/y/z axis with length <length> and radius <radius>, composed of <node>.
+
+    //hollowcylinder x +5 8 dirt
+    //hollowcylinder y 28 10 default:glass
+    //hollowcylinder z -12 3 mesecons:mesecon
+
+### //cylinder x/y/z <length> <radius> <node>
+
+Add cylinder at WorldEdit position 1 along the x/y/z axis with length <length> and radius <radius>, composed of <node>.
+
+    //cylinder x +5 8 dirt
+    //cylinder y 28 10 default:glass
+    //cylinder z -12 3 mesecons:mesecon
+
 ### //copy x/y/z <amount>
 
 Copy the current WorldEdit region along the x/y/z axis by <amount> nodes.
@@ -172,6 +188,18 @@ Returns the number of nodes set.
 Replaces all instances of `searchnode` with `replacenode` in a region defined by positions `pos1` and `pos2`.
 
 Returns the number of nodes replaced.
+
+### worldedit.hollow_cylinder(pos, axis, length, radius, nodename)
+
+Adds a hollow cylinder at `pos` along the `axis` axis ("x" or "y" or "z") with length `length` and radius `radius`.
+
+Returns the number of nodes added.
+
+### worldedit.cylinder(pos, axis, length, radius, nodename)
+
+Adds a cylinder at `pos` along the `axis` axis ("x" or "y" or "z") with length `length` and radius `radius`.
+
+Returns the number of nodes added.
 
 ### worldedit.copy(pos1, pos2, axis, amount)
 

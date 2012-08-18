@@ -72,6 +72,116 @@ worldedit.replace = function(pos1, pos2, searchnode, replacenode)
 	return count
 end
 
+--adds a hollow cylinder at `pos` along the `axis` axis ("x" or "y" or "z") with length `length` and radius `radius`, returning the number of nodes added
+worldedit.hollow_cylinder = function(pos, axis, length, radius, nodename)
+	local other1, other2
+	if axis == "x" then
+		other1, other2 = "y", "z"
+	elseif axis == "y" then
+		other1, other2 = "x", "z"
+	else --axis == "z"
+		other1, other2 = "x", "y"
+	end
+
+	local env = minetest.env
+	local currentpos = {x=pos.x, y=pos.y, z=pos.z}
+	local node = {name=nodename}
+	local count = 0
+	for i = 1, length do
+		local offset1, offset2 = 0, radius
+		local delta = -radius
+		while offset1 <= offset2 do
+			--add node at each octant
+			local first1, first2 = pos[other1] + offset1, pos[other1] - offset1
+			local second1, second2 = pos[other2] + offset2, pos[other2] - offset2
+			currentpos[other1], currentpos[other2] = first1, second1
+			env:add_node(currentpos, node) --octant 1
+			currentpos[other1] = first2
+			env:add_node(currentpos, node) --octant 4
+			currentpos[other2] = second2
+			env:add_node(currentpos, node) --octant 5
+			currentpos[other1] = first1
+			env:add_node(currentpos, node) --octant 8
+			local first1, first2 = pos[other1] + offset2, pos[other1] - offset2
+			local second1, second2 = pos[other2] + offset1, pos[other2] - offset1
+			currentpos[other1], currentpos[other2] = first1, second1
+			env:add_node(currentpos, node) --octant 2
+			currentpos[other1] = first2
+			env:add_node(currentpos, node) --octant 3
+			currentpos[other2] = second2
+			env:add_node(currentpos, node) --octant 6
+			currentpos[other1] = first1
+			env:add_node(currentpos, node) --octant 7
+
+			count = count + 8 --wip: broken
+
+			--move to next location
+			delta = delta + (offset1 * 2) + 1
+			if delta >= 0 then
+				offset2 = offset2 - 1
+				delta = delta - (offset2 * 2)
+			end
+			offset1 = offset1 + 1
+		end
+		currentpos[axis] = currentpos[axis] + 1
+	end
+	return count
+end
+
+--adds a cylinder at `pos` along the `axis` axis ("x" or "y" or "z") with length `length` and radius `radius`, returning the number of nodes added
+worldedit.cylinder = function(pos, axis, length, radius, nodename)
+	local other1, other2
+	if axis == "x" then
+		other1, other2 = "y", "z"
+	elseif axis == "y" then
+		other1, other2 = "x", "z"
+	else --axis == "z"
+		other1, other2 = "x", "y"
+	end
+
+	local env = minetest.env
+	local currentpos = {x=pos.x, y=pos.y, z=pos.z}
+	local node = {name=nodename}
+	local count = 0
+	for i = 1, length do
+		local offset1, offset2 = 0, radius
+		local delta = -radius
+		while offset1 <= offset2 do
+			--connect each pair of octants
+			currentpos[other1] = pos[other1] - offset1
+			local second1, second2 = pos[other2] + offset2, pos[other2] - offset2
+			for i = 0, offset1 * 2 do
+				currentpos[other2] = second1
+				env:add_node(currentpos, node) --octant 1 to 4
+				currentpos[other2] = second2
+				env:add_node(currentpos, node) --octant 5 to 8
+				currentpos[other1] = currentpos[other1] + 1
+			end
+			currentpos[other1] = pos[other1] - offset2
+			local second1, second2 = pos[other2] + offset1, pos[other2] - offset1
+			for i = 0, offset2 * 2 do
+				currentpos[other2] = second1
+				env:add_node(currentpos, node) --octant 2 to 3
+				currentpos[other2] = second2
+				env:add_node(currentpos, node) --octant 6 to 7
+				currentpos[other1] = currentpos[other1] + 1
+			end
+
+			count = count + (offset1 * 4) + (offset2 * 4) + 4 --wip: broken
+
+			--move to next location
+			delta = delta + (offset1 * 2) + 1
+			offset1 = offset1 + 1
+			if delta >= 0 then
+				offset2 = offset2 - 1
+				delta = delta - (offset2 * 2)
+			end
+		end
+		currentpos[axis] = currentpos[axis] + 1
+	end
+	return count
+end
+
 --copies the region defined by positions `pos1` and `pos2` along the `axis` axis ("x" or "y" or "z") by `amount` nodes, returning the number of nodes copied
 worldedit.copy = function(pos1, pos2, axis, amount)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
