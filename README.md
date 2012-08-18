@@ -12,6 +12,14 @@ WorldEdit has a huge potential for abuse by untrusted players. Therefore, users 
 
 For in-game information about these commands, type `/help <command name>` in the chat. For example, to learn more about the `//copy` command, simply type `/help /copy` to display information relevant to copying a region.
 
+Axes
+----
+The coordinate system is the same as that used by MineTest; Y is upwards, X is perpendicular, and Z is parallel.
+
+When an axis is specified in a WorldEdit command, it is specified as one of the following values: x, y, z, or ?.
+
+The value ? represents the axis the player is currently facing. If the player is facing more than one axis, the axis the player face direction is closest to will be used.
+
 Regions
 -------
 Most WorldEdit commands operate on regions. Regions are a set of two positions that define a 3D cube. They are local to each player and chat commands affect only the region for the player giving the commands.
@@ -83,61 +91,68 @@ Replace all instances of <search node> with <place node> in the current WorldEdi
     //replace dirt flowers:flower_waterlily
     //replace flowers:flower_rose flowers:flower_tulip
 
-### //hollowcylinder x/y/z <length> <radius> <node>
+### //hollowcylinder x/y/z/? <length> <radius> <node>
 
-Add hollow cylinder at WorldEdit position 1 along the x/y/z axis with length <length> and radius <radius>, composed of <node>.
+Add hollow cylinder at WorldEdit position 1 along the x/y/z/? axis with length <length> and radius <radius>, composed of <node>.
 
     //hollowcylinder x +5 8 dirt
     //hollowcylinder y 28 10 default:glass
     //hollowcylinder z -12 3 mesecons:mesecon
+    //hollowcylinder ? 2 4 stone
 
-### //cylinder x/y/z <length> <radius> <node>
+### //cylinder x/y/z/? <length> <radius> <node>
 
-Add cylinder at WorldEdit position 1 along the x/y/z axis with length <length> and radius <radius>, composed of <node>.
+Add cylinder at WorldEdit position 1 along the x/y/z/? axis with length <length> and radius <radius>, composed of <node>.
 
     //cylinder x +5 8 dirt
     //cylinder y 28 10 default:glass
     //cylinder z -12 3 mesecons:mesecon
+    //cylinder ? 2 4 stone
 
-### //copy x/y/z <amount>
+### //copy x/y/z/? <amount>
 
-Copy the current WorldEdit region along the x/y/z axis by <amount> nodes.
+Copy the current WorldEdit region along the x/y/z/? axis by <amount> nodes.
 
     //copy x 15
     //copy y -7
     //copy z +4
+    //copy ? 8
 
-### //move x/y/z <amount>
+### //move x/y/z/? <amount>
 
-Move the current WorldEdit region along the x/y/z axis by <amount> nodes.
+Move the current WorldEdit region along the x/y/z/? axis by <amount> nodes.
 
     //move x 15
     //move y -7
     //move z +4
+    //move ? -1
 
-### //stack x/y/z <count>
+### //stack x/y/z/? <count>
 
-Stack the current WorldEdit region along the x/y/z axis <count> times.
+Stack the current WorldEdit region along the x/y/z/? axis <count> times.
 
     //stack x 3
     //stack y -1
     //stack z +5
+    //stack ? 12
 
-### //transpose x/y/z x/y/z
+### //transpose x/y/z/? x/y/z/?
 
-Transpose the current WorldEdit region along the x/y/z and x/y/z axes.
+Transpose the current WorldEdit region along the x/y/z/? and x/y/z/? axes.
 
     //transpose x y
     //transpose x z
     //transpose y z
+    //transpose ? y
 
-### //flip x/y/z
+### //flip x/y/z/?
 
-Flip the current WorldEdit region along the x/y/z axis.
+Flip the current WorldEdit region along the x/y/z/? axis.
 
    //flip x
    //flip y
    //flip z
+   //flip ?
 
 ### //rotate
 

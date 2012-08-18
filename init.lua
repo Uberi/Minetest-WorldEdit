@@ -16,6 +16,18 @@ worldedit.node_is_valid = function(temp_pos, nodename)
 	or minetest.registered_nodes["default:" .. nodename] ~= nil
 end
 
+worldedit.player_axis = function(name)
+	local dir = minetest.env:get_player_by_name(name):get_look_dir()
+	if dir.x > dir.y then
+		if dir.x > dir.z then
+			return "x"
+		end
+	elseif dir.y > dir.z then
+		return "y"
+	end
+	return "z"
+end
+
 minetest.register_chatcommand("/reset", {
 	params = "",
 	description = "Reset the region so that it is empty",
@@ -176,8 +188,8 @@ minetest.register_chatcommand("/replace", {
 })
 
 minetest.register_chatcommand("/hollowcylinder", {
-	params = "x/y/z <length> <radius> <node>",
-	description = "Add hollow cylinder at WorldEdit position 1 along the x/y/z axis with length <length> and radius <radius>, composed of <node>",
+	params = "x/y/z/? <length> <radius> <node>",
+	description = "Add hollow cylinder at WorldEdit position 1 along the x/y/z/? axis with length <length> and radius <radius>, composed of <node>",
 	privs = {worldedit=true},
 	func = function(name, param)
 		local pos = worldedit.pos1[name]
@@ -186,10 +198,13 @@ minetest.register_chatcommand("/hollowcylinder", {
 			return
 		end
 
-		local found, _, axis, length, radius, nodename = param:find("^([xyz])%s+([+-]?%d+)%s+(%d+)%s+([^%s]+)$")
+		local found, _, axis, length, radius, nodename = param:find("^([xyz%?])%s+([+-]?%d+)%s+(%d+)%s+([^%s]+)$")
 		if found == nil then
 			minetest.chat_send_player(name, "Invalid usage: " .. param)
 			return
+		end
+		if axis == "?" then
+			axis = worldedit.player_axis(name)
 		end
 		if not worldedit.node_is_valid(pos, nodename) then
 			minetest.chat_send_player(name, "Invalid node name: " .. param)
@@ -202,8 +217,8 @@ minetest.register_chatcommand("/hollowcylinder", {
 })
 
 minetest.register_chatcommand("/cylinder", {
-	params = "x/y/z <length> <radius> <node>",
-	description = "Add cylinder at WorldEdit position 1 along the x/y/z axis with length <length> and radius <radius>, composed of <node>",
+	params = "x/y/z/? <length> <radius> <node>",
+	description = "Add cylinder at WorldEdit position 1 along the x/y/z/? axis with length <length> and radius <radius>, composed of <node>",
 	privs = {worldedit=true},
 	func = function(name, param)
 		local pos = worldedit.pos1[name]
@@ -212,10 +227,13 @@ minetest.register_chatcommand("/cylinder", {
 			return
 		end
 
-		local found, _, axis, length, radius, nodename = param:find("^([xyz])%s+([+-]?%d+)%s+(%d+)%s+([^%s]+)$")
+		local found, _, axis, length, radius, nodename = param:find("^([xyz%?])%s+([+-]?%d+)%s+(%d+)%s+([^%s]+)$")
 		if found == nil then
 			minetest.chat_send_player(name, "Invalid usage: " .. param)
 			return
+		end
+		if axis == "?" then
+			axis = worldedit.player_axis(name)
 		end
 		if not worldedit.node_is_valid(pos, nodename) then
 			minetest.chat_send_player(name, "Invalid node name: " .. param)
@@ -228,8 +246,8 @@ minetest.register_chatcommand("/cylinder", {
 })
 
 minetest.register_chatcommand("/copy", {
-	params = "x/y/z <amount>",
-	description = "Copy the current WorldEdit region along the x/y/z axis by <amount> nodes",
+	params = "x/y/z/? <amount>",
+	description = "Copy the current WorldEdit region along the x/y/z/? axis by <amount> nodes",
 	privs = {worldedit=true},
 	func = function(name, param)
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
@@ -238,10 +256,13 @@ minetest.register_chatcommand("/copy", {
 			return
 		end
 
-		local found, _, axis, amount = param:find("^([xyz])%s+([+-]?%d+)$")
+		local found, _, axis, amount = param:find("^([xyz%?])%s+([+-]?%d+)$")
 		if found == nil then
 			minetest.chat_send_player(name, "Invalid usage: " .. param)
 			return
+		end
+		if axis == "?" then
+			axis = worldedit.player_axis(name)
 		end
 
 		local count = worldedit.copy(pos1, pos2, axis, tonumber(amount))
@@ -250,8 +271,8 @@ minetest.register_chatcommand("/copy", {
 })
 
 minetest.register_chatcommand("/move", {
-	params = "x/y/z <amount>",
-	description = "Move the current WorldEdit region along the x/y/z axis by <amount> nodes",
+	params = "x/y/z/? <amount>",
+	description = "Move the current WorldEdit region along the x/y/z/? axis by <amount> nodes",
 	privs = {worldedit=true},
 	func = function(name, param)
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
@@ -260,10 +281,13 @@ minetest.register_chatcommand("/move", {
 			return
 		end
 
-		local found, _, axis, amount = param:find("^([xyz])%s+([+-]?%d+)$")
+		local found, _, axis, amount = param:find("^([xyz%?])%s+([+-]?%d+)$")
 		if found == nil then
 			minetest.chat_send_player(name, "Invalid usage: " .. param)
 			return
+		end
+		if axis == "?" then
+			axis = worldedit.player_axis(name)
 		end
 
 		local count = worldedit.move(pos1, pos2, axis, tonumber(amount))
@@ -272,8 +296,8 @@ minetest.register_chatcommand("/move", {
 })
 
 minetest.register_chatcommand("/stack", {
-	params = "x/y/z <count>",
-	description = "Stack the current WorldEdit region along the x/y/z axis <count> times",
+	params = "x/y/z/? <count>",
+	description = "Stack the current WorldEdit region along the x/y/z/? axis <count> times",
 	privs = {worldedit=true},
 	func = function(name, param)
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
@@ -282,10 +306,13 @@ minetest.register_chatcommand("/stack", {
 			return
 		end
 
-		local found, _, axis, count = param:find("^([xyz])%s+([+-]?%d+)$")
+		local found, _, axis, count = param:find("^([xyz%?])%s+([+-]?%d+)$")
 		if found == nil then
 			minetest.chat_send_player(name, "Invalid usage: " .. param)
 			return
+		end
+		if axis == "?" then
+			axis = worldedit.player_axis(name)
 		end
 
 		local count = worldedit.stack(pos1, pos2, axis, tonumber(count))
@@ -294,8 +321,8 @@ minetest.register_chatcommand("/stack", {
 })
 
 minetest.register_chatcommand("/transpose", {
-	params = "x/y/z x/y/z",
-	description = "Transpose the current WorldEdit region along the x/y/z and x/y/z axes",
+	params = "x/y/z/? x/y/z/?",
+	description = "Transpose the current WorldEdit region along the x/y/z/? and x/y/z/? axes",
 	privs = {worldedit=true},
 	func = function(name, param)
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
@@ -304,10 +331,16 @@ minetest.register_chatcommand("/transpose", {
 			return
 		end
 
-		local found, _, axis1, axis2 = param:find("^([xyz])%s+([xyz])$")
+		local found, _, axis1, axis2 = param:find("^([xyz%?])%s+([xyz%?])$")
 		if found == nil then
 			minetest.chat_send_player(name, "Invalid usage: " .. param)
 			return
+		end
+		if axis1 == "?" then
+			axis1 = worldedit.player_axis(name)
+		end
+		if axis2 == "?" then
+			axis2 = worldedit.player_axis(name)
 		end
 		if axis1 == axis2 then
 			minetest.chat_send_player(name, "Invalid usage: axes are the same")
@@ -320,8 +353,8 @@ minetest.register_chatcommand("/transpose", {
 })
 
 minetest.register_chatcommand("/flip", {
-	params = "x/y/z",
-	description = "Flip the current WorldEdit region along the x/y/z axis",
+	params = "x/y/z/?",
+	description = "Flip the current WorldEdit region along the x/y/z/? axis",
 	privs = {worldedit=true},
 	func = function(name, param)
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
@@ -330,6 +363,9 @@ minetest.register_chatcommand("/flip", {
 			return
 		end
 
+		if param == "?" then
+			param = worldedit.player_axis(name)
+		end
 		if param ~= "x" and param ~= "y" and param ~= "z" then
 			minetest.chat_send_player(name, "Invalid usage: " .. param)
 			return
