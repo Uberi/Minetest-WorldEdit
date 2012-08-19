@@ -216,6 +216,36 @@ minetest.register_chatcommand("/hollowcylinder", {
 	end,
 })
 
+
+minetest.register_chatcommand("/spiral", {
+	params = "<size> <node>",
+	description = "Add Spiral at WorldEdit position 1 with size <size>, composed of <node>",
+	privs = {worldedit=true},
+	func = function(name, param)
+		local pos = worldedit.pos1[name]
+		if pos == nil then
+			minetest.chat_send_player(name, "No WorldEdit region selected")
+			return
+		end
+
+		local found, _, size, nodename = param:find("(%d+)%s+([^%s]+)$")
+		if found == nil then
+			minetest.chat_send_player(name, "Invalid usage: " .. param)
+			return
+		end
+		if axis == "?" then
+			axis = worldedit.player_axis(name)
+		end
+		if not worldedit.node_is_valid(pos, nodename) then
+			minetest.chat_send_player(name, "Invalid node name: " .. param)
+			return
+		end
+
+		local count = worldedit.spiral(pos, tonumber(size), nodename)
+		minetest.chat_send_player(name, count .. " nodes changed")
+	end,
+})
+
 minetest.register_chatcommand("/cylinder", {
 	params = "x/y/z/? <length> <radius> <node>",
 	description = "Add cylinder at WorldEdit position 1 along the x/y/z/? axis with length <length> and radius <radius>, composed of <node>",

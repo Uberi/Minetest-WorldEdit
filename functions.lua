@@ -1,3 +1,4 @@
+dofile(minetest.get_modpath("worldedit") .. "/spirals.lua")
 --modifies positions `pos1` and `pos2` so that each component of `pos1` is less than or equal to its corresponding conent of `pos2`, returning two new positions
 worldedit.sort_pos = function(pos1, pos2)
 	pos1 = {x=pos1.x, y=pos1.y, z=pos1.z}
@@ -179,6 +180,26 @@ worldedit.cylinder = function(pos, axis, length, radius, nodename)
 		end
 		currentpos[axis] = currentpos[axis] + 1
 	end
+	return count
+end
+
+--adds a spiral at `pos` with size `size`, returning the number of nodes changed
+worldedit.spiral = function(pos, size, nodename)
+    local shift_x,shift_y
+	sa = spiralt(size)
+    shift_y = #sa -- "Height" of the Array
+    local fe = sa[1]
+    shift_x = #fe -- "Width" of the Array
+    fe = nil
+    
+    local count = 0
+    for x,v in ipairs(sa) do
+        for y, z in ipairs(v) do
+            minetest.env:add_node({x=pos.x-shift_x+x,y=pos.y-shift_y+y,z=pos.z+z}, {name=nodename})
+            count = count + 1
+        end
+    end
+	
 	return count
 end
 
