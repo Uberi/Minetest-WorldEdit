@@ -233,9 +233,6 @@ minetest.register_chatcommand("/spiral", {
 			minetest.chat_send_player(name, "Invalid usage: " .. param)
 			return
 		end
-		if axis == "?" then
-			axis = worldedit.player_axis(name)
-		end
 		if not worldedit.node_is_valid(pos, nodename) then
 			minetest.chat_send_player(name, "Invalid node name: " .. param)
 			return
