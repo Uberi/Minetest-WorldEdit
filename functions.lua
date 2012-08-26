@@ -216,9 +216,12 @@ worldedit.copy = function(pos1, pos2, axis, amount)
 				pos.z = pos1.z
 				while pos.z <= pos2.z do
 					local node = env:get_node(pos)
+					local meta1 = env:get_meta(pos):to_table()
 					local value = pos[axis]
 					pos[axis] = value + amount
 					env:add_node(pos, node)
+					local meta2 = env:get_meta(pos)
+					meta2:from_table(meta1)
 					pos[axis] = value
 					pos.z = pos.z + 1
 				end
@@ -234,9 +237,12 @@ worldedit.copy = function(pos1, pos2, axis, amount)
 				pos.z = pos2.z
 				while pos.z >= pos1.z do
 					local node = minetest.env:get_node(pos)
+					local meta1 = env:get_meta(pos):to_table()
 					local value = pos[axis]
 					pos[axis] = value + amount
 					minetest.env:add_node(pos, node)
+					local meta2 = env:get_meta(pos)
+					meta2:from_table(meta1)
 					pos[axis] = value
 					pos.z = pos.z - 1
 				end
@@ -261,10 +267,13 @@ worldedit.move = function(pos1, pos2, axis, amount)
 				pos.z = pos1.z
 				while pos.z <= pos2.z do
 					local node = env:get_node(pos)
+					local meta1 = env:get_meta(pos):to_table()
 					env:remove_node(pos)
 					local value = pos[axis]
 					pos[axis] = value + amount
 					env:add_node(pos, node)
+					local meta2 = env:get_meta(pos)
+					meta2:from_table(meta1)
 					pos[axis] = value
 					pos.z = pos.z + 1
 				end
@@ -279,11 +288,14 @@ worldedit.move = function(pos1, pos2, axis, amount)
 			while pos.y >= pos1.y do
 				pos.z = pos2.z
 				while pos.z >= pos1.z do
-					local node = minetest.env:get_node(pos)
+					local node = env:get_node(pos)
+					local meta1 = env:get_meta(pos):to_table()
 					env:remove_node(pos)
 					local value = pos[axis]
 					pos[axis] = value + amount
-					minetest.env:add_node(pos, node)
+					env:add_node(pos, node)
+					local meta2 = env:get_meta(pos)
+					meta2:from_table(meta1)
 					pos[axis] = value
 					pos.z = pos.z - 1
 				end
@@ -326,12 +338,18 @@ worldedit.transpose = function(pos1, pos2, axis1, axis2)
 				local extent1, extent2 = pos[axis1] - pos1[axis1], pos[axis2] - pos1[axis2]
 				if extent1 < extent2 then
 					local node1 = env:get_node(pos)
+					local meta1a = env:get_meta(pos):to_table()
 					local value1, value2 = pos[axis1], pos[axis2]
 					pos[axis1], pos[axis2] = pos1[axis1] + extent1, pos1[axis2] + extent2
 					local node2 = env:get_node(pos)
+					local meta2a = env:get_meta(pos):to_table()
 					env:add_node(pos, node1)
+					local meta1b = env:get_meta(pos)
+					meta1b:from_table(meta1a)
 					pos[axis1], pos[axis2] = value1, value2
 					env:add_node(pos, node2)
+					local meta2b = env:get_meta(pos)
+					meta2b:from_table(meta2a)
 				end
 				pos.z = pos.z + 1
 			end
@@ -356,12 +374,18 @@ worldedit.flip = function(pos1, pos2, axis)
 			pos.z = pos1.z
 			while pos.z <= pos2.z do
 				local node1 = env:get_node(pos)
+				local meta1a = env:get_meta(pos):to_table()
 				local value = pos[axis]
 				pos[axis] = start - value
 				local node2 = env:get_node(pos)
+				local meta2a = env:get_meta(pos):to_table()
 				env:add_node(pos, node1)
+				local meta1b = env:get_meta(pos)
+				meta1b:from_table(meta1a)
 				pos[axis] = value
 				env:add_node(pos, node2)
+				local meta2b = env:get_meta(pos)
+				meta2b:from_table(meta2a)
 				pos.z = pos.z + 1
 			end
 			pos.y = pos.y + 1
