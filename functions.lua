@@ -340,13 +340,13 @@ worldedit.transpose = function(pos1, pos2, axis1, axis2)
 					local node1 = env:get_node(pos)
 					local meta1a = env:get_meta(pos):to_table()
 					local value1, value2 = pos[axis1], pos[axis2]
-					pos[axis1], pos[axis2] = pos1[axis1] + extent1, pos1[axis2] + extent2
+					pos[axis1], pos[axis2] = pos1[axis1] + extent2, pos1[axis2] + extent1
 					local node2 = env:get_node(pos)
 					local meta2a = env:get_meta(pos):to_table()
 					env:add_node(pos, node1)
 					local meta1b = env:get_meta(pos)
 					meta1b:from_table(meta1a)
-					pos[axis1], pos[axis2] = value1, value2
+					pos[axis1], pos[axis2] = pos1[axis1] + extent1, pos1[axis2] + extent2
 					env:add_node(pos, node2)
 					local meta2b = env:get_meta(pos)
 					meta2b:from_table(meta2a)
@@ -408,16 +408,12 @@ worldedit.rotate = function(pos1, pos2, angle)
 
 	if angle == 90 then
 		worldedit.transpose(pos1, pos2, "x", "z")
-		pos1.x, pos1.z = pos1.z, pos1.x
-		pos2.x, pos2.z = pos2.z, pos2.x
 		worldedit.flip(pos1, pos2, "z")
 	elseif angle == 180 then
 		worldedit.flip(pos1, pos2, "x")
 		worldedit.flip(pos1, pos2, "z")
 	elseif angle == 270 then
 		worldedit.transpose(pos1, pos2, "x", "z")
-		pos1.x, pos1.z = pos1.z, pos1.x
-		pos2.x, pos2.z = pos2.z, pos2.x
 		worldedit.flip(pos1, pos2, "x")
 	else
 		return 0
