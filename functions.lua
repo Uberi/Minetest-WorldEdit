@@ -395,10 +395,17 @@ worldedit.flip = function(pos1, pos2, axis)
 	return worldedit.volume(pos1, pos2)
 end
 
---rotates a region defined by the positions `pos1` and `pos2` by `angle` degrees clockwise around the y axis (supporting 90 degree increments only), returning the number of nodes rotated
-worldedit.rotate = function(pos1, pos2, angle)
+--rotates a region defined by the positions `pos1` and `pos2` by `angle` degrees clockwise (if you are looking in the negative direction) around the `axis` (supporting 90 degree increments only), returning the number of nodes rotated
+worldedit.rotate = function(pos1, pos2, axis, angle)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 
+	if axis == 'x' then
+		axes = {'z', 'y'}
+	elseif axis == 'y' then
+		axes = {'x', 'z'}
+	else--if axis == 'z' then
+		axes = {'y', 'x'}
+	end
 	angle = angle % 360
 
 	local pos = {x=pos1.x, y=0, z=0}
@@ -407,14 +414,14 @@ worldedit.rotate = function(pos1, pos2, angle)
 	local env = minetest.env
 
 	if angle == 90 then
-		worldedit.transpose(pos1, pos2, "x", "z")
-		worldedit.flip(pos1, pos2, "z")
+		worldedit.transpose(pos1, pos2, axes[1], axes[2])
+		worldedit.flip(pos1, pos2, axes[2])
 	elseif angle == 180 then
-		worldedit.flip(pos1, pos2, "x")
-		worldedit.flip(pos1, pos2, "z")
+		worldedit.flip(pos1, pos2, axes[1])
+		worldedit.flip(pos1, pos2, axes[2])
 	elseif angle == 270 then
-		worldedit.transpose(pos1, pos2, "x", "z")
-		worldedit.flip(pos1, pos2, "x")
+		worldedit.transpose(pos1, pos2, axes[1], axes[2])
+		worldedit.flip(pos1, pos2, axes[1])
 	else
 		return 0
 	end
