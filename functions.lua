@@ -1,4 +1,3 @@
-dofile(minetest.get_modpath("worldedit") .. "/spirals.lua")
 --modifies positions `pos1` and `pos2` so that each component of `pos1` is less than or equal to its corresponding conent of `pos2`, returning two new positions
 worldedit.sort_pos = function(pos1, pos2)
 	pos1 = {x=pos1.x, y=pos1.y, z=pos1.z}
@@ -185,22 +184,75 @@ end
 
 --adds a spiral at `pos` with size `size`, returning the number of nodes changed
 worldedit.spiral = function(pos, size, nodename)
-    local shift_x,shift_y
+	local shift_x, shift_y
 	sa = spiralt(size)
-    shift_y = #sa -- "Height" of the Array
-    local fe = sa[1]
-    shift_x = #fe -- "Width" of the Array
-    fe = nil
-    
-    local count = 0
-    for x,v in ipairs(sa) do
-        for y, z in ipairs(v) do
-            minetest.env:add_node({x=pos.x-shift_x+x,y=pos.y-shift_y+y,z=pos.z+z}, {name=nodename})
-            count = count + 1
-        end
-    end
-	
+	shift_y = #sa -- "Height" of the Array
+	local fe = sa[1]
+	shift_x = #fe -- "Width" of the Array
+	fe = nil
+
+	local count = 0
+	local node = {name=nodename}
+	for x, v in ipairs(sa) do
+		for y, z in ipairs(v) do
+			minetest.env:add_node({x=pos.x - shift_x + x,y=pos.y - shift_y + y,z=pos.z + z}, node)
+			count = count + 1
+		end
+	end
 	return count
+end
+
+--wip: 
+sign = function(s)
+	if s > 0 then
+		return 1
+	end
+	if s < 0 then
+		return -1
+	end
+	return 0
+end
+
+--wip: needs to be faster
+function spiral_index(y, x) -- returns the value at (x, y) in a spiral that starts at 1 and goes outwards
+	if y == -x and y >= x then
+		return (2 * y + 1) ^ 2
+	end
+	local l = math.max(math.abs(y), math.abs(x))
+	local value
+	if math.abs(y) == l then
+		value = x
+		if y < 0 then
+			value = -value
+		end
+	else
+		value = y
+		if x < 0 then
+			value = -value
+		end
+	end
+	t1 = l * 2
+	if x + y < 0 then
+		t1 = -t1
+	end
+	t2 = y ^ 2 - x ^ 2
+	if t2 < 0 then
+		t2 = -t2
+	end
+	return ((2 * l - 1) ^ 2) + (l * 4) + t1 + (t2 * (l - value))
+end
+
+--wip: needs to be faster
+function spiralt(side)
+	local spiral = {}
+	local start, stop = math.floor((-side+1)/2), math.floor((side-1)/2)
+	for i = 1, side do
+		spiral[i] = {}
+		for j = 1, side do
+			spiral[i][j] = side ^ 2 - spiral_index(stop - i + 1,start + j - 1) --moves the coordinates so (0,0) is at the center of the spiral
+		end
+	end
+	return spiral
 end
 
 --copies the region defined by positions `pos1` and `pos2` along the `axis` axis ("x" or "y" or "z") by `amount` nodes, returning the number of nodes copied

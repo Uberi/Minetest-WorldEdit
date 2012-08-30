@@ -111,7 +111,7 @@ Add cylinder at WorldEdit position 1 along the x/y/z/? axis with length <length>
     
 ### //spiral <size> <node>
 
-Add Spiral at WorldEdit position 1 with size <size>, composed of <node>.
+Add spiral at WorldEdit position 1 with size <size>, composed of <node>.
 
     //spiral 8 dirt
     //spiral 5 default:glass
@@ -227,7 +227,7 @@ Returns the number of nodes added.
 
 ### worldedit.spiral(pos, size, nodename)
 
-Adds a Spiral at `pos` with size `size`.
+Adds a spiral at `pos` with size `size`.
 
 Returns the number of nodes changed.
 

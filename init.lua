@@ -16,16 +16,18 @@ worldedit.node_is_valid = function(temp_pos, nodename)
 	or minetest.registered_nodes["default:" .. nodename] ~= nil
 end
 
+--determines the axis in which a player is facing, returning an axis ("x", "y", or "z") and the sign (1 or -1)
 worldedit.player_axis = function(name)
 	local dir = minetest.env:get_player_by_name(name):get_look_dir()
-	if dir.x > dir.y then
-		if dir.x > dir.z then
-			return "x"
+	local x, y, z = math.abs(dir.x), math.abs(dir.y), math.abs(dir.z)
+	if x > y then
+		if x > z then
+			return "x", dir.x > 0 and 1 or -1
 		end
-	elseif dir.y > dir.z then
-		return "y"
+	elseif y > z then
+		return "y", dir.y > 0 and 1 or -1
 	end
-	return "z"
+	return "z", dir.z > 0 and 1 or -1
 end
 
 minetest.register_chatcommand("/reset", {
@@ -204,7 +206,8 @@ minetest.register_chatcommand("/hollowcylinder", {
 			return
 		end
 		if axis == "?" then
-			axis = worldedit.player_axis(name)
+			axis, sign = worldedit.player_axis(name)
+			length = length * sign
 		end
 		if not worldedit.node_is_valid(pos, nodename) then
 			minetest.chat_send_player(name, "Invalid node name: " .. param)
@@ -216,10 +219,9 @@ minetest.register_chatcommand("/hollowcylinder", {
 	end,
 })
 
-
 minetest.register_chatcommand("/spiral", {
 	params = "<size> <node>",
-	description = "Add Spiral at WorldEdit position 1 with size <size>, composed of <node>",
+	description = "Add spiral at WorldEdit position 1 with size <size>, composed of <node>",
 	privs = {worldedit=true},
 	func = function(name, param)
 		local pos = worldedit.pos1[name]
@@ -260,7 +262,8 @@ minetest.register_chatcommand("/cylinder", {
 			return
 		end
 		if axis == "?" then
-			axis = worldedit.player_axis(name)
+			axis, sign = worldedit.player_axis(name)
+			length = length * sign
 		end
 		if not worldedit.node_is_valid(pos, nodename) then
 			minetest.chat_send_player(name, "Invalid node name: " .. param)
@@ -289,7 +292,8 @@ minetest.register_chatcommand("/copy", {
 			return
 		end
 		if axis == "?" then
-			axis = worldedit.player_axis(name)
+			axis, sign = worldedit.player_axis(name)
+			amount = amount * sign
 		end
 
 		local count = worldedit.copy(pos1, pos2, axis, tonumber(amount))
@@ -314,7 +318,8 @@ minetest.register_chatcommand("/move", {
 			return
 		end
 		if axis == "?" then
-			axis = worldedit.player_axis(name)
+			axis, sign = worldedit.player_axis(name)
+			amount = amount * sign
 		end
 
 		local count = worldedit.move(pos1, pos2, axis, tonumber(amount))
@@ -339,7 +344,8 @@ minetest.register_chatcommand("/stack", {
 			return
 		end
 		if axis == "?" then
-			axis = worldedit.player_axis(name)
+			axis, sign = worldedit.player_axis(name)
+			count = count * sign
 		end
 
 		local count = worldedit.stack(pos1, pos2, axis, tonumber(count))
