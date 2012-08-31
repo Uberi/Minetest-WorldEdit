@@ -165,11 +165,12 @@ Flip the current WorldEdit region along the x/y/z/? axis.
 
 ### //rotate
 
-Rotate the current WorldEdit region around the y axis by angle <angle> (90 degree increment).
+Rotate the current WorldEdit region around the axis <axis> by angle <angle> (90 degree increment).
 
-    //rotate 90
-    //rotate 180
-    //rotate 270
+    //rotate x 90
+    //rotate y 180
+    //rotate z 270
+    //rotate ? -90
 
 ### //dig
 
