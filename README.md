@@ -192,6 +192,20 @@ Load nodes from "(world folder)/schems/<file>.we" with position 1 of the current
     //load some random filename
     //load huge_base
 
+### //metasave <file>
+
+Save the current WorldEdit region including metadata to "(world folder)/schems/<file>.wem".
+
+    //metasave some random filename
+    //metasave huge_base
+
+### //metaload <file>
+
+Load nodes and metadata from "(world folder)/schems/<file>.wem" with position 1 of the current WorldEdit region as the origin.
+
+    //metaload some random filename
+    //metaload huge_base
+
 WorldEdit API
 -------------
 WorldEdit exposes all significant functionality in a simple interface. Adding WorldEdit to the file "depends.txt" in your mod gives you access to all of the `worldedit` functions. These are useful if you're looking for high-performance node manipulation without all the hassle of writing tons of code.
@@ -293,6 +307,18 @@ Loads the nodes represented by string `value` at position `originpos`, using the
 This function is deprecated, and should not be used unless there is a need to support legacy WorldEdit save files.
 
 Returns the number of nodes deserialized.
+
+### worldedit.metasave(pos1, pos2, file)
+
+Saves the nodes and meta defined by positions `pos1` and `pos2` into a file
+
+Returns the number of nodes saved
+
+### worldedit.metaload(pos1, file)
+
+Loads the nodes and meta from `file` to position `pos1`
+
+Returns the number of nodes loaded
 
 License
 -------
