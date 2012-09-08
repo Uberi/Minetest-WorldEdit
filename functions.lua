@@ -47,7 +47,7 @@ worldedit.replace = function(pos1, pos2, searchnode, replacenode)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 	local env = minetest.env
 
-	if searchnode:find(":") == nil then
+	if minetest.registered_nodes[searchnode] == nil then
 		searchnode = "default:" .. searchnode
 	end
 
