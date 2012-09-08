@@ -50,6 +50,9 @@ worldedit.replace = function(pos1, pos2, searchnode, replacenode)
 	if minetest.registered_nodes[searchnode] == nil then
 		searchnode = "default:" .. searchnode
 	end
+    if minetest.registered_nodes[replacenode] == nil then
+		replacenode = "default:" .. replacenode
+	end
 
 	local pos = {x=pos1.x, y=0, z=0}
 	local node = {name=replacenode}
