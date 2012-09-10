@@ -309,7 +309,7 @@ worldedit.copy = function(pos1, pos2, axis, amount)
 	return worldedit.volume(pos1, pos2)
 end
 
---moves the region defined by positions `pos1` and `pos2` along the `axis` axis ("x" or "y" or "z") by `amount` nodes, returning the number of nodes moved
+--moves positions `pos1` and `pos2` and the region defined by them along the `axis` axis ("x" or "y" or "z") by `amount` nodes, returning the number of nodes moved
 worldedit.move = function(pos1, pos2, axis, amount)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 	local env = minetest.env
