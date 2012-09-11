@@ -323,6 +323,12 @@ minetest.register_chatcommand("/move", {
 		end
 
 		local count = worldedit.move(pos1, pos2, axis, tonumber(amount))
+
+		worldedit.pos1[name][axis] = worldedit.pos1[name][axis] + amount
+		worldedit.pos2[name][axis] = worldedit.pos2[name][axis] + amount
+		worldedit.mark_pos1(name)
+		worldedit.mark_pos2(name)
+
 		minetest.chat_send_player(name, count .. " nodes moved")
 	end,
 })

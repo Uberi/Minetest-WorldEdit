@@ -129,7 +129,7 @@ Copy the current WorldEdit region along the x/y/z/? axis by <amount> nodes.
 
 ### //move x/y/z/? <amount>
 
-Move the current WorldEdit region along the x/y/z/? axis by <amount> nodes.
+Move the current WorldEdit positions and region along the x/y/z/? axis by <amount> nodes.
 
     //move x 15
     //move y -7
