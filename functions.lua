@@ -50,7 +50,7 @@ worldedit.replace = function(pos1, pos2, searchnode, replacenode)
 	if minetest.registered_nodes[searchnode] == nil then
 		searchnode = "default:" .. searchnode
 	end
-    if minetest.registered_nodes[replacenode] == nil then
+	if minetest.registered_nodes[replacenode] == nil then
 		replacenode = "default:" .. replacenode
 	end
 
@@ -270,14 +270,13 @@ worldedit.copy = function(pos1, pos2, axis, amount)
 			while pos.y <= pos2.y do
 				pos.z = pos1.z
 				while pos.z <= pos2.z do
-					local node = env:get_node(pos)
-					local meta1 = env:get_meta(pos):to_table()
-					local value = pos[axis]
-					pos[axis] = value + amount
-					env:add_node(pos, node)
-					local meta2 = env:get_meta(pos)
-					meta2:from_table(meta1)
-					pos[axis] = value
+					local node = env:get_node(pos) --obtain current node
+					local meta = env:get_meta(pos):to_table() --get meta of current node
+					local value = pos[axis] --store current position
+					pos[axis] = value + amount --move along axis
+					env:add_node(pos, node) --copy node to new position
+					env:get_meta(pos):from_table(meta) --set metadata of new node
+					pos[axis] = value --restore old position
 					pos.z = pos.z + 1
 				end
 				pos.y = pos.y + 1
@@ -291,14 +290,13 @@ worldedit.copy = function(pos1, pos2, axis, amount)
 			while pos.y >= pos1.y do
 				pos.z = pos2.z
 				while pos.z >= pos1.z do
-					local node = minetest.env:get_node(pos)
-					local meta1 = env:get_meta(pos):to_table()
-					local value = pos[axis]
-					pos[axis] = value + amount
-					minetest.env:add_node(pos, node)
-					local meta2 = env:get_meta(pos)
-					meta2:from_table(meta1)
-					pos[axis] = value
+					local node = minetest.env:get_node(pos) --obtain current node
+					local meta = env:get_meta(pos):to_table() --get meta of current node
+					local value = pos[axis] --store current position
+					pos[axis] = value + amount --move along axis
+					minetest.env:add_node(pos, node) --copy node to new position
+					env:get_meta(pos):from_table(meta) --set metadata of new node
+					pos[axis] = value --restore old position
 					pos.z = pos.z - 1
 				end
 				pos.y = pos.y - 1
@@ -309,7 +307,7 @@ worldedit.copy = function(pos1, pos2, axis, amount)
 	return worldedit.volume(pos1, pos2)
 end
 
---moves positions `pos1` and `pos2` and the region defined by them along the `axis` axis ("x" or "y" or "z") by `amount` nodes, returning the number of nodes moved
+--moves the region defined by positions `pos1` and `pos2` along the `axis` axis ("x" or "y" or "z") by `amount` nodes, returning the number of nodes moved
 worldedit.move = function(pos1, pos2, axis, amount)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 	local env = minetest.env
@@ -321,15 +319,14 @@ worldedit.move = function(pos1, pos2, axis, amount)
 			while pos.y <= pos2.y do
 				pos.z = pos1.z
 				while pos.z <= pos2.z do
-					local node = env:get_node(pos)
-					local meta1 = env:get_meta(pos):to_table()
+					local node = env:get_node(pos) --obtain current node
+					local meta = env:get_meta(pos):to_table() --get metadata of current node
 					env:remove_node(pos)
-					local value = pos[axis]
-					pos[axis] = value + amount
-					env:add_node(pos, node)
-					local meta2 = env:get_meta(pos)
-					meta2:from_table(meta1)
-					pos[axis] = value
+					local value = pos[axis] --store current position
+					pos[axis] = value + amount --move along axis
+					env:add_node(pos, node) --move node to new position
+					env:get_meta(pos):from_table(meta) --set metadata of new node
+					pos[axis] = value --restore old position
 					pos.z = pos.z + 1
 				end
 				pos.y = pos.y + 1
@@ -343,15 +340,14 @@ worldedit.move = function(pos1, pos2, axis, amount)
 			while pos.y >= pos1.y do
 				pos.z = pos2.z
 				while pos.z >= pos1.z do
-					local node = env:get_node(pos)
-					local meta1 = env:get_meta(pos):to_table()
+					local node = env:get_node(pos) --obtain current node
+					local meta = env:get_meta(pos):to_table() --get metadata of current node
 					env:remove_node(pos)
-					local value = pos[axis]
-					pos[axis] = value + amount
-					env:add_node(pos, node)
-					local meta2 = env:get_meta(pos)
-					meta2:from_table(meta1)
-					pos[axis] = value
+					local value = pos[axis] --store current position
+					pos[axis] = value + amount --move along axis
+					env:add_node(pos, node) --move node to new position
+					env:get_meta(pos):from_table(meta) --set metadata of new node
+					pos[axis] = value --restore old position
 					pos.z = pos.z - 1
 				end
 				pos.y = pos.y - 1
@@ -366,12 +362,12 @@ end
 worldedit.stack = function(pos1, pos2, axis, count)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 	local length = pos2[axis] - pos1[axis] + 1
-	local amount = 0
-	local copy = worldedit.copy
 	if count < 0 then
 		count = -count
 		length = -length
 	end
+	local amount = 0
+	local copy = worldedit.copy
 	for i = 1, count do
 		amount = amount + length
 		copy(pos1, pos2, axis, amount)
@@ -393,18 +389,16 @@ worldedit.transpose = function(pos1, pos2, axis1, axis2)
 				local extent1, extent2 = pos[axis1] - pos1[axis1], pos[axis2] - pos1[axis2]
 				if extent1 < extent2 then
 					local node1 = env:get_node(pos)
-					local meta1a = env:get_meta(pos):to_table()
+					local meta1 = env:get_meta(pos):to_table()
 					local value1, value2 = pos[axis1], pos[axis2]
-					pos[axis1], pos[axis2] = pos1[axis1] + extent2, pos1[axis2] + extent1
+					pos[axis1], pos[axis2] = value1 + extent2, value2 + extent1
 					local node2 = env:get_node(pos)
-					local meta2a = env:get_meta(pos):to_table()
+					local meta2 = env:get_meta(pos):to_table()
 					env:add_node(pos, node1)
-					local meta1b = env:get_meta(pos)
-					meta1b:from_table(meta1a)
-					pos[axis1], pos[axis2] = pos1[axis1] + extent1, pos1[axis2] + extent2
+					env:get_meta(pos):from_table(meta1)
+					pos[axis1], pos[axis2] = value1, value2
 					env:add_node(pos, node2)
-					local meta2b = env:get_meta(pos)
-					meta2b:from_table(meta2a)
+					env:get_meta(pos):from_table(meta2)
 				end
 				pos.z = pos.z + 1
 			end
@@ -429,18 +423,16 @@ worldedit.flip = function(pos1, pos2, axis)
 			pos.z = pos1.z
 			while pos.z <= pos2.z do
 				local node1 = env:get_node(pos)
-				local meta1a = env:get_meta(pos):to_table()
+				local meta1 = env:get_meta(pos):to_table()
 				local value = pos[axis]
 				pos[axis] = start - value
 				local node2 = env:get_node(pos)
-				local meta2a = env:get_meta(pos):to_table()
+				local meta2 = env:get_meta(pos):to_table()
 				env:add_node(pos, node1)
-				local meta1b = env:get_meta(pos)
-				meta1b:from_table(meta1a)
+				env:get_meta(pos):from_table(meta1)
 				pos[axis] = value
 				env:add_node(pos, node2)
-				local meta2b = env:get_meta(pos)
-				meta2b:from_table(meta2a)
+				env:get_meta(pos):from_table(meta2)
 				pos.z = pos.z + 1
 			end
 			pos.y = pos.y + 1
@@ -450,35 +442,29 @@ worldedit.flip = function(pos1, pos2, axis)
 	return worldedit.volume(pos1, pos2)
 end
 
---rotates a region defined by the positions `pos1` and `pos2` by `angle` degrees clockwise (if you are looking in the negative direction) around the `axis` (supporting 90 degree increments only), returning the number of nodes rotated
+--rotates a region defined by the positions `pos1` and `pos2` by `angle` degrees clockwise around axis `axis` (90 degree increment), returning the number of nodes rotated
 worldedit.rotate = function(pos1, pos2, axis, angle)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 
-	if axis == 'x' then
-		axes = {'z', 'y'}
-	elseif axis == 'y' then
-		axes = {'x', 'z'}
-	else--if axis == 'z' then
-		axes = {'y', 'x'}
+	local axis1, axis2
+	if axis == "x" then
+		axis1, axis2 = "z", "y"
+	elseif axis == "y" then
+		axis1, axis2 = "x", "z"
+	else --axis == "z"
+		axis1, axis2 = "y", "x"
 	end
 	angle = angle % 360
 
-	local pos = {x=pos1.x, y=0, z=0}
-	local newpos = {x=0, y=0, z=0}
-	local offsetx, offsetz
-	local env = minetest.env
-
 	if angle == 90 then
-		worldedit.transpose(pos1, pos2, axes[1], axes[2])
-		worldedit.flip(pos1, pos2, axes[2])
+		worldedit.transpose(pos1, pos2, axis1, axis2)
+		worldedit.flip(pos1, pos2, axis2)
 	elseif angle == 180 then
-		worldedit.flip(pos1, pos2, axes[1])
-		worldedit.flip(pos1, pos2, axes[2])
+		worldedit.flip(pos1, pos2, axis1)
+		worldedit.flip(pos1, pos2, axis2)
 	elseif angle == 270 then
-		worldedit.transpose(pos1, pos2, axes[1], axes[2])
-		worldedit.flip(pos1, pos2, axes[1])
-	else
-		return 0
+		worldedit.transpose(pos1, pos2, axis1, axis2)
+		worldedit.flip(pos1, pos2, axis1)
 	end
 	return worldedit.volume(pos1, pos2)
 end
