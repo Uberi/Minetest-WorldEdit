@@ -308,6 +308,18 @@ This function is deprecated, and should not be used unless there is a need to su
 
 Returns the number of nodes deserialized.
 
+### worldedit.metasave(pos1, pos2, file)
+
+Saves the nodes and meta defined by positions `pos1` and `pos2` into a file
+
+Returns the number of nodes saved
+
+### worldedit.metaload(pos1, file)
+
+Loads the nodes and meta from `file` to position `pos1`
+
+Returns the number of nodes loaded
+
 License
 -------
 Copyright 2012 sfan5 and Anthony Zhang (Temperest)
