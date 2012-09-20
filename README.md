@@ -322,7 +322,7 @@ Returns the number of nodes loaded
 
 License
 -------
-Copyright 2012 sfan5 and Anthony Zhang (Temperest)
+Copyright 2012 sfan5, Anthony Zhang (Temperest), and Brett O'Donnell (cornernote).
 
 This mod is licensed under the [GNU Affero General Public License](http://www.gnu.org/licenses/agpl-3.0.html).
 
