@@ -529,3 +529,49 @@ minetest.register_chatcommand("/load", {
 		minetest.chat_send_player(name, count .. " nodes loaded")
 	end,
 })
+
+minetest.register_chatcommand("/metasave", {
+	params = "<file>",
+	description = "Save the current WorldEdit region to \"(world folder)/schems/<file>.wem\"",
+	privs = {worldedit=true},
+	func = function(name, param)
+		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
+		if pos1 == nil or pos2 == nil then
+			minetest.chat_send_player(name, "No WorldEdit region selected")
+			return
+		end
+		if param == "" then
+			minetest.chat_send_player(name, "Invalid usage: " .. param)
+			return
+		end
+		local count, err = worldedit.metasave(pos1, pos2, param)
+		if err then
+			minetest.chat_send_player(name, "error loading file: " .. err)
+		else
+			minetest.chat_send_player(name, count .. " nodes saved")
+		end
+	end,
+})
+
+minetest.register_chatcommand("/metaload", {
+	params = "<file>",
+	description = "Load nodes from \"(world folder)/schems/<file>.wem\" with position 1 of the current WorldEdit region as the origin",
+	privs = {worldedit=true},
+	func = function(name, param)
+		local pos1 = worldedit.pos1[name]
+		if pos1 == nil then
+			minetest.chat_send_player(name, "No WorldEdit region selected")
+			return
+		end
+		if param == "" then
+			minetest.chat_send_player(name, "Invalid usage: " .. param)
+			return
+		end
+		local count, err = worldedit.metaload(pos1, param)
+		if err then
+			minetest.chat_send_player(name, "error loading file: " .. err)
+		else
+			minetest.chat_send_player(name, count .. " nodes loaded")
+		end
+	end,
+})

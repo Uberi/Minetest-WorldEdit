@@ -566,3 +566,67 @@ worldedit.deserialize_old = function(originpos, value)
 	end
 	return count
 end
+
+--saves the nodes and meta defined by positions `pos1` and `pos2` into a file, returning the number of nodes saved
+worldedit.metasave = function(pos1, pos2, file)
+	local path = minetest.get_worldpath() .. "/schems"
+	local filename = path .. "/" .. file .. ".wem"
+	os.execute("mkdir \"" .. path .. "\"") --create directory if it does not already exist
+	local rows = {}
+	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
+	local pos = {x=pos1.x, y=0, z=0}
+	local count = 0
+	local result = {}
+	local env = minetest.env
+	while pos.x <= pos2.x do
+		pos.y = pos1.y
+		while pos.y <= pos2.y do
+			pos.z = pos1.z
+			while pos.z <= pos2.z do
+				local node = env:get_node(pos)
+				if node.name ~= "air" and node.name ~= "ignore" then
+					count = count + 1
+					local row = {
+						x = pos.x-pos1.x,
+						y = pos.y-pos1.y,
+						z = pos.z-pos1.z,
+						name = node.name,
+						param1 = node.param1,
+						param2 = node.param2,
+						meta = env:get_meta(pos):to_table(),
+					}
+					table.insert(rows, row)
+				end
+				pos.z = pos.z + 1
+			end
+			pos.y = pos.y + 1
+		end
+		pos.x = pos.x + 1
+	end
+	local err = table.save(rows,filename)
+	if err then return _,err end
+	return count
+end
+
+--loads the nodes and meta from `file` to position `pos1`, returning the number of nodes loaded
+worldedit.metaload = function(pos1, file)
+	local filename = minetest.get_worldpath() .. "/schems/" .. file .. ".wem"
+	local rows, err = table.load(filename)
+	if err then return _,err end
+	local pos = {x=0, y=0, z=0}
+	local node = {name="", param1=0, param2=0}
+	local count = 0
+	local env = minetest.env
+	for i,row in pairs(rows) do
+		pos.x = pos1.x + tonumber(row.x)
+		pos.y = pos1.y + tonumber(row.y)
+		pos.z = pos1.z + tonumber(row.z)
+		node.name = row.name
+		node.param1 = row.param1
+		node.param2 = row.param2
+		env:add_node(pos, node)
+		env:get_meta(pos):from_table(row.meta)
+		count = count + 1
+	end
+	return count
+end
