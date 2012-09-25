@@ -90,6 +90,11 @@ worldedit.hollow_cylinder = function(pos, axis, length, radius, nodename)
 	local currentpos = {x=pos.x, y=pos.y, z=pos.z}
 	local node = {name=nodename}
 	local count = 0
+	local step = 1
+	if length < 0
+		length = -length
+		step = -1
+	end
 	for i = 1, length do
 		local offset1, offset2 = 0, radius
 		local delta = -radius
@@ -126,7 +131,7 @@ worldedit.hollow_cylinder = function(pos, axis, length, radius, nodename)
 			end
 			offset1 = offset1 + 1
 		end
-		currentpos[axis] = currentpos[axis] + 1
+		currentpos[axis] = currentpos[axis] + step
 	end
 	return count
 end
@@ -146,6 +151,11 @@ worldedit.cylinder = function(pos, axis, length, radius, nodename)
 	local currentpos = {x=pos.x, y=pos.y, z=pos.z}
 	local node = {name=nodename}
 	local count = 0
+	local step = 1
+	if length < 0
+		length = -length
+		step = -1
+	end
 	for i = 1, length do
 		local offset1, offset2 = 0, radius
 		local delta = -radius
@@ -180,7 +190,7 @@ worldedit.cylinder = function(pos, axis, length, radius, nodename)
 				delta = delta - (offset2 * 2)
 			end
 		end
-		currentpos[axis] = currentpos[axis] + 1
+		currentpos[axis] = currentpos[axis] + step
 	end
 	return count
 end
