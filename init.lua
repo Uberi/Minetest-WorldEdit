@@ -189,6 +189,58 @@ minetest.register_chatcommand("/replace", {
 	end,
 })
 
+minetest.register_chatcommand("/hollowsphere", {
+	params = "<radius> <node>",
+	description = "Add hollow sphere at WorldEdit position 1 with radius <radius>, composed of <node>",
+	privs = {worldedit=true},
+	func = function(name, param)
+		local pos = worldedit.pos1[name]
+		if pos == nil then
+			minetest.chat_send_player(name, "No WorldEdit region selected")
+			return
+		end
+
+		local found, _, radius, nodename = param:find("^(%d+)%s+([^%s]+)$")
+		if found == nil then
+			minetest.chat_send_player(name, "Invalid usage: " .. param)
+			return
+		end
+		if not worldedit.node_is_valid(pos, nodename) then
+			minetest.chat_send_player(name, "Invalid node name: " .. param)
+			return
+		end
+
+		local count = worldedit.hollow_sphere(pos, tonumber(radius), nodename)
+		minetest.chat_send_player(name, count .. " nodes added")
+	end,
+})
+
+minetest.register_chatcommand("/sphere", {
+	params = "<radius> <node>",
+	description = "Add sphere at WorldEdit position 1 with radius <radius>, composed of <node>",
+	privs = {worldedit=true},
+	func = function(name, param)
+		local pos = worldedit.pos1[name]
+		if pos == nil then
+			minetest.chat_send_player(name, "No WorldEdit region selected")
+			return
+		end
+
+		local found, _, radius, nodename = param:find("^(%d+)%s+([^%s]+)$")
+		if found == nil then
+			minetest.chat_send_player(name, "Invalid usage: " .. param)
+			return
+		end
+		if not worldedit.node_is_valid(pos, nodename) then
+			minetest.chat_send_player(name, "Invalid node name: " .. param)
+			return
+		end
+
+		local count = worldedit.sphere(pos, tonumber(radius), nodename)
+		minetest.chat_send_player(name, count .. " nodes added")
+	end,
+})
+
 minetest.register_chatcommand("/hollowcylinder", {
 	params = "x/y/z/? <length> <radius> <node>",
 	description = "Add hollow cylinder at WorldEdit position 1 along the x/y/z/? axis with length <length> and radius <radius>, composed of <node>",

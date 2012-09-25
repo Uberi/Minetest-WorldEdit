@@ -91,6 +91,22 @@ Replace all instances of <search node> with <place node> in the current WorldEdi
     //replace dirt flowers:flower_waterlily
     //replace flowers:flower_rose flowers:flower_tulip
 
+### //hollowsphere <radius> <node>
+
+Add hollow sphere at WorldEdit position 1 with radius <radius>, composed of <node>.
+
+    //hollowsphere 5 dirt
+    //hollowsphere 12 default:glass
+    //hollowsphere 17 mesecons:mesecon
+
+### //sphere <radius> <node>
+
+Add sphere at WorldEdit position 1 with radius <radius>, composed of <node>.
+
+    //sphere 5 dirt
+    //sphere 12 default:glass
+    //sphere 17 mesecons:mesecon
+
 ### //hollowcylinder x/y/z/? <length> <radius> <node>
 
 Add hollow cylinder at WorldEdit position 1 along the x/y/z/? axis with length <length> and radius <radius>, composed of <node>.
@@ -228,15 +244,27 @@ Replaces all instances of `searchnode` with `replacenode` in a region defined by
 
 Returns the number of nodes replaced.
 
+### worldedit.hollow_sphere = function(pos, radius, nodename)
+
+Adds a hollow sphere at `pos` with radius `radius`, composed of `nodename`.
+
+Returns the number of nodes added.
+
+### worldedit.sphere = function(pos, radius, nodename)
+
+Adds a sphere at `pos` with radius `radius`, composed of `nodename`.
+
+Returns the number of nodes added.
+
 ### worldedit.hollow_cylinder(pos, axis, length, radius, nodename)
 
-Adds a hollow cylinder at `pos` along the `axis` axis ("x" or "y" or "z") with length `length` and radius `radius`.
+Adds a hollow cylinder at `pos` along the `axis` axis ("x" or "y" or "z") with length `length` and radius `radius`, composed of `nodename`.
 
 Returns the number of nodes added.
 
 ### worldedit.cylinder(pos, axis, length, radius, nodename)
 
-Adds a cylinder at `pos` along the `axis` axis ("x" or "y" or "z") with length `length` and radius `radius`.
+Adds a cylinder at `pos` along the `axis` axis ("x" or "y" or "z") with length `length` and radius `radius`, composed of `nodename`.
 
 Returns the number of nodes added.
 
@@ -322,7 +350,7 @@ Returns the number of nodes loaded
 
 License
 -------
-Copyright 2012 sfan5, Anthony Zhang (Temperest), and Brett O'Donnell (cornernote).
+Copyright 2012 sfan5 and Anthony Zhang (Temperest)
 
 This mod is licensed under the [GNU Affero General Public License](http://www.gnu.org/licenses/agpl-3.0.html).
 
