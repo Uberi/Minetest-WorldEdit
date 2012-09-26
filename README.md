@@ -125,13 +125,13 @@ Add cylinder at WorldEdit position 1 along the x/y/z/? axis with length <length>
     //cylinder z -12 3 mesecons:mesecon
     //cylinder ? 2 4 stone
     
-### //spiral <size> <node>
+### //spiral <width> <height> <spacer> <node>
 
-Add spiral at WorldEdit position 1 with size <size>, composed of <node>.
+Add spiral at WorldEdit position 1 with width <width>, height <height>, space between walls <spacer>, composed of <node>.
 
-    //spiral 8 dirt
-    //spiral 5 default:glass
-    //spiral 2 stone
+    //spiral 20 5 3 dirt
+    //spiral 5 2 1 default:glass
+    //spiral 7 1 5 stone
 
 
 ### //copy x/y/z/? <amount>
