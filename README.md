@@ -125,13 +125,13 @@ Add cylinder at WorldEdit position 1 along the x/y/z/? axis with length <length>
     //cylinder z -12 3 mesecons:mesecon
     //cylinder ? 2 4 stone
     
-### //spiral <size> <node>
+### //pyramid <height> <node>
 
-Add spiral at WorldEdit position 1 with size <size>, composed of <node>.
+Add pyramid at WorldEdit position 1 with height <height>, composed of <node>.
 
-    //spiral 8 dirt
-    //spiral 5 default:glass
-    //spiral 2 stone
+    //pyramid 8 dirt
+    //pyramid 5 default:glass
+    //pyramid 2 stone
 
 
 ### //copy x/y/z/? <amount>
@@ -268,11 +268,11 @@ Adds a cylinder at `pos` along the `axis` axis ("x" or "y" or "z") with length `
 
 Returns the number of nodes added.
 
-### worldedit.spiral(pos, size, nodename)
+### worldedit.pyramid(pos, height, nodename)
 
-Adds a spiral at `pos` with size `size`.
+Adds a pyramid at `pos` with height `height`.
 
-Returns the number of nodes changed.
+Returns the number of nodes added.
 
 ### worldedit.copy(pos1, pos2, axis, amount)
 

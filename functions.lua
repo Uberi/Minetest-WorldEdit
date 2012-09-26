@@ -76,7 +76,7 @@ worldedit.replace = function(pos1, pos2, searchnode, replacenode)
 end
 
 --adds a hollow sphere at `pos` with radius `radius`, composed of `nodename`, returning the number of nodes added
-worldedit.hollow_sphere = function(pos, radius, nodename)
+worldedit.hollow_sphere = function(pos, radius, nodename) --wip: use bresenham sphere for maximum speed
 	local node = {name=nodename}
 	local pos1 = {x=0, y=0, z=0}
 	local full_radius = radius * radius + radius
@@ -96,7 +96,7 @@ worldedit.hollow_sphere = function(pos, radius, nodename)
 end
 
 --adds a sphere at `pos` with radius `radius`, composed of `nodename`, returning the number of nodes added
-worldedit.sphere = function(pos, radius, nodename)
+worldedit.sphere = function(pos, radius, nodename) --wip: use bresenham sphere for maximum speed
 	local node = {name=nodename}
 	local pos1 = {x=0, y=0, z=0}
 	local full_radius = radius * radius + radius
@@ -134,7 +134,7 @@ worldedit.hollow_cylinder = function(pos, axis, length, radius, nodename)
 	local node = {name=nodename}
 	local count = 0
 	local step = 1
-	if length < 0
+	if length < 0 then
 		length = -length
 		step = -1
 	end
@@ -195,7 +195,7 @@ worldedit.cylinder = function(pos, axis, length, radius, nodename)
 	local node = {name=nodename}
 	local count = 0
 	local step = 1
-	if length < 0
+	if length < 0 then
 		length = -length
 		step = -1
 	end
@@ -238,77 +238,33 @@ worldedit.cylinder = function(pos, axis, length, radius, nodename)
 	return count
 end
 
---adds a spiral at `pos` with size `size`, composed of `nodename`, returning the number of nodes changed
-worldedit.spiral = function(pos, size, nodename)
-	local shift_x, shift_y
-	sa = spiralt(size)
-	shift_y = #sa -- "Height" of the Array
-	local fe = sa[1]
-	shift_x = #fe -- "Width" of the Array
-	fe = nil
+--adds a pyramid at `pos` with height `height`, composed of `nodename`, returning the number of nodes added
+worldedit.pyramid = function(pos, height, nodename)
+	local pos1x, pos1y, pos1z = pos.x - height, pos.y, pos.z - height
+	local pos2x, pos2y, pos2z = pos.x + height, pos.y + height, pos.z + height
+	local pos = {x=0, y=pos1y, z=0}
 
 	local count = 0
 	local node = {name=nodename}
-	for x, v in ipairs(sa) do
-		for y, z in ipairs(v) do
-			minetest.env:add_node({x=pos.x - shift_x + x,y=pos.y - shift_y + y,z=pos.z + z}, node)
-			count = count + 1
+	local env = minetest.env
+	while pos.y <= pos2y do --each vertical level of the pyramid
+		pos.x = pos1x
+		while pos.x <= pos2x do
+			pos.z = pos1z
+			while pos.z <= pos2z do
+				env:add_node(pos, node)
+				pos.z = pos.z + 1
+			end
+			pos.x = pos.x + 1
 		end
+		count = count + ((pos2y - pos.y) * 2 + 1) ^ 2
+		pos.y = pos.y + 1
+
+		pos1x, pos2x = pos1x + 1, pos2x - 1
+		pos1z, pos2z = pos1z + 1, pos2z - 1
+
 	end
 	return count
-end
-
---wip: 
-sign = function(s)
-	if s > 0 then
-		return 1
-	end
-	if s < 0 then
-		return -1
-	end
-	return 0
-end
-
---wip: needs to be faster
-function spiral_index(y, x) -- returns the value at (x, y) in a spiral that starts at 1 and goes outwards
-	if y == -x and y >= x then
-		return (2 * y + 1) ^ 2
-	end
-	local l = math.max(math.abs(y), math.abs(x))
-	local value
-	if math.abs(y) == l then
-		value = x
-		if y < 0 then
-			value = -value
-		end
-	else
-		value = y
-		if x < 0 then
-			value = -value
-		end
-	end
-	t1 = l * 2
-	if x + y < 0 then
-		t1 = -t1
-	end
-	t2 = y ^ 2 - x ^ 2
-	if t2 < 0 then
-		t2 = -t2
-	end
-	return ((2 * l - 1) ^ 2) + (l * 4) + t1 + (t2 * (l - value))
-end
-
---wip: needs to be faster
-function spiralt(side)
-	local spiral = {}
-	local start, stop = math.floor((-side+1)/2), math.floor((side-1)/2)
-	for i = 1, side do
-		spiral[i] = {}
-		for j = 1, side do
-			spiral[i][j] = side ^ 2 - spiral_index(stop - i + 1,start + j - 1) --moves the coordinates so (0,0) is at the center of the spiral
-		end
-	end
-	return spiral
 end
 
 --copies the region defined by positions `pos1` and `pos2` along the `axis` axis ("x" or "y" or "z") by `amount` nodes, returning the number of nodes copied
@@ -621,7 +577,7 @@ worldedit.deserialize_old = function(originpos, value)
 end
 
 --saves the nodes and meta defined by positions `pos1` and `pos2` into a file, returning the number of nodes saved
-worldedit.metasave = function(pos1, pos2, file)
+worldedit.metasave = function(pos1, pos2, file) --wip: simply work with strings instead of doing IO
 	local path = minetest.get_worldpath() .. "/schems"
 	local filename = path .. "/" .. file .. ".wem"
 	os.execute("mkdir \"" .. path .. "\"") --create directory if it does not already exist
@@ -662,7 +618,7 @@ worldedit.metasave = function(pos1, pos2, file)
 end
 
 --loads the nodes and meta from `file` to position `pos1`, returning the number of nodes loaded
-worldedit.metaload = function(pos1, file)
+worldedit.metaload = function(pos1, file) --wip: simply work with strings instead of doing IO
 	local filename = minetest.get_worldpath() .. "/schems/" .. file .. ".wem"
 	local rows, err = table.load(filename)
 	if err then return _,err end

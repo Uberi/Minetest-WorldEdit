@@ -271,9 +271,9 @@ minetest.register_chatcommand("/hollowcylinder", {
 	end,
 })
 
-minetest.register_chatcommand("/spiral", {
-	params = "<size> <node>",
-	description = "Add spiral at WorldEdit position 1 with size <size>, composed of <node>",
+minetest.register_chatcommand("/pyramid", {
+	params = "<height> <node>",
+	description = "Add pyramid at WorldEdit position 1 with height <height>, composed of <node>",
 	privs = {worldedit=true},
 	func = function(name, param)
 		local pos = worldedit.pos1[name]
@@ -292,8 +292,8 @@ minetest.register_chatcommand("/spiral", {
 			return
 		end
 
-		local count = worldedit.spiral(pos, tonumber(size), nodename)
-		minetest.chat_send_player(name, count .. " nodes changed")
+		local count = worldedit.pyramid(pos, tonumber(size), nodename)
+		minetest.chat_send_player(name, count .. " nodes added")
 	end,
 })
 
