@@ -267,6 +267,72 @@ worldedit.pyramid = function(pos, height, nodename)
 	return count
 end
 
+--adds a spiral at `pos` with width `width`, height `height`, space between walls `spacer`, composed of `nodename`, returning the number of nodes added
+worldedit.spiral = function(pos, width, height, spacer, nodename) --wip: clean this up
+	-- spiral matrix - http://rosettacode.org/wiki/Spiral_matrix#Lua
+	av, sn = math.abs, function(s) return s~=0 and s/av(s) or 0 end
+	local function sindex(z, x) -- returns the value at (x, z) in a spiral that starts at 1 and goes outwards
+		if z == -x and z >= x then return (2*z+1)^2 end
+		local l = math.max(av(z), av(x))
+		return (2*l-1)^2+4*l+2*l*sn(x+z)+sn(z^2-x^2)*(l-(av(z)==l and sn(z)*x or sn(x)*z)) -- OH GOD WHAT
+	end
+	local function spiralt(side)
+		local ret, id, start, stop = {}, 0, math.floor((-side+1)/2), math.floor((side-1)/2)
+		for i = 1, side do
+			for j = 1, side do
+				local id = side^2 - sindex(stop - i + 1,start + j - 1)
+				ret[id] = {x=i,z=j}
+			end
+		end
+		return ret
+	end
+	-- connect the joined parts
+	local spiral = spiralt(width)
+	height = tonumber(height)
+	if height < 1 then height = 1 end
+	spacer = tonumber(spacer)-1
+	if spacer < 1 then spacer = 1 end
+	local count = 0
+	local node = {name=nodename}
+	local np,lp
+	for y=0,height do
+		lp = nil
+		for _,v in ipairs(spiral) do
+			np = {x=pos.x+v.x*spacer, y=pos.y+y, z=pos.z+v.z*spacer}
+			if lp~=nil then
+				if lp.x~=np.x then 
+					if lp.x<np.x then 
+						for i=lp.x+1,np.x do
+							minetest.env:add_node({x=i, y=np.y, z=np.z}, node)
+							count = count + 1
+						end
+					else
+						for i=np.x,lp.x-1 do
+							minetest.env:add_node({x=i, y=np.y, z=np.z}, node)
+							count = count + 1
+						end
+					end
+				end
+				if lp.z~=np.z then 
+					if lp.z<np.z then 
+						for i=lp.z+1,np.z do
+							minetest.env:add_node({x=np.x, y=np.y, z=i}, node)
+							count = count + 1
+						end
+					else
+						for i=np.z,lp.z-1 do
+							minetest.env:add_node({x=np.x, y=np.y, z=i}, node)
+							count = count + 1
+						end
+					end
+				end
+			end
+			lp = np
+		end
+	end
+	return count
+end
+
 --copies the region defined by positions `pos1` and `pos2` along the `axis` axis ("x" or "y" or "z") by `amount` nodes, returning the number of nodes copied
 worldedit.copy = function(pos1, pos2, axis, amount)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)

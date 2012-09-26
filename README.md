@@ -133,6 +133,13 @@ Add pyramid at WorldEdit position 1 with height <height>, composed of <node>.
     //pyramid 5 default:glass
     //pyramid 2 stone
 
+### //spiral <width> <height> <spacer> <node>
+
+Add spiral at WorldEdit position 1 with width <width>, height <height>, space between walls <spacer>, composed of <node>.
+
+    //spiral 20 5 3 dirt
+    //spiral 5 2 1 default:glass
+    //spiral 7 1 5 stone
 
 ### //copy x/y/z/? <amount>
 
@@ -271,6 +278,12 @@ Returns the number of nodes added.
 ### worldedit.pyramid(pos, height, nodename)
 
 Adds a pyramid at `pos` with height `height`.
+
+Returns the number of nodes added.
+
+### worldedit.spiral(pos, width, height, spacer, nodename)
+
+Adds a spiral at `pos` with width `width`, height `height`, space between walls `spacer`, composed of `nodename`.
 
 Returns the number of nodes added.
 
