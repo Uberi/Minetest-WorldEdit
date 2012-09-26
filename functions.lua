@@ -75,7 +75,50 @@ worldedit.replace = function(pos1, pos2, searchnode, replacenode)
 	return count
 end
 
---adds a hollow cylinder at `pos` along the `axis` axis ("x" or "y" or "z") with length `length` and radius `radius`, returning the number of nodes added
+--adds a hollow sphere at `pos` with radius `radius`, composed of `nodename`, returning the number of nodes added
+worldedit.hollow_sphere = function(pos, radius, nodename)
+	local node = {name=nodename}
+	local pos1 = {x=0, y=0, z=0}
+	local full_radius = radius * radius + radius
+	local env = minetest.env
+	for x = -radius, radius do
+		pos1.x = pos.x + x
+		for y = -radius, radius do
+			pos1.y = pos.y + y
+			for z = -radius, radius do
+				if x*x+y*y+z*z >= (radius-1) * (radius-1) + (radius-1) and x*x+y*y+z*z <= full_radius then
+					pos1.z = pos.z + z
+					env:add_node({x=pos.x+x,y=pos.y+y,z=pos.z+z}, node)
+				end
+			end
+		end
+	end
+end
+
+--adds a sphere at `pos` with radius `radius`, composed of `nodename`, returning the number of nodes added
+worldedit.sphere = function(pos, radius, nodename)
+	local node = {name=nodename}
+	local pos1 = {x=0, y=0, z=0}
+	local full_radius = radius * radius + radius
+	local count = 0
+	local env = minetest.env
+	for x = -radius, radius do
+		pos1.x = pos.x + x
+		for y = -radius, radius do
+			pos1.y = pos.y + y
+			for z = -radius, radius do
+				if x*x+y*y+z*z <= full_radius then
+					pos1.z = pos.z + z
+					env:add_node(pos1, node)
+					count = count + 1
+				end
+			end
+		end
+	end
+	return count
+end
+
+--adds a hollow cylinder at `pos` along the `axis` axis ("x" or "y" or "z") with length `length` and radius `radius`, composed of `nodename`, returning the number of nodes added
 worldedit.hollow_cylinder = function(pos, axis, length, radius, nodename)
 	local other1, other2
 	if axis == "x" then
@@ -90,6 +133,11 @@ worldedit.hollow_cylinder = function(pos, axis, length, radius, nodename)
 	local currentpos = {x=pos.x, y=pos.y, z=pos.z}
 	local node = {name=nodename}
 	local count = 0
+	local step = 1
+	if length < 0
+		length = -length
+		step = -1
+	end
 	for i = 1, length do
 		local offset1, offset2 = 0, radius
 		local delta = -radius
@@ -126,12 +174,12 @@ worldedit.hollow_cylinder = function(pos, axis, length, radius, nodename)
 			end
 			offset1 = offset1 + 1
 		end
-		currentpos[axis] = currentpos[axis] + 1
+		currentpos[axis] = currentpos[axis] + step
 	end
 	return count
 end
 
---adds a cylinder at `pos` along the `axis` axis ("x" or "y" or "z") with length `length` and radius `radius`, returning the number of nodes added
+--adds a cylinder at `pos` along the `axis` axis ("x" or "y" or "z") with length `length` and radius `radius`, composed of `nodename`, returning the number of nodes added
 worldedit.cylinder = function(pos, axis, length, radius, nodename)
 	local other1, other2
 	if axis == "x" then
@@ -146,6 +194,11 @@ worldedit.cylinder = function(pos, axis, length, radius, nodename)
 	local currentpos = {x=pos.x, y=pos.y, z=pos.z}
 	local node = {name=nodename}
 	local count = 0
+	local step = 1
+	if length < 0
+		length = -length
+		step = -1
+	end
 	for i = 1, length do
 		local offset1, offset2 = 0, radius
 		local delta = -radius
@@ -180,12 +233,12 @@ worldedit.cylinder = function(pos, axis, length, radius, nodename)
 				delta = delta - (offset2 * 2)
 			end
 		end
-		currentpos[axis] = currentpos[axis] + 1
+		currentpos[axis] = currentpos[axis] + step
 	end
 	return count
 end
 
---adds a spiral at `pos` with size `size`, returning the number of nodes changed
+--adds a spiral at `pos` with size `size`, composed of `nodename`, returning the number of nodes changed
 worldedit.spiral = function(pos, size, nodename)
 	local shift_x, shift_y
 	sa = spiralt(size)
