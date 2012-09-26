@@ -134,7 +134,7 @@ worldedit.hollow_cylinder = function(pos, axis, length, radius, nodename)
 	local node = {name=nodename}
 	local count = 0
 	local step = 1
-	if length < 0
+	if length < 0 then
 		length = -length
 		step = -1
 	end
@@ -195,7 +195,7 @@ worldedit.cylinder = function(pos, axis, length, radius, nodename)
 	local node = {name=nodename}
 	local count = 0
 	local step = 1
-	if length < 0
+	if length < 0 then
 		length = -length
 		step = -1
 	end
