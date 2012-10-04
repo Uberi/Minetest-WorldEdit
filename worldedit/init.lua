@@ -9,6 +9,7 @@ worldedit.pos2 = {}
 
 dofile(minetest.get_modpath("worldedit") .. "/functions.lua")
 dofile(minetest.get_modpath("worldedit") .. "/mark.lua")
+dofile(minetest.get_modpath("worldedit") .. "/table_save.lua")
 
 --determines whether `nodename` is a valid node name, returning a boolean
 worldedit.node_is_valid = function(temp_pos, nodename)
