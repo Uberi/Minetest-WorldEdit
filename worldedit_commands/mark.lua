@@ -27,7 +27,7 @@ worldedit.mark_pos2 = function(name)
 	end
 end
 
-minetest.register_entity("worldedit:pos1", {
+minetest.register_entity(":worldedit:pos1", {
 	initial_properties = {
 		visual = "cube",
 		visual_size = {x=1.1, y=1.1},
@@ -48,7 +48,7 @@ minetest.register_entity("worldedit:pos1", {
 	end,
 })
 
-minetest.register_entity("worldedit:pos2", {
+minetest.register_entity(":worldedit:pos2", {
 	initial_properties = {
 		visual = "cube",
 		visual_size = {x=1.1, y=1.1},

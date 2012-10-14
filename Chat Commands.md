@@ -166,6 +166,34 @@ Dig the current WorldEdit region.
 
     //dig
 
+## //hide
+
+Hide all nodes in the current WorldEdit region non-destructively.
+
+    //hide
+
+### //suppress <node>
+
+Suppress all <node> in the current WorldEdit region non-destructively.
+
+    //suppress dirt
+    //suppress default:glass
+    //suppress mesecons:mesecon
+
+### //find <node>
+
+Find <node> in the current WorldEdit region by hiding everything else non-destructively.
+
+    //find dirt
+    //find default:glass
+    //find mesecons:mesecon
+
+### //restore
+
+Restores nodes hidden with WorldEdit in the current WorldEdit region.
+
+    //restore
+
 ### //save <file>
 
 Save the current WorldEdit region to "(world folder)/schems/<file>.we".
