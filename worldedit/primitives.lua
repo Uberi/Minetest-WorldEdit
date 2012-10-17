@@ -5,6 +5,7 @@ worldedit.hollow_sphere = function(pos, radius, nodename) --wip: use bresenham s
 	local node = {name=nodename}
 	local pos1 = {x=0, y=0, z=0}
 	local full_radius = radius * radius + radius
+	local count = 0
 	local env = minetest.env
 	for x = -radius, radius do
 		pos1.x = pos.x + x
@@ -14,10 +15,12 @@ worldedit.hollow_sphere = function(pos, radius, nodename) --wip: use bresenham s
 				if x*x+y*y+z*z >= (radius-1) * (radius-1) + (radius-1) and x*x+y*y+z*z <= full_radius then
 					pos1.z = pos.z + z
 					env:add_node({x=pos.x+x,y=pos.y+y,z=pos.z+z}, node)
+					count = count + 1
 				end
 			end
 		end
 	end
+	return count
 end
 
 --adds a sphere at `pos` with radius `radius`, composed of `nodename`, returning the number of nodes added
