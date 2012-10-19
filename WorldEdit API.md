@@ -94,7 +94,7 @@ Returns the number of nodes added.
 
 ### worldedit.cylinder(pos, axis, length, radius, nodename)
 
-Adds a cylinder at `pos` along the `axis` axis ("x" or "y" or "z") with length `length` and radius `radius`, composed of `nodename`.
+Adds a cylinder at `pos` along the `axis` axis ("x" or "y" or "z") with length `length`, base radius `radius` (and top radius `radius`), composed of `nodename`.
 
 Returns the number of nodes added.
 

@@ -269,8 +269,8 @@ minetest.register_chatcommand("/hollowcylinder", {
 })
 
 minetest.register_chatcommand("/cylinder", {
-	params = "x/y/z/? <length> <radius> <node>",
-	description = "Add cylinder at WorldEdit position 1 along the x/y/z/? axis with length <length> and radius <radius>, composed of <node>",
+	params = "x/y/z/? <length> <radius1> [<radius2>] <node>",
+	description = "Add cylinder at WorldEdit position 1 along the x/y/z/? axis with length <length>, base radius <radius1> [and top radius <radius2>], composed of <node>",
 	privs = {worldedit=true},
 	func = function(name, param)
 		local pos = worldedit.pos1[name]
@@ -279,10 +279,17 @@ minetest.register_chatcommand("/cylinder", {
 			return
 		end
 
-		local found, _, axis, length, radius, nodename = param:find("^([xyz%?])%s+([+-]?%d+)%s+(%d+)%s+([^%s]+)$")
+		--double radius
+		local found, _, axis, length, radius1, radius2, nodename = param:find("^([xyz%?])%s+([+-]?%d+)%s+(%d+)%s+(%d+)%s+([^%s]+)$")
 		if found == nil then
-			minetest.chat_send_player(name, "Invalid usage: " .. param)
-			return
+			--single radius
+			found, _, axis, length, radius1, nodename = param:find("^([xyz%?])%s+([+-]?%d+)%s+(%d+)%s+([^%s]+)$")
+			if found == nil then
+				--no radius
+				minetest.chat_send_player(name, "Invalid usage: " .. param)
+				return
+			end
+			radius2 = radius1
 		end
 		if axis == "?" then
 			axis, sign = worldedit.player_axis(name)
@@ -293,7 +300,7 @@ minetest.register_chatcommand("/cylinder", {
 			return
 		end
 
-		local count = worldedit.cylinder(pos, axis, tonumber(length), tonumber(radius), nodename)
+		local count = worldedit.cylinder(pos, axis, tonumber(length), tonumber(radius1), tonumber(radius2), nodename)
 		minetest.chat_send_player(name, count .. " nodes added")
 	end,
 })

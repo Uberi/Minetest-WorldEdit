@@ -104,8 +104,8 @@ worldedit.hollow_cylinder = function(pos, axis, length, radius, nodename)
 	return count
 end
 
---adds a cylinder at `pos` along the `axis` axis ("x" or "y" or "z") with length `length` and radius `radius`, composed of `nodename`, returning the number of nodes added
-worldedit.cylinder = function(pos, axis, length, radius, nodename)
+--adds a cylinder at `pos` along the `axis` axis ("x" or "y" or "z") with length `length`, base radius `radius` (and top radius `radius`), composed of `nodename`, returning the number of nodes added
+worldedit.cylinder = function(pos, axis, length, radius1, radius2, nodename)
 	local other1, other2
 	if axis == "x" then
 		other1, other2 = "y", "z"
@@ -125,6 +125,9 @@ worldedit.cylinder = function(pos, axis, length, radius, nodename)
 		step = -1
 	end
 	for i = 1, length do
+		local radius = radius1 + (radius2 - radius1) * (i - 1) / (length - 1)
+		--radius shouldn't need rounding
+		radius = math.floor(radius+0.5)
 		local offset1, offset2 = 0, radius
 		local delta = -radius
 		while offset1 <= offset2 do
