@@ -127,9 +127,9 @@ Adds a dome centered at `pos` with radius `radius`, composed of `node_name`.
 
 Returns the number of nodes added.
 
-### count = worldedit.cylinder(pos, axis, length, radius, node_name, hollow)
+### count = worldedit.cylinder(pos, axis, length, radius1, radius2, node_name, hollow)
 
-Adds a cylinder at `pos` along the `axis` axis ("x" or "y" or "z") with length `length` and radius `radius`, composed of `node_name`.
+Adds a cylinder-like at `pos` along the `axis` axis ("x" or "y" or "z") with length `length`, base radius `radius1` and top radius `radius2`, composed of `node_name`.
 
 Returns the number of nodes added.
 

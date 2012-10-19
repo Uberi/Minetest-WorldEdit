@@ -538,46 +538,65 @@ local check_cylinder = function(name, param)
 		worldedit.player_notify(name, "no position 1 selected")
 		return nil
 	end
-	local found, _, axis, length, radius, nodename = param:find("^([xyz%?])%s+([+-]?%d+)%s+(%d+)%s+(.+)$")
+	-- two radii
+	local found, _, axis, length, radius1, radius2, nodename = param:find("^([xyz%?])%s+([+-]?%d+)%s+(%d+)%s+(%d+)%s+(.+)$")
+	if found == nil then
+		-- single radius
+		found, _, axis, length, radius1, nodename = param:find("^([xyz%?])%s+([+-]?%d+)%s+(%d+)%s+(.+)$")
+		radius2 = radius1
+	end
 	if found == nil then
 		worldedit.player_notify(name, "invalid usage: " .. param)
 		return nil
 	end
 	local node = get_node(name, nodename)
 	if not node then return nil end
-	return math.ceil(math.pi * (tonumber(radius) ^ 2) * tonumber(length))
+	local radius = math.max(tonumber(radius1), tonumber(radius2))
+	return math.ceil(math.pi * (radius ^ 2) * tonumber(length))
 end
 
 minetest.register_chatcommand("/hollowcylinder", {
-	params = "x/y/z/? <length> <radius> <node>",
-	description = "Add hollow cylinder at WorldEdit position 1 along the x/y/z/? axis with length <length> and radius <radius>, composed of <node>",
+	params = "x/y/z/? <length> <radius1> [radius2] <node>",
+	description = "Add hollow cylinder at WorldEdit position 1 along the x/y/z/? axis with length <length>, base radius <radius1> (and top radius [radius2]), composed of <node>",
 	privs = {worldedit=true},
 	func = safe_region(function(name, param)
-		local found, _, axis, length, radius, nodename = param:find("^([xyz%?])%s+([+-]?%d+)%s+(%d+)%s+(.+)$")
+		-- two radii
+		local found, _, axis, length, radius1, radius2, nodename = param:find("^([xyz%?])%s+([+-]?%d+)%s+(%d+)%s+(%d+)%s+(.+)$")
+		if found == nil then
+			-- single radius
+			found, _, axis, length, radius1, nodename = param:find("^([xyz%?])%s+([+-]?%d+)%s+(%d+)%s+(.+)$")
+			radius2 = radius1
+		end
 		length = tonumber(length)
 		if axis == "?" then
 			axis, sign = worldedit.player_axis(name)
 			length = length * sign
 		end
 		local node = get_node(name, nodename)
-		local count = worldedit.cylinder(worldedit.pos1[name], axis, length, tonumber(radius), node, true)
+		local count = worldedit.cylinder(worldedit.pos1[name], axis, length, tonumber(radius1), tonumber(radius2), node, true)
 		worldedit.player_notify(name, count .. " nodes added")
 	end, check_cylinder),
 })
 
 minetest.register_chatcommand("/cylinder", {
-	params = "x/y/z/? <length> <radius> <node>",
-	description = "Add cylinder at WorldEdit position 1 along the x/y/z/? axis with length <length> and radius <radius>, composed of <node>",
+	params = "x/y/z/? <length> <radius1> [radius2] <node>",
+	description = "Add cylinder at WorldEdit position 1 along the x/y/z/? axis with length <length>, base radius <radius1> (and top radius [radius2]), composed of <node>",
 	privs = {worldedit=true},
 	func = safe_region(function(name, param)
-		local found, _, axis, length, radius, nodename = param:find("^([xyz%?])%s+([+-]?%d+)%s+(%d+)%s+(.+)$")
+		-- two radii
+		local found, _, axis, length, radius1, radius2, nodename = param:find("^([xyz%?])%s+([+-]?%d+)%s+(%d+)%s+(%d+)%s+(.+)$")
+		if found == nil then
+			-- single radius
+			found, _, axis, length, radius1, nodename = param:find("^([xyz%?])%s+([+-]?%d+)%s+(%d+)%s+(.+)$")
+			radius2 = radius1
+		end
 		length = tonumber(length)
 		if axis == "?" then
 			axis, sign = worldedit.player_axis(name)
 			length = length * sign
 		end
 		local node = get_node(name, nodename)
-		local count = worldedit.cylinder(worldedit.pos1[name], axis, length, tonumber(radius), node)
+		local count = worldedit.cylinder(worldedit.pos1[name], axis, length, tonumber(radius1), tonumber(radius2), node)
 		worldedit.player_notify(name, count .. " nodes added")
 	end, check_cylinder),
 })

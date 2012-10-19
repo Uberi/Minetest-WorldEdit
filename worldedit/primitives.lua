@@ -92,49 +92,60 @@ end
 -- @param pos Position to center base of cylinder at.
 -- @param axis Axis ("x", "y", or "z")
 -- @param length Cylinder length.
--- @param radius Cylinder radius.
+-- @param radius1 Cylinder base radius.
+-- @param radius2 Cylinder top radius.
 -- @param node_name Name of node to make cylinder of.
 -- @param hollow Whether the cylinder should be hollow.
 -- @return The number of nodes added.
-function worldedit.cylinder(pos, axis, length, radius, node_name, hollow)
+function worldedit.cylinder(pos, axis, length, radius1, radius2, node_name, hollow)
 	local other1, other2 = worldedit.get_axis_others(axis)
+
+	-- Backwards compatibility
+	if type(radius2) == "string" then
+		hollow = node_name
+		node_name = radius2
+		radius2 = radius1 -- straight cylinder
+	end
 
 	-- Handle negative lengths
 	local current_pos = {x=pos.x, y=pos.y, z=pos.z}
 	if length < 0 then
 		length = -length
 		current_pos[axis] = current_pos[axis] - length
+		radius1, radius2 = radius2, radius1
 	end
 
 	-- Set up voxel manipulator
-	local manip, area = mh.init_axis_radius_length(current_pos, axis, radius, length)
+	local manip, area = mh.init_axis_radius_length(current_pos, axis, math.max(radius1, radius2), length)
 	local data = mh.get_empty_data(area)
 
-	-- Add cylinder
+	-- Add desired shape (anything inbetween cylinder & cone)
 	local node_id = minetest.get_content_id(node_name)
-	local min_radius, max_radius = radius * (radius - 1), radius * (radius + 1)
 	local stride = {x=1, y=area.ystride, z=area.zstride}
 	local offset = {
 		x = current_pos.x - area.MinEdge.x,
 		y = current_pos.y - area.MinEdge.y,
 		z = current_pos.z - area.MinEdge.z,
 	}
-	local min_slice, max_slice = offset[axis], offset[axis] + length - 1
 	local count = 0
-	for index2 = -radius, radius do
-		-- Offset contributed by other axis 1 plus 1 to make it 1-indexed
-		local new_index2 = (index2 + offset[other1]) * stride[other1] + 1
-		for index3 = -radius, radius do
-			local new_index3 = new_index2 + (index3 + offset[other2]) * stride[other2]
-			local squared = index2 * index2 + index3 * index3
-			if squared <= max_radius and (not hollow or squared >= min_radius) then
-				-- Position is in cylinder
-				-- Add column along axis
-				for index1 = min_slice, max_slice do
-					local vi = new_index3 + index1 * stride[axis]
+	for i = 0, length - 1 do
+		-- Calulate radius for this "height" in the cylinder
+		local radius = radius1 + (radius2 - radius1) * (i - 1) / (length - 1)
+		radius = math.floor(radius + 0.5) -- round
+		local min_radius, max_radius = radius * (radius - 1), radius * (radius + 1)
+
+		for index2 = -radius, radius do
+			-- Offset contributed by other axis 1 plus 1 to make it 1-indexed
+			local new_index2 = (index2 + offset[other1]) * stride[other1] + 1
+			for index3 = -radius, radius do
+				local new_index3 = new_index2 + (index3 + offset[other2]) * stride[other2]
+				local squared = index2 * index2 + index3 * index3
+				if squared <= max_radius and (not hollow or squared >= min_radius) then
+					-- Position is in cylinder, add node here
+					local vi = new_index3 + (offset[axis] + i) * stride[axis]
 					data[vi] = node_id
+					count = count + 1
 				end
-				count = count + length
 			end
 		end
 	end
