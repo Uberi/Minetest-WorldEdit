@@ -78,13 +78,19 @@ minetest.register_chatcommand("/pos2", {
 })
 
 minetest.register_chatcommand("/p", {
-	params = "set/get",
-	description = "Set WorldEdit region by punching two nodes, or display the current WorldEdit region",
+	params = "set/set1/set2/get",
+	description = "Set WorldEdit region, WorldEdit position 1, or WorldEdit position 2 by punching nodes, or display the current WorldEdit region",
 	privs = {worldedit=true},
 	func = function(name, param)
 		if param == "set" then --set both WorldEdit positions
-			worldedit.set_pos[name] = 1
+			worldedit.set_pos[name] = "pos1"
 			minetest.chat_send_player(name, "Select positions by punching two nodes")
+		elseif param == "set1" then --set WorldEdit position 1
+			worldedit.set_pos[name] = "pos1only"
+			minetest.chat_send_player(name, "Select position 1 by punching a node")
+		elseif param == "set2" then --set WorldEdit position 2
+			worldedit.set_pos[name] = "pos2"
+			minetest.chat_send_player(name, "Select position 2 by punching a node")
 		elseif param == "get" then --display current WorldEdit positions
 			if worldedit.pos1[name] ~= nil then
 				minetest.chat_send_player(name, "WorldEdit position 1: " .. minetest.pos_to_string(worldedit.pos1[name]))
@@ -105,15 +111,20 @@ minetest.register_chatcommand("/p", {
 minetest.register_on_punchnode(function(pos, node, puncher)
 	local name = puncher:get_player_name()
 	if name ~= "" and worldedit.set_pos[name] ~= nil then --currently setting position
-		if worldedit.set_pos[name] == 1 then --setting position 1
-			worldedit.set_pos[name] = 2 --set position 2 on the next invocation
+		if worldedit.set_pos[name] == "pos1" then --setting position 1
 			worldedit.pos1[name] = pos
 			worldedit.mark_pos1(name)
+			worldedit.set_pos[name] = "pos2" --set position 2 on the next invocation
 			minetest.chat_send_player(name, "WorldEdit region position 1 set to " .. minetest.pos_to_string(pos))
-		else --setting position 2
+		elseif worldedit.set_pos[name] == "pos1only" then --setting position 1 only
+			worldedit.pos1[name] = pos
+			worldedit.mark_pos1(name)
 			worldedit.set_pos[name] = nil --finished setting positions
+			minetest.chat_send_player(name, "WorldEdit region position 1 set to " .. minetest.pos_to_string(pos))
+		elseif worldedit.set_pos[name] == "pos2" then --setting position 2
 			worldedit.pos2[name] = pos
 			worldedit.mark_pos2(name)
+			worldedit.set_pos[name] = nil --finished setting positions
 			minetest.chat_send_player(name, "WorldEdit region position 2 set to " .. minetest.pos_to_string(pos))
 		end
 	end
@@ -537,23 +548,7 @@ minetest.register_chatcommand("/dig", {
 
 minetest.register_chatcommand("/hide", {
 	params = "<node>",
-	description = "Hide all nodes in the current WorldEdit region non-destructively",
-	privs = {worldedit=true},
-	func = function(name, param)
-		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
-		if pos1 == nil or pos2 == nil then
-			minetest.chat_send_player(name, "No WorldEdit region selected")
-			return
-		end
-
-		local count = worldedit.hide(pos1, pos2)
-		minetest.chat_send_player(name, count .. " nodes hidden")
-	end,
-})
-
-minetest.register_chatcommand("/suppress", {
-	params = "<node>",
-	description = "Suppress all <node> in the current WorldEdit region non-destructively",
+	description = "Hide all <node> in the current WorldEdit region non-destructively",
 	privs = {worldedit=true},
 	func = function(name, param)
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
@@ -567,8 +562,8 @@ minetest.register_chatcommand("/suppress", {
 			return
 		end
 
-		local count = worldedit.suppress(pos1, pos2, param)
-		minetest.chat_send_player(name, count .. " nodes suppressed")
+		local count = worldedit.hide(pos1, pos2, param)
+		minetest.chat_send_player(name, count .. " nodes hidden")
 	end,
 })
 

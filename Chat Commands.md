@@ -26,11 +26,13 @@ Set WorldEdit region position 2 to the player's location.
 
     //pos2
 
-### //p set/get
+### //p set/set1/set2/get
 
-Set WorldEdit region by punching two nodes, or display the current WorldEdit region.
+Set WorldEdit region, WorldEdit position 1, or WorldEdit position 2 by punching nodes, or display the current WorldEdit region.
 
     //p set
+    //p set1
+    //p set2
     //p get
 
 ### //volume
