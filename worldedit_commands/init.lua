@@ -567,9 +567,9 @@ minetest.register_chatcommand("/hide", {
 	end,
 })
 
-minetest.register_chatcommand("/find", {
+minetest.register_chatcommand("/highlight", {
 	params = "<node>",
-	description = "Find <node> in the current WorldEdit region by hiding everything else non-destructively",
+	description = "Highlight <node> in the current WorldEdit region by hiding everything else non-destructively",
 	privs = {worldedit=true},
 	func = function(name, param)
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
@@ -583,8 +583,8 @@ minetest.register_chatcommand("/find", {
 			return
 		end
 
-		local count = worldedit.find(pos1, pos2, param)
-		minetest.chat_send_player(name, count .. " nodes found")
+		local count = worldedit.highlight(pos1, pos2, param)
+		minetest.chat_send_player(name, count .. " nodes highlighted")
 	end,
 })
 
@@ -635,6 +635,42 @@ minetest.register_chatcommand("/save", {
 		file:close()
 
 		minetest.chat_send_player(name, count .. " nodes saved")
+	end,
+})
+
+minetest.register_chatcommand("/allocate", {
+	params = "<file>",
+	description = "Set the region defined by nodes from \"(world folder)/schems/<file>.we\" as the current WorldEdit region",
+	privs = {worldedit=true},
+	func = function(name, param)
+		local pos1 = worldedit.pos1[name]
+		if pos1 == nil then
+			minetest.chat_send_player(name, "No WorldEdit region selected")
+			return
+		end
+
+		if param == "" then
+			minetest.chat_send_player(name, "Invalid usage: " .. param)
+			return
+		end
+
+		local filename = minetest.get_worldpath() .. "/schems/" .. param .. ".we"
+		local file, err = io.open(filename, "rb")
+		if err ~= nil then
+			minetest.chat_send_player(name, "Could not open file \"" .. filename .. "\"")
+			return
+		end
+		local value = file:read("*a")
+		file:close()
+
+		local nodepos1, nodepos2, count = worldedit.allocate(pos1, value)
+
+		worldedit.pos1[name] = nodepos1
+		worldedit.mark_pos1(name)
+		worldedit.pos2[name] = nodepos2
+		worldedit.mark_pos2(name)
+
+		minetest.chat_send_player(name, count .. " nodes allocated")
 	end,
 })
 

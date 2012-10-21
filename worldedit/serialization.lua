@@ -45,16 +45,49 @@ worldedit.serialize = function(pos1, pos2)
 	return result, count
 end
 
+--determines the volume the nodes represented by string `value` would occupy if deserialized at `originpos`, returning the two corner positions and the number of nodes
+worldedit.allocate = function(originpos, value)
+	local huge = math.huge
+	local pos1 = {x=huge, y=huge, z=huge}
+	local pos2 = {x=-huge, y=-huge, z=-huge}
+	local originx, originy, originz = originpos.x, originpos.y, originpos.z
+	local count = 0
+	for x, y, z, name, param1, param2 in value:gmatch("([+-]?%d+)%s+([+-]?%d+)%s+([+-]?%d+)%s+([^%s]+)%s+(%d+)%s+(%d+)[^\r\n]*[\r\n]*") do --match node entries
+		x, y, z = originx + tonumber(x), originy + tonumber(y), originz + tonumber(z)
+		if x < pos1.x then
+			pos1.x = x
+		end
+		if y < pos1.y then
+			pos1.y = y
+		end
+		if z < pos1.z then
+			pos1.z = z
+		end
+		if x > pos2.x then
+			pos2.x = x
+		end
+		if y > pos2.y then
+			pos2.y = y
+		end
+		if z > pos2.z then
+			pos2.z = z
+		end
+		count = count + 1
+	end
+	return pos1, pos2, count
+end
+
 --loads the nodes represented by string `value` at position `originpos`, returning the number of nodes deserialized
 worldedit.deserialize = function(originpos, value)
 	local pos = {x=0, y=0, z=0}
 	local node = {name="", param1=0, param2=0}
+	local originx, originy, originz = originpos.x, originpos.y, originpos.z
 	local count = 0
 	local env = minetest.env
 	for x, y, z, name, param1, param2 in value:gmatch("([+-]?%d+)%s+([+-]?%d+)%s+([+-]?%d+)%s+([^%s]+)%s+(%d+)%s+(%d+)[^\r\n]*[\r\n]*") do --match node entries
-		pos.x = originpos.x + tonumber(x)
-		pos.y = originpos.y + tonumber(y)
-		pos.z = originpos.z + tonumber(z)
+		pos.x = originx + tonumber(x)
+		pos.y = originy + tonumber(y)
+		pos.z = originz + tonumber(z)
 		node.name = name
 		node.param1 = param1
 		node.param2 = param2

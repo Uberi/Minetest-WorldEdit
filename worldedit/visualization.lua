@@ -94,8 +94,8 @@ worldedit.suppress = function(pos1, pos2, nodename)
 	return count
 end
 
---finds all instances of `nodename` in a region defined by positions `pos1` and `pos2` by non-destructively hiding all other nodes, returning the number of nodes found
-worldedit.find = function(pos1, pos2, nodename)
+--highlights all instances of `nodename` in a region defined by positions `pos1` and `pos2` by non-destructively hiding all other nodes, returning the number of nodes found
+worldedit.highlight = function(pos1, pos2, nodename)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 	local env = minetest.env
 

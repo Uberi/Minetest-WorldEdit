@@ -182,13 +182,13 @@ Suppress all <node> in the current WorldEdit region non-destructively.
     //suppress default:glass
     //suppress mesecons:mesecon
 
-### //find <node>
+### //highlight <node>
 
-Find <node> in the current WorldEdit region by hiding everything else non-destructively.
+Highlight <node> in the current WorldEdit region by hiding everything else non-destructively.
 
-    //find dirt
-    //find default:glass
-    //find mesecons:mesecon
+    //highlight dirt
+    //highlight default:glass
+    //highlight mesecons:mesecon
 
 ### //restore
 
@@ -202,6 +202,13 @@ Save the current WorldEdit region to "(world folder)/schems/<file>.we".
 
     //save some random filename
     //save huge_base
+
+### //allocate <file>
+
+Set the region defined by nodes from "(world folder)/schems/<file>.we" as the current WorldEdit region.
+
+    //allocate some random filename
+    //allocate huge_base
 
 ### //load <file>
 
