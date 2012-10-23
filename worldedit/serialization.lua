@@ -97,6 +97,58 @@ worldedit.deserialize = function(originpos, value)
 	return count
 end
 
+--determines the volume the nodes represented by string `value` would occupy if deserialized at `originpos`, returning the two corner positions and the number of nodes
+--based on [table.save/table.load](http://lua-users.org/wiki/SaveTableToFile) by ChillCode, available under the MIT license (GPL compatible)
+worldedit.allocate_old = function(originpos, value)
+	--obtain the node table
+	local count = 0
+	local get_tables = loadstring(value)
+	if get_tables == nil then --error loading value
+		return count
+	end
+	local tables = get_tables()
+
+	--transform the node table into an array of nodes
+	for i = 1, #tables do
+		for j, v in pairs(tables[i]) do
+			if type(v) == "table" then
+				tables[i][j] = tables[v[1]]
+			end
+		end
+	end
+
+	local huge = math.huge
+	local pos1 = {x=huge, y=huge, z=huge}
+	local pos2 = {x=-huge, y=-huge, z=-huge}
+	local originx, originy, originz = originpos.x, originpos.y, originpos.z
+
+	--load the node array
+	for i, v in ipairs(tables[1]) do
+		local pos = v[1]
+		local x, y, z = originx - pos.x, originy - pos.y, originz - pos.z
+		if x < pos1.x then
+			pos1.x = x
+		end
+		if y < pos1.y then
+			pos1.y = y
+		end
+		if z < pos1.z then
+			pos1.z = z
+		end
+		if x > pos2.x then
+			pos2.x = x
+		end
+		if y > pos2.y then
+			pos2.y = y
+		end
+		if z > pos2.z then
+			pos2.z = z
+		end
+		count = count + 1
+	end
+	return pos1, pos2, count
+end
+
 --loads the nodes represented by string `value` at position `originpos`, returning the number of nodes deserialized
 --based on [table.save/table.load](http://lua-users.org/wiki/SaveTableToFile) by ChillCode, available under the MIT license (GPL compatible)
 worldedit.deserialize_old = function(originpos, value)
@@ -119,9 +171,10 @@ worldedit.deserialize_old = function(originpos, value)
 
 	--load the node array
 	local env = minetest.env
+	local originx, originy, originz = originpos.x, originpos.y, originpos.z
 	for i, v in ipairs(tables[1]) do
 		local pos = v[1]
-		pos.x, pos.y, pos.z = originpos.x + pos.x, originpos.y + pos.y, originpos.z + pos.z
+		pos.x, pos.y, pos.z = originx - pos.x, originy - pos.y, originz - pos.z
 		env:add_node(pos, v[2])
 		count = count + 1
 	end

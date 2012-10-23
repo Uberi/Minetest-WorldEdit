@@ -663,7 +663,12 @@ minetest.register_chatcommand("/allocate", {
 		local value = file:read("*a")
 		file:close()
 
-		local nodepos1, nodepos2, count = worldedit.allocate(pos1, value)
+		local nodepos1, nodepos2, count
+		if value:find("{") then --old WorldEdit format
+			nodepos1, nodepos2, count = worldedit.allocate_old(pos1, value)
+		else --new WorldEdit format
+			nodepos1, nodepos2, count = worldedit.allocate(pos1, value)
+		end
 
 		worldedit.pos1[name] = nodepos1
 		worldedit.mark_pos1(name)
