@@ -83,14 +83,18 @@ Add hollow cylinder at WorldEdit position 1 along the x/y/z/? axis with length <
     //hollowcylinder z -12 3 mesecons:mesecon
     //hollowcylinder ? 2 4 stone
 
-### //cylinder x/y/z/? <length> <radius> <node>
+### //cylinder x/y/z/? <length> <radius1> [<radius2>] <node>
 
-Add cylinder at WorldEdit position 1 along the x/y/z/? axis with length <length> and radius <radius>, composed of <node>.
+Add cylinder at WorldEdit position 1 along the x/y/z/? axis with length <length>, base radius <radius1> [and top radius <radius2>], composed of <node>.
 
     //cylinder x +5 8 dirt
     //cylinder y 28 10 default:glass
     //cylinder z -12 3 mesecons:mesecon
     //cylinder ? 2 4 stone
+
+    //cylinder y 10 10 0 water_flowing
+    //cylinder x 6 5 0 dirt
+    //cylinder z 20 10 20 desert_stone
     
 ### //pyramid <height> <node>
 
