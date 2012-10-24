@@ -200,16 +200,24 @@ worldedit.metasave = function(pos1, pos2, file) --wip: simply work with strings 
 				local node = env:get_node(pos)
 				if node.name ~= "air" and node.name ~= "ignore" then
 					count = count + 1
-					local row = {
+					local meta = env:get_meta(pos):to_table()
+
+					--convert metadata itemstacks to itemstrings
+					for i, v in pairs(meta.inventory) do
+						for index, items in ipairs(v) do
+							v[index] = items:to_string()
+						end
+					end
+
+					table.insert(rows, {
 						x = pos.x-pos1.x,
 						y = pos.y-pos1.y,
 						z = pos.z-pos1.z,
 						name = node.name,
 						param1 = node.param1,
 						param2 = node.param2,
-						meta = env:get_meta(pos):to_table(),
-					}
-					table.insert(rows, row)
+						meta = meta,
+					})
 				end
 				pos.z = pos.z + 1
 			end
@@ -217,8 +225,8 @@ worldedit.metasave = function(pos1, pos2, file) --wip: simply work with strings 
 		end
 		pos.x = pos.x + 1
 	end
-	local err = table.save(rows,filename)
-	if err then return _,err end
+	local err = table.save(rows, filename)
+	if err then return _, err end
 	return count
 end
 
