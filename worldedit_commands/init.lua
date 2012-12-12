@@ -115,17 +115,17 @@ minetest.register_on_punchnode(function(pos, node, puncher)
 			worldedit.pos1[name] = pos
 			worldedit.mark_pos1(name)
 			worldedit.set_pos[name] = "pos2" --set position 2 on the next invocation
-			minetest.chat_send_player(name, "WorldEdit region position 1 set to " .. minetest.pos_to_string(pos))
+			minetest.chat_send_player(name, "WorldEdit position 1 set to " .. minetest.pos_to_string(pos))
 		elseif worldedit.set_pos[name] == "pos1only" then --setting position 1 only
 			worldedit.pos1[name] = pos
 			worldedit.mark_pos1(name)
 			worldedit.set_pos[name] = nil --finished setting positions
-			minetest.chat_send_player(name, "WorldEdit region position 1 set to " .. minetest.pos_to_string(pos))
+			minetest.chat_send_player(name, "WorldEdit position 1 set to " .. minetest.pos_to_string(pos))
 		elseif worldedit.set_pos[name] == "pos2" then --setting position 2
 			worldedit.pos2[name] = pos
 			worldedit.mark_pos2(name)
 			worldedit.set_pos[name] = nil --finished setting positions
-			minetest.chat_send_player(name, "WorldEdit region position 2 set to " .. minetest.pos_to_string(pos))
+			minetest.chat_send_player(name, "WorldEdit position 2 set to " .. minetest.pos_to_string(pos))
 		end
 	end
 end)
@@ -472,7 +472,14 @@ minetest.register_chatcommand("/transpose", {
 			return
 		end
 
-		local count = worldedit.transpose(pos1, pos2, axis1, axis2)
+		local count, pos1, pos2 = worldedit.transpose(pos1, pos2, axis1, axis2)
+
+		--reset markers to transposed positions
+		worldedit.pos1[name] = pos1
+		worldedit.pos2[name] = pos2
+		worldedit.mark_pos1(name)
+		worldedit.mark_pos2(name)
+
 		minetest.chat_send_player(name, count .. " nodes transposed")
 	end,
 })
@@ -525,7 +532,14 @@ minetest.register_chatcommand("/rotate", {
 			return
 		end
 
-		local count = worldedit.rotate(pos1, pos2, axis, angle)
+		local count, pos1, pos2 = worldedit.rotate(pos1, pos2, axis, angle)
+
+		--reset markers to rotated positions
+		worldedit.pos1[name] = pos1
+		worldedit.pos2[name] = pos2
+		worldedit.mark_pos1(name)
+		worldedit.mark_pos2(name)
+
 		minetest.chat_send_player(name, count .. " nodes rotated")
 	end,
 })
@@ -547,8 +561,24 @@ minetest.register_chatcommand("/dig", {
 })
 
 minetest.register_chatcommand("/hide", {
+	params = "",
+	description = "Hide all nodes in the current WorldEdit region non-destructively",
+	privs = {worldedit=true},
+	func = function(name, param)
+		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
+		if pos1 == nil or pos2 == nil then
+			minetest.chat_send_player(name, "No WorldEdit region selected")
+			return
+		end
+
+		local count = worldedit.hide(pos1, pos2)
+		minetest.chat_send_player(name, count .. " nodes hidden")
+	end,
+})
+
+minetest.register_chatcommand("/suppress", {
 	params = "<node>",
-	description = "Hide all <node> in the current WorldEdit region non-destructively",
+	description = "Suppress all <node> in the current WorldEdit region non-destructively",
 	privs = {worldedit=true},
 	func = function(name, param)
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
@@ -562,8 +592,8 @@ minetest.register_chatcommand("/hide", {
 			return
 		end
 
-		local count = worldedit.hide(pos1, pos2, param)
-		minetest.chat_send_player(name, count .. " nodes hidden")
+		local count = worldedit.suppress(pos1, pos2, param)
+		minetest.chat_send_player(name, count .. " nodes suppressed")
 	end,
 })
 

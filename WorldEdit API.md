@@ -38,11 +38,11 @@ Duplicates the region defined by positions `pos1` and `pos2` along the `axis` ax
 
 Returns the number of nodes stacked.
 
-### count = worldedit.transpose(pos1, pos2, axis1, axis2)
+### count, newpos1, newpos2 = worldedit.transpose(pos1, pos2, axis1, axis2)
 
 Transposes a region defined by the positions `pos1` and `pos2` between the `axis1` and `axis2` axes ("x" or "y" or "z").
 
-Returns the number of nodes transposed.
+Returns the number of nodes transposed, the new position 1, and the new position 2.
 
 ### count = worldedit.flip(pos1, pos2, axis)
 
@@ -50,11 +50,11 @@ Flips a region defined by the positions `pos1` and `pos2` along the `axis` axis 
 
 Returns the number of nodes flipped.
 
-### count = worldedit.rotate(pos1, pos2, angle)
+### count, newpos2, newpos2 = worldedit.rotate(pos1, pos2, angle)
 
 Rotates a region defined by the positions `pos1` and `pos2` by `angle` degrees clockwise around the y axis (supporting 90 degree increments only).
 
-Returns the number of nodes rotated.
+Returns the number of nodes rotated, the new position 1, and the new position 2.
 
 ### count = worldedit.dig(pos1, pos2)
 
@@ -99,6 +99,8 @@ Returns the number of nodes added.
 ### count = worldedit.spiral(pos, width, height, spacer, nodename)
 
 Adds a spiral at `pos` with width `width`, height `height`, space between walls `spacer`, composed of `nodename`.
+
+Returns the number of nodes added.
 
 Visualization
 -------------

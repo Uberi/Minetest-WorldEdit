@@ -137,7 +137,7 @@ Stack the current WorldEdit region along the x/y/z/? axis <count> times.
 
 ### //transpose x/y/z/? x/y/z/?
 
-Transpose the current WorldEdit region along the x/y/z/? and x/y/z/? axes.
+Transpose the current WorldEdit positions and region along the x/y/z/? and x/y/z/? axes.
 
     //transpose x y
     //transpose x z
@@ -155,7 +155,7 @@ Flip the current WorldEdit region along the x/y/z/? axis.
 
 ### //rotate x/y/z/? <angle>
 
-Rotate the current WorldEdit region along the x/y/z/? axis by angle <angle> (90 degree increment).
+Rotate the current WorldEdit positions and region along the x/y/z/? axis by angle <angle> (integer multiple of 90 degrees).
 
     //rotate x 90
     //rotate y 180

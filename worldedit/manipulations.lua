@@ -191,9 +191,27 @@ worldedit.stack = function(pos1, pos2, axis, count)
 	return worldedit.volume(pos1, pos2)
 end
 
---transposes a region defined by the positions `pos1` and `pos2` between the `axis1` and `axis2` axes, returning the number of nodes transposed
+--transposes a region defined by the positions `pos1` and `pos2` between the `axis1` and `axis2` axes, returning the number of nodes transposed, the new position 1, and the new position 2
 worldedit.transpose = function(pos1, pos2, axis1, axis2)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
+
+	local compare
+	local extent1, extent2 = pos2[axis1] - pos1[axis1], pos2[axis2] - pos1[axis2]
+
+	if extent1 > extent2 then
+		compare = function(extent1, extent2)
+			return extent1 > extent2
+		end
+	else
+		compare = function(extent1, extent2)
+			return extent1 < extent2
+		end
+	end
+
+	--calculate the new position 2 after transposition
+	local newpos2 = {x=pos1.x, y=pos1.y, z=pos1.z}
+	newpos2[axis1] = pos1[axis1] + extent2
+	newpos2[axis2] = pos1[axis2] + extent1
 
 	local pos = {x=pos1.x, y=0, z=0}
 	local env = minetest.env
@@ -203,16 +221,16 @@ worldedit.transpose = function(pos1, pos2, axis1, axis2)
 			pos.z = pos1.z
 			while pos.z <= pos2.z do
 				local extent1, extent2 = pos[axis1] - pos1[axis1], pos[axis2] - pos1[axis2]
-				if extent1 < extent2 then
+				if compare(extent1, extent2) then --transpose only if below the diagonal
 					local node1 = env:get_node(pos)
 					local meta1 = env:get_meta(pos):to_table()
-					local value1, value2 = pos[axis1], pos[axis2]
-					pos[axis1], pos[axis2] = value1 + extent2, value2 + extent1
+					local value1, value2 = pos[axis1], pos[axis2] --save position values
+					pos[axis1], pos[axis2] = pos1[axis1] + extent2, pos1[axis2] + extent1 --swap axis extents
 					local node2 = env:get_node(pos)
 					local meta2 = env:get_meta(pos):to_table()
 					env:add_node(pos, node1)
 					env:get_meta(pos):from_table(meta1)
-					pos[axis1], pos[axis2] = value1, value2
+					pos[axis1], pos[axis2] = value1, value2 --restore position values
 					env:add_node(pos, node2)
 					env:get_meta(pos):from_table(meta2)
 				end
@@ -222,7 +240,7 @@ worldedit.transpose = function(pos1, pos2, axis1, axis2)
 		end
 		pos.x = pos.x + 1
 	end
-	return worldedit.volume(pos1, pos2)
+	return worldedit.volume(pos1, pos2), pos1, newpos2
 end
 
 --flips a region defined by the positions `pos1` and `pos2` along the `axis` axis ("x" or "y" or "z"), returning the number of nodes flipped
@@ -272,17 +290,18 @@ worldedit.rotate = function(pos1, pos2, axis, angle)
 	end
 	angle = angle % 360
 
+	local count
 	if angle == 90 then
-		worldedit.transpose(pos1, pos2, axis1, axis2)
-		worldedit.flip(pos1, pos2, axis2)
+		worldedit.flip(pos1, pos2, axis1)
+		count, pos1, pos2 = worldedit.transpose(pos1, pos2, axis1, axis2)
 	elseif angle == 180 then
 		worldedit.flip(pos1, pos2, axis1)
-		worldedit.flip(pos1, pos2, axis2)
+		count = worldedit.flip(pos1, pos2, axis2)
 	elseif angle == 270 then
-		worldedit.transpose(pos1, pos2, axis1, axis2)
-		worldedit.flip(pos1, pos2, axis1)
+		worldedit.flip(pos1, pos2, axis2)
+		count, pos1, pos2 = worldedit.transpose(pos1, pos2, axis1, axis2)
 	end
-	return worldedit.volume(pos1, pos2)
+	return count, pos1, pos2
 end
 
 --digs a region defined by positions `pos1` and `pos2`, returning the number of nodes dug
