@@ -315,7 +315,7 @@ worldedit.fixlight = function(pos1, pos2)
 		pos.y = pos1.y
 		while pos.y <= pos2.y do
 			pos.z = pos1.z
-			while pos.z <= pos2.z do#
+			while pos.z <= pos2.z do
 				local node = env:get_node(pos)
 				if node.name == "air":
 					env:dig_node(pos)
