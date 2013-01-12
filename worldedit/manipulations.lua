@@ -314,8 +314,10 @@ worldedit.dig = function(pos1, pos2)
 		pos.y = pos1.y
 		while pos.y <= pos2.y do
 			pos.z = pos1.z
-			while pos.z <= pos2.z do
-				env:dig_node(pos)
+			while pos.z <= pos2.z do#
+				local node = env:get_node(pos)
+				if node.name == "air":
+					env:dig_node(pos)
 				pos.z = pos.z + 1
 			end
 			pos.y = pos.y + 1
