@@ -544,6 +544,33 @@ minetest.register_chatcommand("/rotate", {
 	end,
 })
 
+minetest.register_chatcommand("/orient", {
+	params = "<angle>",
+	description = "Rotate oriented nodes in the current WorldEdit region around the Y axis by angle <angle> (90 degree increment)",
+	privs = {worldedit=true},
+	func = function(name, param)
+		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
+		if pos1 == nil or pos2 == nil then
+			minetest.chat_send_player(name, "No WorldEdit region selected")
+			return
+		end
+
+		local found, _, angle = param:find("^([+-]?%d+)$")
+		if found == nil then
+			minetest.chat_send_player(name, "Invalid usage: " .. param)
+			return
+		end
+		if angle % 90 ~= 0 then
+			minetest.chat_send_player(name, "Invalid usage: angle must be multiple of 90")
+			return
+		end
+
+		local count = worldedit.orient(pos1, pos2, angle)
+
+		minetest.chat_send_player(name, count .. " nodes oriented")
+	end,
+})
+
 minetest.register_chatcommand("/fixlight", {
 	params = "",
 	description = "Fix the lighting in the current WorldEdit region",

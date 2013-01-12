@@ -56,6 +56,12 @@ Rotates a region defined by the positions `pos1` and `pos2` by `angle` degrees c
 
 Returns the number of nodes rotated, the new position 1, and the new position 2.
 
+### count = worldedit.orient(pos1, pos2, angle)
+
+Rotates all oriented nodes in a region defined by the positions `pos1` and `pos2` by `angle` degrees clockwise (90 degree increment) around the Y axis.
+
+Returns the number of nodes oriented.
+
 ### count = worldedit.fixlight(pos1, pos2)
 
 Fixes the lighting in a region defined by positions `pos1` and `pos2`.
