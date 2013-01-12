@@ -555,7 +555,7 @@ minetest.register_chatcommand("/fixlight", {
 			return
 		end
 
-		local count = worldedit.dig(pos1, pos2)
+		local count = worldedit.fixlight(pos1, pos2)
 		minetest.chat_send_player(name, count .. " nodes dug")
 	end,
 })
