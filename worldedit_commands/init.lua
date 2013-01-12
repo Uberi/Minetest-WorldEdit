@@ -197,9 +197,9 @@ minetest.register_chatcommand("/replace", {
 	end,
 })
 
-minetest.register_chatcommand("/homogenize", {
-	params = "<node>",
-	description = "Replace all non-air nodes with <node> in the current WorldEdit region",
+minetest.register_chatcommand("/replaceinverse", {
+	params = "<search node> <replace node>",
+	description = "Replace all nodes other than <search node> with <replace node> in the current WorldEdit region",
 	privs = {worldedit=true},
 	func = function(name, param)
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
@@ -208,13 +208,22 @@ minetest.register_chatcommand("/homogenize", {
 			return
 		end
 
-		if not worldedit.node_is_valid(param) then
-			minetest.chat_send_player(name, "Invalid node name: " .. param)
+		local found, _, searchnode, replacenode = param:find("^([^%s]+)%s+([^%s]+)$")
+		if found == nil then
+			minetest.chat_send_player(name, "Invalid usage: " .. param)
+			return
+		end
+		if not worldedit.node_is_valid(searchnode) then
+			minetest.chat_send_player(name, "Invalid search node name: " .. searchnode)
+			return
+		end
+		if not worldedit.node_is_valid(replacenode) then
+			minetest.chat_send_player(name, "Invalid replace node name: " .. replacenode)
 			return
 		end
 
-		local count = worldedit.homogenize(pos1, pos2, param)
-		minetest.chat_send_player(name, count .. " nodes homogenized")
+		local count = worldedit.replaceinverse(pos1, pos2, searchnode, replacenode)
+		minetest.chat_send_player(name, count .. " nodes replaced")
 	end,
 })
 

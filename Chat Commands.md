@@ -51,12 +51,21 @@ Set the current WorldEdit region to <node>.
 
 ### //replace <search node> <replace node>
 
-Replace all instances of <search node> with <place node> in the current WorldEdit region.
+Replace all instances of <search node> with <replace node> in the current WorldEdit region.
 
     //replace cobble stone
     //replace default:steelblock glass
     //replace dirt flowers:flower_waterlily
     //replace flowers:flower_rose flowers:flower_tulip
+
+### //replaceinverse <search node> <replace node>
+
+Replace all nodes other than <search node> with <replace node> in the current WorldEdit region.
+
+    //replaceinverse air stone
+    //replaceinverse water_source default:dirt
+    //replaceinverse mesecons:mesecon air
+    //replaceinverse default:steelblock default:glass
 
 ### //hollowsphere <radius> <node>
 

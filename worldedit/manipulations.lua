@@ -74,6 +74,37 @@ worldedit.replace = function(pos1, pos2, searchnode, replacenode)
 	return count
 end
 
+--replaces all nodes other than `searchnode` with `replacenode` in a region defined by positions `pos1` and `pos2`, returning the number of nodes replaced
+worldedit.replaceinverse = function(pos1, pos2, searchnode, replacenode)
+	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
+	local env = minetest.env
+
+	if minetest.registered_nodes[searchnode] == nil then
+		searchnode = "default:" .. searchnode
+	end
+
+	local pos = {x=pos1.x, y=0, z=0}
+	local node = {name=replacenode}
+	local count = 0
+	while pos.x <= pos2.x do
+		pos.y = pos1.y
+		while pos.y <= pos2.y do
+			pos.z = pos1.z
+			while pos.z <= pos2.z do
+				local name = env:get_node(pos).name
+				if name ~= "ignore" and name ~= searchnode then
+					env:add_node(pos, node)
+					count = count + 1
+				end
+				pos.z = pos.z + 1
+			end
+			pos.y = pos.y + 1
+		end
+		pos.x = pos.x + 1
+	end
+	return count
+end
+
 --copies the region defined by positions `pos1` and `pos2` along the `axis` axis ("x" or "y" or "z") by `amount` nodes, returning the number of nodes copied
 worldedit.copy = function(pos1, pos2, axis, amount)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)

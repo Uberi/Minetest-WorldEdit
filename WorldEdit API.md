@@ -20,6 +20,12 @@ Replaces all instances of `searchnode` with `replacenode` in a region defined by
 
 Returns the number of nodes replaced.
 
+### count = worldedit.replaceinverse(pos1, pos2, searchnode, replacenode)
+
+Replaces all nodes other than `searchnode` with `replacenode` in a region defined by positions `pos1` and `pos2`.
+
+Returns the number of nodes replaced.
+
 ### count = worldedit.copy(pos1, pos2, axis, amount)
 
 Copies the region defined by positions `pos1` and `pos2` along the `axis` axis ("x" or "y" or "z") by `amount` nodes.
