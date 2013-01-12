@@ -320,6 +320,7 @@ worldedit.fixlight = function(pos1, pos2)
 				if node.name == "air" then
 					env:dig_node(pos)
 					d = d + 1
+				end
 				pos.z = pos.z + 1
 			end
 			pos.y = pos.y + 1
