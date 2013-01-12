@@ -162,9 +162,9 @@ Rotate the current WorldEdit positions and region along the x/y/z/? axis by angl
     //rotate z 270
     //rotate ? -90
 
-### //dig
+### //fixlight
 
-Dig the current WorldEdit region.
+Fixes the lighting in the current WorldEdit region.
 
     //dig
 

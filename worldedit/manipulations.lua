@@ -304,11 +304,11 @@ worldedit.rotate = function(pos1, pos2, axis, angle)
 	return count, pos1, pos2
 end
 
---Fixes the Lightning in a region defined by positions `pos1` and `pos2`, returning the number of nodes dug
+--fixes the lighting in a region defined by positions `pos1` and `pos2`, returning the number of nodes updated
 worldedit.fixlight = function(pos1, pos2)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 	local env = minetest.env
-	local d = 0
+	local count = 0
 
 	local pos = {x=pos1.x, y=0, z=0}
 	while pos.x <= pos2.x do
@@ -316,10 +316,9 @@ worldedit.fixlight = function(pos1, pos2)
 		while pos.y <= pos2.y do
 			pos.z = pos1.z
 			while pos.z <= pos2.z do
-				local node = env:get_node(pos)
-				if node.name == "air" then
+				if env:get_node(pos).name == "air" then
 					env:dig_node(pos)
-					d = d + 1
+					count = count + 1
 				end
 				pos.z = pos.z + 1
 			end
@@ -327,5 +326,5 @@ worldedit.fixlight = function(pos1, pos2)
 		end
 		pos.x = pos.x + 1
 	end
-	return d
+	return count
 end

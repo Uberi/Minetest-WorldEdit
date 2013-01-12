@@ -546,7 +546,7 @@ minetest.register_chatcommand("/rotate", {
 
 minetest.register_chatcommand("/fixlight", {
 	params = "",
-	description = "Fix the Lightning in the current WorldEdit region",
+	description = "Fix the lighting in the current WorldEdit region",
 	privs = {worldedit=true},
 	func = function(name, param)
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
@@ -556,7 +556,7 @@ minetest.register_chatcommand("/fixlight", {
 		end
 
 		local count = worldedit.fixlight(pos1, pos2)
-		minetest.chat_send_player(name, count .. " nodes dug")
+		minetest.chat_send_player(name, count .. " nodes updated")
 	end,
 })
 

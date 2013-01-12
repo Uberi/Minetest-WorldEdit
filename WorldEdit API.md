@@ -56,11 +56,11 @@ Rotates a region defined by the positions `pos1` and `pos2` by `angle` degrees c
 
 Returns the number of nodes rotated, the new position 1, and the new position 2.
 
-### count = worldedit.dig(pos1, pos2)
+### count = worldedit.fixlight(pos1, pos2)
 
-Digs a region defined by positions `pos1` and `pos2`.
+Fixes the lighting in a region defined by positions `pos1` and `pos2`.
 
-Returns the number of nodes dug.
+Returns the number of nodes updated.
 
 Primitives
 ----------
