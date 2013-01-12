@@ -183,3 +183,19 @@ Returns the number of nodes saved.
 Loads the nodes and meta from `file` to position `pos1`.
 
 Returns the number of nodes loaded.
+
+Code
+----
+Contained in code.lua, this module allows arbitrary Lua code to be used with WorldEdit.
+
+### error = worldedit.lua(code)
+
+Executes `code` as a Lua chunk in the global namespace.
+
+Returns an error if the code fails or nil otherwise.
+
+### error = worldedit.luatransform(pos1, pos2, code)
+
+Executes `code` as a Lua chunk in the global namespace with the variable pos available, for each node in a region defined by positions `pos1` and `pos2`.
+
+Returns an error if the code fails or nil otherwise.

@@ -169,7 +169,7 @@ minetest.register_chatcommand("/set", {
 
 minetest.register_chatcommand("/replace", {
 	params = "<search node> <replace node>",
-	description = "Replace all instances of <search node> with <place node> in the current WorldEdit region",
+	description = "Replace all instances of <search node> with <replace node> in the current WorldEdit region",
 	privs = {worldedit=true},
 	func = function(name, param)
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
@@ -194,6 +194,27 @@ minetest.register_chatcommand("/replace", {
 
 		local count = worldedit.replace(pos1, pos2, searchnode, replacenode)
 		minetest.chat_send_player(name, count .. " nodes replaced")
+	end,
+})
+
+minetest.register_chatcommand("/homogenize", {
+	params = "<node>",
+	description = "Replace all non-air nodes with <node> in the current WorldEdit region",
+	privs = {worldedit=true},
+	func = function(name, param)
+		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
+		if pos1 == nil or pos2 == nil then
+			minetest.chat_send_player(name, "No WorldEdit region selected")
+			return
+		end
+
+		if not worldedit.node_is_valid(param) then
+			minetest.chat_send_player(name, "Invalid node name: " .. param)
+			return
+		end
+
+		local count = worldedit.homogenize(pos1, pos2, param)
+		minetest.chat_send_player(name, count .. " nodes homogenized")
 	end,
 })
 
@@ -811,9 +832,43 @@ minetest.register_chatcommand("/metaload", {
 		end
 		local count, err = worldedit.metaload(pos1, param)
 		if err then
-			minetest.chat_send_player(name, "error loading file: " .. err)
+			minetest.chat_send_player(name, "Error loading file: " .. err)
 		else
 			minetest.chat_send_player(name, count .. " nodes loaded")
+		end
+	end,
+})
+
+minetest.register_chatcommand("/lua", {
+	params = "<code>",
+	description = "Executes <code> as a Lua chunk in the global namespace",
+	privs = {worldedit=true},
+	func = function(name, param)
+		local err = worldedit.lua(param)
+		if err then
+			minetest.chat_send_player(name, "Code error: " .. err)
+		else
+			minetest.chat_send_player(name, "Code successfully executed")
+		end
+	end,
+})
+
+minetest.register_chatcommand("/luatransform", {
+	params = "<code>",
+	description = "Executes <code> as a Lua chunk in the global namespace with the variable pos available, for each node in the current WorldEdit region",
+	privs = {worldedit=true},
+	func = function(name, param)
+		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
+		if pos1 == nil or pos2 == nil then
+			minetest.chat_send_player(name, "No WorldEdit region selected")
+			return
+		end
+
+		local err = worldedit.luatransform(pos1, pos2, param)
+		if err then
+			minetest.chat_send_player(name, "Code error: " .. err)
+		else
+			minetest.chat_send_player(name, "Code successfully executed")
 		end
 	end,
 })

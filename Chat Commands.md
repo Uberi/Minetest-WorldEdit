@@ -239,3 +239,17 @@ Load nodes and metadata from "(world folder)/schems/<file>.wem" with position 1 
 
     //metaload some random filename
     //metaload huge_base
+
+### //lua <code>
+
+Executes <code> as a Lua chunk in the global namespace.
+
+    //lua worldedit.pos1["singleplayer"] = {x=0, y=0, z=0}
+    //lua worldedit.rotate(worldedit.pos1["singleplayer"], worldedit.pos2["singleplayer"], "y", 90)
+
+### //luatransform <code>
+
+Executes <code> as a Lua chunk in the global namespace with the variable pos available, for each node in the current WorldEdit region.
+
+    //luatransform minetest.env:add_node(pos, {name="default:stone"})
+    //luatransform if minetest.env:get_node(pos).name == "air" then minetest.env:add_node(pos, {name="default:water_source"})
