@@ -544,9 +544,9 @@ minetest.register_chatcommand("/rotate", {
 	end,
 })
 
-minetest.register_chatcommand("/dig", {
+minetest.register_chatcommand("/fixlight", {
 	params = "",
-	description = "Dig the current WorldEdit region",
+	description = "Fix the Lightning in the current WorldEdit region",
 	privs = {worldedit=true},
 	func = function(name, param)
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
