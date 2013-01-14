@@ -851,7 +851,7 @@ minetest.register_chatcommand("/metaload", {
 minetest.register_chatcommand("/lua", {
 	params = "<code>",
 	description = "Executes <code> as a Lua chunk in the global namespace",
-	privs = {worldedit=true},
+	privs = {worldedit=true, server=true},
 	func = function(name, param)
 		local err = worldedit.lua(param)
 		if err then
@@ -865,7 +865,7 @@ minetest.register_chatcommand("/lua", {
 minetest.register_chatcommand("/luatransform", {
 	params = "<code>",
 	description = "Executes <code> as a Lua chunk in the global namespace with the variable pos available, for each node in the current WorldEdit region",
-	privs = {worldedit=true},
+	privs = {worldedit=true, server=true},
 	func = function(name, param)
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
 		if pos1 == nil or pos2 == nil then
