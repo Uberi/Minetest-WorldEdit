@@ -240,7 +240,7 @@ worldedit.transpose = function(pos1, pos2, axis1, axis2)
 	end
 
 	--calculate the new position 2 after transposition
-	local newpos2 = {x=pos1.x, y=pos1.y, z=pos1.z}
+	local newpos2 = {x=pos2.x, y=pos2.y, z=pos2.z}
 	newpos2[axis1] = pos1[axis1] + extent2
 	newpos2[axis2] = pos1[axis2] + extent1
 
