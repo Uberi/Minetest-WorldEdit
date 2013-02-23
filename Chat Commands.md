@@ -157,10 +157,10 @@ Transpose the current WorldEdit positions and region along the x/y/z/? and x/y/z
 
 Flip the current WorldEdit region along the x/y/z/? axis.
 
-   //flip x
-   //flip y
-   //flip z
-   //flip ?
+    //flip x
+    //flip y
+    //flip z
+    //flip ?
 
 ### //rotate x/y/z/? <angle>
 
@@ -186,7 +186,7 @@ Fixes the lighting in the current WorldEdit region.
 
     //fixlight
 
-## //hide
+### //hide
 
 Hide all nodes in the current WorldEdit region non-destructively.
 
