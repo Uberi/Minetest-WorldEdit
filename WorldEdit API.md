@@ -152,6 +152,12 @@ Serialization
 -------------
 Contained in serialization.lua, this module allows regions of nodes to be serialized and deserialized to formats suitable for use outside MineTest.
 
+### version = worldedit.valueversion(value)
+
+Determines the version of serialized data `value`.
+
+Returns the version as a positive integer or 0 for unknown versions.
+
 ### data, count = worldedit.serialize(pos1, pos2)
 
 Converts the region defined by positions `pos1` and `pos2` into a single string.
@@ -169,26 +175,6 @@ Returns the two corner positions and the number of nodes.
 Loads the nodes represented by string `value` at position `originpos`.
 
 Returns the number of nodes deserialized.
-
-### count = worldedit.deserialize_old(originpos, value)
-
-Loads the nodes represented by string `value` at position `originpos`, using the older table-based WorldEdit format.
-
-This function is deprecated, and should not be used unless there is a need to support legacy WorldEdit save files.
-
-Returns the number of nodes deserialized.
-
-### count = worldedit.metasave(pos1, pos2, file)
-
-Saves the nodes and meta defined by positions `pos1` and `pos2` into a file.
-
-Returns the number of nodes saved.
-
-### count = worldedit.metaload(pos1, file)
-
-Loads the nodes and meta from `file` to position `pos1`.
-
-Returns the number of nodes loaded.
 
 Code
 ----

@@ -750,12 +750,11 @@ minetest.register_chatcommand("/allocate", {
 		local value = file:read("*a")
 		file:close()
 
-		local nodepos1, nodepos2, count
-		if value:find("{") then --old WorldEdit format
-			nodepos1, nodepos2, count = worldedit.allocate_old(pos1, value)
-		else --new WorldEdit format
-			nodepos1, nodepos2, count = worldedit.allocate(pos1, value)
+		if worldedit.valueversion(value) == 0 then --unknown version
+			minetest.chat_send_player(name, "Invalid file: file is invalid or created with newer version of WorldEdit")
+			return
 		end
+		local nodepos1, nodepos2, count = worldedit.allocate(pos1, value)
 
 		worldedit.pos1[name] = nodepos1
 		worldedit.mark_pos1(name)
@@ -768,7 +767,7 @@ minetest.register_chatcommand("/allocate", {
 
 minetest.register_chatcommand("/load", {
 	params = "<file>",
-	description = "Load nodes from \"(world folder)/schems/<file>.we\" with position 1 of the current WorldEdit region as the origin",
+	description = "Load nodes from \"(world folder)/schems/<file>[.we[m]]\" with position 1 of the current WorldEdit region as the origin",
 	privs = {worldedit=true},
 	func = function(name, param)
 		local pos1 = worldedit.pos1[name]
@@ -782,69 +781,33 @@ minetest.register_chatcommand("/load", {
 			return
 		end
 
-		local filename = minetest.get_worldpath() .. "/schems/" .. param .. ".we"
-		local file, err = io.open(filename, "rb")
-		if err ~= nil then
-			minetest.chat_send_player(name, "Could not open file \"" .. filename .. "\"")
+		--find the file in the world path
+		local testpaths = {
+			minetest.get_worldpath() .. "/schems/" .. param,
+			minetest.get_worldpath() .. "/schems/" .. param .. ".we",
+			minetest.get_worldpath() .. "/schems/" .. param .. ".wem",
+		}
+		local file, err
+		for index, path in ipairs(testpaths) do
+			file, err = io.open(path, "rb")
+			if not err then
+				break
+			end
+		end
+		if err then
+			minetest.chat_send_player(name, "Could not open file \"" .. param .. "\"")
 			return
 		end
 		local value = file:read("*a")
 		file:close()
 
-		local count
-		if value:find("{") then --old WorldEdit format
-			count = worldedit.deserialize_old(pos1, value)
-		else --new WorldEdit format
-			count = worldedit.deserialize(pos1, value)
+		if worldedit.valueversion(value) == 0 then --unknown version
+			minetest.chat_send_player(name, "Invalid file: file is invalid or created with newer version of WorldEdit")
+			return
 		end
+		local count = worldedit.deserialize(pos1, value)
 
 		minetest.chat_send_player(name, count .. " nodes loaded")
-	end,
-})
-
-minetest.register_chatcommand("/metasave", {
-	params = "<file>",
-	description = "Save the current WorldEdit region to \"(world folder)/schems/<file>.wem\"",
-	privs = {worldedit=true},
-	func = function(name, param)
-		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
-		if pos1 == nil or pos2 == nil then
-			minetest.chat_send_player(name, "No WorldEdit region selected")
-			return
-		end
-		if param == "" then
-			minetest.chat_send_player(name, "Invalid usage: " .. param)
-			return
-		end
-		local count, err = worldedit.metasave(pos1, pos2, param)
-		if err then
-			minetest.chat_send_player(name, "error loading file: " .. err)
-		else
-			minetest.chat_send_player(name, count .. " nodes saved")
-		end
-	end,
-})
-
-minetest.register_chatcommand("/metaload", {
-	params = "<file>",
-	description = "Load nodes from \"(world folder)/schems/<file>.wem\" with position 1 of the current WorldEdit region as the origin",
-	privs = {worldedit=true},
-	func = function(name, param)
-		local pos1 = worldedit.pos1[name]
-		if pos1 == nil then
-			minetest.chat_send_player(name, "No WorldEdit region selected")
-			return
-		end
-		if param == "" then
-			minetest.chat_send_player(name, "Invalid usage: " .. param)
-			return
-		end
-		local count, err = worldedit.metaload(pos1, param)
-		if err then
-			minetest.chat_send_player(name, "Error loading file: " .. err)
-		else
-			minetest.chat_send_player(name, count .. " nodes loaded")
-		end
 	end,
 })
 
