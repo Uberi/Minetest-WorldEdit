@@ -2,6 +2,8 @@ WorldEdit API
 =============
 The WorldEdit API is composed of multiple modules, each of which is independent and can be used without the other. Each module is contained within a single file.
 
+If needed, individual modules such as visualization.lua can be removed without affecting the rest of the program. The only file that cannot be removed is init.lua, which is necessary for the mod to run.
+
 For more information, see the [README](README.md).
 
 Manipulations

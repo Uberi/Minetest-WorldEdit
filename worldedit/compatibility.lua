@@ -1,3 +1,5 @@
+worldedit = worldedit or {}
+
 worldedit.allocate_old = worldedit.allocate
 worldedit.deserialize_old = worldedit.deserialize
 worldedit.metasave = function(pos1, pos2, filename)

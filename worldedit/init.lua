@@ -1,7 +1,14 @@
 local path = minetest.get_modpath("worldedit")
-dofile(path .. "/manipulations.lua")
-dofile(path .. "/primitives.lua")
-dofile(path .. "/visualization.lua")
-dofile(path .. "/serialization.lua")
-dofile(path .. "/code.lua")
-dofile(path .. "/compatibility.lua")
+
+local loadmodule = function(path)
+	return pcall(function()
+		dofile(path)
+	end)
+end
+
+loadmodule(path .. "/manipulations.lua")
+loadmodule(path .. "/primitives.lua")
+loadmodule(path .. "/visualization.lua")
+loadmodule(path .. "/serialization.lua")
+loadmodule(path .. "/code.lua")
+loadmodule(path .. "/compatibility.lua")
