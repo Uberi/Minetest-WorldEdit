@@ -47,6 +47,14 @@ worldedit.serialize = function(pos1, pos2) --wip: check for ItemStacks and wheth
 				if node.name ~= "air" and node.name ~= "ignore" then
 					count = count + 1
 					local meta = env:get_meta(pos):to_table()
+
+					--convert metadata itemstacks to itemstrings
+					for name, inventory in pairs(meta.inventory) do
+						for index, stack in ipairs(inventory) do
+							inventory[index] = stack:to_string()
+						end
+					end
+
 					result[count] = {
 						x = pos.x - pos1.x,
 						y = pos.y - pos1.y,
