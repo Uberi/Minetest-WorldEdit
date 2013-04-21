@@ -214,7 +214,22 @@ worldedit.deserialize = function(originpos, value)
 			count = count + 1
 		end
 	elseif version == 4 then --current nested table format
-		local nodes = minetest.deserialize(value)
+		--wip: this is a filthy hack that works surprisingly well
+		value = value:gsub("return%s*{", "", 1):gsub("}%s*$", "", 1)
+		local escaped = value:gsub("\\\\", "@@"):gsub("\\\"", "@@"):gsub("(\"[^\"]+\")", function(s) return string.rep("@", #s) end)
+		local startpos, startpos1, endpos = 1, 1
+		local nodes = {}
+		while true do
+			startpos, endpos = escaped:find("},%s*{", startpos)
+			if not startpos then
+				break
+			end
+			local current = value:sub(startpos1, startpos)
+			table.insert(nodes, minetest.deserialize("return " .. current))
+			startpos, startpos1 = endpos, endpos
+		end
+
+		--local nodes = minetest.deserialize(value) --wip: this is broken for larger tables in the current version of LuaJIT
 		count = #nodes
 		for index = 1, count do
 			local entry = nodes[index]
