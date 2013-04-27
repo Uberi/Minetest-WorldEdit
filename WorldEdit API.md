@@ -92,6 +92,18 @@ Adds a sphere at `pos` with radius `radius`, composed of `nodename`.
 
 Returns the number of nodes added.
 
+### count = worldedit.hollow_dome(pos, radius, nodename)
+
+Adds a hollow dome at `pos` with radius `radius`, composed of `nodename`.
+
+Returns the number of nodes added.
+
+### count = worldedit.dome(pos, radius, nodename)
+
+Adds a dome at `pos` with radius `radius`, composed of `nodename`.
+
+Returns the number of nodes added.
+
 ### count = worldedit.hollow_cylinder(pos, axis, length, radius, nodename)
 
 Adds a hollow cylinder at `pos` along the `axis` axis ("x" or "y" or "z") with length `length` and radius `radius`, composed of `nodename`.

@@ -1,10 +1,11 @@
 worldedit = worldedit or {}
 
 --adds a hollow sphere at `pos` with radius `radius`, composed of `nodename`, returning the number of nodes added
-worldedit.hollow_sphere = function(pos, radius, nodename) --wip: use bresenham sphere for maximum speed
+worldedit.hollow_sphere = function(pos, radius, nodename)
 	local node = {name=nodename}
 	local pos1 = {x=0, y=0, z=0}
-	local full_radius = radius * radius + radius
+	local min_radius = radius * (radius - 1)
+	local max_radius = radius * (radius + 1)
 	local count = 0
 	local env = minetest.env
 	for x = -radius, radius do
@@ -12,9 +13,9 @@ worldedit.hollow_sphere = function(pos, radius, nodename) --wip: use bresenham s
 		for y = -radius, radius do
 			pos1.y = pos.y + y
 			for z = -radius, radius do
-				if x*x+y*y+z*z >= (radius-1) * (radius-1) + (radius-1) and x*x+y*y+z*z <= full_radius then
+				if x*x+y*y+z*z >= min_radius and x*x+y*y+z*z <= max_radius then
 					pos1.z = pos.z + z
-					env:add_node({x=pos.x+x,y=pos.y+y,z=pos.z+z}, node)
+					env:add_node(pos1, node)
 					count = count + 1
 				end
 			end
@@ -24,10 +25,10 @@ worldedit.hollow_sphere = function(pos, radius, nodename) --wip: use bresenham s
 end
 
 --adds a sphere at `pos` with radius `radius`, composed of `nodename`, returning the number of nodes added
-worldedit.sphere = function(pos, radius, nodename) --wip: use bresenham sphere for maximum speed
+worldedit.sphere = function(pos, radius, nodename)
 	local node = {name=nodename}
 	local pos1 = {x=0, y=0, z=0}
-	local full_radius = radius * radius + radius
+	local max_radius = radius * (radius + 1)
 	local count = 0
 	local env = minetest.env
 	for x = -radius, radius do
@@ -35,7 +36,54 @@ worldedit.sphere = function(pos, radius, nodename) --wip: use bresenham sphere f
 		for y = -radius, radius do
 			pos1.y = pos.y + y
 			for z = -radius, radius do
-				if x*x+y*y+z*z <= full_radius then
+				if x*x+y*y+z*z <= max_radius then
+					pos1.z = pos.z + z
+					env:add_node(pos1, node)
+					count = count + 1
+				end
+			end
+		end
+	end
+	return count
+end
+
+--adds a hollow dome at `pos` with radius `radius`, composed of `nodename`, returning the number of nodes added
+worldedit.hollow_dome = function(pos, radius, nodename) --wip: use bresenham sphere for maximum speed
+	local node = {name=nodename}
+	local pos1 = {x=0, y=0, z=0}
+	local min_radius = radius * (radius - 1)
+	local max_radius = radius * (radius + 1)
+	local count = 0
+	local env = minetest.env
+	for x = -radius, radius do
+		pos1.x = pos.x + x
+		for y = 0, radius do
+			pos1.y = pos.y + y
+			for z = -radius, radius do
+				if x*x+y*y+z*z >= min_radius and x*x+y*y+z*z <= max_radius then
+					pos1.z = pos.z + z
+					env:add_node(pos1, node)
+					count = count + 1
+				end
+			end
+		end
+	end
+	return count
+end
+
+--adds a dome at `pos` with radius `radius`, composed of `nodename`, returning the number of nodes added
+worldedit.dome = function(pos, radius, nodename) --wip: use bresenham sphere for maximum speed
+	local node = {name=nodename}
+	local pos1 = {x=0, y=0, z=0}
+	local max_radius = radius * (radius + 1)
+	local count = 0
+	local env = minetest.env
+	for x = -radius, radius do
+		pos1.x = pos.x + x
+		for y = 0, radius do
+			pos1.y = pos.y + y
+			for z = -radius, radius do
+				if x*x+y*y+z*z <= max_radius then
 					pos1.z = pos.z + z
 					env:add_node(pos1, node)
 					count = count + 1

@@ -83,6 +83,22 @@ Add sphere at WorldEdit position 1 with radius <radius>, composed of <node>.
     //sphere 12 default:glass
     //sphere 17 mesecons:mesecon
 
+### //hollowdome <radius> <node>
+
+Add hollow dome at WorldEdit position 1 with radius <radius>, composed of <node>.
+
+    //hollowdome 5 dirt
+    //hollowdome 12 default:glass
+    //hollowdome 17 mesecons:mesecon
+
+### //dome <radius> <node>
+
+Add dome at WorldEdit position 1 with radius <radius>, composed of <node>.
+
+    //dome 5 dirt
+    //dome 12 default:glass
+    //dome 17 mesecons:mesecon
+
 ### //hollowcylinder x/y/z/? <length> <radius> <node>
 
 Add hollow cylinder at WorldEdit position 1 along the x/y/z/? axis with length <length> and radius <radius>, composed of <node>.
