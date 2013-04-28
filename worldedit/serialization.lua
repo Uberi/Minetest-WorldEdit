@@ -216,7 +216,7 @@ worldedit.deserialize = function(originpos, value, env)
 	elseif version == 4 then --current nested table format
 		--wip: this is a filthy hack that works surprisingly well
 		value = value:gsub("return%s*{", "", 1):gsub("}%s*$", "", 1)
-		local escaped = value:gsub("\\\\", "@@"):gsub("\\\"", "@@"):gsub("(\"[^\"]+\")", function(s) return string.rep("@", #s) end)
+		local escaped = value:gsub("\\\\", "@@"):gsub("\\\"", "@@"):gsub("(\"[^\"]*\")", function(s) return string.rep("@", #s) end)
 		local startpos, startpos1, endpos = 1, 1
 		local nodes = {}
 		while true do

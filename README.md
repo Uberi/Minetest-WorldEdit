@@ -1,8 +1,8 @@
 WorldEdit v0.6 for MineTest 0.4
 ===============================
-In-game world editing for [MineTest](http://minetest.net/)! Tons of chat commands to help with building, fixing, and more.
+In-game world editing for [MineTest](http://minetest.net/)! Tons of functionality to help with building, fixing, and more.
 
-For more information, see the [forum topic](http://minetest.net/forum/viewtopic.php?id=572) at the MineTest forums.
+For more information, see the [forum topic](http://minetest.net/forum/viewtopic.php?id=572) at the Minetest forums.
 
 Usage
 -----
