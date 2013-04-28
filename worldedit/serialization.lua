@@ -160,10 +160,10 @@ end
 
 --loads the nodes represented by string `value` at position `originpos`, returning the number of nodes deserialized
 --contains code based on [table.save/table.load](http://lua-users.org/wiki/SaveTableToFile) by ChillCode, available under the MIT license (GPL compatible)
-worldedit.deserialize = function(originpos, value)
+worldedit.deserialize = function(originpos, value, env)
 	local originx, originy, originz = originpos.x, originpos.y, originpos.z
 	local count = 0
-	local env = minetest.env
+	if env == nil then env = minetest.env end
 	local version = worldedit.valueversion(value)
 	if version == 1 or version == 2 then --original flat table format
 		--obtain the node table

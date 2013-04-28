@@ -23,9 +23,9 @@ worldedit.volume = function(pos1, pos2)
 end
 
 --sets a region defined by positions `pos1` and `pos2` to `nodename`, returning the number of nodes filled
-worldedit.set = function(pos1, pos2, nodename)
+worldedit.set = function(pos1, pos2, nodename, env)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
-	local env = minetest.env
+	if env == nil then env = minetest.env end
 
 	local node = {name=nodename}
 	local pos = {x=pos1.x, y=0, z=0}
@@ -45,9 +45,9 @@ worldedit.set = function(pos1, pos2, nodename)
 end
 
 --replaces all instances of `searchnode` with `replacenode` in a region defined by positions `pos1` and `pos2`, returning the number of nodes replaced
-worldedit.replace = function(pos1, pos2, searchnode, replacenode)
+worldedit.replace = function(pos1, pos2, searchnode, replacenode, env)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
-	local env = minetest.env
+	if env == nil then env = minetest.env end
 
 	if minetest.registered_nodes[searchnode] == nil then
 		searchnode = "default:" .. searchnode
@@ -75,9 +75,9 @@ worldedit.replace = function(pos1, pos2, searchnode, replacenode)
 end
 
 --replaces all nodes other than `searchnode` with `replacenode` in a region defined by positions `pos1` and `pos2`, returning the number of nodes replaced
-worldedit.replaceinverse = function(pos1, pos2, searchnode, replacenode)
+worldedit.replaceinverse = function(pos1, pos2, searchnode, replacenode, env)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
-	local env = minetest.env
+	if env == nil then env = minetest.env end
 
 	if minetest.registered_nodes[searchnode] == nil then
 		searchnode = "default:" .. searchnode
@@ -106,9 +106,9 @@ worldedit.replaceinverse = function(pos1, pos2, searchnode, replacenode)
 end
 
 --copies the region defined by positions `pos1` and `pos2` along the `axis` axis ("x" or "y" or "z") by `amount` nodes, returning the number of nodes copied
-worldedit.copy = function(pos1, pos2, axis, amount)
+worldedit.copy = function(pos1, pos2, axis, amount, env)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
-	local env = minetest.env
+	if env == nil then env = minetest.env end
 
 	if amount < 0 then
 		local pos = {x=pos1.x, y=0, z=0}
@@ -155,9 +155,9 @@ worldedit.copy = function(pos1, pos2, axis, amount)
 end
 
 --moves the region defined by positions `pos1` and `pos2` along the `axis` axis ("x" or "y" or "z") by `amount` nodes, returning the number of nodes moved
-worldedit.move = function(pos1, pos2, axis, amount)
+worldedit.move = function(pos1, pos2, axis, amount, env)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
-	local env = minetest.env
+	if env == nil then env = minetest.env end
 
 	if amount < 0 then
 		local pos = {x=pos1.x, y=0, z=0}
@@ -206,7 +206,7 @@ worldedit.move = function(pos1, pos2, axis, amount)
 end
 
 --duplicates the region defined by positions `pos1` and `pos2` along the `axis` axis ("x" or "y" or "z") `count` times, returning the number of nodes stacked
-worldedit.stack = function(pos1, pos2, axis, count)
+worldedit.stack = function(pos1, pos2, axis, count, env)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 	local length = pos2[axis] - pos1[axis] + 1
 	if count < 0 then
@@ -217,13 +217,13 @@ worldedit.stack = function(pos1, pos2, axis, count)
 	local copy = worldedit.copy
 	for i = 1, count do
 		amount = amount + length
-		copy(pos1, pos2, axis, amount)
+		copy(pos1, pos2, axis, amount, env)
 	end
 	return worldedit.volume(pos1, pos2)
 end
 
 --transposes a region defined by the positions `pos1` and `pos2` between the `axis1` and `axis2` axes, returning the number of nodes transposed, the new position 1, and the new position 2
-worldedit.transpose = function(pos1, pos2, axis1, axis2)
+worldedit.transpose = function(pos1, pos2, axis1, axis2, env)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 
 	local compare
@@ -245,7 +245,7 @@ worldedit.transpose = function(pos1, pos2, axis1, axis2)
 	newpos2[axis2] = pos1[axis2] + extent1
 
 	local pos = {x=pos1.x, y=0, z=0}
-	local env = minetest.env
+	if env == nil then env = minetest.env end
 	while pos.x <= pos2.x do
 		pos.y = pos1.y
 		while pos.y <= pos2.y do
@@ -275,13 +275,13 @@ worldedit.transpose = function(pos1, pos2, axis1, axis2)
 end
 
 --flips a region defined by the positions `pos1` and `pos2` along the `axis` axis ("x" or "y" or "z"), returning the number of nodes flipped
-worldedit.flip = function(pos1, pos2, axis)
+worldedit.flip = function(pos1, pos2, axis, env)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 
 	local pos = {x=pos1.x, y=0, z=0}
 	local start = pos1[axis] + pos2[axis]
 	pos2[axis] = pos1[axis] + math.floor((pos2[axis] - pos1[axis]) / 2)
-	local env = minetest.env
+	if env == nil then env = minetest.env end
 	while pos.x <= pos2.x do
 		pos.y = pos1.y
 		while pos.y <= pos2.y do
@@ -308,7 +308,7 @@ worldedit.flip = function(pos1, pos2, axis)
 end
 
 --rotates a region defined by the positions `pos1` and `pos2` by `angle` degrees clockwise around axis `axis` (90 degree increment), returning the number of nodes rotated
-worldedit.rotate = function(pos1, pos2, axis, angle)
+worldedit.rotate = function(pos1, pos2, axis, angle, env)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 
 	local axis1, axis2
@@ -323,23 +323,23 @@ worldedit.rotate = function(pos1, pos2, axis, angle)
 
 	local count
 	if angle == 90 then
-		worldedit.flip(pos1, pos2, axis1)
-		count, pos1, pos2 = worldedit.transpose(pos1, pos2, axis1, axis2)
+		worldedit.flip(pos1, pos2, axis1, env)
+		count, pos1, pos2 = worldedit.transpose(pos1, pos2, axis1, axis2, env)
 	elseif angle == 180 then
-		worldedit.flip(pos1, pos2, axis1)
-		count = worldedit.flip(pos1, pos2, axis2)
+		worldedit.flip(pos1, pos2, axis1, env)
+		count = worldedit.flip(pos1, pos2, axis2, env)
 	elseif angle == 270 then
-		worldedit.flip(pos1, pos2, axis2)
-		count, pos1, pos2 = worldedit.transpose(pos1, pos2, axis1, axis2)
+		worldedit.flip(pos1, pos2, axis2, env)
+		count, pos1, pos2 = worldedit.transpose(pos1, pos2, axis1, axis2, env)
 	end
 	return count, pos1, pos2
 end
 
 --rotates all oriented nodes in a region defined by the positions `pos1` and `pos2` by `angle` degrees clockwise (90 degree increment) around the Y axis, returning the number of nodes oriented
-worldedit.orient = function(pos1, pos2, angle)
+worldedit.orient = function(pos1, pos2, angle, env)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 	local nodes = minetest.registered_nodes
-	local env = minetest.env
+	if env == nil then env = minetest.env end
 	local wallmounted = {
 		[90]={[0]=0, [1]=1, [2]=5, [3]=4, [4]=2, [5]=3},
 		[180]={[0]=0, [1]=1, [2]=3, [3]=2, [4]=5, [5]=4},
@@ -392,9 +392,9 @@ worldedit.orient = function(pos1, pos2, angle)
 end
 
 --fixes the lighting in a region defined by positions `pos1` and `pos2`, returning the number of nodes updated
-worldedit.fixlight = function(pos1, pos2)
+worldedit.fixlight = function(pos1, pos2, env)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
-	local env = minetest.env
+	if env == nil then env = minetest.env end
 	local count = 0
 
 	local pos = {x=pos1.x, y=0, z=0}

@@ -31,9 +31,9 @@ minetest.register_node("worldedit:placeholder", {
 })
 
 --hides all nodes in a region defined by positions `pos1` and `pos2` by non-destructively replacing them with invisible nodes, returning the number of nodes hidden
-worldedit.hide = function(pos1, pos2)
+worldedit.hide = function(pos1, pos2, tenv)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
-	local env = minetest.env
+	if env == nil then env = minetest.env end
 
 	local pos = {x=pos1.x, y=0, z=0}
 	local placeholder = {name="worldedit:placeholder", param1=0, param2=0}
@@ -59,9 +59,9 @@ worldedit.hide = function(pos1, pos2)
 end
 
 --suppresses all instances of `nodename` in a region defined by positions `pos1` and `pos2` by non-destructively replacing them with invisible nodes, returning the number of nodes suppressed
-worldedit.suppress = function(pos1, pos2, nodename)
+worldedit.suppress = function(pos1, pos2, nodename, tenv)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
-	local env = minetest.env
+	if env == nil then env = minetest.env end
 
 	if minetest.registered_nodes[nodename] == nil then
 		nodename = "default:" .. nodename
@@ -95,9 +95,9 @@ worldedit.suppress = function(pos1, pos2, nodename)
 end
 
 --highlights all instances of `nodename` in a region defined by positions `pos1` and `pos2` by non-destructively hiding all other nodes, returning the number of nodes found
-worldedit.highlight = function(pos1, pos2, nodename)
+worldedit.highlight = function(pos1, pos2, nodename, tenv)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
-	local env = minetest.env
+	if env == nil then env = minetest.env end
 
 	if minetest.registered_nodes[nodename] == nil then
 		nodename = "default:" .. nodename
@@ -132,9 +132,9 @@ worldedit.highlight = function(pos1, pos2, nodename)
 end
 
 --restores all nodes hidden with WorldEdit functions in a region defined by positions `pos1` and `pos2`, returning the number of nodes restored
-worldedit.restore = function(pos1, pos2)
+worldedit.restore = function(pos1, pos2, tenv)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
-	local env = minetest.env
+	if env == nil then env = minetest.env end
 
 	local pos = {x=pos1.x, y=0, z=0}
 	local node = {name="", param1=0, param2=0}

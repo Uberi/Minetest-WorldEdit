@@ -1,13 +1,13 @@
 worldedit = worldedit or {}
 
 --adds a hollow sphere at `pos` with radius `radius`, composed of `nodename`, returning the number of nodes added
-worldedit.hollow_sphere = function(pos, radius, nodename)
+worldedit.hollow_sphere = function(pos, radius, nodename, env)
 	local node = {name=nodename}
 	local pos1 = {x=0, y=0, z=0}
 	local min_radius = radius * (radius - 1)
 	local max_radius = radius * (radius + 1)
 	local count = 0
-	local env = minetest.env
+	if env == nil then env = minetest.env end
 	for x = -radius, radius do
 		pos1.x = pos.x + x
 		for y = -radius, radius do
@@ -25,12 +25,12 @@ worldedit.hollow_sphere = function(pos, radius, nodename)
 end
 
 --adds a sphere at `pos` with radius `radius`, composed of `nodename`, returning the number of nodes added
-worldedit.sphere = function(pos, radius, nodename)
+worldedit.sphere = function(pos, radius, nodename, env)
 	local node = {name=nodename}
 	local pos1 = {x=0, y=0, z=0}
 	local max_radius = radius * (radius + 1)
 	local count = 0
-	local env = minetest.env
+	if env == nil then env = minetest.env end
 	for x = -radius, radius do
 		pos1.x = pos.x + x
 		for y = -radius, radius do
@@ -48,13 +48,13 @@ worldedit.sphere = function(pos, radius, nodename)
 end
 
 --adds a hollow dome at `pos` with radius `radius`, composed of `nodename`, returning the number of nodes added
-worldedit.hollow_dome = function(pos, radius, nodename) --wip: use bresenham sphere for maximum speed
+worldedit.hollow_dome = function(pos, radius, nodename, env) --wip: use bresenham sphere for maximum speed
 	local node = {name=nodename}
 	local pos1 = {x=0, y=0, z=0}
 	local min_radius = radius * (radius - 1)
 	local max_radius = radius * (radius + 1)
 	local count = 0
-	local env = minetest.env
+	if env == nil then env = minetest.env end
 	for x = -radius, radius do
 		pos1.x = pos.x + x
 		for y = 0, radius do
@@ -72,12 +72,12 @@ worldedit.hollow_dome = function(pos, radius, nodename) --wip: use bresenham sph
 end
 
 --adds a dome at `pos` with radius `radius`, composed of `nodename`, returning the number of nodes added
-worldedit.dome = function(pos, radius, nodename) --wip: use bresenham sphere for maximum speed
+worldedit.dome = function(pos, radius, nodename, env) --wip: use bresenham sphere for maximum speed
 	local node = {name=nodename}
 	local pos1 = {x=0, y=0, z=0}
 	local max_radius = radius * (radius + 1)
 	local count = 0
-	local env = minetest.env
+	if env == nil then env = minetest.env end
 	for x = -radius, radius do
 		pos1.x = pos.x + x
 		for y = 0, radius do
@@ -95,7 +95,7 @@ worldedit.dome = function(pos, radius, nodename) --wip: use bresenham sphere for
 end
 
 --adds a hollow cylinder at `pos` along the `axis` axis ("x" or "y" or "z") with length `length` and radius `radius`, composed of `nodename`, returning the number of nodes added
-worldedit.hollow_cylinder = function(pos, axis, length, radius, nodename)
+worldedit.hollow_cylinder = function(pos, axis, length, radius, nodename, env)
 	local other1, other2
 	if axis == "x" then
 		other1, other2 = "y", "z"
@@ -105,7 +105,7 @@ worldedit.hollow_cylinder = function(pos, axis, length, radius, nodename)
 		other1, other2 = "x", "y"
 	end
 
-	local env = minetest.env
+	if env == nil then env = minetest.env end
 	local currentpos = {x=pos.x, y=pos.y, z=pos.z}
 	local node = {name=nodename}
 	local count = 0
@@ -156,7 +156,7 @@ worldedit.hollow_cylinder = function(pos, axis, length, radius, nodename)
 end
 
 --adds a cylinder at `pos` along the `axis` axis ("x" or "y" or "z") with length `length` and radius `radius`, composed of `nodename`, returning the number of nodes added
-worldedit.cylinder = function(pos, axis, length, radius, nodename)
+worldedit.cylinder = function(pos, axis, length, radius, nodename, env)
 	local other1, other2
 	if axis == "x" then
 		other1, other2 = "y", "z"
@@ -166,7 +166,7 @@ worldedit.cylinder = function(pos, axis, length, radius, nodename)
 		other1, other2 = "x", "y"
 	end
 
-	local env = minetest.env
+	if env == nil then env = minetest.env end
 	local currentpos = {x=pos.x, y=pos.y, z=pos.z}
 	local node = {name=nodename}
 	local count = 0
@@ -215,14 +215,14 @@ worldedit.cylinder = function(pos, axis, length, radius, nodename)
 end
 
 --adds a pyramid at `pos` with height `height`, composed of `nodename`, returning the number of nodes added
-worldedit.pyramid = function(pos, height, nodename)
+worldedit.pyramid = function(pos, height, nodename, env)
 	local pos1x, pos1y, pos1z = pos.x - height, pos.y, pos.z - height
 	local pos2x, pos2y, pos2z = pos.x + height, pos.y + height, pos.z + height
 	local pos = {x=0, y=pos1y, z=0}
 
 	local count = 0
 	local node = {name=nodename}
-	local env = minetest.env
+	if env == nil then env = minetest.env end
 	while pos.y <= pos2y do --each vertical level of the pyramid
 		pos.x = pos1x
 		while pos.x <= pos2x do
@@ -244,7 +244,7 @@ worldedit.pyramid = function(pos, height, nodename)
 end
 
 --adds a spiral at `pos` with width `width`, height `height`, space between walls `spacer`, composed of `nodename`, returning the number of nodes added
-worldedit.spiral = function(pos, width, height, spacer, nodename) --wip: clean this up
+worldedit.spiral = function(pos, width, height, spacer, nodename, env) --wip: clean this up
 	-- spiral matrix - http://rosettacode.org/wiki/Spiral_matrix#Lua
 	av, sn = math.abs, function(s) return s~=0 and s/av(s) or 0 end
 	local function sindex(z, x) -- returns the value at (x, z) in a spiral that starts at 1 and goes outwards
@@ -262,6 +262,7 @@ worldedit.spiral = function(pos, width, height, spacer, nodename) --wip: clean t
 		end
 		return ret
 	end
+    if env == nil then env = minetest.env end
 	-- connect the joined parts
 	local spiral = spiralt(width)
 	height = tonumber(height)
@@ -279,12 +280,12 @@ worldedit.spiral = function(pos, width, height, spacer, nodename) --wip: clean t
 				if lp.x~=np.x then 
 					if lp.x<np.x then 
 						for i=lp.x+1,np.x do
-							minetest.env:add_node({x=i, y=np.y, z=np.z}, node)
+							env:add_node({x=i, y=np.y, z=np.z}, node)
 							count = count + 1
 						end
 					else
 						for i=np.x,lp.x-1 do
-							minetest.env:add_node({x=i, y=np.y, z=np.z}, node)
+							env:add_node({x=i, y=np.y, z=np.z}, node)
 							count = count + 1
 						end
 					end
@@ -292,12 +293,12 @@ worldedit.spiral = function(pos, width, height, spacer, nodename) --wip: clean t
 				if lp.z~=np.z then 
 					if lp.z<np.z then 
 						for i=lp.z+1,np.z do
-							minetest.env:add_node({x=np.x, y=np.y, z=i}, node)
+							env:add_node({x=np.x, y=np.y, z=i}, node)
 							count = count + 1
 						end
 					else
 						for i=np.z,lp.z-1 do
-							minetest.env:add_node({x=np.x, y=np.y, z=i}, node)
+							env:add_node({x=np.x, y=np.y, z=i}, node)
 							count = count + 1
 						end
 					end
