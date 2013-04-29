@@ -51,7 +51,7 @@ worldedit.serialize = function(pos1, pos2) --wip: check for ItemStacks and wheth
 					--convert metadata itemstacks to itemstrings
 					for name, inventory in pairs(meta.inventory) do
 						for index, stack in ipairs(inventory) do
-							inventory[index] = stack:to_string()
+							inventory[index] = stack.to_string and stack:to_string() or stack
 						end
 					end
 
@@ -228,13 +228,21 @@ worldedit.deserialize = function(originpos, value, env)
 			table.insert(nodes, minetest.deserialize("return " .. current))
 			startpos, startpos1 = endpos, endpos
 		end
+		table.insert(nodes, minetest.deserialize("return " .. value:sub(startpos1)))
 
 		--local nodes = minetest.deserialize(value) --wip: this is broken for larger tables in the current version of LuaJIT
+
+		--load the nodes
 		count = #nodes
 		for index = 1, count do
 			local entry = nodes[index]
 			entry.x, entry.y, entry.z = originx + entry.x, originy + entry.y, originz + entry.z
 			env:add_node(entry, entry) --entry acts both as position and as node
+		end
+
+		--load the metadata
+		for index = 1, count do
+			local entry = nodes[index]
 			env:get_meta(entry):from_table(entry.meta)
 		end
 	end
