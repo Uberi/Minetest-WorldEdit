@@ -48,7 +48,7 @@ This API is documented in the [WorldEdit API Reference](WorldEdit API.md).
 
 License
 -------
-Copyright 2012 sfan5, Anthony Zhang (Temperest), and Brett O'Donnell (cornernote).
+Copyright 2013 sfan5, Anthony Zhang (Temperest), and Brett O'Donnell (cornernote).
 
 This mod is licensed under the [GNU Affero General Public License](http://www.gnu.org/licenses/agpl-3.0.html).
 
