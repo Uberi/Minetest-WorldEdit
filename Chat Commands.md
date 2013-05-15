@@ -14,6 +14,12 @@ Show markers at the region positions.
 
     //mark
 
+### //unmark
+
+Hide markers if currently shown.
+
+    //unmark
+
 ### //pos1
 
 Set WorldEdit region position 1 to the player's location.

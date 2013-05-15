@@ -36,6 +36,7 @@ minetest.register_chatcommand("/reset", {
 		worldedit.pos2[name] = nil
 		worldedit.mark_pos1(name)
 		worldedit.mark_pos2(name)
+		worldedit.set_pos[name] = nil
 		minetest.chat_send_player(name, "WorldEdit region reset", false)
 	end,
 })
@@ -48,6 +49,22 @@ minetest.register_chatcommand("/mark", {
 		worldedit.mark_pos1(name)
 		worldedit.mark_pos2(name)
 		minetest.chat_send_player(name, "WorldEdit region marked", false)
+	end,
+})
+
+minetest.register_chatcommand("/unmark", {
+	params = "",
+	description = "Hide markers if currently shown",
+	privs = {worldedit=true},
+	func = function(name, param)
+		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
+		worldedit.pos1[name] = nil
+		worldedit.pos2[name] = nil
+		worldedit.mark_pos1(name)
+		worldedit.mark_pos2(name)
+		worldedit.pos1[name] = pos1
+		worldedit.pos2[name] = pos2
+		minetest.chat_send_player(name, "WorldEdit region unmarked", false)
 	end,
 })
 
