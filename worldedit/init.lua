@@ -1,4 +1,4 @@
-local path = minetest.get_modpath("worldedit")
+local path = minetest.get_modpath(minetest.get_current_modname())
 
 local loadmodule = function(path)
 	return pcall(function()
