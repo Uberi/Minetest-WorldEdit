@@ -560,11 +560,8 @@ minetest.register_chatcommand("/move", {
 			amount = amount * sign
 		end
 
-		local tenv = minetest.env
-		if worldedit.ENABLE_QUEUE then
-			tenv = worldedit.quene_aliasenv
-		end
-		local count = worldedit.move(pos1, pos2, axis, tonumber(amount), tenv)
+		--Do NOT use the queue here, it'll mess it up
+		local count = worldedit.move(pos1, pos2, axis, tonumber(amount))
 
 		pos1[axis] = pos1[axis] + amount
 		pos2[axis] = pos2[axis] + amount
