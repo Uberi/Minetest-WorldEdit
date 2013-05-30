@@ -2,29 +2,39 @@ worldedit = worldedit or {}
 
 worldedit.queue = {}
 
-worldedit.ENABLE_QUEUE = true
-worldedit.BLOCKS_PER_GLOBALSTEP = 512
+worldedit.ENABLE_QUEUE = true --enable the WorldEdit block queue
+worldedit.MAXIMUM_TIME = 0.08 --maximum time each step alloted for WorldEdit operations
 
 minetest.register_globalstep(function(dtime)
-    i = 1
-    while i <= #worldedit.queue and i <= worldedit.BLOCKS_PER_GLOBALSTEP do
-        idx = (#worldedit.queue + 1) - i -- we use the last entry, so we don't spend days moving stuff in the table because we removed the first entry
-        if worldedit.queue[idx].t == "set_node" then
-            minetest.env:set_node(worldedit.queue[idx].pos, worldedit.queue[idx].node)
-        elseif worldedit.queue[idx].t == "remove_node" then
-            minetest.env:remove_node(worldedit.queue[idx].pos)
-        elseif worldedit.queue[idx].t == "place_node" then
-            minetest.env:place_node(worldedit.queue[idx].pos, worldedit.queue[idx].node)
-        elseif worldedit.queue[idx].t == "dig_node" then
-            minetest.env:dig_node(worldedit.queue[idx].pos)
-        elseif worldedit.queue[idx].t == "add_entity" then
-            minetest.env:add_entity(worldedit.queue[idx].pos, worldedit.queue[idx].name)
-        elseif worldedit.queue[idx].t == "add_item" then
-            minetest.env:add_item(worldedit.queue[idx].pos, worldedit.queue[idx].item)
-        elseif worldedit.queue[idx].t == "meta_from_table" then
-            minetest.env:get_meta(worldedit.queue[idx].pos):from_table(worldedit.queue[idx].table)
+    local i = 1
+    local elapsed = 0
+    local env = minetest.env
+    while i <= #worldedit.queue and elapsed <= worldedit.MAXIMUM_TIME do
+	local idx = (#worldedit.queue + 1) - i
+	local entry = worldedit.queue[idx] --we use the last entry, so we don't spend days moving stuff in the table because we removed the first entry
+        if entry.t == "set_node" then
+            env:set_node(entry.pos, entry.node)
+	    elapsed = elapsed + 0.0002
+        elseif entry.t == "remove_node" then
+            env:remove_node(entry.pos)
+	    elapsed = elapsed + 0.0002
+        elseif entry.t == "place_node" then
+            env:place_node(entry.pos, entry.node)
+	    elapsed = elapsed + 0.001
+        elseif entry.t == "dig_node" then
+            env:dig_node(entry.pos)
+	    elapsed = elapsed + 0.001
+        elseif entry.t == "add_entity" then
+            env:add_entity(entry.pos, entry.name)
+	    elapsed = elapsed + 0.005
+        elseif entry.t == "add_item" then
+            env:add_item(entry.pos, entry.item)
+	    elapsed = elapsed + 0.005
+        elseif entry.t == "meta_from_table" then
+            env:get_meta(entry.pos):from_table(entry.table)
+	    elapsed = elapsed + 0.0002
         else
-            print("Unknown queue event type: " .. worldedit.queue[idx].t)
+            print("Unknown queue event type: " .. entry.t)
         end
         table.remove(worldedit.queue, idx)
         i = i + 1

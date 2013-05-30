@@ -397,19 +397,15 @@ worldedit.fixlight = function(pos1, pos2, env)
 	if env == nil then env = minetest.env end
 	local count = 0
 
-	local pos = {x=pos1.x, y=0, z=0}
+	local pos = {x=pos1.x, y=pos2.y, z=0}
 	while pos.x <= pos2.x do
-		pos.y = pos1.y
-		while pos.y <= pos2.y do
-			pos.z = pos1.z
-			while pos.z <= pos2.z do
-				if env:get_node(pos).name == "air" then
-					env:dig_node(pos)
-					count = count + 1
-				end
-				pos.z = pos.z + 1
+		pos.z = pos1.z
+		while pos.z <= pos2.z do
+			if env:get_node(pos).name == "air" then
+				env:dig_node(pos)
+				count = count + 1
 			end
-			pos.y = pos.y + 1
+			pos.z = pos.z + 1
 		end
 		pos.x = pos.x + 1
 	end
