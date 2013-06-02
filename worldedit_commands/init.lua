@@ -699,11 +699,7 @@ minetest.register_chatcommand("/rotate", {
 			return
 		end
 
-		local tenv = minetest.env
-		if worldedit.ENABLE_QUEUE then
-			tenv = worldedit.queue_aliasenv
-		end
-		local count, pos1, pos2 = worldedit.rotate(pos1, pos2, axis, angle, tenv)
+		local count, pos1, pos2 = worldedit.rotate(pos1, pos2, axis, angle)
 
 		--reset markers to rotated positions
 		worldedit.pos1[name] = pos1
