@@ -20,6 +20,16 @@ When an axis is specified in a WorldEdit command, it is specified as one of the 
 
 The value ? represents the axis the player is currently facing. If the player is facing more than one axis, the axis the player face direction is closest to will be used.
 
+Nodes
+-----
+Node names are required for many types of commands that identify or modify specific types of nodes. They can be specified in a number of ways.
+
+First, by description - the tooltip that appears when hovering over the item in an inventory. This is case insensitive and includes values such as "Cobblestone" and "bronze block". Note that certain commands (namely, `//replace` and `//replaceinverse`) do not support descriptions that contain spaces in the `<searchnode>` field.
+
+Second, by name - the node name that is defined by code, but without the mod name prefix. This is case sensitive and includes values such as "piston_normal_off" and "cactus". Nodes defined in the `default` mod always take precedence over other nodes when searching for the correct one, and if there are multiple possible nodes (such as "a:celery" and "b:celery"), one is chosen in no particular order.
+
+Finally, by full name - the unambiguous identifier of the node, prefixes and all. This is case sensitive and includes values such as "default:stone" and "mesecons:wire_00000000_off".
+
 Regions
 -------
 Most WorldEdit commands operate on regions. Regions are a set of two positions that define a 3D cube. They are local to each player and chat commands affect only the region for the player giving the commands.

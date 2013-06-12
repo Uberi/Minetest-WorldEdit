@@ -51,93 +51,93 @@ Display the volume of the current WorldEdit region.
 
 Set the current WorldEdit region to <node>.
 
-    //set dirt
-    //set default:glass
-    //set mesecons:mesecon
+    //set cactus
+    //set Bronze Block
+    //set mesecons:wire_00000000_off
 
 ### //replace <search node> <replace node>
 
 Replace all instances of <search node> with <replace node> in the current WorldEdit region.
 
-    //replace cobble stone
-    //replace default:steelblock glass
-    //replace dirt flowers:flower_waterlily
-    //replace flowers:flower_rose flowers:flower_tulip
+    //replace Cobblestone cactus
+    //replace lightstone_blue glass
+    //replace dirt Bronze Block
+    //replace mesecons:wire_00000000_off flowers:flower_tulip
 
 ### //replaceinverse <search node> <replace node>
 
 Replace all nodes other than <search node> with <replace node> in the current WorldEdit region.
 
-    //replaceinverse air stone
-    //replaceinverse water_source default:dirt
-    //replaceinverse mesecons:mesecon air
-    //replaceinverse default:steelblock default:glass
+    //replaceinverse Cobblestone cactus
+    //replaceinverse flowers:flower_waterlily glass
+    //replaceinverse dirt Bronze Block
+    //replaceinverse mesecons:wire_00000000_off flowers:flower_tulip
 
 ### //hollowsphere <radius> <node>
 
 Add hollow sphere at WorldEdit position 1 with radius <radius>, composed of <node>.
 
-    //hollowsphere 5 dirt
-    //hollowsphere 12 default:glass
-    //hollowsphere 17 mesecons:mesecon
+    //hollowsphere 5 Diamond Block
+    //hollowsphere 12 glass
+    //hollowsphere 17 mesecons:wire_00000000_off
 
 ### //sphere <radius> <node>
 
 Add sphere at WorldEdit position 1 with radius <radius>, composed of <node>.
 
-    //sphere 5 dirt
-    //sphere 12 default:glass
-    //sphere 17 mesecons:mesecon
+    //sphere 5 Diamond Block
+    //sphere 12 glass
+    //sphere 17 mesecons:wire_00000000_off
 
 ### //hollowdome <radius> <node>
 
 Add hollow dome at WorldEdit position 1 with radius <radius>, composed of <node>.
 
-    //hollowdome 5 dirt
-    //hollowdome 12 default:glass
-    //hollowdome 17 mesecons:mesecon
+    //hollowdome 5 Diamond Block
+    //hollowdome 12 glass
+    //hollowdome 17 mesecons:wire_00000000_off
 
 ### //dome <radius> <node>
 
 Add dome at WorldEdit position 1 with radius <radius>, composed of <node>.
 
-    //dome 5 dirt
-    //dome 12 default:glass
-    //dome 17 mesecons:mesecon
+    //dome 5 Diamond Block
+    //dome 12 glass
+    //dome 17 mesecons:wire_00000000_off
 
 ### //hollowcylinder x/y/z/? <length> <radius> <node>
 
 Add hollow cylinder at WorldEdit position 1 along the x/y/z/? axis with length <length> and radius <radius>, composed of <node>.
 
-    //hollowcylinder x +5 8 dirt
-    //hollowcylinder y 28 10 default:glass
-    //hollowcylinder z -12 3 mesecons:mesecon
-    //hollowcylinder ? 2 4 stone
+    //hollowcylinder x +5 8 Bronze Block
+    //hollowcylinder y 28 10 glass
+    //hollowcylinder z -12 3 mesecons:wire_00000000_off
+    //hollowcylinder ? 2 4 default:stone
 
 ### //cylinder x/y/z/? <length> <radius> <node>
 
 Add cylinder at WorldEdit position 1 along the x/y/z/? axis with length <length> and radius <radius>, composed of <node>.
 
-    //cylinder x +5 8 dirt
-    //cylinder y 28 10 default:glass
-    //cylinder z -12 3 mesecons:mesecon
-    //cylinder ? 2 4 stone
+    //cylinder x +5 8 Bronze Block
+    //cylinder y 28 10 glass
+    //cylinder z -12 3 mesecons:wire_00000000_off
+    //cylinder ? 2 4 default:stone
     
 ### //pyramid <height> <node>
 
 Add pyramid at WorldEdit position 1 with height <height>, composed of <node>.
 
-    //pyramid 8 dirt
-    //pyramid 5 default:glass
-    //pyramid 2 stone
+    //pyramid 8 Diamond Block
+    //pyramid 5 glass
+    //pyramid 2 mesecons:wire_00000000_off
 
 ### //spiral <width> <height> <spacer> <node>
 
 Add spiral at WorldEdit position 1 with width <width>, height <height>, space between walls <spacer>, composed of <node>.
 
-    //spiral 20 5 3 dirt
-    //spiral 5 2 1 default:glass
-    //spiral 7 1 5 stone
+    //spiral 20 5 3 Diamond Block
+    //spiral 5 2 1 glass
+    //spiral 7 1 5 mesecons:wire_00000000_off
 
 ### //copy x/y/z/? <amount>
 
@@ -218,17 +218,17 @@ Hide all nodes in the current WorldEdit region non-destructively.
 
 Suppress all <node> in the current WorldEdit region non-destructively.
 
-    //suppress dirt
-    //suppress default:glass
-    //suppress mesecons:mesecon
+    //suppress Diamond Block
+    //suppress glass
+    //suppress mesecons:wire_00000000_off
 
 ### //highlight <node>
 
 Highlight <node> in the current WorldEdit region by hiding everything else non-destructively.
 
-    //highlight dirt
-    //highlight default:glass
-    //highlight mesecons:mesecon
+    //highlight Diamond Block
+    //highlight glass
+    //highlight mesecons:wire_00000000_off
 
 ### //restore
 

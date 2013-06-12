@@ -12,9 +12,23 @@ worldedit.player_notify = function(name, message)
 end
 
 --determines whether `nodename` is a valid node name, returning a boolean
-worldedit.node_is_valid = function(nodename)
-	return minetest.registered_nodes[nodename] ~= nil
-	or minetest.registered_nodes["default:" .. nodename] ~= nil
+worldedit.normalize_nodename = function(nodename)
+	if minetest.registered_nodes[nodename] then --directly found node name
+		return nodename
+	elseif minetest.registered_nodes["default:" .. nodename] then --found node name in default
+		return "default:" .. nodename
+	end
+	for key, value in pairs(minetest.registered_nodes) do
+		if key:find(":" .. nodename, 1, true) then --found in mod
+			return key
+		end
+	end
+	for key, value in pairs(minetest.registered_nodes) do
+		if value.description:lower() == nodename:lower() then --found in description
+			return key
+		end
+	end
+	return nil
 end
 
 --determines the axis in which a player is facing, returning an axis ("x", "y", or "z") and the sign (1 or -1)
@@ -178,7 +192,8 @@ minetest.register_chatcommand("/set", {
 			return
 		end
 
-		if param == "" or not worldedit.node_is_valid(param) then
+		local node = worldedit.normalize_nodename(param)
+		if param == "" or not node then
 			worldedit.player_notify(name, "invalid node name: " .. param)
 			return
 		end
@@ -188,7 +203,7 @@ minetest.register_chatcommand("/set", {
 			tenv = worldedit.queue_aliasenv
 		end
 
-		local count = worldedit.set(pos1, pos2, param, tenv)
+		local count = worldedit.set(pos1, pos2, node, tenv)
 		worldedit.player_notify(name, count .. " nodes set")
 	end,
 })
@@ -204,16 +219,18 @@ minetest.register_chatcommand("/replace", {
 			return
 		end
 
-		local found, _, searchnode, replacenode = param:find("^([^%s]+)%s+([^%s]+)$")
+		local found, _, searchnode, replacenode = param:find("^([^%s]+)%s+(.+)$")
 		if found == nil then
 			worldedit.player_notify(name, "invalid usage: " .. param)
 			return
 		end
-		if not worldedit.node_is_valid(searchnode) then
+		local newsearchnode = worldedit.normalize_nodename(searchnode)
+		if not newsearchnode then
 			worldedit.player_notify(name, "invalid search node name: " .. searchnode)
 			return
 		end
-		if not worldedit.node_is_valid(replacenode) then
+		local newreplacenode = worldedit.normalize_nodename(replacenode)
+		if not newreplacenode then
 			worldedit.player_notify(name, "invalid replace node name: " .. replacenode)
 			return
 		end
@@ -222,7 +239,7 @@ minetest.register_chatcommand("/replace", {
 		if worldedit.ENABLE_QUEUE then
 			tenv = worldedit.queue_aliasenv
 		end
-		local count = worldedit.replace(pos1, pos2, searchnode, replacenode, tenv)
+		local count = worldedit.replace(pos1, pos2, newsearchnode, newreplacenode, tenv)
 		worldedit.player_notify(name, count .. " nodes replaced")
 	end,
 })
@@ -238,16 +255,18 @@ minetest.register_chatcommand("/replaceinverse", {
 			return
 		end
 
-		local found, _, searchnode, replacenode = param:find("^([^%s]+)%s+([^%s]+)$")
+		local found, _, searchnode, replacenode = param:find("^([^%s]+)%s+(.+)$")
 		if found == nil then
 			worldedit.player_notify(name, "invalid usage: " .. param)
 			return
 		end
-		if not worldedit.node_is_valid(searchnode) then
+		local newsearchnode = worldedit.normalize_nodename(searchnode)
+		if not newsearchnode then
 			worldedit.player_notify(name, "invalid search node name: " .. searchnode)
 			return
 		end
-		if not worldedit.node_is_valid(replacenode) then
+		local newreplacenode = worldedit.normalize_nodename(replacenode)
+		if not newreplacenode then
 			worldedit.player_notify(name, "invalid replace node name: " .. replacenode)
 			return
 		end
@@ -272,13 +291,14 @@ minetest.register_chatcommand("/hollowsphere", {
 			return
 		end
 
-		local found, _, radius, nodename = param:find("^(%d+)%s+([^%s]+)$")
+		local found, _, radius, nodename = param:find("^(%d+)%s+(.+)$")
 		if found == nil then
 			worldedit.player_notify(name, "invalid usage: " .. param)
 			return
 		end
-		if not worldedit.node_is_valid(nodename) then
-			worldedit.player_notify(name, "invalid node name: " .. param)
+		local node = worldedit.normalize_nodename(nodename)
+		if not node then
+			worldedit.player_notify(name, "invalid node name: " .. nodename)
 			return
 		end
 
@@ -286,7 +306,7 @@ minetest.register_chatcommand("/hollowsphere", {
 		if worldedit.ENABLE_QUEUE then
 			tenv = worldedit.queue_aliasenv
 		end
-		local count = worldedit.hollow_sphere(pos, tonumber(radius), nodename, tenv)
+		local count = worldedit.hollow_sphere(pos, tonumber(radius), node, tenv)
 		worldedit.player_notify(name, count .. " nodes added")
 	end,
 })
@@ -302,13 +322,14 @@ minetest.register_chatcommand("/sphere", {
 			return
 		end
 
-		local found, _, radius, nodename = param:find("^(%d+)%s+([^%s]+)$")
+		local found, _, radius, nodename = param:find("^(%d+)%s+(.+)$")
 		if found == nil then
 			worldedit.player_notify(name, "invalid usage: " .. param)
 			return
 		end
-		if not worldedit.node_is_valid(nodename) then
-			worldedit.player_notify(name, "invalid node name: " .. param)
+		local node = worldedit.normalize_nodename(nodename)
+		if not node then
+			worldedit.player_notify(name, "invalid node name: " .. nodename)
 			return
 		end
 
@@ -316,7 +337,7 @@ minetest.register_chatcommand("/sphere", {
 		if worldedit.ENABLE_QUEUE then
 			tenv = worldedit.queue_aliasenv
 		end
-		local count = worldedit.sphere(pos, tonumber(radius), nodename, tenv)
+		local count = worldedit.sphere(pos, tonumber(radius), node, tenv)
 		worldedit.player_notify(name, count .. " nodes added")
 	end,
 })
@@ -332,13 +353,14 @@ minetest.register_chatcommand("/hollowdome", {
 			return
 		end
 
-		local found, _, radius, nodename = param:find("^(%d+)%s+([^%s]+)$")
+		local found, _, radius, nodename = param:find("^(%d+)%s+(.+)$")
 		if found == nil then
 			worldedit.player_notify(name, "invalid usage: " .. param)
 			return
 		end
-		if not worldedit.node_is_valid(nodename) then
-			worldedit.player_notify(name, "invalid node name: " .. param)
+		local node = worldedit.normalize_nodename(nodename)
+		if not node then
+			worldedit.player_notify(name, "invalid node name: " .. nodename)
 			return
 		end
 
@@ -346,7 +368,7 @@ minetest.register_chatcommand("/hollowdome", {
 		if worldedit.ENABLE_QUEUE then
 			tenv = worldedit.queue_aliasenv
 		end
-		local count = worldedit.hollow_dome(pos, tonumber(radius), nodename, tenv)
+		local count = worldedit.hollow_dome(pos, tonumber(radius), node, tenv)
 		worldedit.player_notify(name, count .. " nodes added")
 	end,
 })
@@ -362,13 +384,14 @@ minetest.register_chatcommand("/dome", {
 			return
 		end
 
-		local found, _, radius, nodename = param:find("^(%d+)%s+([^%s]+)$")
+		local found, _, radius, nodename = param:find("^(%d+)%s+(.+)$")
 		if found == nil then
 			worldedit.player_notify(name, "invalid usage: " .. param)
 			return
 		end
-		if not worldedit.node_is_valid(nodename) then
-			worldedit.player_notify(name, "invalid node name: " .. param)
+		local node = worldedit.normalize_nodename(nodename)
+		if not node then
+			worldedit.player_notify(name, "invalid node name: " .. nodename)
 			return
 		end
 
@@ -376,7 +399,7 @@ minetest.register_chatcommand("/dome", {
 		if worldedit.ENABLE_QUEUE then
 			tenv = worldedit.queue_aliasenv
 		end
-		local count = worldedit.dome(pos, tonumber(radius), nodename, tenv)
+		local count = worldedit.dome(pos, tonumber(radius), node, tenv)
 		worldedit.player_notify(name, count .. " nodes added")
 	end,
 })
@@ -392,7 +415,7 @@ minetest.register_chatcommand("/hollowcylinder", {
 			return
 		end
 
-		local found, _, axis, length, radius, nodename = param:find("^([xyz%?])%s+([+-]?%d+)%s+(%d+)%s+([^%s]+)$")
+		local found, _, axis, length, radius, nodename = param:find("^([xyz%?])%s+([+-]?%d+)%s+(%d+)%s+(.+)$")
 		if found == nil then
 			worldedit.player_notify(name, "invalid usage: " .. param)
 			return
@@ -401,8 +424,9 @@ minetest.register_chatcommand("/hollowcylinder", {
 			axis, sign = worldedit.player_axis(name)
 			length = length * sign
 		end
-		if not worldedit.node_is_valid(nodename) then
-			worldedit.player_notify(name, "invalid node name: " .. param)
+		local node = worldedit.normalize_nodename(nodename)
+		if not node then
+			worldedit.player_notify(name, "invalid node name: " .. nodename)
 			return
 		end
 
@@ -410,7 +434,7 @@ minetest.register_chatcommand("/hollowcylinder", {
 		if worldedit.ENABLE_QUEUE then
 			tenv = worldedit.queue_aliasenv
 		end
-		local count = worldedit.hollow_cylinder(pos, axis, tonumber(length), tonumber(radius), nodename, tenv)
+		local count = worldedit.hollow_cylinder(pos, axis, tonumber(length), tonumber(radius), node, tenv)
 		worldedit.player_notify(name, count .. " nodes added")
 	end,
 })
@@ -426,7 +450,7 @@ minetest.register_chatcommand("/cylinder", {
 			return
 		end
 
-		local found, _, axis, length, radius, nodename = param:find("^([xyz%?])%s+([+-]?%d+)%s+(%d+)%s+([^%s]+)$")
+		local found, _, axis, length, radius, nodename = param:find("^([xyz%?])%s+([+-]?%d+)%s+(%d+)%s+(.+)$")
 		if found == nil then
 			worldedit.player_notify(name, "invalid usage: " .. param)
 			return
@@ -435,8 +459,9 @@ minetest.register_chatcommand("/cylinder", {
 			axis, sign = worldedit.player_axis(name)
 			length = length * sign
 		end
-		if not worldedit.node_is_valid(nodename) then
-			worldedit.player_notify(name, "invalid node name: " .. param)
+		local node = worldedit.normalize_nodename(nodename)
+		if not node then
+			worldedit.player_notify(name, "invalid node name: " .. nodename)
 			return
 		end
 
@@ -444,7 +469,7 @@ minetest.register_chatcommand("/cylinder", {
 		if worldedit.ENABLE_QUEUE then
 			tenv = worldedit.queue_aliasenv
 		end
-		local count = worldedit.cylinder(pos, axis, tonumber(length), tonumber(radius), nodename, tenv)
+		local count = worldedit.cylinder(pos, axis, tonumber(length), tonumber(radius), node, tenv)
 		worldedit.player_notify(name, count .. " nodes added")
 	end,
 })
@@ -460,13 +485,14 @@ minetest.register_chatcommand("/pyramid", {
 			return
 		end
 
-		local found, _, size, nodename = param:find("(%d+)%s+([^%s]+)$")
+		local found, _, size, nodename = param:find("(%d+)%s+(.+)$")
 		if found == nil then
 			worldedit.player_notify(name, "invalid usage: " .. param)
 			return
 		end
-		if not worldedit.node_is_valid(nodename) then
-			worldedit.player_notify(name, "invalid node name: " .. param)
+		local node = worldedit.normalize_nodename(nodename)
+		if not node then
+			worldedit.player_notify(name, "invalid node name: " .. nodename)
 			return
 		end
 
@@ -474,7 +500,7 @@ minetest.register_chatcommand("/pyramid", {
 		if worldedit.ENABLE_QUEUE then
 			tenv = worldedit.queue_aliasenv
 		end
-		local count = worldedit.pyramid(pos, tonumber(size), nodename, tenv)
+		local count = worldedit.pyramid(pos, tonumber(size), node, tenv)
 		worldedit.player_notify(name, count .. " nodes added")
 	end,
 })
@@ -490,13 +516,14 @@ minetest.register_chatcommand("/spiral", {
 			return
 		end
 
-		local found, _, width, height, space, nodename = param:find("(%d+)%s+(%d+)%s+(%d+)%s+([^%s]+)$")
+		local found, _, width, height, space, nodename = param:find("(%d+)%s+(%d+)%s+(%d+)%s+(.+)$")
 		if found == nil then
 			worldedit.player_notify(name, "invalid usage: " .. param)
 			return
 		end
-		if not worldedit.node_is_valid(nodename) then
-			worldedit.player_notify(name, "invalid node name: " .. param)
+		local node = worldedit.normalize_nodename(nodename)
+		if not node then
+			worldedit.player_notify(name, "invalid node name: " .. nodename)
 			return
 		end
 
@@ -504,7 +531,7 @@ minetest.register_chatcommand("/spiral", {
 		if worldedit.ENABLE_QUEUE then
 			tenv = worldedit.queue_aliasenv
 		end
-		local count = worldedit.spiral(pos, tonumber(width), tonumber(height), tonumber(space), nodename, tenv)
+		local count = worldedit.spiral(pos, tonumber(width), tonumber(height), tonumber(space), node, tenv)
 		worldedit.player_notify(name, count .. " nodes added")
 	end,
 })
@@ -793,7 +820,8 @@ minetest.register_chatcommand("/suppress", {
 			return
 		end
 
-		if param == "" or not worldedit.node_is_valid(param) then
+		local node = worldedit.node_is_valid(param)
+		if param == "" or not node then
 			worldedit.player_notify(name, "invalid node name: " .. param)
 			return
 		end
@@ -802,7 +830,7 @@ minetest.register_chatcommand("/suppress", {
 		if worldedit.ENABLE_QUEUE then
 			tenv = worldedit.queue_aliasenv
 		end
-		local count = worldedit.suppress(pos1, pos2, param, tenv)
+		local count = worldedit.suppress(pos1, pos2, node, tenv)
 		worldedit.player_notify(name, count .. " nodes suppressed")
 	end,
 })
@@ -818,7 +846,8 @@ minetest.register_chatcommand("/highlight", {
 			return
 		end
 
-		if param == "" or not worldedit.node_is_valid(param) then
+		local node = worldedit.node_is_valid(param)
+		if param == "" or not node then
 			worldedit.player_notify(name, "invalid node name: " .. param)
 			return
 		end
@@ -827,7 +856,7 @@ minetest.register_chatcommand("/highlight", {
 		if worldedit.ENABLE_QUEUE then
 			tenv = worldedit.queue_aliasenv
 		end
-		local count = worldedit.highlight(pos1, pos2, param, tenv)
+		local count = worldedit.highlight(pos1, pos2, node, tenv)
 		worldedit.player_notify(name, count .. " nodes highlighted")
 	end,
 })
