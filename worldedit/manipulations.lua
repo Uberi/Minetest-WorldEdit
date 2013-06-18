@@ -222,7 +222,43 @@ worldedit.stack = function(pos1, pos2, axis, count, env)
 	return worldedit.volume(pos1, pos2)
 end
 
---transposes a region defined by the positions `pos1` and `pos2` between the `axis1` and `axis2` axes, returning the number of nodes transposed, the new position 1, and the new position 2
+--scales the region defined by positions `pos1` and `pos2` by an factor of positive integer `factor` with `pos1` as the origin, returning the number of nodes scaled, the new scaled position 1, and the new scaled position 2
+worldedit.scale = function(pos1, pos2, factor, env)
+	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
+	if env == nil then env = minetest.env end
+
+	local pos = {x=pos2.x, y=0, z=0}
+	local bigpos = {x=0, y=0, z=0}
+	size = factor - 1
+	while pos.x >= pos1.x do
+		pos.y = pos2.y
+		while pos.y >= pos1.y do
+			pos.z = pos2.z
+			while pos.z >= pos1.z do
+				local node = env:get_node(pos) --obtain current node
+				local meta = env:get_meta(pos):to_table() --get meta of current node
+				local value = pos[axis] --store current position
+				local posx, posy, posz = pos1.x + (pos.x - pos1.x) * factor, pos1.y + (pos.y - pos1.y) * factor, pos1.z + (pos.z - pos1.z) * factor
+				for x = 0, size do --fill in large node
+					for y = 0, size do
+						for z = 0, size do
+							bigpos.x, bigpos.y, bigpos.z = posx + x, posy + y, posz + z
+							env:add_node(bigpos, node) --copy node to new position
+							env:get_meta(bigpos):from_table(meta) --set metadata of new node
+						end
+					end
+				end
+				pos.z = pos.z - 1
+			end
+			pos.y = pos.y - 1
+		end
+		pos.x = pos.x - 1
+	end
+	local newpos2 = {x=pos1.x + (pos2.x - pos1.x) * factor + size, y=pos1.y + (pos2.y - pos1.y) * factor + size, z=pos1.z + (pos2.z - pos1.z) * factor + size}
+	return worldedit.volume(pos1, pos2), pos1, newpos2
+end
+
+--transposes a region defined by the positions `pos1` and `pos2` between the `axis1` and `axis2` axes, returning the number of nodes transposed, the new transposed position 1, and the new transposed position 2
 worldedit.transpose = function(pos1, pos2, axis1, axis2, env)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 

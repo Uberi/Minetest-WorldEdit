@@ -46,11 +46,17 @@ Duplicates the region defined by positions `pos1` and `pos2` along the `axis` ax
 
 Returns the number of nodes stacked.
 
+### count, newpos1, newpos2 = worldedit.scale(pos1, pos2, factor)
+
+Scales the region defined by positions `pos1` and `pos2` by an factor of positive integer `factor` with `pos1` as the origin.
+
+Returns the number of nodes scaled, the new scaled position 1, and the new scaled position 2.
+
 ### count, newpos1, newpos2 = worldedit.transpose(pos1, pos2, axis1, axis2)
 
 Transposes a region defined by the positions `pos1` and `pos2` between the `axis1` and `axis2` axes ("x" or "y" or "z").
 
-Returns the number of nodes transposed, the new position 1, and the new position 2.
+Returns the number of nodes transposed, the new transposed position 1, and the new transposed position 2.
 
 ### count = worldedit.flip(pos1, pos2, axis)
 

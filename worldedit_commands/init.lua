@@ -631,6 +631,38 @@ minetest.register_chatcommand("/stack", {
 	end,
 })
 
+minetest.register_chatcommand("/scale", {
+	params = "<factor>",
+	description = "Scale the current WorldEdit positions and region by a factor of positive integer <factor> with position 1 as the origin",
+	privs = {worldedit=true},
+	func = function(name, param)
+		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
+		if pos1 == nil or pos2 == nil then
+			worldedit.player_notify(name, "no region selected")
+			return
+		end
+
+		local factor = tonumber(param)
+		if not factor or factor ~= math.floor(factor) or factor <= 0 then
+			worldedit.player_notify(name, "invalid scaling factor: " .. param)
+		end
+
+		local tenv = minetest.env
+		if worldedit.ENABLE_QUEUE then
+			tenv = worldedit.queue_aliasenv
+		end
+		local count, pos1, pos2 = worldedit.scale(pos1, pos2, factor, tenv)
+
+		--reset markers to scaled positions
+		worldedit.pos1[name] = pos1
+		worldedit.pos2[name] = pos2
+		worldedit.mark_pos1(name)
+		worldedit.mark_pos2(name)
+
+		worldedit.player_notify(name, count .. " nodes scaled")
+	end,
+})
+
 minetest.register_chatcommand("/transpose", {
 	params = "x/y/z/? x/y/z/?",
 	description = "Transpose the current WorldEdit region along the x/y/z/? and x/y/z/? axes",

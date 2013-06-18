@@ -166,6 +166,14 @@ Stack the current WorldEdit region along the x/y/z/? axis <count> times.
     //stack z +5
     //stack ? 12
 
+### //scale <factor>
+
+Scale the current WorldEdit positions and region by a factor of positive integer <factor> with position 1 as the origin.
+
+    //scale 2
+    //scale 1
+    //scale 10
+
 ### //transpose x/y/z/? x/y/z/?
 
 Transpose the current WorldEdit positions and region along the x/y/z/? and x/y/z/? axes.
