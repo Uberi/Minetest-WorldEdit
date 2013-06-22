@@ -278,3 +278,24 @@ Executes <code> as a Lua chunk in the global namespace with the variable pos ava
 
     //luatransform minetest.env:add_node(pos, {name="default:stone"})
     //luatransform if minetest.env:get_node(pos).name == "air" then minetest.env:add_node(pos, {name="default:water_source"})
+
+### //mtschemcreate <file>
+
+Save the current WorldEdit region using the Minetest Schematic format to "(world folder)/schems/<file>.mts".
+
+    //mtschemcreate some random filename
+    //mtschemcreate huge_base
+
+### //mtschemplace <file>
+
+Load nodes from "(world folder)/schems/<file>.mts" with position 1 of the current WorldEdit region as the origin.
+
+    //mtschemplace some random filename
+    //mtschemplace huge_base
+
+### //mtschemprob start/finish/get
+
+After using //mtschemprob start all nodes punched will bring up a text field where a probablity can be entered.
+This mode can be left with //mtschemprob finish. //mtschemprob get will display the probabilities saved for the nodes.
+
+    //mtschemprob get

@@ -4,6 +4,10 @@ worldedit.set_pos = {}
 
 worldedit.pos1 = {}
 worldedit.pos2 = {}
+if minetest.place_schematic then
+	worldedit.prob_pos = {}
+	worldedit.prob_list = {}
+end
 
 dofile(minetest.get_modpath("worldedit_commands") .. "/mark.lua")
 
@@ -161,6 +165,9 @@ minetest.register_on_punchnode(function(pos, node, puncher)
 			worldedit.mark_pos2(name)
 			worldedit.set_pos[name] = nil --finished setting positions
 			worldedit.player_notify(name, "position 2 set to " .. minetest.pos_to_string(pos))
+		elseif worldedit.set_pos[name] == "prob" then --setting Minetest schematic node probabilities
+			worldedit.prob_pos[name] = pos
+			minetest.show_formspec(puncher:get_player_name(), "prob_val_enter", "field[text;;]")
 		end
 	end
 end)
@@ -1071,3 +1078,100 @@ minetest.register_chatcommand("/luatransform", {
 		end
 	end,
 })
+
+if minetest.place_schematic then
+minetest.register_chatcommand("/mtschemcreate", {
+	params = "<filename>",
+	description = "Creates a Minetest schematic of the box defined by position 1 and position 2, and saves it to <filename>",
+	privs = {worldedit=true},
+	func = function(name, param)
+		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
+		if pos1 == nil or pos2 == nil then
+			worldedit.player_notify(name, "No region selected")
+			return
+		end
+		if param == nil then
+			worldedit.player_notify(name, "No filename specified")
+			return
+		end
+
+		local path = minetest.get_worldpath() .. "/schems"
+		local filename = path .. "/" .. param .. ".mts"
+		os.execute("mkdir \"" .. path .. "\"") --create directory if it does not already exist
+
+		local ret = minetest.create_schematic(pos1, pos2, worldedit.prob_list[name], filename)
+		if ret == nil then
+			worldedit.player_notify(name, "Failed to create Minetest schematic", false)
+		else
+			worldedit.player_notify(name, "Saved Minetest schematic to " .. param, false)
+		end
+		worldedit.prob_list[name] = {}
+	end,
+})
+
+minetest.register_chatcommand("/mtschemplace", {
+	params = "<filename>",
+	description = "Places the Minetest schematic identified by <filename> at WorldEdit position 1",
+	privs = {worldedit=true},
+	func = function(name, param)
+		local pos = worldedit.pos1[name]
+		if pos == nil then
+			worldedit.player_notify(name, "No position selected")
+			return
+		end
+		if param == nil then
+			worldedit.player_notify(name, "No filename specified")
+			return
+		end
+
+		local path = minetest.get_worldpath() .. "/schems/" .. param .. ".mts"
+		if minetest.place_schematic(pos, path) == nil then
+			worldedit.player_notify(name, "Failed to place Minetest schematic", false)
+		else
+			worldedit.player_notify(name, "Placed Minetest schematic " .. param ..
+				" at " .. minetest.pos_to_string(pos), false)
+		end
+	end,
+})
+
+minetest.register_chatcommand("/mtschemprob", {
+	params = "start/finish/get",
+	description = "Begins node probability entry for Minetest schematics, gets the nodes that have probabilities set, or ends node probability entry",
+	privs = {worldedit=true},
+	func = function(name, param)
+		if param == "start" then --start probability setting
+			worldedit.set_pos[name] = "prob"
+			worldedit.prob_list[name] = {}
+			worldedit.player_notify(name, "select Minetest schematic probability values by punching nodes")
+		elseif param == "finish" then --finish probability setting
+			worldedit.set_pos[name] = nil
+			worldedit.player_notify(name, "finished Minetest schematic probability selection")
+		elseif param == "get" then --get all nodes that had probabilities set on them
+			local text = ""
+			local problist = worldedit.prob_list[name]
+			if problist == nil then
+				return
+			end
+			for k,v in pairs(problist) do
+				local prob = math.floor(((v["prob"] / 256) * 100) * 100 + 0.5) / 100
+				text = text .. minetest.pos_to_string(v["pos"]) .. ": " .. prob .. "% | "
+			end
+			worldedit.player_notify(name, "Currently set node probabilities:")
+			worldedit.player_notify(name, text)
+		else
+			worldedit.player_notify(name, "unknown subcommand: " .. param)
+		end
+	end,
+})
+
+minetest.register_on_player_receive_fields(
+	function(player, formname, fields)
+		if (formname == "prob_val_enter") and (fields.text ~= "") then
+			local name = player:get_player_name()
+			local prob_entry = {pos=worldedit.prob_pos[name], prob=tonumber(fields.text)}
+			local index = table.getn(worldedit.prob_list[name]) + 1
+			worldedit.prob_list[name][index] = prob_entry
+		end
+	end
+)
+end
