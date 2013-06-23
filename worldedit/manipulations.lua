@@ -1,5 +1,8 @@
 worldedit = worldedit or {}
 
+--wip: test the entire API again to make sure it works
+--wip: remove env parameter where no longer needed in chat commands module
+
 --modifies positions `pos1` and `pos2` so that each component of `pos1` is less than or equal to its corresponding conent of `pos2`, returning two new positions
 worldedit.sort_pos = function(pos1, pos2)
 	pos1 = {x=pos1.x, y=pos1.y, z=pos1.z}
@@ -23,24 +26,19 @@ worldedit.volume = function(pos1, pos2)
 end
 
 --sets a region defined by positions `pos1` and `pos2` to `nodename`, returning the number of nodes filled
-worldedit.set = function(pos1, pos2, nodename, env)
+worldedit.set = function(pos1, pos2, nodename)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
-	if env == nil then env = minetest.env end
 
-	local node = {name=nodename}
-	local pos = {x=pos1.x, y=0, z=0}
-	while pos.x <= pos2.x do
-		pos.y = pos1.y
-		while pos.y <= pos2.y do
-			pos.z = pos1.z
-			while pos.z <= pos2.z do
-				env:add_node(pos, node)
-				pos.z = pos.z + 1
-			end
-			pos.y = pos.y + 1
-		end
-		pos.x = pos.x + 1
+	local size = {x=pos2.x - pos1.x, y=pos2.y - pos1.y, z=pos2.z - pos1.z}
+	local nodes = {}
+
+	--fill nodes table with node to be set
+	local node = {nodename, 0, 0}
+	for i = 1, (size.x * size.y * size.z) do
+		nodes[i] = node
 	end
+
+	minetest.place_schematic(pos1, {size=size, data=nodes})
 	return worldedit.volume(pos1, pos2)
 end
 
@@ -49,29 +47,12 @@ worldedit.replace = function(pos1, pos2, searchnode, replacenode, env)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 	if env == nil then env = minetest.env end
 
-	if minetest.registered_nodes[searchnode] == nil then
-		searchnode = "default:" .. searchnode
-	end
-
-	local pos = {x=pos1.x, y=0, z=0}
 	local node = {name=replacenode}
-	local count = 0
-	while pos.x <= pos2.x do
-		pos.y = pos1.y
-		while pos.y <= pos2.y do
-			pos.z = pos1.z
-			while pos.z <= pos2.z do
-				if env:get_node(pos).name == searchnode then
-					env:add_node(pos, node)
-					count = count + 1
-				end
-				pos.z = pos.z + 1
-			end
-			pos.y = pos.y + 1
-		end
-		pos.x = pos.x + 1
+	local nodes = minetest.find_nodes_in_area(pos1, pos2, searchnode)
+	for _, pos in ipairs(nodes) do
+		env:add_node(pos, node)
 	end
-	return count
+	return #nodes
 end
 
 --replaces all nodes other than `searchnode` with `replacenode` in a region defined by positions `pos1` and `pos2`, returning the number of nodes replaced
@@ -86,7 +67,7 @@ worldedit.replaceinverse = function(pos1, pos2, searchnode, replacenode, env)
 	local pos = {x=pos1.x, y=0, z=0}
 	local node = {name=replacenode}
 	local count = 0
-	while pos.x <= pos2.x do
+	while pos.x <= pos2.x do --wip: see if this can be sped up like worldedit.replace
 		pos.y = pos1.y
 		while pos.y <= pos2.y do
 			pos.z = pos1.z
@@ -110,6 +91,7 @@ worldedit.copy = function(pos1, pos2, axis, amount, env)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 	if env == nil then env = minetest.env end
 
+	--wip: copy slice by slice using schematic method in the copy axis and transfer metadata in separate loop (and if the amount is greater than the length in the axis, copy whole thing at a time)
 	if amount < 0 then
 		local pos = {x=pos1.x, y=0, z=0}
 		while pos.x <= pos2.x do
@@ -159,6 +141,7 @@ worldedit.move = function(pos1, pos2, axis, amount, env)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 	if env == nil then env = minetest.env end
 
+	--wip: move slice by slice using schematic method in the move axis and transfer metadata in separate loop (and if the amount is greater than the length in the axis, copy whole thing at a time and erase original after, using schematic method)
 	if amount < 0 then
 		local pos = {x=pos1.x, y=0, z=0}
 		while pos.x <= pos2.x do
@@ -227,6 +210,15 @@ worldedit.scale = function(pos1, pos2, factor, env)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 	if env == nil then env = minetest.env end
 
+	--prepare schematic of large node
+	local place_schematic = minetest.place_schematic
+	local placeholder_node = {"", 0, 0}
+	local nodes = {}
+	for i = 1, size ^ 3 do
+		nodes[i] = placeholder_node
+	end
+	local schematic = {size={x=size, y=size, z=size}, data=nodes}
+
 	local pos = {x=pos2.x, y=0, z=0}
 	local bigpos = {x=0, y=0, z=0}
 	size = factor - 1
@@ -237,13 +229,18 @@ worldedit.scale = function(pos1, pos2, factor, env)
 			while pos.z >= pos1.z do
 				local node = env:get_node(pos) --obtain current node
 				local meta = env:get_meta(pos):to_table() --get meta of current node
+
 				local value = pos[axis] --store current position
 				local posx, posy, posz = pos1.x + (pos.x - pos1.x) * factor, pos1.y + (pos.y - pos1.y) * factor, pos1.z + (pos.z - pos1.z) * factor
-				for x = 0, size do --fill in large node
+
+				--create large node
+				placeholder_node[1], placeholder_node[3] = node.name, node.param2
+				bigpos.x, bigpos.y, bigpos.z = posx, posy, posz
+				place_schematic(bigpos, schematic)
+				for x = 0, size do --fill in large node meta
 					for y = 0, size do
 						for z = 0, size do
 							bigpos.x, bigpos.y, bigpos.z = posx + x, posy + y, posz + z
-							env:add_node(bigpos, node) --copy node to new position
 							env:get_meta(bigpos):from_table(meta) --set metadata of new node
 						end
 					end
@@ -314,6 +311,7 @@ end
 worldedit.flip = function(pos1, pos2, axis, env)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 
+	--wip: flip the region slice by slice along the flip axis using schematic method
 	local pos = {x=pos1.x, y=0, z=0}
 	local start = pos1[axis] + pos2[axis]
 	pos2[axis] = pos1[axis] + math.floor((pos2[axis] - pos1[axis]) / 2)
