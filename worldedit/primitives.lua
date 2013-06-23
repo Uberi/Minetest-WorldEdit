@@ -1,101 +1,97 @@
 worldedit = worldedit or {}
 
 --adds a hollow sphere centered at `pos` with radius `radius`, composed of `nodename`, returning the number of nodes added
-worldedit.hollow_sphere = function(pos, radius, nodename, env)
-	local node = {name=nodename}
-	local pos1 = {x=0, y=0, z=0}
-	local min_radius = radius * (radius - 1)
-	local max_radius = radius * (radius + 1)
-	local count = 0
-	if env == nil then env = minetest.env end
+worldedit.hollow_sphere = function(pos, radius, nodename)
+	local insert = table.insert
+	local node = {nodename, 0, 0}
+	local ignore = {"ignore", 0, 0}
+	local nodes = {}
+	local min_radius, max_radius = radius * (radius - 1), radius * (radius + 1)
 	for x = -radius, radius do
-		pos1.x = pos.x + x
 		for y = -radius, radius do
-			pos1.y = pos.y + y
 			for z = -radius, radius do
-				if x*x+y*y+z*z >= min_radius and x*x+y*y+z*z <= max_radius then
-					pos1.z = pos.z + z
-					env:add_node(pos1, node)
-					count = count + 1
+				local squared = x * x + y * y + z * z
+				if squared >= min_radius and squared <= max_radius then
+					insert(nodes, node)
+				else
+					insert(nodes, ignore)
 				end
 			end
 		end
 	end
-	return count
+	minetest.place_schematic({x=pos.x - radius, y=pos.y - radius, z=pos.z - radius}, {size={x=radius * 2, y=radius * 2, z=radius * 2}, data=nodes})
+	return #nodes
 end
 
 --adds a sphere centered at `pos` with radius `radius`, composed of `nodename`, returning the number of nodes added
-worldedit.sphere = function(pos, radius, nodename, env)
-	local node = {name=nodename}
-	local pos1 = {x=0, y=0, z=0}
+worldedit.sphere = function(pos, radius, nodename)
+	local insert = table.insert
+	local node = {nodename, 0, 0}
+	local ignore = {"ignore", 0, 0}
+	local nodes = {}
 	local max_radius = radius * (radius + 1)
-	local count = 0
-	if env == nil then env = minetest.env end
 	for x = -radius, radius do
-		pos1.x = pos.x + x
 		for y = -radius, radius do
-			pos1.y = pos.y + y
 			for z = -radius, radius do
-				if x*x+y*y+z*z <= max_radius then
-					pos1.z = pos.z + z
-					env:add_node(pos1, node)
-					count = count + 1
+				if x * x + y * y + z * z <= max_radius then
+					insert(nodes, node)
+				else
+					insert(nodes, ignore)
 				end
 			end
 		end
 	end
-	return count
+	minetest.place_schematic({x=pos.x - radius, y=pos.y - radius, z=pos.z - radius}, {size={x=radius * 2, y=radius * 2, z=radius * 2}, data=nodes})
+	return #nodes
 end
 
 --adds a hollow dome centered at `pos` with radius `radius`, composed of `nodename`, returning the number of nodes added
-worldedit.hollow_dome = function(pos, radius, nodename, env) --wip: use bresenham sphere for maximum speed
-	local node = {name=nodename}
-	local pos1 = {x=0, y=0, z=0}
-	local min_radius = radius * (radius - 1)
-	local max_radius = radius * (radius + 1)
-	local count = 0
-	if env == nil then env = minetest.env end
+worldedit.hollow_dome = function(pos, radius, nodename) --wip: use bresenham sphere for maximum speed
+	local insert = table.insert
+	local node = {nodename, 0, 0}
+	local ignore = {"ignore", 0, 0}
+	local nodes = {}
+	local min_radius, max_radius = radius * (radius - 1), radius * (radius + 1)
 	for x = -radius, radius do
-		pos1.x = pos.x + x
 		for y = 0, radius do
-			pos1.y = pos.y + y
 			for z = -radius, radius do
-				if x*x+y*y+z*z >= min_radius and x*x+y*y+z*z <= max_radius then
-					pos1.z = pos.z + z
-					env:add_node(pos1, node)
-					count = count + 1
+				local squared = x * x + y * y + z * z
+				if squared >= min_radius and squared <= max_radius then
+					insert(nodes, node)
+				else
+					insert(nodes, ignore)
 				end
 			end
 		end
 	end
-	return count
+	minetest.place_schematic({x=pos.x - radius, y=pos.y, z=pos.z - radius}, {size={x=radius * 2, y=radius * 2, z=radius * 2}, data=nodes})
+	return #nodes
 end
 
 --adds a dome centered at `pos` with radius `radius`, composed of `nodename`, returning the number of nodes added
-worldedit.dome = function(pos, radius, nodename, env) --wip: use bresenham sphere for maximum speed
-	local node = {name=nodename}
-	local pos1 = {x=0, y=0, z=0}
+worldedit.dome = function(pos, radius, nodename) --wip: use bresenham sphere for maximum speed
+	local insert = table.insert
+	local node = {nodename, 0, 0}
+	local ignore = {"ignore", 0, 0}
+	local nodes = {}
 	local max_radius = radius * (radius + 1)
-	local count = 0
-	if env == nil then env = minetest.env end
 	for x = -radius, radius do
-		pos1.x = pos.x + x
 		for y = 0, radius do
-			pos1.y = pos.y + y
 			for z = -radius, radius do
-				if x*x+y*y+z*z <= max_radius then
-					pos1.z = pos.z + z
-					env:add_node(pos1, node)
-					count = count + 1
+				if x * x + y * y + z * z <= max_radius then
+					insert(nodes, node)
+				else
+					insert(nodes, ignore)
 				end
 			end
 		end
 	end
-	return count
+	minetest.place_schematic({x=pos.x - radius, y=pos.y, z=pos.z - radius}, {size={x=radius * 2, y=radius * 2, z=radius * 2}, data=nodes})
+	return #nodes
 end
 
 --adds a hollow cylinder at `pos` along the `axis` axis ("x" or "y" or "z") with length `length` and radius `radius`, composed of `nodename`, returning the number of nodes added
-worldedit.hollow_cylinder = function(pos, axis, length, radius, nodename, env)
+worldedit.hollow_cylinder = function(pos, axis, length, radius, nodename)
 	local other1, other2
 	if axis == "x" then
 		other1, other2 = "y", "z"

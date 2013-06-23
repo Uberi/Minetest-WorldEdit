@@ -67,7 +67,7 @@ worldedit.replaceinverse = function(pos1, pos2, searchnode, replacenode, env)
 	local pos = {x=pos1.x, y=0, z=0}
 	local node = {name=replacenode}
 	local count = 0
-	while pos.x <= pos2.x do --wip: see if this can be sped up like worldedit.replace
+	while pos.x <= pos2.x do --wip: see if this can be sped up like worldedit.replace, except with hashed found node positions and testing against the set
 		pos.y = pos1.y
 		while pos.y <= pos2.y do
 			pos.z = pos1.z
