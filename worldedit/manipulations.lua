@@ -33,7 +33,7 @@ worldedit.set = function(pos1, pos2, nodename)
 	local nodes = {}
 
 	--fill nodes table with node to be set
-	local node = {nodename, 0, 0}
+	local node = {name=nodename, param1=0, param2=0}
 	for i = 1, (size.x * size.y * size.z) do
 		nodes[i] = node
 	end
@@ -43,38 +43,34 @@ worldedit.set = function(pos1, pos2, nodename)
 end
 
 --replaces all instances of `searchnode` with `replacenode` in a region defined by positions `pos1` and `pos2`, returning the number of nodes replaced
-worldedit.replace = function(pos1, pos2, searchnode, replacenode, env)
+worldedit.replace = function(pos1, pos2, searchnode, replacenode)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
-	if env == nil then env = minetest.env end
 
 	local node = {name=replacenode}
+	local add_node = minetest.add_node
 	local nodes = minetest.find_nodes_in_area(pos1, pos2, searchnode)
 	for _, pos in ipairs(nodes) do
-		env:add_node(pos, node)
+		add_node(pos, node)
 	end
 	return #nodes
 end
 
 --replaces all nodes other than `searchnode` with `replacenode` in a region defined by positions `pos1` and `pos2`, returning the number of nodes replaced
-worldedit.replaceinverse = function(pos1, pos2, searchnode, replacenode, env)
+worldedit.replaceinverse = function(pos1, pos2, searchnode, replacenode)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
-	if env == nil then env = minetest.env end
-
-	if minetest.registered_nodes[searchnode] == nil then
-		searchnode = "default:" .. searchnode
-	end
 
 	local pos = {x=pos1.x, y=0, z=0}
 	local node = {name=replacenode}
+	local get_node, add_node = minetest.get_node, minetest.add_node
 	local count = 0
-	while pos.x <= pos2.x do --wip: see if this can be sped up like worldedit.replace, except with hashed found node positions and testing against the set
+	while pos.x <= pos2.x do
 		pos.y = pos1.y
 		while pos.y <= pos2.y do
 			pos.z = pos1.z
 			while pos.z <= pos2.z do
-				local name = env:get_node(pos).name
+				local name = get_node(pos).name
 				if name ~= "ignore" and name ~= searchnode then
-					env:add_node(pos, node)
+					add_node(pos, node)
 					count = count + 1
 				end
 				pos.z = pos.z + 1
@@ -206,13 +202,12 @@ worldedit.stack = function(pos1, pos2, axis, count, env)
 end
 
 --scales the region defined by positions `pos1` and `pos2` by an factor of positive integer `factor` with `pos1` as the origin, returning the number of nodes scaled, the new scaled position 1, and the new scaled position 2
-worldedit.scale = function(pos1, pos2, factor, env)
+worldedit.scale = function(pos1, pos2, factor)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
-	if env == nil then env = minetest.env end
 
 	--prepare schematic of large node
-	local place_schematic = minetest.place_schematic
-	local placeholder_node = {"", 0, 0}
+	local get_node, get_meta, place_schematic = minetest.get_node, minetest.get_meta, minetest.place_schematic
+	local placeholder_node = {name="", param1=0, param2=0}
 	local nodes = {}
 	for i = 1, size ^ 3 do
 		nodes[i] = placeholder_node
@@ -227,8 +222,8 @@ worldedit.scale = function(pos1, pos2, factor, env)
 		while pos.y >= pos1.y do
 			pos.z = pos2.z
 			while pos.z >= pos1.z do
-				local node = env:get_node(pos) --obtain current node
-				local meta = env:get_meta(pos):to_table() --get meta of current node
+				local node = get_node(pos) --obtain current node
+				local meta = get_meta(pos):to_table() --get meta of current node
 
 				local value = pos[axis] --store current position
 				local posx, posy, posz = pos1.x + (pos.x - pos1.x) * factor, pos1.y + (pos.y - pos1.y) * factor, pos1.z + (pos.z - pos1.z) * factor
@@ -241,7 +236,7 @@ worldedit.scale = function(pos1, pos2, factor, env)
 					for y = 0, size do
 						for z = 0, size do
 							bigpos.x, bigpos.y, bigpos.z = posx + x, posy + y, posz + z
-							env:get_meta(bigpos):from_table(meta) --set metadata of new node
+							get_meta(bigpos):from_table(meta) --set metadata of new node
 						end
 					end
 				end
@@ -278,7 +273,7 @@ worldedit.transpose = function(pos1, pos2, axis1, axis2, env)
 	newpos2[axis2] = pos1[axis2] + extent1
 
 	local pos = {x=pos1.x, y=0, z=0}
-	if env == nil then env = minetest.env end
+	local get_node, get_meta, add_node = minetest.get_node, minetest.get_meta, minetest.add_node
 	while pos.x <= pos2.x do
 		pos.y = pos1.y
 		while pos.y <= pos2.y do
@@ -286,17 +281,17 @@ worldedit.transpose = function(pos1, pos2, axis1, axis2, env)
 			while pos.z <= pos2.z do
 				local extent1, extent2 = pos[axis1] - pos1[axis1], pos[axis2] - pos1[axis2]
 				if compare(extent1, extent2) then --transpose only if below the diagonal
-					local node1 = env:get_node(pos)
-					local meta1 = env:get_meta(pos):to_table()
+					local node1 = get_node(pos)
+					local meta1 = get_meta(pos):to_table()
 					local value1, value2 = pos[axis1], pos[axis2] --save position values
 					pos[axis1], pos[axis2] = pos1[axis1] + extent2, pos1[axis2] + extent1 --swap axis extents
-					local node2 = env:get_node(pos)
-					local meta2 = env:get_meta(pos):to_table()
-					env:add_node(pos, node1)
-					env:get_meta(pos):from_table(meta1)
+					local node2 = get_node(pos)
+					local meta2 = get_meta(pos):to_table()
+					add_node(pos, node1)
+					get_meta(pos):from_table(meta1)
 					pos[axis1], pos[axis2] = value1, value2 --restore position values
-					env:add_node(pos, node2)
-					env:get_meta(pos):from_table(meta2)
+					add_node(pos, node2)
+					get_meta(pos):from_table(meta2)
 				end
 				pos.z = pos.z + 1
 			end
@@ -372,8 +367,8 @@ end
 --rotates all oriented nodes in a region defined by the positions `pos1` and `pos2` by `angle` degrees clockwise (90 degree increment) around the Y axis, returning the number of nodes oriented
 worldedit.orient = function(pos1, pos2, angle, env)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
-	local nodes = minetest.registered_nodes
-	if env == nil then env = minetest.env end
+	local registered_nodes = minetest.registered_nodes
+
 	local wallmounted = {
 		[90]={[0]=0, [1]=1, [2]=5, [3]=4, [4]=2, [5]=3},
 		[180]={[0]=0, [1]=1, [2]=3, [3]=2, [4]=5, [5]=4},
@@ -393,26 +388,27 @@ worldedit.orient = function(pos1, pos2, angle, env)
 	local facedir_substitution = facedir[angle]
 
 	local count = 0
+	local get_node, get_meta, add_node = minetest.get_node, minetest.get_meta, minetest.add_node
 	local pos = {x=pos1.x, y=0, z=0}
 	while pos.x <= pos2.x do
 		pos.y = pos1.y
 		while pos.y <= pos2.y do
 			pos.z = pos1.z
 			while pos.z <= pos2.z do
-				local node = env:get_node(pos)
-				local def = nodes[node.name]
+				local node = get_node(pos)
+				local def = registered_nodes[node.name]
 				if def then
 					if def.paramtype2 == "wallmounted" then
 						node.param2 = wallmounted_substitution[node.param2]
-						local meta = env:get_meta(pos):to_table()
-						env:add_node(pos, node)
-						env:get_meta(pos):from_table(meta)
+						local meta = get_meta(pos):to_table()
+						add_node(pos, node)
+						get_meta(pos):from_table(meta)
 						count = count + 1
 					elseif def.paramtype2 == "facedir" then
 						node.param2 = facedir_substitution[node.param2]
-						local meta = env:get_meta(pos):to_table()
-						env:add_node(pos, node)
-						env:get_meta(pos):from_table(meta)
+						local meta = get_meta(pos):to_table()
+						add_node(pos, node)
+						get_meta(pos):from_table(meta)
 						count = count + 1
 					end
 				end
@@ -428,20 +424,10 @@ end
 --fixes the lighting in a region defined by positions `pos1` and `pos2`, returning the number of nodes updated
 worldedit.fixlight = function(pos1, pos2, env)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
-	if env == nil then env = minetest.env end
-	local count = 0
-
-	local pos = {x=pos1.x, y=pos2.y, z=0}
-	while pos.x <= pos2.x do
-		pos.z = pos1.z
-		while pos.z <= pos2.z do
-			if env:get_node(pos).name == "air" then
-				env:dig_node(pos)
-				count = count + 1
-			end
-			pos.z = pos.z + 1
-		end
-		pos.x = pos.x + 1
+	local nodes = minetest.find_nodes_in_area(pos1, pos2, "air")
+	local dig_node = minetest.dig_node
+	for _, pos in ipairs(nodes) do
+		dig_node(pos)
 	end
-	return count
+	return #nodes
 end

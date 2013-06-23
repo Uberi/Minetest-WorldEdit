@@ -31,22 +31,21 @@ minetest.register_node("worldedit:placeholder", {
 })
 
 --hides all nodes in a region defined by positions `pos1` and `pos2` by non-destructively replacing them with invisible nodes, returning the number of nodes hidden
-worldedit.hide = function(pos1, pos2, tenv)
+worldedit.hide = function(pos1, pos2)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
-	if env == nil then env = minetest.env end
-
 	local pos = {x=pos1.x, y=0, z=0}
 	local placeholder = {name="worldedit:placeholder", param1=0, param2=0}
+	local get_node, get_meta, add_node = minetest.get_node, minetest.get_meta, minetest.add_node
 	while pos.x <= pos2.x do
 		pos.y = pos1.y
 		while pos.y <= pos2.y do
 			pos.z = pos1.z
 			while pos.z <= pos2.z do
-				local node = env:get_node(pos)
+				local node = get_node(pos)
 				placeholder.param1, placeholder.param2 = node.param1, node.param2 --copy node's param1 and param2
-				local data = env:get_meta(pos):to_table() --obtain metadata of original node
-				env:add_node(pos, placeholder) --add placeholder node
-				local meta = env:get_meta(pos) --obtain placeholder meta
+				local data = get_meta(pos):to_table() --obtain metadata of original node
+				add_node(pos, placeholder) --add placeholder node
+				local meta = get_meta(pos) --obtain placeholder meta
 				meta:from_table(data) --set placeholder metadata to the original node's metadata
 				meta:set_string("worldedit_placeholder", node.name)  --add the node's name
 				pos.z = pos.z + 1
@@ -59,18 +58,17 @@ worldedit.hide = function(pos1, pos2, tenv)
 end
 
 --suppresses all instances of `nodename` in a region defined by positions `pos1` and `pos2` by non-destructively replacing them with invisible nodes, returning the number of nodes suppressed
-worldedit.suppress = function(pos1, pos2, nodename, tenv)
+worldedit.suppress = function(pos1, pos2, nodename)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
-	if env == nil then env = minetest.env end
-
 	local placeholder = {name="worldedit:placeholder", param1=0, param2=0}
 	local nodes = minetest.find_nodes_in_area(pos1, pos2, nodename)
+	local get_node, get_meta, add_node = minetest.get_node, minetest.get_meta, minetest.add_node
 	for _, pos in ipairs(nodes) do
-		local node = env:get_node(pos)
+		local node = get_node(pos)
 		placeholder.param1, placeholder.param2 = node.param1, node.param2 --copy node's param1 and param2
-		local data = env:get_meta(pos):to_table() --obtain metadata of original node
-		env:add_node(pos, placeholder) --add placeholder node
-		local meta = env:get_meta(pos) --obtain placeholder meta
+		local data = get_meta(pos):to_table() --obtain metadata of original node
+		add_node(pos, placeholder) --add placeholder node
+		local meta = get_meta(pos) --obtain placeholder meta
 		meta:from_table(data) --set placeholder metadata to the original node's metadata
 		meta:set_string("worldedit_placeholder", nodename)  --add the node's name
 	end
@@ -78,30 +76,25 @@ worldedit.suppress = function(pos1, pos2, nodename, tenv)
 end
 
 --highlights all instances of `nodename` in a region defined by positions `pos1` and `pos2` by non-destructively hiding all other nodes, returning the number of nodes found
-worldedit.highlight = function(pos1, pos2, nodename, tenv)
+worldedit.highlight = function(pos1, pos2, nodename)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
-	if env == nil then env = minetest.env end
-
-	if minetest.registered_nodes[nodename] == nil then
-		nodename = "default:" .. nodename
-	end
-
 	local pos = {x=pos1.x, y=0, z=0}
 	local placeholder = {name="worldedit:placeholder", param1=0, param2=0}
+	local get_node, get_meta, add_node = minetest.get_node, minetest.get_meta, minetest.add_node
 	local count = 0
-	while pos.x <= pos2.x do --wip: see if this can be sped up like worldedit.suppress, except with hashed found node positions and testing against the set
+	while pos.x <= pos2.x do
 		pos.y = pos1.y
 		while pos.y <= pos2.y do
 			pos.z = pos1.z
 			while pos.z <= pos2.z do
-				local node = env:get_node(pos)
+				local node = get_node(pos)
 				if node.name == nodename then --node found
 					count = count + 1
 				else --hide other nodes
 					placeholder.param1, placeholder.param2 = node.param1, node.param2 --copy node's param1 and param2
-					local data = env:get_meta(pos):to_table() --obtain metadata of original node
-					env:add_node(pos, placeholder) --add placeholder node
-					local meta = env:get_meta(pos) --obtain placeholder meta
+					local data = get_meta(pos):to_table() --obtain metadata of original node
+					add_node(pos, placeholder) --add placeholder node
+					local meta = get_meta(pos) --obtain placeholder meta
 					meta:from_table(data) --set placeholder metadata to the original node's metadata
 					meta:set_string("worldedit_placeholder", node.name)  --add the node's name
 				end
@@ -115,20 +108,19 @@ worldedit.highlight = function(pos1, pos2, nodename, tenv)
 end
 
 --restores all nodes hidden with WorldEdit functions in a region defined by positions `pos1` and `pos2`, returning the number of nodes restored
-worldedit.restore = function(pos1, pos2, tenv)
+worldedit.restore = function(pos1, pos2)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
-	if env == nil then env = minetest.env end
-
 	local node = {name="", param1=0, param2=0}
-	local nodes = minetest.find_nodes_in_area(pos1, pos2, nodename)
+	local nodes = minetest.find_nodes_in_area(pos1, pos2, "worldedit:placeholder")
+	local get_node, get_meta, add_node = minetest.get_node, minetest.get_meta, minetest.add_node
 	for _, pos in ipairs(nodes) do
-		local currentnode = env:get_node(pos)
+		local currentnode = get_node(pos)
 		node.param1, node.param2 = currentnode.param1, currentnode.param2 --copy node's param1 and param2
-		local data = env:get_meta(pos):to_table() --obtain node metadata
+		local data = get_meta(pos):to_table() --obtain node metadata
 		node.name = data.fields.worldedit_placeholder --set node name
 		data.fields.worldedit_placeholder = nil --delete old nodename
-		env:add_node(pos, placeholder) --add original node
-		env:get_meta(pos):from_table(data) --set original node metadata
+		add_node(pos, placeholder) --add original node
+		get_meta(pos):from_table(data) --set original node metadata
 	end
 	return #nodes
 end

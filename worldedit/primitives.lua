@@ -3,8 +3,8 @@ worldedit = worldedit or {}
 --adds a hollow sphere centered at `pos` with radius `radius`, composed of `nodename`, returning the number of nodes added
 worldedit.hollow_sphere = function(pos, radius, nodename)
 	local insert = table.insert
-	local node = {nodename, 0, 0}
-	local ignore = {"ignore", 0, 0}
+	local node = {name=nodename, param1=0, param2=0}
+	local ignore = {name="ignore", param1=0, param2=0}
 	local nodes = {}
 	local min_radius, max_radius = radius * (radius - 1), radius * (radius + 1)
 	for x = -radius, radius do
@@ -26,8 +26,8 @@ end
 --adds a sphere centered at `pos` with radius `radius`, composed of `nodename`, returning the number of nodes added
 worldedit.sphere = function(pos, radius, nodename)
 	local insert = table.insert
-	local node = {nodename, 0, 0}
-	local ignore = {"ignore", 0, 0}
+	local node = {name=nodename, param1=0, param2=0}
+	local ignore = {name="ignore", param1=0, param2=0}
 	local nodes = {}
 	local max_radius = radius * (radius + 1)
 	for x = -radius, radius do
@@ -48,8 +48,8 @@ end
 --adds a hollow dome centered at `pos` with radius `radius`, composed of `nodename`, returning the number of nodes added
 worldedit.hollow_dome = function(pos, radius, nodename) --wip: use bresenham sphere for maximum speed
 	local insert = table.insert
-	local node = {nodename, 0, 0}
-	local ignore = {"ignore", 0, 0}
+	local node = {name=nodename, param1=0, param2=0}
+	local ignore = {name="ignore", param1=0, param2=0}
 	local nodes = {}
 	local min_radius, max_radius = radius * (radius - 1), radius * (radius + 1)
 	for x = -radius, radius do
@@ -71,8 +71,8 @@ end
 --adds a dome centered at `pos` with radius `radius`, composed of `nodename`, returning the number of nodes added
 worldedit.dome = function(pos, radius, nodename) --wip: use bresenham sphere for maximum speed
 	local insert = table.insert
-	local node = {nodename, 0, 0}
-	local ignore = {"ignore", 0, 0}
+	local node = {name=nodename, param1=0, param2=0}
+	local ignore = {name="ignore", param1=0, param2=0}
 	local nodes = {}
 	local max_radius = radius * (radius + 1)
 	for x = -radius, radius do
@@ -101,52 +101,57 @@ worldedit.hollow_cylinder = function(pos, axis, length, radius, nodename)
 		other1, other2 = "x", "y"
 	end
 
-	if env == nil then env = minetest.env end
 	local currentpos = {x=pos.x, y=pos.y, z=pos.z}
-	local node = {name=nodename}
-	local count = 0
-	local step = 1
 	if length < 0 then
 		length = -length
-		step = -1
+		currentpos[axis] = currentpos[axis] - length
 	end
+
+	--create schematic for single node column along the axis
+	local node = {name=nodename, param1=0, param2=0}
+	local nodes = {}
 	for i = 1, length do
-		local offset1, offset2 = 0, radius
-		local delta = -radius
-		while offset1 <= offset2 do
-			--add node at each octant
-			local first1, first2 = pos[other1] + offset1, pos[other1] - offset1
-			local second1, second2 = pos[other2] + offset2, pos[other2] - offset2
-			currentpos[other1], currentpos[other2] = first1, second1
-			env:add_node(currentpos, node) --octant 1
-			currentpos[other1] = first2
-			env:add_node(currentpos, node) --octant 4
-			currentpos[other2] = second2
-			env:add_node(currentpos, node) --octant 5
-			currentpos[other1] = first1
-			env:add_node(currentpos, node) --octant 8
-			local first1, first2 = pos[other1] + offset2, pos[other1] - offset2
-			local second1, second2 = pos[other2] + offset1, pos[other2] - offset1
-			currentpos[other1], currentpos[other2] = first1, second1
-			env:add_node(currentpos, node) --octant 2
-			currentpos[other1] = first2
-			env:add_node(currentpos, node) --octant 3
-			currentpos[other2] = second2
-			env:add_node(currentpos, node) --octant 6
-			currentpos[other1] = first1
-			env:add_node(currentpos, node) --octant 7
+		nodes[i] = node
+	end
+	local schematic = {size={[axis]=length, [other1]=1, [other2]=1}, data=nodes}
 
-			count = count + 8 --wip: broken
+	--add columns in a circle around axis to form cylinder
+	local place_schematic = minetest.place_schematic
+	local count = 0
+	local offset1, offset2 = 0, radius
+	local delta = -radius
+	while offset1 <= offset2 do
+		--add node at each octant
+		local first1, first2 = pos[other1] + offset1, pos[other1] - offset1
+		local second1, second2 = pos[other2] + offset2, pos[other2] - offset2
+		currentpos[other1], currentpos[other2] = first1, second1
+		place_schematic(currentpos, schematic) --octant 1
+		currentpos[other1] = first2
+		place_schematic(currentpos, schematic) --octant 4
+		currentpos[other2] = second2
+		place_schematic(currentpos, schematic) --octant 5
+		currentpos[other1] = first1
+		place_schematic(currentpos, schematic) --octant 8
+		local first1, first2 = pos[other1] + offset2, pos[other1] - offset2
+		local second1, second2 = pos[other2] + offset1, pos[other2] - offset1
+		currentpos[other1], currentpos[other2] = first1, second1
+		place_schematic(currentpos, schematic) --octant 2
+		currentpos[other1] = first2
+		place_schematic(currentpos, schematic) --octant 3
+		currentpos[other2] = second2
+		place_schematic(currentpos, schematic) --octant 6
+		currentpos[other1] = first1
+		place_schematic(currentpos, schematic) --octant 7
 
-			--move to next location
-			delta = delta + (offset1 * 2) + 1
-			if delta >= 0 then
-				offset2 = offset2 - 1
-				delta = delta - (offset2 * 2)
-			end
-			offset1 = offset1 + 1
+		count = count + (length *8) --wip: broken because sometimes currentpos is repeated
+
+		--move to next location
+		delta = delta + (offset1 * 2) + 1
+		if delta >= 0 then
+			offset2 = offset2 - 1
+			delta = delta - (offset2 * 2)
 		end
-		currentpos[axis] = currentpos[axis] + step
+		offset1 = offset1 + 1
 	end
 	return count
 end
@@ -162,6 +167,7 @@ worldedit.cylinder = function(pos, axis, length, radius, nodename, env)
 		other1, other2 = "x", "y"
 	end
 
+	--wip: make this faster using the schematic method by adding columns in a circle pattern like in hollow_cylinder, or by adding whole 2D slices using custom sized schematics
 	if env == nil then env = minetest.env end
 	local currentpos = {x=pos.x, y=pos.y, z=pos.z}
 	local node = {name=nodename}
@@ -216,6 +222,7 @@ worldedit.pyramid = function(pos, height, nodename, env)
 	local pos2x, pos2y, pos2z = pos.x + height, pos.y + height, pos.z + height
 	local pos = {x=0, y=pos1y, z=0}
 
+	--wip: make this faster using base sized schematics that are then resized while moving upwards, or if that's not possible, add new rows/columns while looping
 	local count = 0
 	local node = {name=nodename}
 	if env == nil then env = minetest.env end
@@ -242,6 +249,7 @@ end
 --adds a spiral centered at `pos` with width `width`, height `height`, space between walls `spacer`, composed of `nodename`, returning the number of nodes added
 worldedit.spiral = function(pos, width, height, spacer, nodename, env) --wip: clean this up
 	-- spiral matrix - http://rosettacode.org/wiki/Spiral_matrix#Lua
+	--wip: rewrite this whole thing, nobody can understand it anyways
 	av, sn = math.abs, function(s) return s~=0 and s/av(s) or 0 end
 	local function sindex(z, x) -- returns the value at (x, z) in a spiral that starts at 1 and goes outwards
 		if z == -x and z >= x then return (2*z+1)^2 end
