@@ -75,7 +75,7 @@ Replace all nodes other than <search node> with <replace node> in the current Wo
 
 ### //hollowsphere <radius> <node>
 
-Add hollow sphere at WorldEdit position 1 with radius <radius>, composed of <node>.
+Add hollow sphere centered at WorldEdit position 1 with radius <radius>, composed of <node>.
 
     //hollowsphere 5 Diamond Block
     //hollowsphere 12 glass
@@ -83,7 +83,7 @@ Add hollow sphere at WorldEdit position 1 with radius <radius>, composed of <nod
 
 ### //sphere <radius> <node>
 
-Add sphere at WorldEdit position 1 with radius <radius>, composed of <node>.
+Add sphere centered at WorldEdit position 1 with radius <radius>, composed of <node>.
 
     //sphere 5 Diamond Block
     //sphere 12 glass
@@ -91,7 +91,7 @@ Add sphere at WorldEdit position 1 with radius <radius>, composed of <node>.
 
 ### //hollowdome <radius> <node>
 
-Add hollow dome at WorldEdit position 1 with radius <radius>, composed of <node>.
+Add hollow dome centered at WorldEdit position 1 with radius <radius>, composed of <node>.
 
     //hollowdome 5 Diamond Block
     //hollowdome 12 glass
@@ -99,7 +99,7 @@ Add hollow dome at WorldEdit position 1 with radius <radius>, composed of <node>
 
 ### //dome <radius> <node>
 
-Add dome at WorldEdit position 1 with radius <radius>, composed of <node>.
+Add dome centered at WorldEdit position 1 with radius <radius>, composed of <node>.
 
     //dome 5 Diamond Block
     //dome 12 glass
@@ -125,7 +125,7 @@ Add cylinder at WorldEdit position 1 along the x/y/z/? axis with length <length>
     
 ### //pyramid <height> <node>
 
-Add pyramid at WorldEdit position 1 with height <height>, composed of <node>.
+Add pyramid centered at WorldEdit position 1 with height <height>, composed of <node>.
 
     //pyramid 8 Diamond Block
     //pyramid 5 glass
@@ -133,7 +133,7 @@ Add pyramid at WorldEdit position 1 with height <height>, composed of <node>.
 
 ### //spiral <width> <height> <spacer> <node>
 
-Add spiral at WorldEdit position 1 with width <width>, height <height>, space between walls <spacer>, composed of <node>.
+Add spiral centered at WorldEdit position 1 with width <width>, height <height>, space between walls <spacer>, composed of <node>.
 
     //spiral 20 5 3 Diamond Block
     //spiral 5 2 1 glass

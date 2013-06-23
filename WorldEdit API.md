@@ -88,25 +88,25 @@ Contained in primitives.lua, this module allows the creation of several geometri
 
 ### count = worldedit.hollow_sphere(pos, radius, nodename)
 
-Adds a hollow sphere at `pos` with radius `radius`, composed of `nodename`.
+Adds a hollow sphere centered at `pos` with radius `radius`, composed of `nodename`.
 
 Returns the number of nodes added.
 
 ### count = worldedit.sphere(pos, radius, nodename)
 
-Adds a sphere at `pos` with radius `radius`, composed of `nodename`.
+Adds a sphere centered at `pos` with radius `radius`, composed of `nodename`.
 
 Returns the number of nodes added.
 
 ### count = worldedit.hollow_dome(pos, radius, nodename)
 
-Adds a hollow dome at `pos` with radius `radius`, composed of `nodename`.
+Adds a hollow dome centered at `pos` with radius `radius`, composed of `nodename`.
 
 Returns the number of nodes added.
 
 ### count = worldedit.dome(pos, radius, nodename)
 
-Adds a dome at `pos` with radius `radius`, composed of `nodename`.
+Adds a dome centered at `pos` with radius `radius`, composed of `nodename`.
 
 Returns the number of nodes added.
 
@@ -124,13 +124,13 @@ Returns the number of nodes added.
 
 ### count = worldedit.pyramid(pos, height, nodename)
 
-Adds a pyramid at `pos` with height `height`.
+Adds a pyramid centered at `pos` with height `height`.
 
 Returns the number of nodes added.
 
 ### count = worldedit.spiral(pos, width, height, spacer, nodename)
 
-Adds a spiral at `pos` with width `width`, height `height`, space between walls `spacer`, composed of `nodename`.
+Adds a spiral centered at `pos` with width `width`, height `height`, space between walls `spacer`, composed of `nodename`.
 
 Returns the number of nodes added.
 

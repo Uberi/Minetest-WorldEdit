@@ -1,6 +1,6 @@
 worldedit = worldedit or {}
 
---adds a hollow sphere at `pos` with radius `radius`, composed of `nodename`, returning the number of nodes added
+--adds a hollow sphere centered at `pos` with radius `radius`, composed of `nodename`, returning the number of nodes added
 worldedit.hollow_sphere = function(pos, radius, nodename, env)
 	local node = {name=nodename}
 	local pos1 = {x=0, y=0, z=0}
@@ -24,7 +24,7 @@ worldedit.hollow_sphere = function(pos, radius, nodename, env)
 	return count
 end
 
---adds a sphere at `pos` with radius `radius`, composed of `nodename`, returning the number of nodes added
+--adds a sphere centered at `pos` with radius `radius`, composed of `nodename`, returning the number of nodes added
 worldedit.sphere = function(pos, radius, nodename, env)
 	local node = {name=nodename}
 	local pos1 = {x=0, y=0, z=0}
@@ -47,7 +47,7 @@ worldedit.sphere = function(pos, radius, nodename, env)
 	return count
 end
 
---adds a hollow dome at `pos` with radius `radius`, composed of `nodename`, returning the number of nodes added
+--adds a hollow dome centered at `pos` with radius `radius`, composed of `nodename`, returning the number of nodes added
 worldedit.hollow_dome = function(pos, radius, nodename, env) --wip: use bresenham sphere for maximum speed
 	local node = {name=nodename}
 	local pos1 = {x=0, y=0, z=0}
@@ -71,7 +71,7 @@ worldedit.hollow_dome = function(pos, radius, nodename, env) --wip: use bresenha
 	return count
 end
 
---adds a dome at `pos` with radius `radius`, composed of `nodename`, returning the number of nodes added
+--adds a dome centered at `pos` with radius `radius`, composed of `nodename`, returning the number of nodes added
 worldedit.dome = function(pos, radius, nodename, env) --wip: use bresenham sphere for maximum speed
 	local node = {name=nodename}
 	local pos1 = {x=0, y=0, z=0}
@@ -214,7 +214,7 @@ worldedit.cylinder = function(pos, axis, length, radius, nodename, env)
 	return count
 end
 
---adds a pyramid at `pos` with height `height`, composed of `nodename`, returning the number of nodes added
+--adds a pyramid centered at `pos` with height `height`, composed of `nodename`, returning the number of nodes added
 worldedit.pyramid = function(pos, height, nodename, env)
 	local pos1x, pos1y, pos1z = pos.x - height, pos.y, pos.z - height
 	local pos2x, pos2y, pos2z = pos.x + height, pos.y + height, pos.z + height
@@ -243,7 +243,7 @@ worldedit.pyramid = function(pos, height, nodename, env)
 	return count
 end
 
---adds a spiral at `pos` with width `width`, height `height`, space between walls `spacer`, composed of `nodename`, returning the number of nodes added
+--adds a spiral centered at `pos` with width `width`, height `height`, space between walls `spacer`, composed of `nodename`, returning the number of nodes added
 worldedit.spiral = function(pos, width, height, spacer, nodename, env) --wip: clean this up
 	-- spiral matrix - http://rosettacode.org/wiki/Spiral_matrix#Lua
 	av, sn = math.abs, function(s) return s~=0 and s/av(s) or 0 end

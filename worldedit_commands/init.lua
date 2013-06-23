@@ -289,7 +289,7 @@ minetest.register_chatcommand("/replaceinverse", {
 
 minetest.register_chatcommand("/hollowsphere", {
 	params = "<radius> <node>",
-	description = "Add hollow sphere at WorldEdit position 1 with radius <radius>, composed of <node>",
+	description = "Add hollow sphere centered at WorldEdit position 1 with radius <radius>, composed of <node>",
 	privs = {worldedit=true},
 	func = function(name, param)
 		local pos = worldedit.pos1[name]
@@ -320,7 +320,7 @@ minetest.register_chatcommand("/hollowsphere", {
 
 minetest.register_chatcommand("/sphere", {
 	params = "<radius> <node>",
-	description = "Add sphere at WorldEdit position 1 with radius <radius>, composed of <node>",
+	description = "Add sphere centered at WorldEdit position 1 with radius <radius>, composed of <node>",
 	privs = {worldedit=true},
 	func = function(name, param)
 		local pos = worldedit.pos1[name]
@@ -351,7 +351,7 @@ minetest.register_chatcommand("/sphere", {
 
 minetest.register_chatcommand("/hollowdome", {
 	params = "<radius> <node>",
-	description = "Add hollow dome at WorldEdit position 1 with radius <radius>, composed of <node>",
+	description = "Add hollow dome centered at WorldEdit position 1 with radius <radius>, composed of <node>",
 	privs = {worldedit=true},
 	func = function(name, param)
 		local pos = worldedit.pos1[name]
@@ -382,7 +382,7 @@ minetest.register_chatcommand("/hollowdome", {
 
 minetest.register_chatcommand("/dome", {
 	params = "<radius> <node>",
-	description = "Add dome at WorldEdit position 1 with radius <radius>, composed of <node>",
+	description = "Add dome centered at WorldEdit position 1 with radius <radius>, composed of <node>",
 	privs = {worldedit=true},
 	func = function(name, param)
 		local pos = worldedit.pos1[name]
@@ -483,7 +483,7 @@ minetest.register_chatcommand("/cylinder", {
 
 minetest.register_chatcommand("/pyramid", {
 	params = "<height> <node>",
-	description = "Add pyramid at WorldEdit position 1 with height <height>, composed of <node>",
+	description = "Add pyramid centered at WorldEdit position 1 with height <height>, composed of <node>",
 	privs = {worldedit=true},
 	func = function(name, param)
 		local pos = worldedit.pos1[name]
@@ -514,7 +514,7 @@ minetest.register_chatcommand("/pyramid", {
 
 minetest.register_chatcommand("/spiral", {
 	params = "<width> <height> <space> <node>",
-	description = "Add spiral at WorldEdit position 1 with width <width>, height <height>, space between walls <space>, composed of <node>",
+	description = "Add spiral centered at WorldEdit position 1 with width <width>, height <height>, space between walls <space>, composed of <node>",
 	privs = {worldedit=true},
 	func = function(name, param)
 		local pos = worldedit.pos1[name]
