@@ -6,6 +6,7 @@ worldedit.hollow_sphere = function(pos, radius, nodename)
 	local node = {name=nodename, param1=0, param2=0}
 	local ignore = {name="ignore", param1=0, param2=0}
 	local nodes = {}
+	local count = 0
 	local min_radius, max_radius = radius * (radius - 1), radius * (radius + 1)
 	for x = -radius, radius do
 		for y = -radius, radius do
@@ -13,6 +14,7 @@ worldedit.hollow_sphere = function(pos, radius, nodename)
 				local squared = x * x + y * y + z * z
 				if squared >= min_radius and squared <= max_radius then
 					insert(nodes, node)
+					count = count + 1
 				else
 					insert(nodes, ignore)
 				end
@@ -20,7 +22,7 @@ worldedit.hollow_sphere = function(pos, radius, nodename)
 		end
 	end
 	minetest.place_schematic({x=pos.x - radius, y=pos.y - radius, z=pos.z - radius}, {size={x=radius * 2, y=radius * 2, z=radius * 2}, data=nodes})
-	return #nodes
+	return count
 end
 
 --adds a sphere centered at `pos` with radius `radius`, composed of `nodename`, returning the number of nodes added
@@ -29,12 +31,14 @@ worldedit.sphere = function(pos, radius, nodename)
 	local node = {name=nodename, param1=0, param2=0}
 	local ignore = {name="ignore", param1=0, param2=0}
 	local nodes = {}
+	local count = 0
 	local max_radius = radius * (radius + 1)
 	for x = -radius, radius do
 		for y = -radius, radius do
 			for z = -radius, radius do
 				if x * x + y * y + z * z <= max_radius then
 					insert(nodes, node)
+					count = count + 1
 				else
 					insert(nodes, ignore)
 				end
@@ -42,7 +46,7 @@ worldedit.sphere = function(pos, radius, nodename)
 		end
 	end
 	minetest.place_schematic({x=pos.x - radius, y=pos.y - radius, z=pos.z - radius}, {size={x=radius * 2, y=radius * 2, z=radius * 2}, data=nodes})
-	return #nodes
+	return count
 end
 
 --adds a hollow dome centered at `pos` with radius `radius`, composed of `nodename`, returning the number of nodes added
@@ -51,6 +55,7 @@ worldedit.hollow_dome = function(pos, radius, nodename) --wip: use bresenham sph
 	local node = {name=nodename, param1=0, param2=0}
 	local ignore = {name="ignore", param1=0, param2=0}
 	local nodes = {}
+	local count = 0
 	local min_radius, max_radius = radius * (radius - 1), radius * (radius + 1)
 	for x = -radius, radius do
 		for y = 0, radius do
@@ -58,6 +63,7 @@ worldedit.hollow_dome = function(pos, radius, nodename) --wip: use bresenham sph
 				local squared = x * x + y * y + z * z
 				if squared >= min_radius and squared <= max_radius then
 					insert(nodes, node)
+					count = count + 1
 				else
 					insert(nodes, ignore)
 				end
@@ -65,7 +71,7 @@ worldedit.hollow_dome = function(pos, radius, nodename) --wip: use bresenham sph
 		end
 	end
 	minetest.place_schematic({x=pos.x - radius, y=pos.y, z=pos.z - radius}, {size={x=radius * 2, y=radius * 2, z=radius * 2}, data=nodes})
-	return #nodes
+	return count
 end
 
 --adds a dome centered at `pos` with radius `radius`, composed of `nodename`, returning the number of nodes added
@@ -74,12 +80,14 @@ worldedit.dome = function(pos, radius, nodename) --wip: use bresenham sphere for
 	local node = {name=nodename, param1=0, param2=0}
 	local ignore = {name="ignore", param1=0, param2=0}
 	local nodes = {}
+	local count = 0
 	local max_radius = radius * (radius + 1)
 	for x = -radius, radius do
 		for y = 0, radius do
 			for z = -radius, radius do
 				if x * x + y * y + z * z <= max_radius then
 					insert(nodes, node)
+					count = count + 1
 				else
 					insert(nodes, ignore)
 				end
@@ -87,7 +95,7 @@ worldedit.dome = function(pos, radius, nodename) --wip: use bresenham sphere for
 		end
 	end
 	minetest.place_schematic({x=pos.x - radius, y=pos.y, z=pos.z - radius}, {size={x=radius * 2, y=radius * 2, z=radius * 2}, data=nodes})
-	return #nodes
+	return count
 end
 
 --adds a hollow cylinder at `pos` along the `axis` axis ("x" or "y" or "z") with length `length` and radius `radius`, composed of `nodename`, returning the number of nodes added
@@ -143,7 +151,7 @@ worldedit.hollow_cylinder = function(pos, axis, length, radius, nodename)
 		currentpos[other1] = first1
 		place_schematic(currentpos, schematic) --octant 7
 
-		count = count + (length *8) --wip: broken because sometimes currentpos is repeated
+		count = count + (length * 8) --wip: broken because sometimes currentpos is repeated
 
 		--move to next location
 		delta = delta + (offset1 * 2) + 1
