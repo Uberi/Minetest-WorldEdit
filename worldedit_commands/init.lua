@@ -17,18 +17,18 @@ end
 
 --determines whether `nodename` is a valid node name, returning a boolean
 worldedit.normalize_nodename = function(nodename)
-	if minetest.registered_nodes[nodename] then --directly found node name
-		return nodename
-	elseif minetest.registered_nodes["default:" .. nodename] then --found node name in default
-		return "default:" .. nodename
+	local fullname = ItemStack({name=nodename}):get_name() --resolve aliases of node names to full names
+	if minetest.registered_nodes[fullname] then --directly found node name or alias of nodename
+		return fullname
 	end
 	for key, value in pairs(minetest.registered_nodes) do
 		if key:find(":" .. nodename, 1, true) then --found in mod
 			return key
 		end
 	end
+	nodename = nodename:lower() --lowercase both for case insensitive comparison
 	for key, value in pairs(minetest.registered_nodes) do
-		if value.description:lower() == nodename:lower() then --found in description
+		if value.description:lower() == nodename then --found in description
 			return key
 		end
 	end
