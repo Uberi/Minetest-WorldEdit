@@ -1,4 +1,5 @@
 worldedit = worldedit or {}
+local minetest = minetest --local copy of global
 
 worldedit.allocate_old = worldedit.allocate
 worldedit.deserialize_old = worldedit.deserialize

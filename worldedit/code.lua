@@ -1,4 +1,5 @@
 worldedit = worldedit or {}
+local minetest = minetest --local copy of global
 
 --executes `code` as a Lua chunk in the global namespace, returning an error if the code fails or nil otherwise
 worldedit.lua = function(code)

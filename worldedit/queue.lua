@@ -1,4 +1,5 @@
 worldedit = worldedit or {}
+local minetest = minetest --local copy of global
 
 worldedit.queue = {}
 worldedit.lower = 1

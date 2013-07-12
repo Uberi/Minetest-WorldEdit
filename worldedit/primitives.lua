@@ -1,100 +1,149 @@
 worldedit = worldedit or {}
+local minetest = minetest --local copy of global
 
 --adds a hollow sphere centered at `pos` with radius `radius`, composed of `nodename`, returning the number of nodes added
 worldedit.hollow_sphere = function(pos, radius, nodename)
+	--set up voxel manipulator
+	local manip = minetest.get_voxel_manip()
+	manip:read_from_map(
+		{x=pos.x - radius, y=pos.y - radius, z=pos.z - radius},
+		{x=pos.x + radius, y=pos.y + radius, z=pos.z + radius},
+	)
+
 	local insert = table.insert
-	local node = {name=nodename, param1=0, param2=0}
-	local ignore = {name="ignore", param1=0, param2=0}
+	local node_id = minetest.get_content_id(nodename)
+	local ignore_id = minetest.get_content_id("ignore")
+	local min_radius, max_radius = radius * (radius - 1), radius * (radius + 1)
 	local nodes = {}
 	local count = 0
-	local min_radius, max_radius = radius * (radius - 1), radius * (radius + 1)
 	for x = -radius, radius do
 		for y = -radius, radius do
 			for z = -radius, radius do
 				local squared = x * x + y * y + z * z
-				if squared >= min_radius and squared <= max_radius then
-					insert(nodes, node)
+				if squared >= min_radius and squared <= max_radius then --surface of sphere
+					insert(nodes, node_id)
 					count = count + 1
 				else
-					insert(nodes, ignore)
+					insert(nodes, ignore_id)
 				end
 			end
 		end
 	end
-	minetest.place_schematic({x=pos.x - radius, y=pos.y - radius, z=pos.z - radius}, {size={x=radius * 2, y=radius * 2, z=radius * 2}, data=nodes})
+
+	--update map nodes
+	manip:set_data(nodes)
+	manip:write_to_map()
+	manip:update_map()
+
 	return count
 end
 
 --adds a sphere centered at `pos` with radius `radius`, composed of `nodename`, returning the number of nodes added
 worldedit.sphere = function(pos, radius, nodename)
+	--set up voxel manipulator
+	local manip = minetest.get_voxel_manip()
+	manip:read_from_map(
+		{x=pos.x - radius, y=pos.y - radius, z=pos.z - radius},
+		{x=pos.x + radius, y=pos.y + radius, z=pos.z + radius},
+	)
+
 	local insert = table.insert
-	local node = {name=nodename, param1=0, param2=0}
-	local ignore = {name="ignore", param1=0, param2=0}
+	local node_id = minetest.get_content_id(nodename)
+	local ignore_id = minetest.get_content_id("ignore")
+	local max_radius = radius * (radius + 1)
 	local nodes = {}
 	local count = 0
-	local max_radius = radius * (radius + 1)
 	for x = -radius, radius do
 		for y = -radius, radius do
 			for z = -radius, radius do
-				if x * x + y * y + z * z <= max_radius then
-					insert(nodes, node)
+				if x * x + y * y + z * z <= max_radius then --inside sphere
+					insert(nodes, node_id)
 					count = count + 1
 				else
-					insert(nodes, ignore)
+					insert(nodes, ignore_id)
 				end
 			end
 		end
 	end
-	minetest.place_schematic({x=pos.x - radius, y=pos.y - radius, z=pos.z - radius}, {size={x=radius * 2, y=radius * 2, z=radius * 2}, data=nodes})
+
+	--update map nodes
+	manip:set_data(nodes)
+	manip:write_to_map()
+	manip:update_map()
+
 	return count
 end
 
 --adds a hollow dome centered at `pos` with radius `radius`, composed of `nodename`, returning the number of nodes added
 worldedit.hollow_dome = function(pos, radius, nodename) --wip: use bresenham sphere for maximum speed
+	--set up voxel manipulator
+	local manip = minetest.get_voxel_manip()
+	manip:read_from_map(
+		{x=pos.x - radius, y=pos.y, z=pos.z - radius},
+		{x=pos.x + radius, y=pos.y + radius, z=pos.z + radius},
+	)
+
 	local insert = table.insert
-	local node = {name=nodename, param1=0, param2=0}
-	local ignore = {name="ignore", param1=0, param2=0}
+	local node_id = minetest.get_content_id(nodename)
+	local ignore_id = minetest.get_content_id("ignore")
+	local min_radius, max_radius = radius * (radius - 1), radius * (radius + 1)
 	local nodes = {}
 	local count = 0
-	local min_radius, max_radius = radius * (radius - 1), radius * (radius + 1)
 	for x = -radius, radius do
 		for y = 0, radius do
 			for z = -radius, radius do
 				local squared = x * x + y * y + z * z
-				if squared >= min_radius and squared <= max_radius then
-					insert(nodes, node)
+				if squared >= min_radius and squared <= max_radius then --surface of dome
+					insert(nodes, node_id)
 					count = count + 1
 				else
-					insert(nodes, ignore)
+					insert(nodes, ignore_id)
 				end
 			end
 		end
 	end
-	minetest.place_schematic({x=pos.x - radius, y=pos.y, z=pos.z - radius}, {size={x=radius * 2, y=radius * 2, z=radius * 2}, data=nodes})
+
+	--update map nodes
+	manip:set_data(nodes)
+	manip:write_to_map()
+	manip:update_map()
+
 	return count
 end
 
 --adds a dome centered at `pos` with radius `radius`, composed of `nodename`, returning the number of nodes added
 worldedit.dome = function(pos, radius, nodename) --wip: use bresenham sphere for maximum speed
+	--set up voxel manipulator
+	local manip = minetest.get_voxel_manip()
+	manip:read_from_map(
+		{x=pos.x - radius, y=pos.y, z=pos.z - radius},
+		{x=pos.x + radius, y=pos.y + radius, z=pos.z + radius},
+	)
+
 	local insert = table.insert
-	local node = {name=nodename, param1=0, param2=0}
-	local ignore = {name="ignore", param1=0, param2=0}
+	local node_id = minetest.get_content_id(nodename)
+	local ignore_id = minetest.get_content_id("ignore")
+	local max_radius = radius * (radius + 1)
 	local nodes = {}
 	local count = 0
-	local max_radius = radius * (radius + 1)
 	for x = -radius, radius do
 		for y = 0, radius do
 			for z = -radius, radius do
-				if x * x + y * y + z * z <= max_radius then
-					insert(nodes, node)
+				if x * x + y * y + z * z <= max_radius then --inside dome
+					insert(nodes, node_id)
 					count = count + 1
 				else
-					insert(nodes, ignore)
+					insert(nodes, ignore_id)
 				end
 			end
 		end
 	end
-	minetest.place_schematic({x=pos.x - radius, y=pos.y, z=pos.z - radius}, {size={x=radius * 2, y=radius * 2, z=radius * 2}, data=nodes})
+
+	--update map nodes
+	manip:set_data(nodes)
+	manip:write_to_map()
+	manip:update_map()
+
 	return count
 end
 
@@ -109,6 +158,7 @@ worldedit.hollow_cylinder = function(pos, axis, length, radius, nodename)
 		other1, other2 = "x", "y"
 	end
 
+	--handle negative lengths
 	local currentpos = {x=pos.x, y=pos.y, z=pos.z}
 	if length < 0 then
 		length = -length
@@ -151,7 +201,7 @@ worldedit.hollow_cylinder = function(pos, axis, length, radius, nodename)
 		currentpos[other1] = first1
 		place_schematic(currentpos, schematic) --octant 7
 
-		count = count + (length * 8) --wip: broken because sometimes currentpos is repeated
+		count = count + 8 --wip: broken because sometimes currentpos is repeated
 
 		--move to next location
 		delta = delta + (offset1 * 2) + 1
@@ -161,6 +211,7 @@ worldedit.hollow_cylinder = function(pos, axis, length, radius, nodename)
 		end
 		offset1 = offset1 + 1
 	end
+	count = count * length --apply the length to the number of nodes
 	return count
 end
 
@@ -175,52 +226,57 @@ worldedit.cylinder = function(pos, axis, length, radius, nodename, env)
 		other1, other2 = "x", "y"
 	end
 
-	--wip: make this faster using the schematic method by adding columns in a circle pattern like in hollow_cylinder, or by adding whole 2D slices using custom sized schematics
-	if env == nil then env = minetest.env end
+	--handle negative lengths
 	local currentpos = {x=pos.x, y=pos.y, z=pos.z}
-	local node = {name=nodename}
-	local count = 0
-	local step = 1
 	if length < 0 then
 		length = -length
-		step = -1
+		currentpos[axis] = currentpos[axis] - length
 	end
+
+	--create schematic for single node column along the axis
+	local node = {name=nodename, param1=0, param2=0}
+	local nodes = {}
 	for i = 1, length do
-		local offset1, offset2 = 0, radius
-		local delta = -radius
-		while offset1 <= offset2 do
-			--connect each pair of octants
-			currentpos[other1] = pos[other1] - offset1
-			local second1, second2 = pos[other2] + offset2, pos[other2] - offset2
-			for i = 0, offset1 * 2 do
-				currentpos[other2] = second1
-				env:add_node(currentpos, node) --octant 1 to 4
-				currentpos[other2] = second2
-				env:add_node(currentpos, node) --octant 5 to 8
-				currentpos[other1] = currentpos[other1] + 1
-			end
-			currentpos[other1] = pos[other1] - offset2
-			local second1, second2 = pos[other2] + offset1, pos[other2] - offset1
-			for i = 0, offset2 * 2 do
-				currentpos[other2] = second1
-				env:add_node(currentpos, node) --octant 2 to 3
-				currentpos[other2] = second2
-				env:add_node(currentpos, node) --octant 6 to 7
-				currentpos[other1] = currentpos[other1] + 1
-			end
-
-			count = count + (offset1 * 4) + (offset2 * 4) + 4 --wip: broken
-
-			--move to next location
-			delta = delta + (offset1 * 2) + 1
-			offset1 = offset1 + 1
-			if delta >= 0 then
-				offset2 = offset2 - 1
-				delta = delta - (offset2 * 2)
-			end
-		end
-		currentpos[axis] = currentpos[axis] + step
+		nodes[i] = node
 	end
+	local schematic = {size={[axis]=length, [other1]=1, [other2]=1}, data=nodes}
+
+	local place_schematic = minetest.place_schematic
+	local count = 0
+	local offset1, offset2 = 0, radius
+	local delta = -radius
+	while offset1 <= offset2 do
+		--connect each pair of octants taking advantage of symmetry along two axes
+		currentpos[other1] = pos[other1] - offset1
+		local second1, second2 = pos[other2] + offset2, pos[other2] - offset2
+		for i = 0, offset1 * 2 do
+			currentpos[other2] = second1
+			place_schematic(currentpos, schematic) --octant 1 to 4
+			currentpos[other2] = second2
+			place_schematic(currentpos, schematic) --octant 5 to 8
+			currentpos[other1] = currentpos[other1] + 1
+		end
+		currentpos[other1] = pos[other1] - offset2
+		local second1, second2 = pos[other2] + offset1, pos[other2] - offset1
+		for i = 0, offset2 * 2 do
+			currentpos[other2] = second1
+			place_schematic(currentpos, schematic) --octant 2 to 3
+			currentpos[other2] = second2
+			place_schematic(currentpos, schematic) --octant 6 to 7
+			currentpos[other1] = currentpos[other1] + 1
+		end
+
+		count = count + (offset1 * 4) + (offset2 * 4) + 4 --wip: broken since node positions may coincide
+
+		--move to next location
+		delta = delta + (offset1 * 2) + 1
+		offset1 = offset1 + 1
+		if delta >= 0 then
+			offset2 = offset2 - 1
+			delta = delta - (offset2 * 2)
+		end
+	end
+	count = count * length --apply the length to the number of nodes
 	return count
 end
 
@@ -274,7 +330,7 @@ worldedit.spiral = function(pos, width, height, spacer, nodename, env) --wip: cl
 		end
 		return ret
 	end
-    if env == nil then env = minetest.env end
+	if env == nil then env = minetest.env end
 	-- connect the joined parts
 	local spiral = spiralt(width)
 	height = tonumber(height)

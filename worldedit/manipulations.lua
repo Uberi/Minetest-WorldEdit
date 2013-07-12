@@ -1,4 +1,5 @@
 worldedit = worldedit or {}
+local minetest = minetest --local copy of global
 
 --wip: test the entire API again to make sure it works
 --wip: remove env parameter where no longer needed in chat commands module
@@ -29,16 +30,22 @@ end
 worldedit.set = function(pos1, pos2, nodename)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 
-	local size = {x=pos2.x - pos1.x, y=pos2.y - pos1.y, z=pos2.z - pos1.z}
-	local nodes = {}
+	--set up voxel manipulator
+	local manip = minetest.get_voxel_manip()
+	manip:read_from_map(pos1, pos2)
 
 	--fill nodes table with node to be set
-	local node = {name=nodename, param1=0, param2=0}
-	for i = 1, (size.x * size.y * size.z) do
-		nodes[i] = node
+	local nodes = {}
+	local node_id = minetest.get_content_id(nodename)
+	for i = 1, (pos2.x - pos1.x) * (pos2.y - pos1.y) * (pos2.z - pos1.z) do
+		nodes[i] = node_id
 	end
 
-	minetest.place_schematic(pos1, {size=size, data=nodes})
+	--update map nodes
+	manip:set_data(nodes)
+	manip:write_to_map()
+	manip:update_map()
+
 	return worldedit.volume(pos1, pos2)
 end
 
@@ -56,7 +63,7 @@ worldedit.replace = function(pos1, pos2, searchnode, replacenode)
 end
 
 --replaces all nodes other than `searchnode` with `replacenode` in a region defined by positions `pos1` and `pos2`, returning the number of nodes replaced
-worldedit.replaceinverse = function(pos1, pos2, searchnode, replacenode)
+worldedit.replaceinverse = function(pos1, pos2, searchnode, replacenode) --wip: use voxelmanip get_data for this
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 
 	local pos = {x=pos1.x, y=0, z=0}

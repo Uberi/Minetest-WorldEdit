@@ -1,4 +1,5 @@
 worldedit = worldedit or {}
+local minetest = minetest --local copy of global
 
 --modifies positions `pos1` and `pos2` so that each component of `pos1` is less than or equal to its corresponding conent of `pos2`, returning two new positions
 worldedit.sort_pos = function(pos1, pos2)
@@ -76,7 +77,7 @@ worldedit.suppress = function(pos1, pos2, nodename)
 end
 
 --highlights all instances of `nodename` in a region defined by positions `pos1` and `pos2` by non-destructively hiding all other nodes, returning the number of nodes found
-worldedit.highlight = function(pos1, pos2, nodename)
+worldedit.highlight = function(pos1, pos2, nodename) --wip: speed this up with voxmanip get_data
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 	local pos = {x=pos1.x, y=0, z=0}
 	local placeholder = {name="worldedit:placeholder", param1=0, param2=0}

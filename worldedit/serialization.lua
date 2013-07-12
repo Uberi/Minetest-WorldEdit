@@ -1,4 +1,5 @@
 worldedit = worldedit or {}
+local minetest = minetest --local copy of global
 
 --modifies positions `pos1` and `pos2` so that each component of `pos1` is less than or equal to its corresponding conent of `pos2`, returning two new positions
 worldedit.sort_pos = function(pos1, pos2)
@@ -37,16 +38,16 @@ worldedit.serialize = function(pos1, pos2) --wip: check for ItemStacks and wheth
 	local pos = {x=pos1.x, y=0, z=0}
 	local count = 0
 	local result = {}
-	local env = minetest.env
+	local get_node, get_meta = minetest.get_node, minetest.get_meta
 	while pos.x <= pos2.x do
 		pos.y = pos1.y
 		while pos.y <= pos2.y do
 			pos.z = pos1.z
 			while pos.z <= pos2.z do
-				local node = env:get_node(pos)
+				local node = get_node(pos)
 				if node.name ~= "air" and node.name ~= "ignore" then
 					count = count + 1
-					local meta = env:get_meta(pos):to_table()
+					local meta = get_meta(pos):to_table()
 
 					--convert metadata itemstacks to itemstrings
 					for name, inventory in pairs(meta.inventory) do
@@ -160,10 +161,10 @@ end
 
 --loads the nodes represented by string `value` at position `originpos`, returning the number of nodes deserialized
 --contains code based on [table.save/table.load](http://lua-users.org/wiki/SaveTableToFile) by ChillCode, available under the MIT license (GPL compatible)
-worldedit.deserialize = function(originpos, value, env)
+worldedit.deserialize = function(originpos, value)
 	local originx, originy, originz = originpos.x, originpos.y, originpos.z
 	local count = 0
-	if env == nil then env = minetest.env end
+	local add_node, get_meta = minetest.add_node, minetest.get_meta
 	local version = worldedit.valueversion(value)
 	if version == 1 or version == 2 then --original flat table format
 		--obtain the node table
@@ -190,27 +191,23 @@ worldedit.deserialize = function(originpos, value, env)
 				local entry = nodes[index]
 				local pos = entry[1]
 				pos.x, pos.y, pos.z = originx - pos.x, originy - pos.y, originz - pos.z
-				env:add_node(pos, entry[2])
+				add_node(pos, entry[2])
 			end
 		else --previous meta flat table format
 			for index = 1, #nodes do
 				local entry = nodes[index]
 				entry.x, entry.y, entry.z = originx + entry.x, originy + entry.y, originz + entry.z
-				env:add_node(entry, entry) --entry acts both as position and as node
-				env:get_meta(entry):from_table(entry.meta)
+				add_node(entry, entry) --entry acts both as position and as node
+				get_meta(entry):from_table(entry.meta)
 			end
 		end
 	elseif version == 3 then --previous list format
 		local pos = {x=0, y=0, z=0}
 		local node = {name="", param1=0, param2=0}
 		for x, y, z, name, param1, param2 in value:gmatch("([+-]?%d+)%s+([+-]?%d+)%s+([+-]?%d+)%s+([^%s]+)%s+(%d+)%s+(%d+)[^\r\n]*[\r\n]*") do --match node entries
-			pos.x = originx + tonumber(x)
-			pos.y = originy + tonumber(y)
-			pos.z = originz + tonumber(z)
-			node.name = name
-			node.param1 = param1
-			node.param2 = param2
-			env:add_node(pos, node)
+			pos.x, pos.y, pos.z = originx + tonumber(x), originy + tonumber(y), originz + tonumber(z)
+			node.name, node.param1, node.param2 = name, param1, param2
+			add_node(pos, node)
 			count = count + 1
 		end
 	elseif version == 4 then --current nested table format
@@ -237,13 +234,13 @@ worldedit.deserialize = function(originpos, value, env)
 		for index = 1, count do
 			local entry = nodes[index]
 			entry.x, entry.y, entry.z = originx + entry.x, originy + entry.y, originz + entry.z
-			env:add_node(entry, entry) --entry acts both as position and as node
+			add_node(entry, entry) --entry acts both as position and as node
 		end
 
 		--load the metadata
 		for index = 1, count do
 			local entry = nodes[index]
-			env:get_meta(entry):from_table(entry.meta)
+			get_meta(entry):from_table(entry.meta)
 		end
 	end
 	return count
