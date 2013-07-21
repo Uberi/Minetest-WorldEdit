@@ -12,6 +12,24 @@ WorldEdit has a huge potential for abuse by untrusted players. Therefore, users 
 
 For in-game information about these commands, type `/help <command name>` in the chat. For example, to learn more about the `//copy` command, simply type `/help /copy` to display information relevant to copying a region.
 
+Chat Commands
+-------------
+WorldEdit is accessed in-game through an interface. By default, the mod distribution includes a chat interface for this purpose. It is documented in the [Chat Commands Reference](Chat Commands.md).
+
+If visual manipulation of nodes is desired, the [WorldEdit GUI](http://minetest.net/forum/viewtopic.php?id=3112) mod provides a simple interface with buttons and text entry fields for this purpose.
+
+WorldEdit API
+-------------
+WorldEdit exposes all significant functionality in a simple Lua interface. Adding WorldEdit to the file "depends.txt" in your mod gives you access to all of the `worldedit` functions. The API is useful for tasks such as high-performance node manipulation, alternative interfaces, and map creation.
+
+If you don't add WorldEdit to your "depends.txt" file, each file in the WorldEdit mod is also independent. For example, one may import the WorldEdit primitives API using the following code:
+
+    dofile(minetest.get_modpath("worldedit").."/primitives.lua")
+
+AGPLv3 compatible mods may further include WorldEdit files in their own mods. This may be useful if a modder wishes to completely avoid any dependencies on WorldEdit. Note that it is required to give credit to the authors.
+
+This API is documented in the [WorldEdit API Reference](WorldEdit API.md).
+
 Axes
 ----
 The coordinate system is the same as that used by MineTest; Y is upwards, X is perpendicular, and Z is parallel.
@@ -44,17 +62,32 @@ Entities are used to mark the location of the WorldEdit regions. They appear as 
 
 To remove the entities, simply punch them. This does not reset the positions themselves.
 
-Chat Commands
--------------
-WorldEdit is accessed in-game through an interface. By default, the mod distribution includes a chat interface for this purpose. It is documented in the [Chat Commands Reference](Chat Commands.md).
+Schematics
+----------
+WorldEdit supports two different types of schematics.
 
-If visual manipulation of nodes is desired, the [WorldEdit GUI](http://minetest.net/forum/viewtopic.php?id=3112) mod provides a simple interface with buttons and text entry fields for this purpose.
+The first is the WorldEdit Schematic format, with the file extension ".we", and in some older versions, ".wem". There have been several previous versions of the WorldEdit Schematic format, but WorldEdit is capable of loading any past versions, and will always support them - there is no need to worry about schematics becoming obselete.
 
-WorldEdit API
--------------
-WorldEdit exposes all significant functionality in a simple interface. Adding WorldEdit to the file "depends.txt" in your mod gives you access to all of the `worldedit` functions. The API is useful for tasks such as high-performance node manipulation, alternative interfaces, and map creation.
+The current version of the WorldEdit Schematic format, internally known as version 4, is essentially an array of node data tables in Lua 5.2 table syntax. Specifically:
 
-This API is documented in the [WorldEdit API Reference](WorldEdit API.md).
+    return {
+        {
+            ["y"]      = <y-axis coordinate>,
+            ["x"]      = <x-axis coordinate>,
+            ["name"]   = <node name>,
+            ["z"]      = <z-axis coordinate>,
+            ["meta"]   = <metadata table>,
+            ["param2"] = <param2 value>,
+            ["param1"] = <y-axis coordinate>,
+        },
+        <...>
+    }
+
+Value ordering and minor aspects of the syntax, such as trailing commas or newlines, are not guaranteed.
+
+The WorldEdit Schematic format is accessed via the WorldEdit API, or WorldEdit serialization chat commands such as `//serialize` and `//deserialize`.
+
+The second is the Minetest Schematic format (MTS). The details of this format may be found in the Minetest documentation and are out of the scope of this document. Access to this format is done via specialized MTS commands such as `//mtschemcreate` and `//mtschemplace`.
 
 License
 -------
