@@ -208,6 +208,6 @@ Returns an error if the code fails or nil otherwise.
 
 ### error = worldedit.luatransform(pos1, pos2, code)
 
-Executes `code` as a Lua chunk in the global namespace with the variable pos available, for each node in a region defined by positions `pos1` and `pos2`.
+Executes `code` as a Lua chunk in the global namespace with the variable `pos` available, for each node in a region defined by positions `pos1` and `pos2`.
 
 Returns an error if the code fails or nil otherwise.

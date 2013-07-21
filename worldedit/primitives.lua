@@ -5,27 +5,39 @@ local minetest = minetest --local copy of global
 worldedit.hollow_sphere = function(pos, radius, nodename)
 	--set up voxel manipulator
 	local manip = minetest.get_voxel_manip()
-	manip:read_from_map(
-		{x=pos.x - radius, y=pos.y - radius, z=pos.z - radius},
-		{x=pos.x + radius, y=pos.y + radius, z=pos.z + radius},
-	)
+	local pos1 = {x=pos.x - radius, y=pos.y - radius, z=pos.z - radius}
+	local pos2 = {x=pos.x + radius, y=pos.y + radius, z=pos.z + radius}
+	local emerged_pos1, emerged_pos2 = manip:read_from_map(pos1, pos2)
+	local area = VoxelArea:new({MinEdge=emerged_pos1, MaxEdge=emerged_pos2})
 
-	local insert = table.insert
-	local node_id = minetest.get_content_id(nodename)
-	local ignore_id = minetest.get_content_id("ignore")
-	local min_radius, max_radius = radius * (radius - 1), radius * (radius + 1)
+	--fill emerged area with ignore
 	local nodes = {}
+	local ignore = minetest.get_content_id("ignore")
+	for i = 1, worldedit.volume(emerged_pos1, emerged_pos2) do
+		nodes[i] = ignore
+	end
+
+	--fill selected area with node
+	local node_id = minetest.get_content_id(nodename)
+	local min_radius, max_radius = radius * (radius - 1), radius * (radius + 1)
+	local ystride, zstride = area.ystride, area.zstride
+	local x, y, z = -radius, -radius, -radius
 	local count = 0
-	for x = -radius, radius do
-		for y = -radius, radius do
-			for z = -radius, radius do
-				local squared = x * x + y * y + z * z
-				if squared >= min_radius and squared <= max_radius then --surface of sphere
-					insert(nodes, node_id)
-					count = count + 1
-				else
-					insert(nodes, ignore_id)
-				end
+	for i in area:iterp(pos1, pos2) do
+		local squared = x * x + y * y + z * z
+		if squared >= min_radius and squared <= max_radius then --position is on surface of sphere
+			nodes[i] = node_id
+			count = count + 1
+		end
+
+		--move to the next position
+		x = x + 1
+		if x > radius then
+			x = -radius
+			y = y + 1
+			if y > radius then
+				y = -radius
+				z = z + 1
 			end
 		end
 	end
@@ -42,26 +54,38 @@ end
 worldedit.sphere = function(pos, radius, nodename)
 	--set up voxel manipulator
 	local manip = minetest.get_voxel_manip()
-	manip:read_from_map(
-		{x=pos.x - radius, y=pos.y - radius, z=pos.z - radius},
-		{x=pos.x + radius, y=pos.y + radius, z=pos.z + radius},
-	)
+	local pos1 = {x=pos.x - radius, y=pos.y - radius, z=pos.z - radius}
+	local pos2 = {x=pos.x + radius, y=pos.y + radius, z=pos.z + radius}
+	local emerged_pos1, emerged_pos2 = manip:read_from_map(pos1, pos2)
+	local area = VoxelArea:new({MinEdge=emerged_pos1, MaxEdge=emerged_pos2})
 
-	local insert = table.insert
-	local node_id = minetest.get_content_id(nodename)
-	local ignore_id = minetest.get_content_id("ignore")
-	local max_radius = radius * (radius + 1)
+	--fill emerged area with ignore
 	local nodes = {}
+	local ignore = minetest.get_content_id("ignore")
+	for i = 1, worldedit.volume(emerged_pos1, emerged_pos2) do
+		nodes[i] = ignore
+	end
+
+	--fill selected area with node
+	local node_id = minetest.get_content_id(nodename)
+	local max_radius = radius * (radius + 1)
+	local ystride, zstride = area.ystride, area.zstride
+	local x, y, z = -radius, -radius, -radius
 	local count = 0
-	for x = -radius, radius do
-		for y = -radius, radius do
-			for z = -radius, radius do
-				if x * x + y * y + z * z <= max_radius then --inside sphere
-					insert(nodes, node_id)
-					count = count + 1
-				else
-					insert(nodes, ignore_id)
-				end
+	for i in area:iterp(pos1, pos2) do
+		if x * x + y * y + z * z <= max_radius then --position is inside sphere
+			nodes[i] = node_id
+			count = count + 1
+		end
+
+		--move to the next position
+		x = x + 1
+		if x > radius then
+			x = -radius
+			y = y + 1
+			if y > radius then
+				y = -radius
+				z = z + 1
 			end
 		end
 	end
@@ -75,30 +99,42 @@ worldedit.sphere = function(pos, radius, nodename)
 end
 
 --adds a hollow dome centered at `pos` with radius `radius`, composed of `nodename`, returning the number of nodes added
-worldedit.hollow_dome = function(pos, radius, nodename) --wip: use bresenham sphere for maximum speed
+worldedit.hollow_dome = function(pos, radius, nodename)
 	--set up voxel manipulator
 	local manip = minetest.get_voxel_manip()
-	manip:read_from_map(
-		{x=pos.x - radius, y=pos.y, z=pos.z - radius},
-		{x=pos.x + radius, y=pos.y + radius, z=pos.z + radius},
-	)
+	local pos1 = {x=pos.x - radius, y=pos.y, z=pos.z - radius}
+	local pos2 = {x=pos.x + radius, y=pos.y + radius, z=pos.z + radius}
+	local emerged_pos1, emerged_pos2 = manip:read_from_map(pos1, pos2)
+	local area = VoxelArea:new({MinEdge=emerged_pos1, MaxEdge=emerged_pos2})
 
-	local insert = table.insert
-	local node_id = minetest.get_content_id(nodename)
-	local ignore_id = minetest.get_content_id("ignore")
-	local min_radius, max_radius = radius * (radius - 1), radius * (radius + 1)
+	--fill emerged area with ignore
 	local nodes = {}
+	local ignore = minetest.get_content_id("ignore")
+	for i = 1, worldedit.volume(emerged_pos1, emerged_pos2) do
+		nodes[i] = ignore
+	end
+
+	--fill selected area with node
+	local node_id = minetest.get_content_id(nodename)
+	local min_radius, max_radius = radius * (radius - 1), radius * (radius + 1)
+	local ystride, zstride = area.ystride, area.zstride
+	local x, y, z = -radius, 0, -radius
 	local count = 0
-	for x = -radius, radius do
-		for y = 0, radius do
-			for z = -radius, radius do
-				local squared = x * x + y * y + z * z
-				if squared >= min_radius and squared <= max_radius then --surface of dome
-					insert(nodes, node_id)
-					count = count + 1
-				else
-					insert(nodes, ignore_id)
-				end
+	for i in area:iterp(pos1, pos2) do
+		local squared = x * x + y * y + z * z
+		if squared >= min_radius and squared <= max_radius then --position is on surface of sphere
+			nodes[i] = node_id
+			count = count + 1
+		end
+
+		--move to the next position
+		x = x + 1
+		if x > radius then
+			x = -radius
+			y = y + 1
+			if y > radius then
+				y = 0
+				z = z + 1
 			end
 		end
 	end
@@ -115,26 +151,38 @@ end
 worldedit.dome = function(pos, radius, nodename) --wip: use bresenham sphere for maximum speed
 	--set up voxel manipulator
 	local manip = minetest.get_voxel_manip()
-	manip:read_from_map(
-		{x=pos.x - radius, y=pos.y, z=pos.z - radius},
-		{x=pos.x + radius, y=pos.y + radius, z=pos.z + radius},
-	)
+	local pos1 = {x=pos.x - radius, y=pos.y, z=pos.z - radius}
+	local pos2 = {x=pos.x + radius, y=pos.y + radius, z=pos.z + radius}
+	local emerged_pos1, emerged_pos2 = manip:read_from_map(pos1, pos2)
+	local area = VoxelArea:new({MinEdge=emerged_pos1, MaxEdge=emerged_pos2})
 
-	local insert = table.insert
-	local node_id = minetest.get_content_id(nodename)
-	local ignore_id = minetest.get_content_id("ignore")
-	local max_radius = radius * (radius + 1)
+	--fill emerged area with ignore
 	local nodes = {}
+	local ignore = minetest.get_content_id("ignore")
+	for i = 1, worldedit.volume(emerged_pos1, emerged_pos2) do
+		nodes[i] = ignore
+	end
+
+	--fill selected area with node
+	local node_id = minetest.get_content_id(nodename)
+	local max_radius = radius * (radius + 1)
+	local ystride, zstride = area.ystride, area.zstride
+	local x, y, z = -radius, 0, -radius
 	local count = 0
-	for x = -radius, radius do
-		for y = 0, radius do
-			for z = -radius, radius do
-				if x * x + y * y + z * z <= max_radius then --inside dome
-					insert(nodes, node_id)
-					count = count + 1
-				else
-					insert(nodes, ignore_id)
-				end
+	for i in area:iterp(pos1, pos2) do
+		if x * x + y * y + z * z <= max_radius then --position is inside sphere
+			nodes[i] = node_id
+			count = count + 1
+		end
+
+		--move to the next position
+		x = x + 1
+		if x > radius then
+			x = -radius
+			y = y + 1
+			if y > radius then
+				y = 0
+				z = z + 1
 			end
 		end
 	end
@@ -148,7 +196,7 @@ worldedit.dome = function(pos, radius, nodename) --wip: use bresenham sphere for
 end
 
 --adds a hollow cylinder at `pos` along the `axis` axis ("x" or "y" or "z") with length `length` and radius `radius`, composed of `nodename`, returning the number of nodes added
-worldedit.hollow_cylinder = function(pos, axis, length, radius, nodename)
+worldedit.hollow_cylinder = function(pos, axis, length, radius, nodename) --wip: rewrite this using voxelmanip
 	local other1, other2
 	if axis == "x" then
 		other1, other2 = "y", "z"
@@ -216,7 +264,7 @@ worldedit.hollow_cylinder = function(pos, axis, length, radius, nodename)
 end
 
 --adds a cylinder at `pos` along the `axis` axis ("x" or "y" or "z") with length `length` and radius `radius`, composed of `nodename`, returning the number of nodes added
-worldedit.cylinder = function(pos, axis, length, radius, nodename, env)
+worldedit.cylinder = function(pos, axis, length, radius, nodename, env) --wip: rewrite this using voxelmanip
 	local other1, other2
 	if axis == "x" then
 		other1, other2 = "y", "z"
@@ -281,7 +329,7 @@ worldedit.cylinder = function(pos, axis, length, radius, nodename, env)
 end
 
 --adds a pyramid centered at `pos` with height `height`, composed of `nodename`, returning the number of nodes added
-worldedit.pyramid = function(pos, height, nodename, env)
+worldedit.pyramid = function(pos, height, nodename, env) --wip: rewrite this using voxelmanip
 	local pos1x, pos1y, pos1z = pos.x - height, pos.y, pos.z - height
 	local pos2x, pos2y, pos2z = pos.x + height, pos.y + height, pos.z + height
 	local pos = {x=0, y=pos1y, z=0}

@@ -2,7 +2,7 @@ local path = minetest.get_modpath(minetest.get_current_modname())
 
 local loadmodule = function(path)
 	return pcall(function()
-		dofile(path)
+		return dofile(path)
 	end)
 end
 

@@ -34,6 +34,10 @@ end
 
 --converts the region defined by positions `pos1` and `pos2` into a single string, returning the serialized data and the number of nodes serialized
 worldedit.serialize = function(pos1, pos2) --wip: check for ItemStacks and whether they can be serialized
+	--make area stay loaded
+	local manip = minetest.get_voxel_manip()
+	manip:read_from_map(pos1, pos2)
+
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 	local pos = {x=pos1.x, y=0, z=0}
 	local count = 0
@@ -141,7 +145,24 @@ worldedit.allocate = function(originpos, value)
 			count = count + 1
 		end
 	elseif version == 4 then --current nested table format
-		local nodes = minetest.deserialize(value)
+		--wip: this is a filthy hack that works surprisingly well
+		value = value:gsub("return%s*{", "", 1):gsub("}%s*$", "", 1)
+		local escaped = value:gsub("\\\\", "@@"):gsub("\\\"", "@@"):gsub("(\"[^\"]*\")", function(s) return string.rep("@", #s) end)
+		local startpos, startpos1, endpos = 1, 1
+		local nodes = {}
+		while true do
+			startpos, endpos = escaped:find("},%s*{", startpos)
+			if not startpos then
+				break
+			end
+			local current = value:sub(startpos1, startpos)
+			table.insert(nodes, minetest.deserialize("return " .. current))
+			startpos, startpos1 = endpos, endpos
+		end
+		table.insert(nodes, minetest.deserialize("return " .. value:sub(startpos1)))
+
+		--local nodes = minetest.deserialize(value) --wip: this is broken for larger tables in the current version of LuaJIT
+
 		count = #nodes
 		for index = 1, count do
 			local entry = nodes[index]
@@ -161,7 +182,7 @@ end
 
 --loads the nodes represented by string `value` at position `originpos`, returning the number of nodes deserialized
 --contains code based on [table.save/table.load](http://lua-users.org/wiki/SaveTableToFile) by ChillCode, available under the MIT license (GPL compatible)
-worldedit.deserialize = function(originpos, value)
+worldedit.deserialize = function(originpos, value) --wip: use voxelmanip to make sure the blocks are loaded
 	local originx, originy, originz = originpos.x, originpos.y, originpos.z
 	local count = 0
 	local add_node, get_meta = minetest.add_node, minetest.get_meta

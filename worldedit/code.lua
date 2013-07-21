@@ -24,6 +24,10 @@ worldedit.luatransform = function(pos1, pos2, code)
 	end
 	local operation = factory()
 
+	--make area stay loaded
+	local manip = minetest.get_voxel_manip()
+	manip:read_from_map(pos1, pos2)
+
 	local pos = {x=pos1.x, y=0, z=0}
 	while pos.x <= pos2.x do
 		pos.y = pos1.y

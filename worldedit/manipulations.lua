@@ -3,6 +3,7 @@ local minetest = minetest --local copy of global
 
 --wip: test the entire API again to make sure it works
 --wip: remove env parameter where no longer needed in chat commands module
+--wip: fix the queue
 
 --modifies positions `pos1` and `pos2` so that each component of `pos1` is less than or equal to its corresponding conent of `pos2`, returning two new positions
 worldedit.sort_pos = function(pos1, pos2)
@@ -32,12 +33,19 @@ worldedit.set = function(pos1, pos2, nodename)
 
 	--set up voxel manipulator
 	local manip = minetest.get_voxel_manip()
-	manip:read_from_map(pos1, pos2)
+	local emerged_pos1, emerged_pos2 = manip:read_from_map(pos1, pos2)
+	local area = VoxelArea:new({MinEdge=emerged_pos1, MaxEdge=emerged_pos2})
 
-	--fill nodes table with node to be set
+	--fill emerged area with ignore
 	local nodes = {}
+	local ignore = minetest.get_content_id("ignore")
+	for i = 1, worldedit.volume(emerged_pos1, emerged_pos2) do
+		nodes[i] = ignore
+	end
+
+	--fill selected area with node
 	local node_id = minetest.get_content_id(nodename)
-	for i = 1, (pos2.x - pos1.x) * (pos2.y - pos1.y) * (pos2.z - pos1.z) do
+	for i in area:iterp(pos1, pos2) do
 		nodes[i] = node_id
 	end
 
@@ -53,39 +61,55 @@ end
 worldedit.replace = function(pos1, pos2, searchnode, replacenode)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 
-	local node = {name=replacenode}
-	local add_node = minetest.add_node
-	local nodes = minetest.find_nodes_in_area(pos1, pos2, searchnode)
-	for _, pos in ipairs(nodes) do
-		add_node(pos, node)
+	--set up voxel manipulator
+	local manip = minetest.get_voxel_manip()
+	local emerged_pos1, emerged_pos2 = manip:read_from_map(pos1, pos2)
+	local area = VoxelArea:new({MinEdge=emerged_pos1, MaxEdge=emerged_pos2})
+
+	local nodes = manip:get_data()
+	local searchnode_id = minetest.get_content_id(searchnode)
+	local replacenode_id = minetest.get_content_id(replacenode)
+	local count = 0
+	for i in area:iterp(pos1, pos2) do --replace searchnode with replacenode
+		if nodes[i] == searchnode_id then
+			nodes[i] = replacenode_id
+			count = count + 1
+		end
 	end
-	return #nodes
+
+	--update map nodes
+	manip:set_data(nodes)
+	manip:write_to_map()
+	manip:update_map()
+
+	return count
 end
 
 --replaces all nodes other than `searchnode` with `replacenode` in a region defined by positions `pos1` and `pos2`, returning the number of nodes replaced
-worldedit.replaceinverse = function(pos1, pos2, searchnode, replacenode) --wip: use voxelmanip get_data for this
+worldedit.replaceinverse = function(pos1, pos2, searchnode, replacenode)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 
-	local pos = {x=pos1.x, y=0, z=0}
-	local node = {name=replacenode}
-	local get_node, add_node = minetest.get_node, minetest.add_node
+	--set up voxel manipulator
+	local manip = minetest.get_voxel_manip()
+	local emerged_pos1, emerged_pos2 = manip:read_from_map(pos1, pos2)
+	local area = VoxelArea:new({MinEdge=emerged_pos1, MaxEdge=emerged_pos2})
+
+	local nodes = manip:get_data()
+	local searchnode_id = minetest.get_content_id(searchnode)
+	local replacenode_id = minetest.get_content_id(replacenode)
 	local count = 0
-	while pos.x <= pos2.x do
-		pos.y = pos1.y
-		while pos.y <= pos2.y do
-			pos.z = pos1.z
-			while pos.z <= pos2.z do
-				local name = get_node(pos).name
-				if name ~= "ignore" and name ~= searchnode then
-					add_node(pos, node)
-					count = count + 1
-				end
-				pos.z = pos.z + 1
-			end
-			pos.y = pos.y + 1
+	for i in area:iterp(pos1, pos2) do --replace anything that is not searchnode with replacenode
+		if nodes[i] ~= searchnode_id then
+			nodes[i] = replacenode_id
+			count = count + 1
 		end
-		pos.x = pos.x + 1
 	end
+
+	--update map nodes
+	manip:set_data(nodes)
+	manip:write_to_map()
+	manip:update_map()
+
 	return count
 end
 
@@ -94,7 +118,7 @@ worldedit.copy = function(pos1, pos2, axis, amount, env)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 	if env == nil then env = minetest.env end
 
-	--wip: copy slice by slice using schematic method in the copy axis and transfer metadata in separate loop (and if the amount is greater than the length in the axis, copy whole thing at a time)
+	--wip: copy slice by slice using schematic method in the copy axis and transfer metadata in separate loop (and if the amount is greater than the length in the axis, copy whole thing at a time), use voxelmanip to keep area loaded
 	if amount < 0 then
 		local pos = {x=pos1.x, y=0, z=0}
 		while pos.x <= pos2.x do
@@ -144,7 +168,7 @@ worldedit.move = function(pos1, pos2, axis, amount, env)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 	if env == nil then env = minetest.env end
 
-	--wip: move slice by slice using schematic method in the move axis and transfer metadata in separate loop (and if the amount is greater than the length in the axis, copy whole thing at a time and erase original after, using schematic method)
+	--wip: move slice by slice using schematic method in the move axis and transfer metadata in separate loop (and if the amount is greater than the length in the axis, copy whole thing at a time and erase original after, using schematic method), use voxelmanip to keep area loaded
 	if amount < 0 then
 		local pos = {x=pos1.x, y=0, z=0}
 		while pos.x <= pos2.x do
@@ -205,7 +229,7 @@ worldedit.stack = function(pos1, pos2, axis, count, env)
 		amount = amount + length
 		copy(pos1, pos2, axis, amount, env)
 	end
-	return worldedit.volume(pos1, pos2)
+	return worldedit.volume(pos1, pos2) * count
 end
 
 --scales the region defined by positions `pos1` and `pos2` by an factor of positive integer `factor` with `pos1` as the origin, returning the number of nodes scaled, the new scaled position 1, and the new scaled position 2
@@ -216,14 +240,20 @@ worldedit.scale = function(pos1, pos2, factor)
 	local get_node, get_meta, place_schematic = minetest.get_node, minetest.get_meta, minetest.place_schematic
 	local placeholder_node = {name="", param1=0, param2=0}
 	local nodes = {}
-	for i = 1, size ^ 3 do
+	for i = 1, factor ^ 3 do
 		nodes[i] = placeholder_node
 	end
-	local schematic = {size={x=size, y=size, z=size}, data=nodes}
+	local schematic = {size={x=factor, y=factor, z=factor}, data=nodes}
+
+	local size = factor - 1
+
+	--make area stay loaded
+	local manip = minetest.get_voxel_manip()
+	local new_pos2 = {x=pos1.x + (pos2.x - pos1.x) * factor + size, y=pos1.y + (pos2.y - pos1.y) * factor + size, z=pos1.z + (pos2.z - pos1.z) * factor + size}
+	local emerged_pos1, emerged_pos2 = manip:read_from_map(pos1, new_pos2)
 
 	local pos = {x=pos2.x, y=0, z=0}
 	local bigpos = {x=0, y=0, z=0}
-	size = factor - 1
 	while pos.x >= pos1.x do
 		pos.y = pos2.y
 		while pos.y >= pos1.y do
@@ -236,14 +266,19 @@ worldedit.scale = function(pos1, pos2, factor)
 				local posx, posy, posz = pos1.x + (pos.x - pos1.x) * factor, pos1.y + (pos.y - pos1.y) * factor, pos1.z + (pos.z - pos1.z) * factor
 
 				--create large node
-				placeholder_node[1], placeholder_node[3] = node.name, node.param2
+				placeholder_node.name = node.name
+				placeholder_node.param1, placeholder_node.param2 = node.param1, node.param2
 				bigpos.x, bigpos.y, bigpos.z = posx, posy, posz
 				place_schematic(bigpos, schematic)
-				for x = 0, size do --fill in large node meta
-					for y = 0, size do
-						for z = 0, size do
-							bigpos.x, bigpos.y, bigpos.z = posx + x, posy + y, posz + z
-							get_meta(bigpos):from_table(meta) --set metadata of new node
+
+				--fill in large node meta
+				if next(meta.fields) ~= nil and next(meta.inventory) ~= nil then --node has meta fields
+					for x = 0, size do
+						for y = 0, size do
+							for z = 0, size do
+								bigpos.x, bigpos.y, bigpos.z = posx + x, posy + y, posz + z
+								get_meta(bigpos):from_table(meta) --set metadata of new node
+							end
 						end
 					end
 				end
@@ -253,8 +288,7 @@ worldedit.scale = function(pos1, pos2, factor)
 		end
 		pos.x = pos.x - 1
 	end
-	local newpos2 = {x=pos1.x + (pos2.x - pos1.x) * factor + size, y=pos1.y + (pos2.y - pos1.y) * factor + size, z=pos1.z + (pos2.z - pos1.z) * factor + size}
-	return worldedit.volume(pos1, pos2), pos1, newpos2
+	return worldedit.volume(pos1, pos2) * (factor ^ 3), pos1, new_pos2
 end
 
 --transposes a region defined by the positions `pos1` and `pos2` between the `axis1` and `axis2` axes, returning the number of nodes transposed, the new transposed position 1, and the new transposed position 2
@@ -275,9 +309,16 @@ worldedit.transpose = function(pos1, pos2, axis1, axis2, env)
 	end
 
 	--calculate the new position 2 after transposition
-	local newpos2 = {x=pos2.x, y=pos2.y, z=pos2.z}
-	newpos2[axis1] = pos1[axis1] + extent2
-	newpos2[axis2] = pos1[axis2] + extent1
+	local new_pos2 = {x=pos2.x, y=pos2.y, z=pos2.z}
+	new_pos2[axis1] = pos1[axis1] + extent2
+	new_pos2[axis2] = pos1[axis2] + extent1
+
+	--make area stay loaded
+	local manip = minetest.get_voxel_manip()
+	local upperbound = {x=pos2.x, y=pos2.y, z=pos2.z}
+	if upperbound[axis1] < new_pos2[axis1] then upperbound[axis1] = new_pos2[axis1] end
+	if upperbound[axis2] < new_pos2[axis2] then upperbound[axis2] = new_pos2[axis2] end
+	manip:read_from_map(pos1, upperbound)
 
 	local pos = {x=pos1.x, y=0, z=0}
 	local get_node, get_meta, add_node = minetest.get_node, minetest.get_meta, minetest.add_node
@@ -306,34 +347,38 @@ worldedit.transpose = function(pos1, pos2, axis1, axis2, env)
 		end
 		pos.x = pos.x + 1
 	end
-	return worldedit.volume(pos1, pos2), pos1, newpos2
+	return worldedit.volume(pos1, pos2), pos1, new_pos2
 end
 
 --flips a region defined by the positions `pos1` and `pos2` along the `axis` axis ("x" or "y" or "z"), returning the number of nodes flipped
 worldedit.flip = function(pos1, pos2, axis, env)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 
+	--make area stay loaded
+	local manip = minetest.get_voxel_manip()
+	manip:read_from_map(pos1, pos2)
+
 	--wip: flip the region slice by slice along the flip axis using schematic method
 	local pos = {x=pos1.x, y=0, z=0}
 	local start = pos1[axis] + pos2[axis]
 	pos2[axis] = pos1[axis] + math.floor((pos2[axis] - pos1[axis]) / 2)
-	if env == nil then env = minetest.env end
+	local get_node, get_meta, add_node = minetest.get_node, minetest.get_meta, minetest.add_node
 	while pos.x <= pos2.x do
 		pos.y = pos1.y
 		while pos.y <= pos2.y do
 			pos.z = pos1.z
 			while pos.z <= pos2.z do
-				local node1 = env:get_node(pos)
-				local meta1 = env:get_meta(pos):to_table()
+				local node1 = get_node(pos)
+				local meta1 = get_meta(pos):to_table()
 				local value = pos[axis]
 				pos[axis] = start - value
-				local node2 = env:get_node(pos)
-				local meta2 = env:get_meta(pos):to_table()
-				env:add_node(pos, node1)
-				env:get_meta(pos):from_table(meta1)
+				local node2 = get_node(pos)
+				local meta2 = get_meta(pos):to_table()
+				add_node(pos, node1)
+				get_meta(pos):from_table(meta1)
 				pos[axis] = value
-				env:add_node(pos, node2)
-				env:get_meta(pos):from_table(meta2)
+				add_node(pos, node2)
+				get_meta(pos):from_table(meta2)
 				pos.z = pos.z + 1
 			end
 			pos.y = pos.y + 1
@@ -372,7 +417,7 @@ worldedit.rotate = function(pos1, pos2, axis, angle, env)
 end
 
 --rotates all oriented nodes in a region defined by the positions `pos1` and `pos2` by `angle` degrees clockwise (90 degree increment) around the Y axis, returning the number of nodes oriented
-worldedit.orient = function(pos1, pos2, angle, env)
+worldedit.orient = function(pos1, pos2, angle, env) --wip: support 6D facedir rotation along arbitrary axis
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 	local registered_nodes = minetest.registered_nodes
 
@@ -393,6 +438,10 @@ worldedit.orient = function(pos1, pos2, angle, env)
 	end
 	local wallmounted_substitution = wallmounted[angle]
 	local facedir_substitution = facedir[angle]
+
+	--make area stay loaded
+	local manip = minetest.get_voxel_manip()
+	manip:read_from_map(pos1, pos2)
 
 	local count = 0
 	local get_node, get_meta, add_node = minetest.get_node, minetest.get_meta, minetest.add_node
@@ -431,6 +480,11 @@ end
 --fixes the lighting in a region defined by positions `pos1` and `pos2`, returning the number of nodes updated
 worldedit.fixlight = function(pos1, pos2, env)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
+
+	--make area stay loaded
+	local manip = minetest.get_voxel_manip()
+	manip:read_from_map(pos1, pos2)
+
 	local nodes = minetest.find_nodes_in_area(pos1, pos2, "air")
 	local dig_node = minetest.dig_node
 	for _, pos in ipairs(nodes) do

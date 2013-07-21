@@ -12,41 +12,39 @@ minetest.register_globalstep(function(dtime)
     local elapsed = 0
     local env = minetest.env
     while worldedit.lower <= worldedit.higher and elapsed <= worldedit.MAXIMUM_TIME do
-	local entry = worldedit.queue[worldedit.lower]
+        local entry = worldedit.queue[worldedit.lower]
         if entry.t == "set_node" then
             env:set_node(entry.pos, entry.node)
-	    elapsed = elapsed + 0.0002
+            elapsed = elapsed + 0.0002
         elseif entry.t == "remove_node" then
             env:remove_node(entry.pos)
-	    elapsed = elapsed + 0.0002
+            elapsed = elapsed + 0.0002
         elseif entry.t == "place_node" then
             env:place_node(entry.pos, entry.node)
-	    elapsed = elapsed + 0.001
+            elapsed = elapsed + 0.001
         elseif entry.t == "dig_node" then
             env:dig_node(entry.pos)
-	    elapsed = elapsed + 0.001
+            elapsed = elapsed + 0.001
         elseif entry.t == "add_entity" then
             env:add_entity(entry.pos, entry.name)
-	    elapsed = elapsed + 0.005
+            elapsed = elapsed + 0.005
         elseif entry.t == "add_item" then
             env:add_item(entry.pos, entry.item)
-	    elapsed = elapsed + 0.005
+            elapsed = elapsed + 0.005
         elseif entry.t == "meta_from_table" then
             env:get_meta(entry.pos):from_table(entry.table)
-	    elapsed = elapsed + 0.0002
+            elapsed = elapsed + 0.0002
         else
             print("Unknown queue event type: " .. entry.t)
         end
         worldedit.queue[worldedit.lower] = nil
-	worldedit.lower = worldedit.lower + 1
+        worldedit.lower = worldedit.lower + 1
     end
 end)
 
-do
-	worldedit.enqueue = function(value)
-		worldedit.higher = worldedit.higher + 1
-		worldedit.queue[worldedit.higher] = value
-	end
+worldedit.enqueue = function(value)
+        worldedit.higher = worldedit.higher + 1
+        worldedit.queue[worldedit.higher] = value
 end
 
 function table.copy(t, seen)
@@ -123,4 +121,3 @@ worldedit.queue_aliasenv = {
     add_entity      = queue_addentity,
     add_item        = queue_additem,
 }
-

@@ -33,6 +33,10 @@ minetest.register_node("worldedit:placeholder", {
 
 --hides all nodes in a region defined by positions `pos1` and `pos2` by non-destructively replacing them with invisible nodes, returning the number of nodes hidden
 worldedit.hide = function(pos1, pos2)
+	--make area stay loaded
+	local manip = minetest.get_voxel_manip()
+	manip:read_from_map(pos1, pos2)
+
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 	local pos = {x=pos1.x, y=0, z=0}
 	local placeholder = {name="worldedit:placeholder", param1=0, param2=0}
@@ -60,6 +64,10 @@ end
 
 --suppresses all instances of `nodename` in a region defined by positions `pos1` and `pos2` by non-destructively replacing them with invisible nodes, returning the number of nodes suppressed
 worldedit.suppress = function(pos1, pos2, nodename)
+	--make area stay loaded
+	local manip = minetest.get_voxel_manip()
+	manip:read_from_map(pos1, pos2)
+
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 	local placeholder = {name="worldedit:placeholder", param1=0, param2=0}
 	local nodes = minetest.find_nodes_in_area(pos1, pos2, nodename)
@@ -77,7 +85,11 @@ worldedit.suppress = function(pos1, pos2, nodename)
 end
 
 --highlights all instances of `nodename` in a region defined by positions `pos1` and `pos2` by non-destructively hiding all other nodes, returning the number of nodes found
-worldedit.highlight = function(pos1, pos2, nodename) --wip: speed this up with voxmanip get_data
+worldedit.highlight = function(pos1, pos2, nodename) --wip: speed this up with voxmanip get_data to speed up searching
+	--make area stay loaded
+	local manip = minetest.get_voxel_manip()
+	manip:read_from_map(pos1, pos2)
+
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 	local pos = {x=pos1.x, y=0, z=0}
 	local placeholder = {name="worldedit:placeholder", param1=0, param2=0}
@@ -110,6 +122,10 @@ end
 
 --restores all nodes hidden with WorldEdit functions in a region defined by positions `pos1` and `pos2`, returning the number of nodes restored
 worldedit.restore = function(pos1, pos2)
+	--make area stay loaded
+	local manip = minetest.get_voxel_manip()
+	manip:read_from_map(pos1, pos2)
+
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 	local node = {name="", param1=0, param2=0}
 	local nodes = minetest.find_nodes_in_area(pos1, pos2, "worldedit:placeholder")
