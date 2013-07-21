@@ -2,6 +2,21 @@ Chat Commands
 -------------
 For more information, see the [README](README.md).
 
+### //inspect
+
+Enable or disable node inspection.
+
+    //inspect on
+    //inspect off
+    //inspect 1
+    //inspect 0
+    //inspect true
+    //inspect false
+    //inspect yes
+    //inspect no
+    //inspect enable
+    //inspect disable
+
 ### //reset
 
 Reset the region so that it is empty.

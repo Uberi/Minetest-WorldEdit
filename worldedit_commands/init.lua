@@ -49,6 +49,32 @@ worldedit.player_axis = function(name)
 	return "z", dir.z > 0 and 1 or -1
 end
 
+worldedit.inspect = true
+
+minetest.register_chatcommand("/inspect", {
+	params = "on/off/1/0/true/false/yes/no/enable/disable",
+	description = "Enable or disable node inspection",
+	privs = {worldedit=true},
+	func = function(name, param)
+		if param == "on" or param == "1" or param == "true" or param == "yes" or param == "enable" then
+			worldedit.inspect = true
+			worldedit.player_notify(name, "node inspection is now on")
+		elseif param == "off" or param == "0" or param == "false" or param == "no" or param == "disable" then
+			worldedit.inspect = false
+			worldedit.player_notify(name, "node inspection is now off")
+		else
+			worldedit.player_notify(name, "invalid usage: " .. param)
+		end
+	end,
+})
+
+minetest.register_on_punchnode(function(pos, node, puncher)
+	if worldedit.inspect then
+		message = "node inspector: " .. node.name .. " at " .. minetest.pos_to_string(pos) .. " (param1=" .. node.param1 .. ", param2=" .. node.param2 .. ")"
+		worldedit.player_notify(puncher:get_player_name(), message)
+	end
+end)
+
 minetest.register_chatcommand("/reset", {
 	params = "",
 	description = "Reset the region so that it is empty",
@@ -205,12 +231,7 @@ minetest.register_chatcommand("/set", {
 			return
 		end
 
-		local tenv = minetest.env
-		if worldedit.ENABLE_QUEUE then
-			tenv = worldedit.queue_aliasenv
-		end
-
-		local count = worldedit.set(pos1, pos2, node, tenv)
+		local count = worldedit.set(pos1, pos2, node)
 		worldedit.player_notify(name, count .. " nodes set")
 	end,
 })
