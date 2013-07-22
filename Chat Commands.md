@@ -66,6 +66,7 @@ Display the volume of the current WorldEdit region.
 
 Set the current WorldEdit region to <node>.
 
+    //set air
     //set cactus
     //set Bronze Block
     //set mesecons:wire_00000000_off
@@ -74,7 +75,7 @@ Set the current WorldEdit region to <node>.
 
 Replace all instances of <search node> with <replace node> in the current WorldEdit region.
 
-    //replace Cobblestone cactus
+    //replace Cobblestone air
     //replace lightstone_blue glass
     //replace dirt Bronze Block
     //replace mesecons:wire_00000000_off flowers:flower_tulip
@@ -83,7 +84,7 @@ Replace all instances of <search node> with <replace node> in the current WorldE
 
 Replace all nodes other than <search node> with <replace node> in the current WorldEdit region.
 
-    //replaceinverse Cobblestone cactus
+    //replaceinverse Cobblestone air
     //replaceinverse flowers:flower_waterlily glass
     //replaceinverse dirt Bronze Block
     //replaceinverse mesecons:wire_00000000_off flowers:flower_tulip

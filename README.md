@@ -48,6 +48,8 @@ Second, by name - the node name that is defined by code, but without the mod nam
 
 Finally, by full name - the unambiguous identifier of the node, prefixes and all. This is case sensitive and includes values such as "default:stone" and "mesecons:wire_00000000_off".
 
+The node name "air" can be used anywhere a normal node name can, and acts as a blank node. This is useful for clearing or removing nodes. For example, `//set air` would remove all the nodes in the current WorldEdit region. Similarly, `//sphere 10 air`, when WorldEdit position 1 underground, would dig a large sphere out of the ground.
+
 Regions
 -------
 Most WorldEdit commands operate on regions. Regions are a set of two positions that define a 3D cube. They are local to each player and chat commands affect only the region for the player giving the commands.
