@@ -1,8 +1,10 @@
-WorldEdit v0.6 for MineTest 0.4
-===============================
-In-game world editing for [MineTest](http://minetest.net/)! Tons of functionality to help with building, fixing, and more.
+WorldEdit v0.6 for MineTest 0.4.8+
+==================================
+In-game world editing for [Minetest](http://minetest.net/)! Tons of functionality to help with building, fixing, and more.
 
-For more information, see the [forum topic](http://minetest.net/forum/viewtopic.php?id=572) at the Minetest forums.
+For more information, see the [forum topic](https://forum.minetest.net/viewtopic.php?id=572) at the Minetest forums.
+
+# New users should see the [tutorial](Tutorial.md).
 
 Usage
 -----
@@ -16,7 +18,13 @@ Chat Commands
 -------------
 WorldEdit is accessed in-game through an interface. By default, the mod distribution includes a chat interface for this purpose. It is documented in the [Chat Commands Reference](Chat Commands.md).
 
-If visual manipulation of nodes is desired, the [WorldEdit GUI](http://minetest.net/forum/viewtopic.php?id=3112) mod provides a simple interface with buttons and text entry fields for this purpose.
+If visual manipulation of nodes is desired, the [WorldEdit GUI](https://forum.minetest.net/viewtopic.php?id=3112) mod provides a simple interface with buttons and text entry fields for this purpose.
+
+Compatibility
+-------------
+This mod supports Minetest versions 0.4.8 and newer. Older versions of WorldEdit may work with older versions of Minetest, but are not recommended.
+
+WorldEdit works quite well with other mods, and does not have any known mod conflicts.
 
 WorldEdit API
 -------------
@@ -52,7 +60,7 @@ The node name "air" can be used anywhere a normal node name can, and acts as a b
 
 Regions
 -------
-Most WorldEdit commands operate on regions. Regions are a set of two positions that define a 3D cube. They are local to each player and chat commands affect only the region for the player giving the commands.
+Most WorldEdit commands operate on regions. Regions are a set of two positions that define a 3D cuboid. They are local to each player and chat commands affect only the region for the player giving the commands.
 
 Each positions together define two opposing corners of the cube. With two opposing corners it is possible to determine both the location and dimensions of the region.
 
@@ -93,7 +101,7 @@ The second is the Minetest Schematic format (MTS). The details of this format ma
 
 License
 -------
-Copyright 2013 sfan5, Anthony Zhang (Temperest), and Brett O'Donnell (cornernote).
+Copyright 2013 sfan5, Anthony Zhang (Uberi/Temperest), and Brett O'Donnell (cornernote).
 
 This mod is licensed under the [GNU Affero General Public License](http://www.gnu.org/licenses/agpl-3.0.html).
 
