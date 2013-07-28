@@ -136,7 +136,7 @@ worldedit.hollow_dome = function(pos, radius, nodename)
 end
 
 --adds a dome centered at `pos` with radius `radius`, composed of `nodename`, returning the number of nodes added
-worldedit.dome = function(pos, radius, nodename) --wip: use bresenham sphere for maximum speed
+worldedit.dome = function(pos, radius, nodename)
 	--set up voxel manipulator
 	local manip = minetest.get_voxel_manip()
 	local pos1 = {x=pos.x - radius, y=pos.y, z=pos.z - radius}
@@ -361,9 +361,8 @@ worldedit.pyramid = function(pos, height, nodename, env)
 end
 
 --adds a spiral centered at `pos` with width `width`, height `height`, space between walls `spacer`, composed of `nodename`, returning the number of nodes added
-worldedit.spiral = function(pos, width, height, spacer, nodename, env) --wip: clean this up
+worldedit.spiral = function(pos, width, height, spacer, nodename, env) --wip: rewrite this whole thing, nobody can understand it anyways
 	-- spiral matrix - http://rosettacode.org/wiki/Spiral_matrix#Lua
-	--wip: rewrite this whole thing, nobody can understand it anyways
 	av, sn = math.abs, function(s) return s~=0 and s/av(s) or 0 end
 	local function sindex(z, x) -- returns the value at (x, z) in a spiral that starts at 1 and goes outwards
 		if z == -x and z >= x then return (2*z+1)^2 end

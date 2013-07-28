@@ -33,7 +33,7 @@ worldedit.valueversion = function(value)
 end
 
 --converts the region defined by positions `pos1` and `pos2` into a single string, returning the serialized data and the number of nodes serialized
-worldedit.serialize = function(pos1, pos2) --wip: check for ItemStacks and whether they can be serialized
+worldedit.serialize = function(pos1, pos2)
 	--make area stay loaded
 	local manip = minetest.get_voxel_manip()
 	manip:read_from_map(pos1, pos2)

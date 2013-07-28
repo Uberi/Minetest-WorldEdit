@@ -183,7 +183,7 @@ minetest.register_chatcommand("/fixedpos", {
 			worldedit.player_notify(name, "invalid usage: " .. param)
 			return
 		end
-		local pos = {x=x, y=y, z=z}
+		local pos = {x=tonumber(x), y=tonumber(y), z=tonumber(z)}
 		if flag == "set1" then
 			worldedit.pos1[name] = pos
 			worldedit.mark_pos1(name)
@@ -887,11 +887,7 @@ minetest.register_chatcommand("/hide", {
 			return
 		end
 
-		local tenv = minetest.env
-		if worldedit.ENABLE_QUEUE then
-			tenv = worldedit.queue_aliasenv
-		end
-		local count = worldedit.hide(pos1, pos2, tenv)
+		local count = worldedit.hide(pos1, pos2)
 		worldedit.player_notify(name, count .. " nodes hidden")
 	end,
 })
@@ -907,7 +903,7 @@ minetest.register_chatcommand("/suppress", {
 			return
 		end
 
-		local node = worldedit.node_is_valid(param)
+		local node = worldedit.normalize_nodename(param)
 		if param == "" or not node then
 			worldedit.player_notify(name, "invalid node name: " .. param)
 			return
@@ -933,7 +929,7 @@ minetest.register_chatcommand("/highlight", {
 			return
 		end
 
-		local node = worldedit.node_is_valid(param)
+		local node = worldedit.normalize_nodename(param)
 		if param == "" or not node then
 			worldedit.player_notify(name, "invalid node name: " .. param)
 			return
