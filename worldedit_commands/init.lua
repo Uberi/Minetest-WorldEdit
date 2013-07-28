@@ -210,7 +210,11 @@ minetest.register_chatcommand("/volume", {
 		end
 
 		local volume = worldedit.volume(pos1, pos2)
-		worldedit.player_notify(name, "current region has a volume of " .. volume .. " nodes (" .. pos2.x - pos1.x .. "*" .. pos2.y - pos1.y .. "*" .. pos2.z - pos1.z .. ")")
+		local abs = math.abs
+		worldedit.player_notify(name, "current region has a volume of " .. volume .. " nodes ("
+			.. abs(pos2.x - pos1.x) .. "*"
+			.. abs(pos2.y - pos1.y) .. "*"
+			.. abs(pos2.z - pos1.z) .. ")")
 	end,
 })
 

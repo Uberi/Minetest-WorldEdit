@@ -20,24 +20,20 @@ worldedit.hollow_sphere = function(pos, radius, nodename)
 	--fill selected area with node
 	local node_id = minetest.get_content_id(nodename)
 	local min_radius, max_radius = radius * (radius - 1), radius * (radius + 1)
-	local ystride, zstride = area.ystride, area.zstride
-	local x, y, z = -radius, -radius, -radius
+	local offsetx, offsety, offsetz = pos.x - emerged_pos1.x, pos.y - emerged_pos1.y, pos.z - emerged_pos1.z
+	local zstride, ystride = area.zstride, area.ystride
 	local count = 0
-	for i in area:iterp(pos1, pos2) do
-		local squared = x * x + y * y + z * z
-		if squared >= min_radius and squared <= max_radius then --position is on surface of sphere
-			nodes[i] = node_id
-			count = count + 1
-		end
-
-		--move to the next position
-		x = x + 1
-		if x > radius then
-			x = -radius
-			y = y + 1
-			if y > radius then
-				y = -radius
-				z = z + 1
+	for z = -radius, radius do
+		local newz = (z + offsetz) * zstride
+		for y = -radius, radius do
+			local newy = newz + (y + offsety) * ystride
+			for x = -radius, radius do
+				local squared = x * x + y * y + z * z
+				if squared >= min_radius and squared <= max_radius then --position is on surface of sphere
+					local i = newy + (x + offsetx) + 1
+					nodes[i] = node_id
+					count = count + 1
+				end
 			end
 		end
 	end
@@ -69,23 +65,19 @@ worldedit.sphere = function(pos, radius, nodename)
 	--fill selected area with node
 	local node_id = minetest.get_content_id(nodename)
 	local max_radius = radius * (radius + 1)
-	local ystride, zstride = area.ystride, area.zstride
-	local x, y, z = -radius, -radius, -radius
+	local offsetx, offsety, offsetz = pos.x - emerged_pos1.x, pos.y - emerged_pos1.y, pos.z - emerged_pos1.z
+	local zstride, ystride = area.zstride, area.ystride
 	local count = 0
-	for i in area:iterp(pos1, pos2) do
-		if x * x + y * y + z * z <= max_radius then --position is inside sphere
-			nodes[i] = node_id
-			count = count + 1
-		end
-
-		--move to the next position
-		x = x + 1
-		if x > radius then
-			x = -radius
-			y = y + 1
-			if y > radius then
-				y = -radius
-				z = z + 1
+	for z = -radius, radius do
+		local newz = (z + offsetz) * zstride
+		for y = -radius, radius do
+			local newy = newz + (y + offsety) * ystride
+			for x = -radius, radius do
+				if x * x + y * y + z * z <= max_radius then --position is inside sphere
+					local i = newy + (x + offsetx) + 1
+					nodes[i] = node_id
+					count = count + 1
+				end
 			end
 		end
 	end
@@ -117,24 +109,20 @@ worldedit.hollow_dome = function(pos, radius, nodename)
 	--fill selected area with node
 	local node_id = minetest.get_content_id(nodename)
 	local min_radius, max_radius = radius * (radius - 1), radius * (radius + 1)
-	local ystride, zstride = area.ystride, area.zstride
-	local x, y, z = -radius, 0, -radius
+	local offsetx, offsety, offsetz = pos.x - emerged_pos1.x, pos.y - emerged_pos1.y, pos.z - emerged_pos1.z
+	local zstride, ystride = area.zstride, area.ystride
 	local count = 0
-	for i in area:iterp(pos1, pos2) do
-		local squared = x * x + y * y + z * z
-		if squared >= min_radius and squared <= max_radius then --position is on surface of sphere
-			nodes[i] = node_id
-			count = count + 1
-		end
-
-		--move to the next position
-		x = x + 1
-		if x > radius then
-			x = -radius
-			y = y + 1
-			if y > radius then
-				y = 0
-				z = z + 1
+	for z = -radius, radius do
+		local newz = (z + offsetz) * zstride
+		for y = 0, radius do
+			local newy = newz + (y + offsety) * ystride
+			for x = -radius, radius do
+				local squared = x * x + y * y + z * z
+				if squared >= min_radius and squared <= max_radius then --position is on surface of sphere
+					local i = newy + (x + offsetx) + 1
+					nodes[i] = node_id
+					count = count + 1
+				end
 			end
 		end
 	end
@@ -166,23 +154,19 @@ worldedit.dome = function(pos, radius, nodename) --wip: use bresenham sphere for
 	--fill selected area with node
 	local node_id = minetest.get_content_id(nodename)
 	local max_radius = radius * (radius + 1)
-	local ystride, zstride = area.ystride, area.zstride
-	local x, y, z = -radius, 0, -radius
+	local offsetx, offsety, offsetz = pos.x - emerged_pos1.x, pos.y - emerged_pos1.y, pos.z - emerged_pos1.z
+	local zstride, ystride = area.zstride, area.ystride
 	local count = 0
-	for i in area:iterp(pos1, pos2) do
-		if x * x + y * y + z * z <= max_radius then --position is inside sphere
-			nodes[i] = node_id
-			count = count + 1
-		end
-
-		--move to the next position
-		x = x + 1
-		if x > radius then
-			x = -radius
-			y = y + 1
-			if y > radius then
-				y = 0
-				z = z + 1
+	for z = -radius, radius do
+		local newz = (z + offsetz) * zstride
+		for y = 0, radius do
+			local newy = newz + (y + offsety) * ystride
+			for x = -radius, radius do
+				if x * x + y * y + z * z <= max_radius then --position is inside sphere
+					local i = newy + (x + offsetx) + 1
+					nodes[i] = node_id
+					count = count + 1
+				end
 			end
 		end
 	end
@@ -281,50 +265,54 @@ worldedit.cylinder = function(pos, axis, length, radius, nodename, env) --wip: r
 		currentpos[axis] = currentpos[axis] - length
 	end
 
-	--create schematic for single node column along the axis
-	local node = {name=nodename, param1=0, param2=0}
+	--set up voxel manipulator
+	local manip = minetest.get_voxel_manip()
+	local pos1 = {
+		[axis]=currentpos[axis],
+		[other1]=currentpos[other1] - radius,
+		[other2]=currentpos[other2] - radius
+	}
+	local pos2 = {
+		[axis]=currentpos[axis] + length - 1,
+		[other1]=currentpos[other1] + radius,
+		[other2]=currentpos[other2] + radius
+	}
+	local emerged_pos1, emerged_pos2 = manip:read_from_map(pos1, pos2)
+	local area = VoxelArea:new({MinEdge=emerged_pos1, MaxEdge=emerged_pos2})
+
+	--fill emerged area with ignore
 	local nodes = {}
-	for i = 1, length do
-		nodes[i] = node
+	local ignore = minetest.get_content_id("ignore")
+	for i = 1, worldedit.volume(emerged_pos1, emerged_pos2) do
+		nodes[i] = ignore
 	end
-	local schematic = {size={[axis]=length, [other1]=1, [other2]=1}, data=nodes}
 
-	local place_schematic = minetest.place_schematic
+	--fill selected area with node
+	local node_id = minetest.get_content_id(nodename)
+	local max_radius = radius * (radius + 1)
+	local stride = {x=1, y=area.ystride, z=area.zstride}
+	local offset = {x=currentpos.x - emerged_pos1.x, y=currentpos.y - emerged_pos1.y, z=currentpos.z - emerged_pos1.z}
+	local min_slice, max_slice = offset[axis], offset[axis] + length - 1
 	local count = 0
-	local offset1, offset2 = 0, radius
-	local delta = -radius
-	while offset1 <= offset2 do
-		--connect each pair of octants taking advantage of symmetry along two axes
-		currentpos[other1] = pos[other1] - offset1
-		local second1, second2 = pos[other2] + offset2, pos[other2] - offset2
-		for i = 0, offset1 * 2 do
-			currentpos[other2] = second1
-			place_schematic(currentpos, schematic) --octant 1 to 4
-			currentpos[other2] = second2
-			place_schematic(currentpos, schematic) --octant 5 to 8
-			currentpos[other1] = currentpos[other1] + 1
-		end
-		currentpos[other1] = pos[other1] - offset2
-		local second1, second2 = pos[other2] + offset1, pos[other2] - offset1
-		for i = 0, offset2 * 2 do
-			currentpos[other2] = second1
-			place_schematic(currentpos, schematic) --octant 2 to 3
-			currentpos[other2] = second2
-			place_schematic(currentpos, schematic) --octant 6 to 7
-			currentpos[other1] = currentpos[other1] + 1
-		end
-
-		count = count + (offset1 * 4) + (offset2 * 4) + 4 --wip: broken since node positions may coincide
-
-		--move to next location
-		delta = delta + (offset1 * 2) + 1
-		offset1 = offset1 + 1
-		if delta >= 0 then
-			offset2 = offset2 - 1
-			delta = delta - (offset2 * 2)
+	for axis1 = -radius, radius do
+		local newaxis1 = (axis1 + offset[other1]) * stride[other1]
+		for axis2 = -radius, radius do
+			local newaxis2 = newaxis1 + (axis2 + offset[other2]) * stride[other2]
+			if axis1 * axis1 + axis2 * axis2 <= max_radius then
+				for slice = min_slice, max_slice do
+					local i = newaxis2 + slice * stride[axis] + 1
+					nodes[i] = node_id
+				end
+				count = count + length
+			end
 		end
 	end
-	count = count * length --apply the length to the number of nodes
+
+	--update map nodes
+	manip:set_data(nodes)
+	manip:write_to_map()
+	manip:update_map()
+
 	return count
 end
 
@@ -334,7 +322,31 @@ worldedit.pyramid = function(pos, height, nodename, env) --wip: rewrite this usi
 	local pos2x, pos2y, pos2z = pos.x + height, pos.y + height, pos.z + height
 	local pos = {x=0, y=pos1y, z=0}
 
-	--wip: make this faster using base sized schematics that are then resized while moving upwards, or if that's not possible, add new rows/columns while looping
+	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
+
+	--set up voxel manipulator
+	local manip = minetest.get_voxel_manip()
+	local emerged_pos1, emerged_pos2 = manip:read_from_map(pos1, pos2)
+	local area = VoxelArea:new({MinEdge=emerged_pos1, MaxEdge=emerged_pos2})
+
+	--fill emerged area with ignore
+	local nodes = {}
+	local ignore = minetest.get_content_id("ignore")
+	for i = 1, worldedit.volume(emerged_pos1, emerged_pos2) do
+		nodes[i] = ignore
+	end
+
+	--fill selected area with node
+	local node_id = minetest.get_content_id(nodename)
+	for i in area:iterp(pos1, pos2) do
+		nodes[i] = node_id
+	end
+
+	--update map nodes
+	manip:set_data(nodes)
+	manip:write_to_map()
+	manip:update_map()
+
 	local count = 0
 	local node = {name=nodename}
 	if env == nil then env = minetest.env end
