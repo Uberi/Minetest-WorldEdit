@@ -173,6 +173,29 @@ minetest.register_chatcommand("/p", {
 	end,
 })
 
+minetest.register_chatcommand("/fixedpos", {
+	params = "set1/set2 x y z",
+	description = "Set a WorldEdit region position to the position at (<x>, <y>, <z>)",
+	privs = {worldedit=true},
+	func = function(name, param)
+		local found, _, flag, x, y, z = param:find("^(set[12])%s+([+-]?%d+)%s+([+-]?%d+)%s+([+-]?%d+)$")
+		if found == nil then
+			worldedit.player_notify(name, "invalid usage: " .. param)
+			return
+		end
+		local pos = {x=x, y=y, z=z}
+		if flag == "set1" then
+			worldedit.pos1[name] = pos
+			worldedit.mark_pos1(name)
+			worldedit.player_notify(name, "position 1 set to " .. minetest.pos_to_string(pos))
+		else --flag == "set2"
+			worldedit.pos2[name] = pos
+			worldedit.mark_pos2(name)
+			worldedit.player_notify(name, "position 2 set to " .. minetest.pos_to_string(pos))
+		end
+	end,
+})
+
 minetest.register_on_punchnode(function(pos, node, puncher)
 	local name = puncher:get_player_name()
 	if name ~= "" and worldedit.set_pos[name] ~= nil then --currently setting position

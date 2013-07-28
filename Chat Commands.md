@@ -56,6 +56,14 @@ Set WorldEdit region, WorldEdit position 1, or WorldEdit position 2 by punching 
     //p set2
     //p get
 
+### //fixedpos set1 x y z
+
+Set a WorldEdit region position to the position at (<x>, <y>, <z>).
+
+    //fixedpos set1 0, 0, 0
+    //fixedpos set1 -30, 5, 28
+    //fixedpos set2 1004, -200, 432
+
 ### //volume
 
 Display the volume of the current WorldEdit region.
