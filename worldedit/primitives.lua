@@ -24,13 +24,13 @@ worldedit.hollow_sphere = function(pos, radius, nodename)
 	local zstride, ystride = area.zstride, area.ystride
 	local count = 0
 	for z = -radius, radius do
-		local newz = (z + offsetz) * zstride
+		local newz = (z + offsetz) * zstride + 1 --offset contributed by z plus 1 to make it 1-indexed
 		for y = -radius, radius do
 			local newy = newz + (y + offsety) * ystride
 			for x = -radius, radius do
 				local squared = x * x + y * y + z * z
 				if squared >= min_radius and squared <= max_radius then --position is on surface of sphere
-					local i = newy + (x + offsetx) + 1
+					local i = newy + (x + offsetx)
 					nodes[i] = node_id
 					count = count + 1
 				end
@@ -69,12 +69,12 @@ worldedit.sphere = function(pos, radius, nodename)
 	local zstride, ystride = area.zstride, area.ystride
 	local count = 0
 	for z = -radius, radius do
-		local newz = (z + offsetz) * zstride
+		local newz = (z + offsetz) * zstride + 1 --offset contributed by z plus 1 to make it 1-indexed
 		for y = -radius, radius do
 			local newy = newz + (y + offsety) * ystride
 			for x = -radius, radius do
 				if x * x + y * y + z * z <= max_radius then --position is inside sphere
-					local i = newy + (x + offsetx) + 1
+					local i = newy + (x + offsetx)
 					nodes[i] = node_id
 					count = count + 1
 				end
@@ -113,13 +113,13 @@ worldedit.hollow_dome = function(pos, radius, nodename)
 	local zstride, ystride = area.zstride, area.ystride
 	local count = 0
 	for z = -radius, radius do
-		local newz = (z + offsetz) * zstride
+		local newz = (z + offsetz) * zstride + 1 --offset contributed by z plus 1 to make it 1-indexed
 		for y = 0, radius do
 			local newy = newz + (y + offsety) * ystride
 			for x = -radius, radius do
 				local squared = x * x + y * y + z * z
 				if squared >= min_radius and squared <= max_radius then --position is on surface of sphere
-					local i = newy + (x + offsetx) + 1
+					local i = newy + (x + offsetx)
 					nodes[i] = node_id
 					count = count + 1
 				end
@@ -158,12 +158,12 @@ worldedit.dome = function(pos, radius, nodename) --wip: use bresenham sphere for
 	local zstride, ystride = area.zstride, area.ystride
 	local count = 0
 	for z = -radius, radius do
-		local newz = (z + offsetz) * zstride
+		local newz = (z + offsetz) * zstride + 1 --offset contributed by z plus 1 to make it 1-indexed
 		for y = 0, radius do
 			local newy = newz + (y + offsety) * ystride
 			for x = -radius, radius do
 				if x * x + y * y + z * z <= max_radius then --position is inside sphere
-					local i = newy + (x + offsetx) + 1
+					local i = newy + (x + offsetx)
 					nodes[i] = node_id
 					count = count + 1
 				end
@@ -248,7 +248,7 @@ worldedit.hollow_cylinder = function(pos, axis, length, radius, nodename) --wip:
 end
 
 --adds a cylinder at `pos` along the `axis` axis ("x" or "y" or "z") with length `length` and radius `radius`, composed of `nodename`, returning the number of nodes added
-worldedit.cylinder = function(pos, axis, length, radius, nodename, env) --wip: rewrite this using voxelmanip
+worldedit.cylinder = function(pos, axis, length, radius, nodename, env)
 	local other1, other2
 	if axis == "x" then
 		other1, other2 = "y", "z"
@@ -295,7 +295,7 @@ worldedit.cylinder = function(pos, axis, length, radius, nodename, env) --wip: r
 	local min_slice, max_slice = offset[axis], offset[axis] + length - 1
 	local count = 0
 	for axis1 = -radius, radius do
-		local newaxis1 = (axis1 + offset[other1]) * stride[other1]
+		local newaxis1 = (axis1 + offset[other1]) * stride[other1] + 1 --offset contributed by other axis 1 plus 1 to make it 1-indexed
 		for axis2 = -radius, radius do
 			local newaxis2 = newaxis1 + (axis2 + offset[other2]) * stride[other2]
 			if axis1 * axis1 + axis2 * axis2 <= max_radius then
@@ -317,12 +317,9 @@ worldedit.cylinder = function(pos, axis, length, radius, nodename, env) --wip: r
 end
 
 --adds a pyramid centered at `pos` with height `height`, composed of `nodename`, returning the number of nodes added
-worldedit.pyramid = function(pos, height, nodename, env) --wip: rewrite this using voxelmanip
-	local pos1x, pos1y, pos1z = pos.x - height, pos.y, pos.z - height
-	local pos2x, pos2y, pos2z = pos.x + height, pos.y + height, pos.z + height
-	local pos = {x=0, y=pos1y, z=0}
-
-	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
+worldedit.pyramid = function(pos, height, nodename, env)
+	local pos1 = {x=pos.x - height, y=pos.y, z=pos.z - height}
+	local pos2 = {x=pos.x + height, y=pos.y + height, z=pos.z + height}
 
 	--set up voxel manipulator
 	local manip = minetest.get_voxel_manip()
@@ -338,8 +335,21 @@ worldedit.pyramid = function(pos, height, nodename, env) --wip: rewrite this usi
 
 	--fill selected area with node
 	local node_id = minetest.get_content_id(nodename)
-	for i in area:iterp(pos1, pos2) do
-		nodes[i] = node_id
+	height = height - 1
+	local offsetx, offsety, offsetz = pos.x - emerged_pos1.x, pos.y - emerged_pos1.y, pos.z - emerged_pos1.z
+	local zstride, ystride = area.zstride, area.ystride
+	local count = 0
+	for y = 0, height do --go through each level of the pyramid
+		local newy = (y + offsety) * ystride + 1 --offset contributed by y plus 1 to make it 1-indexed
+		for z = -height, height do
+			local newz = newy + (z + offsetz) * zstride
+			for x = -height, height do
+				local i = newz + (x + offsetx)
+				nodes[i] = node_id
+			end
+		end
+		height = height - 1
+		count = count + ((height - y) * 2 + 1) ^ 2
 	end
 
 	--update map nodes
@@ -347,26 +357,6 @@ worldedit.pyramid = function(pos, height, nodename, env) --wip: rewrite this usi
 	manip:write_to_map()
 	manip:update_map()
 
-	local count = 0
-	local node = {name=nodename}
-	if env == nil then env = minetest.env end
-	while pos.y <= pos2y do --each vertical level of the pyramid
-		pos.x = pos1x
-		while pos.x <= pos2x do
-			pos.z = pos1z
-			while pos.z <= pos2z do
-				env:add_node(pos, node)
-				pos.z = pos.z + 1
-			end
-			pos.x = pos.x + 1
-		end
-		count = count + ((pos2y - pos.y) * 2 + 1) ^ 2
-		pos.y = pos.y + 1
-
-		pos1x, pos2x = pos1x + 1, pos2x - 1
-		pos1z, pos2z = pos1z + 1, pos2z - 1
-
-	end
 	return count
 end
 
