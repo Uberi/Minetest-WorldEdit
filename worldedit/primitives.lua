@@ -106,6 +106,12 @@ worldedit.hollow_dome = function(pos, radius, nodename)
 		nodes[i] = ignore
 	end
 
+	local miny, maxy = 0, radius
+	if radius < 0 then
+		radius = -radius
+		miny, maxy = -radius, 0
+	end
+
 	--fill selected area with node
 	local node_id = minetest.get_content_id(nodename)
 	local min_radius, max_radius = radius * (radius - 1), radius * (radius + 1)
@@ -114,7 +120,7 @@ worldedit.hollow_dome = function(pos, radius, nodename)
 	local count = 0
 	for z = -radius, radius do
 		local newz = (z + offsetz) * zstride + 1 --offset contributed by z plus 1 to make it 1-indexed
-		for y = 0, radius do
+		for y = miny, maxy do
 			local newy = newz + (y + offsety) * ystride
 			for x = -radius, radius do
 				local squared = x * x + y * y + z * z
@@ -151,6 +157,12 @@ worldedit.dome = function(pos, radius, nodename)
 		nodes[i] = ignore
 	end
 
+	local miny, maxy = 0, radius
+	if radius < 0 then
+		radius = -radius
+		miny, maxy = -radius, 0
+	end
+
 	--fill selected area with node
 	local node_id = minetest.get_content_id(nodename)
 	local max_radius = radius * (radius + 1)
@@ -159,7 +171,7 @@ worldedit.dome = function(pos, radius, nodename)
 	local count = 0
 	for z = -radius, radius do
 		local newz = (z + offsetz) * zstride + 1 --offset contributed by z plus 1 to make it 1-indexed
-		for y = 0, radius do
+		for y = miny, maxy do
 			local newy = newz + (y + offsety) * ystride
 			for x = -radius, radius do
 				if x * x + y * y + z * z <= max_radius then --position is inside sphere
@@ -248,7 +260,7 @@ worldedit.hollow_cylinder = function(pos, axis, length, radius, nodename) --wip:
 end
 
 --adds a cylinder at `pos` along the `axis` axis ("x" or "y" or "z") with length `length` and radius `radius`, composed of `nodename`, returning the number of nodes added
-worldedit.cylinder = function(pos, axis, length, radius, nodename, env)
+worldedit.cylinder = function(pos, axis, length, radius, nodename)
 	local other1, other2
 	if axis == "x" then
 		other1, other2 = "y", "z"
@@ -317,7 +329,7 @@ worldedit.cylinder = function(pos, axis, length, radius, nodename, env)
 end
 
 --adds a pyramid centered at `pos` with height `height`, composed of `nodename`, returning the number of nodes added
-worldedit.pyramid = function(pos, height, nodename, env)
+worldedit.pyramid = function(pos, axis, height, nodename)
 	local pos1 = {x=pos.x - height, y=pos.y, z=pos.z - height}
 	local pos2 = {x=pos.x + height, y=pos.y + height, z=pos.z + height}
 
@@ -333,22 +345,30 @@ worldedit.pyramid = function(pos, height, nodename, env)
 		nodes[i] = ignore
 	end
 
+	--handle inverted pyramids
+	height = height - 1
+	local size = height
+	local step = -1
+	if height < 0 then
+		size = 0
+		step = 1
+	end
+--wip: support arbitrary axes
 	--fill selected area with node
 	local node_id = minetest.get_content_id(nodename)
-	height = height - 1
 	local offsetx, offsety, offsetz = pos.x - emerged_pos1.x, pos.y - emerged_pos1.y, pos.z - emerged_pos1.z
 	local zstride, ystride = area.zstride, area.ystride
 	local count = 0
 	for y = 0, height do --go through each level of the pyramid
 		local newy = (y + offsety) * ystride + 1 --offset contributed by y plus 1 to make it 1-indexed
-		for z = -height, height do
+		for z = -size, size do
 			local newz = newy + (z + offsetz) * zstride
-			for x = -height, height do
+			for x = -size, size do
 				local i = newz + (x + offsetx)
 				nodes[i] = node_id
 			end
 		end
-		height = height - 1
+		size = size + step
 		count = count + ((height - y) * 2 + 1) ^ 2
 	end
 

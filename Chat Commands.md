@@ -118,7 +118,7 @@ Add sphere centered at WorldEdit position 1 with radius <radius>, composed of <n
 Add hollow dome centered at WorldEdit position 1 with radius <radius>, composed of <node>.
 
     //hollowdome 5 Diamond Block
-    //hollowdome 12 glass
+    //hollowdome -12 glass
     //hollowdome 17 mesecons:wire_00000000_off
 
 ### //dome <radius> <node>
@@ -126,7 +126,7 @@ Add hollow dome centered at WorldEdit position 1 with radius <radius>, composed 
 Add dome centered at WorldEdit position 1 with radius <radius>, composed of <node>.
 
     //dome 5 Diamond Block
-    //dome 12 glass
+    //dome -12 glass
     //dome 17 mesecons:wire_00000000_off
 
 ### //hollowcylinder x/y/z/? <length> <radius> <node>
@@ -147,9 +147,9 @@ Add cylinder at WorldEdit position 1 along the x/y/z/? axis with length <length>
     //cylinder z -12 3 mesecons:wire_00000000_off
     //cylinder ? 2 4 default:stone
     
-### //pyramid <height> <node>
+### //pyramid x/y/z? <height> <node>
 
-Add pyramid centered at WorldEdit position 1 with height <height>, composed of <node>.
+Add pyramid centered at WorldEdit position 1 along the x/y/z/? axis with height <height>, composed of <node>.
 
     //pyramid 8 Diamond Block
     //pyramid 5 glass
@@ -323,3 +323,9 @@ After using //mtschemprob start all nodes punched will bring up a text field whe
 This mode can be left with //mtschemprob finish. //mtschemprob get will display the probabilities saved for the nodes.
 
     //mtschemprob get
+
+### //clearobjects
+
+Clears all objects within the WorldEdit region.
+
+    //clearobjects

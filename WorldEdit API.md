@@ -82,6 +82,12 @@ Fixes the lighting in a region defined by positions `pos1` and `pos2`.
 
 Returns the number of nodes updated.
 
+### count = worldedit.clearobjects(pos1, pos2)
+
+Clears all objects in a region defined by the positions `pos1` and `pos2`.
+
+Returns the number of objects cleared.
+
 Primitives
 ----------
 Contained in primitives.lua, this module allows the creation of several geometric primitives.
@@ -122,9 +128,9 @@ Adds a cylinder at `pos` along the `axis` axis ("x" or "y" or "z") with length `
 
 Returns the number of nodes added.
 
-### count = worldedit.pyramid(pos, height, nodename)
+### count = worldedit.pyramid(pos, axis, height, nodename)
 
-Adds a pyramid centered at `pos` with height `height`.
+Adds a pyramid centered at `pos` along the `axis` axis ("x" or "y" or "z") with height `height`.
 
 Returns the number of nodes added.
 

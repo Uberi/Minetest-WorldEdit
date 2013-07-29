@@ -1,6 +1,7 @@
 minetest.register_privilege("worldedit", "Can use WorldEdit commands")
 
 worldedit.set_pos = {}
+worldedit.inspect = {}
 
 worldedit.pos1 = {}
 worldedit.pos2 = {}
@@ -49,19 +50,17 @@ worldedit.player_axis = function(name)
 	return "z", dir.z > 0 and 1 or -1
 end
 
-worldedit.inspect = true
-
 minetest.register_chatcommand("/inspect", {
 	params = "on/off/1/0/true/false/yes/no/enable/disable",
 	description = "Enable or disable node inspection",
 	privs = {worldedit=true},
 	func = function(name, param)
 		if param == "on" or param == "1" or param == "true" or param == "yes" or param == "enable" then
-			worldedit.inspect = true
-			worldedit.player_notify(name, "node inspection is now on")
+			worldedit.inspect[name] = true
+			worldedit.player_notify(name, "node inspection enabled")
 		elseif param == "off" or param == "0" or param == "false" or param == "no" or param == "disable" then
-			worldedit.inspect = false
-			worldedit.player_notify(name, "node inspection is now off")
+			worldedit.inspect[name] = nil
+			worldedit.player_notify(name, "node inspection disabled")
 		else
 			worldedit.player_notify(name, "invalid usage: " .. param)
 		end
@@ -69,9 +68,14 @@ minetest.register_chatcommand("/inspect", {
 })
 
 minetest.register_on_punchnode(function(pos, node, puncher)
-	if worldedit.inspect then
-		message = "node inspector: " .. node.name .. " at " .. minetest.pos_to_string(pos) .. " (param1=" .. node.param1 .. ", param2=" .. node.param2 .. ")"
-		worldedit.player_notify(puncher:get_player_name(), message)
+	local name = puncher:get_player_name()
+	if worldedit.inspect[name] then
+		if minetest.check_player_privs(name, {worldedit=true}) then
+			message = "inspector: " .. node.name .. " at " .. minetest.pos_to_string(pos) .. " (param1=" .. node.param1 .. ", param2=" .. node.param2 .. ")"
+		else
+			message = "inspector: worldedit privileges required"
+		end
+		worldedit.player_notify(name, message)
 	end
 end)
 
@@ -408,7 +412,7 @@ minetest.register_chatcommand("/hollowdome", {
 			return
 		end
 
-		local found, _, radius, nodename = param:find("^(%d+)%s+(.+)$")
+		local found, _, radius, nodename = param:find("^([+-]?%d+)%s+(.+)$")
 		if found == nil then
 			worldedit.player_notify(name, "invalid usage: " .. param)
 			return
@@ -439,7 +443,7 @@ minetest.register_chatcommand("/dome", {
 			return
 		end
 
-		local found, _, radius, nodename = param:find("^(%d+)%s+(.+)$")
+		local found, _, radius, nodename = param:find("^([+-]?%d+)%s+(.+)$")
 		if found == nil then
 			worldedit.player_notify(name, "invalid usage: " .. param)
 			return
@@ -475,6 +479,7 @@ minetest.register_chatcommand("/hollowcylinder", {
 			worldedit.player_notify(name, "invalid usage: " .. param)
 			return
 		end
+		length, radius = tonumber(length), tonumber(radius)
 		if axis == "?" then
 			axis, sign = worldedit.player_axis(name)
 			length = length * sign
@@ -489,7 +494,7 @@ minetest.register_chatcommand("/hollowcylinder", {
 		if worldedit.ENABLE_QUEUE then
 			tenv = worldedit.queue_aliasenv
 		end
-		local count = worldedit.hollow_cylinder(pos, axis, tonumber(length), tonumber(radius), node, tenv)
+		local count = worldedit.hollow_cylinder(pos, axis, length, radius, node, tenv)
 		worldedit.player_notify(name, count .. " nodes added")
 	end,
 })
@@ -510,6 +515,7 @@ minetest.register_chatcommand("/cylinder", {
 			worldedit.player_notify(name, "invalid usage: " .. param)
 			return
 		end
+		length, radius = tonumber(length), tonumber(radius)
 		if axis == "?" then
 			axis, sign = worldedit.player_axis(name)
 			length = length * sign
@@ -524,14 +530,14 @@ minetest.register_chatcommand("/cylinder", {
 		if worldedit.ENABLE_QUEUE then
 			tenv = worldedit.queue_aliasenv
 		end
-		local count = worldedit.cylinder(pos, axis, tonumber(length), tonumber(radius), node, tenv)
+		local count = worldedit.cylinder(pos, axis, length, radius, node, tenv)
 		worldedit.player_notify(name, count .. " nodes added")
 	end,
 })
 
 minetest.register_chatcommand("/pyramid", {
-	params = "<height> <node>",
-	description = "Add pyramid centered at WorldEdit position 1 with height <height>, composed of <node>",
+	params = "x/y/z/? <height> <node>",
+	description = "Add pyramid centered at WorldEdit position 1 along the x/y/z/? axis with height <height>, composed of <node>",
 	privs = {worldedit=true},
 	func = function(name, param)
 		local pos = worldedit.pos1[name]
@@ -540,10 +546,15 @@ minetest.register_chatcommand("/pyramid", {
 			return
 		end
 
-		local found, _, size, nodename = param:find("(%d+)%s+(.+)$")
+		local found, _, axis, height, nodename = param:find("^([xyz%?])%s+([+-]?%d+)%s+(.+)$")
 		if found == nil then
 			worldedit.player_notify(name, "invalid usage: " .. param)
 			return
+		end
+		height = tonumber(height)
+		if axis == "?" then
+			axis, sign = worldedit.player_axis(name)
+			height = height * sign
 		end
 		local node = worldedit.normalize_nodename(nodename)
 		if not node then
@@ -551,11 +562,7 @@ minetest.register_chatcommand("/pyramid", {
 			return
 		end
 
-		local tenv = minetest.env
-		if worldedit.ENABLE_QUEUE then
-			tenv = worldedit.queue_aliasenv
-		end
-		local count = worldedit.pyramid(pos, tonumber(size), node, tenv)
+		local count = worldedit.pyramid(pos, axis, height, node)
 		worldedit.player_notify(name, count .. " nodes added")
 	end,
 })
@@ -571,7 +578,7 @@ minetest.register_chatcommand("/spiral", {
 			return
 		end
 
-		local found, _, width, height, space, nodename = param:find("(%d+)%s+(%d+)%s+(%d+)%s+(.+)$")
+		local found, _, width, height, space, nodename = param:find("^(%d+)%s+(%d+)%s+(%d+)%s+(.+)$")
 		if found == nil then
 			worldedit.player_notify(name, "invalid usage: " .. param)
 			return
@@ -607,6 +614,7 @@ minetest.register_chatcommand("/copy", {
 			worldedit.player_notify(name, "invalid usage: " .. param)
 			return
 		end
+		amount = tonumber(amount)
 		if axis == "?" then
 			axis, sign = worldedit.player_axis(name)
 			amount = amount * sign
@@ -616,7 +624,7 @@ minetest.register_chatcommand("/copy", {
 		if worldedit.ENABLE_QUEUE then
 			tenv = worldedit.queue_aliasenv
 		end
-		local count = worldedit.copy(pos1, pos2, axis, tonumber(amount), tenv)
+		local count = worldedit.copy(pos1, pos2, axis, amount, tenv)
 		worldedit.player_notify(name, count .. " nodes copied")
 	end,
 })
@@ -637,6 +645,7 @@ minetest.register_chatcommand("/move", {
 			worldedit.player_notify(name, "invalid usage: " .. param)
 			return
 		end
+		amount = tonumber(amount)
 		if axis == "?" then
 			axis, sign = worldedit.player_axis(name)
 			amount = amount * sign
@@ -646,7 +655,7 @@ minetest.register_chatcommand("/move", {
 		if worldedit.ENABLE_QUEUE then
 			tenv = worldedit.queue_aliasenv
 		end
-		local count = worldedit.move(pos1, pos2, axis, tonumber(amount), tenv)
+		local count = worldedit.move(pos1, pos2, axis, amount, tenv)
 
 		pos1[axis] = pos1[axis] + amount
 		pos2[axis] = pos2[axis] + amount
@@ -672,6 +681,7 @@ minetest.register_chatcommand("/stack", {
 			worldedit.player_notify(name, "invalid usage: " .. param)
 			return
 		end
+		count = tonumber(count)
 		if axis == "?" then
 			axis, sign = worldedit.player_axis(name)
 			count = count * sign
@@ -681,7 +691,7 @@ minetest.register_chatcommand("/stack", {
 		if worldedit.ENABLE_QUEUE then
 			tenv = worldedit.queue_aliasenv
 		end
-		local count = worldedit.stack(pos1, pos2, axis, tonumber(count), tenv)
+		local count = worldedit.stack(pos1, pos2, axis, count, tenv)
 		worldedit.player_notify(name, count .. " nodes stacked")
 	end,
 })
@@ -1125,8 +1135,8 @@ minetest.register_chatcommand("/luatransform", {
 
 if minetest.place_schematic then
 minetest.register_chatcommand("/mtschemcreate", {
-	params = "<filename>",
-	description = "Creates a Minetest schematic of the box defined by position 1 and position 2, and saves it to <filename>",
+	params = "<file>",
+	description = "Save the current WorldEdit region using the Minetest Schematic format to \"(world folder)/schems/<filename>.mts\"",
 	privs = {worldedit=true},
 	func = function(name, param)
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
@@ -1154,8 +1164,8 @@ minetest.register_chatcommand("/mtschemcreate", {
 })
 
 minetest.register_chatcommand("/mtschemplace", {
-	params = "<filename>",
-	description = "Places the Minetest schematic identified by <filename> at WorldEdit position 1",
+	params = "<file>",
+	description = "Load nodes from \"(world folder)/schems/<file>.mts\" with position 1 of the current WorldEdit region as the origin",
 	privs = {worldedit=true},
 	func = function(name, param)
 		local pos = worldedit.pos1[name]
@@ -1219,3 +1229,19 @@ minetest.register_on_player_receive_fields(
 	end
 )
 end
+
+minetest.register_chatcommand("/clearobjects", {
+	params = "",
+	description = "Clears all objects within the WorldEdit region",
+	privs = {worldedit=true},
+	func = function(name, param)
+		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
+		if pos1 == nil or pos2 == nil then
+			worldedit.player_notify(name, "no region selected")
+			return
+		end
+
+		local count = worldedit.clearobjects(pos1, pos2)
+		worldedit.player_notify(name, count .. " objects cleared")
+	end,
+})

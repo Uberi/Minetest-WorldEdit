@@ -88,7 +88,7 @@ worldedit.suppress = function(pos1, pos2, nodename)
 end
 
 --highlights all instances of `nodename` in a region defined by positions `pos1` and `pos2` by non-destructively hiding all other nodes, returning the number of nodes found
-worldedit.highlight = function(pos1, pos2, nodename) --wip: speed this up with voxmanip get_data to speed up searching
+worldedit.highlight = function(pos1, pos2, nodename)
 	--make area stay loaded
 	local manip = minetest.get_voxel_manip()
 	manip:read_from_map(pos1, pos2)

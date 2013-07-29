@@ -1,7 +1,6 @@
 worldedit = worldedit or {}
 local minetest = minetest --local copy of global
 
---wip: test the entire API again to make sure it works
 --wip: remove env parameter where no longer needed in chat commands module
 --wip: fix the queue
 
@@ -491,4 +490,29 @@ worldedit.fixlight = function(pos1, pos2, env)
 		dig_node(pos)
 	end
 	return #nodes
+end
+
+--clears all objects in a region defined by the positions `pos1` and `pos2`, returning the number of objects cleared
+worldedit.clearobjects = function(pos1, pos2)
+	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
+
+	--set up voxel manipulator
+	local manip = minetest.get_voxel_manip()
+	manip:read_from_map(pos1, pos2)
+
+	local pos1x, pos1y, pos1z = pos1.x, pos1.y, pos1.z
+	local pos2x, pos2y, pos2z = pos2.x, pos2.y, pos2.z
+	local center = {x=(pos1x + pos2x + 1) / 2, y=(pos1y + pos2y + 1) / 2, z=(pos1z + pos2z + 1) / 2}
+	local radius = ((center.x - pos1x + 0.5) + (center.y - pos1y + 0.5) + (center.z - pos1z + 0.5)) ^ 0.5
+	local count = 0
+	for _, obj in pairs(minetest.get_objects_inside_radius(center, radius)) do
+		local pos = obj:getpos()
+		if pos.x >= pos1x and pos.x <= pos2x
+		and pos.y >= pos1y and pos.y <= pos2y
+		and pos.z >= pos1z and pos.z <= pos2z then
+			obj:remove()
+			count = count + 1
+		end
+	end
+	return count
 end
