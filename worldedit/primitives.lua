@@ -209,6 +209,20 @@ worldedit.hollow_cylinder = function(pos, axis, length, radius, nodename) --wip:
 		currentpos[axis] = currentpos[axis] - length
 	end
 
+	--make area stay loaded
+	local manip = minetest.get_voxel_manip()
+	local pos1 = {
+		[axis]=currentpos[axis],
+		[other1]=currentpos[other1] - radius,
+		[other2]=currentpos[other2] - radius
+	}
+	local pos2 = {
+		[axis]=currentpos[axis] + length - 1,
+		[other1]=currentpos[other1] + radius,
+		[other2]=currentpos[other2] + radius
+	}
+	manip:read_from_map(pos1, pos2)
+
 	--create schematic for single node column along the axis
 	local node = {name=nodename, param1=0, param2=0}
 	local nodes = {}
@@ -306,13 +320,13 @@ worldedit.cylinder = function(pos, axis, length, radius, nodename)
 	local offset = {x=currentpos.x - emerged_pos1.x, y=currentpos.y - emerged_pos1.y, z=currentpos.z - emerged_pos1.z}
 	local min_slice, max_slice = offset[axis], offset[axis] + length - 1
 	local count = 0
-	for axis1 = -radius, radius do
-		local newaxis1 = (axis1 + offset[other1]) * stride[other1] + 1 --offset contributed by other axis 1 plus 1 to make it 1-indexed
-		for axis2 = -radius, radius do
-			local newaxis2 = newaxis1 + (axis2 + offset[other2]) * stride[other2]
-			if axis1 * axis1 + axis2 * axis2 <= max_radius then
-				for slice = min_slice, max_slice do
-					local i = newaxis2 + slice * stride[axis] + 1
+	for index2 = -radius, radius do
+		local newindex2 = (index2 + offset[other1]) * stride[other1] + 1 --offset contributed by other axis 1 plus 1 to make it 1-indexed
+		for index3 = -radius, radius do
+			local newindex3 = newindex2 + (index3 + offset[other2]) * stride[other2]
+			if index2 * index2 + index3 * index3 <= max_radius then
+				for index1 = min_slice, max_slice do --add column along axis
+					local i = newindex3 + index1 * stride[axis] + 1
 					nodes[i] = node_id
 				end
 				count = count + length
@@ -330,8 +344,33 @@ end
 
 --adds a pyramid centered at `pos` with height `height`, composed of `nodename`, returning the number of nodes added
 worldedit.pyramid = function(pos, axis, height, nodename)
-	local pos1 = {x=pos.x - height, y=pos.y, z=pos.z - height}
+	local other1, other2
+	if axis == "x" then
+		other1, other2 = "y", "z"
+	elseif axis == "y" then
+		other1, other2 = "x", "z"
+	else --axis == "z"
+		other1, other2 = "x", "y"
+	end
+
+	local pos1 = {x=pos.x - height, y=pos.y - height, z=pos.z - height}
 	local pos2 = {x=pos.x + height, y=pos.y + height, z=pos.z + height}
+
+	--handle inverted pyramids
+	local startaxis, endaxis, step
+	local currentpos = {x=pos.x, y=pos.y, z=pos.z}
+	if height > 0 then
+		height = height - 1
+		startaxis, endaxis = 0, height
+		step = 1
+		pos1[axis] = pos[axis] --upper half of box
+	else
+		height = -height - 1
+		startaxis, endaxis = height, 0
+		step = -1
+		pos2[axis] = pos[axis] + 1 --lower half of box
+		currentpos[axis] = pos[axis] - height --bottom of box
+	end
 
 	--set up voxel manipulator
 	local manip = minetest.get_voxel_manip()
@@ -345,31 +384,22 @@ worldedit.pyramid = function(pos, axis, height, nodename)
 		nodes[i] = ignore
 	end
 
-	--handle inverted pyramids
-	height = height - 1
-	local size = height
-	local step = -1
-	if height < 0 then
-		size = 0
-		step = 1
-	end
---wip: support arbitrary axes
 	--fill selected area with node
 	local node_id = minetest.get_content_id(nodename)
-	local offsetx, offsety, offsetz = pos.x - emerged_pos1.x, pos.y - emerged_pos1.y, pos.z - emerged_pos1.z
-	local zstride, ystride = area.zstride, area.ystride
+	local stride = {x=1, y=area.ystride, z=area.zstride}
+	local offset = {x=currentpos.x - emerged_pos1.x, y=currentpos.y - emerged_pos1.y, z=currentpos.z - emerged_pos1.z}
 	local count = 0
-	for y = 0, height do --go through each level of the pyramid
-		local newy = (y + offsety) * ystride + 1 --offset contributed by y plus 1 to make it 1-indexed
-		for z = -size, size do
-			local newz = newy + (z + offsetz) * zstride
-			for x = -size, size do
-				local i = newz + (x + offsetx)
+	for index1 = startaxis, endaxis, step do --go through each level of the pyramid
+		local newindex1 = (index1 + offset[axis]) * stride[axis] + 1 --offset contributed by axis plus 1 to make it 1-indexed
+		for index2 = -height, height do
+			local newindex2 = newindex1 + (index2 + offset[other1]) * stride[other1]
+			for index3 = -height, height do
+				local i = newindex2 + (index3 + offset[other2]) * stride[other2]
 				nodes[i] = node_id
 			end
 		end
-		size = size + step
-		count = count + ((height - y) * 2 + 1) ^ 2
+		count = count + (height * 2 + 1) ^ 2
+		height = height - 1
 	end
 
 	--update map nodes
@@ -383,11 +413,12 @@ end
 --adds a spiral centered at `pos` with width `width`, height `height`, space between walls `spacer`, composed of `nodename`, returning the number of nodes added
 worldedit.spiral = function(pos, width, height, spacer, nodename, env) --wip: rewrite this whole thing, nobody can understand it anyways
 	-- spiral matrix - http://rosettacode.org/wiki/Spiral_matrix#Lua
-	av, sn = math.abs, function(s) return s~=0 and s/av(s) or 0 end
+	local abs = math.abs
+	local sign = function(s) return s ~= 0 and s / av(s) or 0 end
 	local function sindex(z, x) -- returns the value at (x, z) in a spiral that starts at 1 and goes outwards
 		if z == -x and z >= x then return (2*z+1)^2 end
-		local l = math.max(av(z), av(x))
-		return (2*l-1)^2+4*l+2*l*sn(x+z)+sn(z^2-x^2)*(l-(av(z)==l and sn(z)*x or sn(x)*z)) -- OH GOD WHAT
+		local longest = math.max(abs(z), abs(x))
+		return (2*longest-1)^2 + 4*longest + 2*longest*sign(x+z) + sign(z^2-x^2)*(longest-(abs(z)==longest and sign(z)*x or sign(x)*z)) -- OH GOD WHAT
 	end
 	local function spiralt(side)
 		local ret, id, start, stop = {}, 0, math.floor((-side+1)/2), math.floor((side-1)/2)

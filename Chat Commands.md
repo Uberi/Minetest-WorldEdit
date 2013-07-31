@@ -301,7 +301,7 @@ Executes <code> as a Lua chunk in the global namespace.
 Executes <code> as a Lua chunk in the global namespace with the variable pos available, for each node in the current WorldEdit region.
 
     //luatransform minetest.add_node(pos, {name="default:stone"})
-    //luatransform if minetest.get_node(pos).name == "air" then minetest.env:add_node(pos, {name="default:water_source"})
+    //luatransform if minetest.get_node(pos).name == "air" then minetest.add_node(pos, {name="default:water_source"})
 
 ### //mtschemcreate <file>
 

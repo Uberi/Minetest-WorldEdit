@@ -38,7 +38,7 @@ end
 
 --determines the axis in which a player is facing, returning an axis ("x", "y", or "z") and the sign (1 or -1)
 worldedit.player_axis = function(name)
-	local dir = minetest.env:get_player_by_name(name):get_look_dir()
+	local dir = minetest.get_player_by_name(name):get_look_dir()
 	local x, y, z = math.abs(dir.x), math.abs(dir.y), math.abs(dir.z)
 	if x > y then
 		if x > z then
@@ -125,7 +125,7 @@ minetest.register_chatcommand("/pos1", {
 	description = "Set WorldEdit region position 1 to the player's location",
 	privs = {worldedit=true},
 	func = function(name, param)
-		local pos = minetest.env:get_player_by_name(name):getpos()
+		local pos = minetest.get_player_by_name(name):getpos()
 		pos.x, pos.y, pos.z = math.floor(pos.x + 0.5), math.floor(pos.y + 0.5), math.floor(pos.z + 0.5)
 		worldedit.pos1[name] = pos
 		worldedit.mark_pos1(name)
@@ -138,7 +138,7 @@ minetest.register_chatcommand("/pos2", {
 	description = "Set WorldEdit region position 2 to the player's location",
 	privs = {worldedit=true},
 	func = function(name, param)
-		local pos = minetest.env:get_player_by_name(name):getpos()
+		local pos = minetest.get_player_by_name(name):getpos()
 		pos.x, pos.y, pos.z = math.floor(pos.x + 0.5), math.floor(pos.y + 0.5), math.floor(pos.z + 0.5)
 		worldedit.pos2[name] = pos
 		worldedit.mark_pos2(name)
@@ -294,11 +294,7 @@ minetest.register_chatcommand("/replace", {
 			return
 		end
 
-		local tenv = minetest.env
-		if worldedit.ENABLE_QUEUE then
-			tenv = worldedit.queue_aliasenv
-		end
-		local count = worldedit.replace(pos1, pos2, newsearchnode, newreplacenode, tenv)
+		local count = worldedit.replace(pos1, pos2, newsearchnode, newreplacenode)
 		worldedit.player_notify(name, count .. " nodes replaced")
 	end,
 })
@@ -330,11 +326,7 @@ minetest.register_chatcommand("/replaceinverse", {
 			return
 		end
 
-		local tenv = minetest.env
-		if worldedit.ENABLE_QUEUE then
-			tenv = worldedit.queue_aliasenv
-		end
-		local count = worldedit.replaceinverse(pos1, pos2, searchnode, replacenode, tenv)
+		local count = worldedit.replaceinverse(pos1, pos2, searchnode, replacenode)
 		worldedit.player_notify(name, count .. " nodes replaced")
 	end,
 })
@@ -361,11 +353,7 @@ minetest.register_chatcommand("/hollowsphere", {
 			return
 		end
 
-		local tenv = minetest.env
-		if worldedit.ENABLE_QUEUE then
-			tenv = worldedit.queue_aliasenv
-		end
-		local count = worldedit.hollow_sphere(pos, tonumber(radius), node, tenv)
+		local count = worldedit.hollow_sphere(pos, tonumber(radius), node)
 		worldedit.player_notify(name, count .. " nodes added")
 	end,
 })
@@ -392,11 +380,7 @@ minetest.register_chatcommand("/sphere", {
 			return
 		end
 
-		local tenv = minetest.env
-		if worldedit.ENABLE_QUEUE then
-			tenv = worldedit.queue_aliasenv
-		end
-		local count = worldedit.sphere(pos, tonumber(radius), node, tenv)
+		local count = worldedit.sphere(pos, tonumber(radius), node)
 		worldedit.player_notify(name, count .. " nodes added")
 	end,
 })
@@ -423,11 +407,7 @@ minetest.register_chatcommand("/hollowdome", {
 			return
 		end
 
-		local tenv = minetest.env
-		if worldedit.ENABLE_QUEUE then
-			tenv = worldedit.queue_aliasenv
-		end
-		local count = worldedit.hollow_dome(pos, tonumber(radius), node, tenv)
+		local count = worldedit.hollow_dome(pos, tonumber(radius), node)
 		worldedit.player_notify(name, count .. " nodes added")
 	end,
 })
@@ -454,11 +434,7 @@ minetest.register_chatcommand("/dome", {
 			return
 		end
 
-		local tenv = minetest.env
-		if worldedit.ENABLE_QUEUE then
-			tenv = worldedit.queue_aliasenv
-		end
-		local count = worldedit.dome(pos, tonumber(radius), node, tenv)
+		local count = worldedit.dome(pos, tonumber(radius), node)
 		worldedit.player_notify(name, count .. " nodes added")
 	end,
 })
@@ -490,11 +466,7 @@ minetest.register_chatcommand("/hollowcylinder", {
 			return
 		end
 
-		local tenv = minetest.env
-		if worldedit.ENABLE_QUEUE then
-			tenv = worldedit.queue_aliasenv
-		end
-		local count = worldedit.hollow_cylinder(pos, axis, length, radius, node, tenv)
+		local count = worldedit.hollow_cylinder(pos, axis, length, radius, node)
 		worldedit.player_notify(name, count .. " nodes added")
 	end,
 })
@@ -526,11 +498,7 @@ minetest.register_chatcommand("/cylinder", {
 			return
 		end
 
-		local tenv = minetest.env
-		if worldedit.ENABLE_QUEUE then
-			tenv = worldedit.queue_aliasenv
-		end
-		local count = worldedit.cylinder(pos, axis, length, radius, node, tenv)
+		local count = worldedit.cylinder(pos, axis, length, radius, node)
 		worldedit.player_notify(name, count .. " nodes added")
 	end,
 })
@@ -589,11 +557,7 @@ minetest.register_chatcommand("/spiral", {
 			return
 		end
 
-		local tenv = minetest.env
-		if worldedit.ENABLE_QUEUE then
-			tenv = worldedit.queue_aliasenv
-		end
-		local count = worldedit.spiral(pos, tonumber(width), tonumber(height), tonumber(space), node, tenv)
+		local count = worldedit.spiral(pos, tonumber(width), tonumber(height), tonumber(space), node)
 		worldedit.player_notify(name, count .. " nodes added")
 	end,
 })
@@ -620,11 +584,7 @@ minetest.register_chatcommand("/copy", {
 			amount = amount * sign
 		end
 
-		local tenv = minetest.env
-		if worldedit.ENABLE_QUEUE then
-			tenv = worldedit.queue_aliasenv
-		end
-		local count = worldedit.copy(pos1, pos2, axis, amount, tenv)
+		local count = worldedit.copy(pos1, pos2, axis, amount)
 		worldedit.player_notify(name, count .. " nodes copied")
 	end,
 })
@@ -651,11 +611,7 @@ minetest.register_chatcommand("/move", {
 			amount = amount * sign
 		end
 
-		local tenv = minetest.env
-		if worldedit.ENABLE_QUEUE then
-			tenv = worldedit.queue_aliasenv
-		end
-		local count = worldedit.move(pos1, pos2, axis, amount, tenv)
+		local count = worldedit.move(pos1, pos2, axis, amount)
 
 		pos1[axis] = pos1[axis] + amount
 		pos2[axis] = pos2[axis] + amount
@@ -687,11 +643,7 @@ minetest.register_chatcommand("/stack", {
 			count = count * sign
 		end
 
-		local tenv = minetest.env
-		if worldedit.ENABLE_QUEUE then
-			tenv = worldedit.queue_aliasenv
-		end
-		local count = worldedit.stack(pos1, pos2, axis, count, tenv)
+		local count = worldedit.stack(pos1, pos2, axis, count)
 		worldedit.player_notify(name, count .. " nodes stacked")
 	end,
 })
@@ -712,11 +664,7 @@ minetest.register_chatcommand("/scale", {
 			worldedit.player_notify(name, "invalid scaling factor: " .. param)
 		end
 
-		local tenv = minetest.env
-		if worldedit.ENABLE_QUEUE then
-			tenv = worldedit.queue_aliasenv
-		end
-		local count, pos1, pos2 = worldedit.scale(pos1, pos2, factor, tenv)
+		local count, pos1, pos2 = worldedit.scale(pos1, pos2, factor)
 
 		--reset markers to scaled positions
 		worldedit.pos1[name] = pos1
@@ -755,11 +703,7 @@ minetest.register_chatcommand("/transpose", {
 			return
 		end
 
-		local tenv = minetest.env
-		if worldedit.ENABLE_QUEUE then
-			tenv = worldedit.queue_aliasenv
-		end
-		local count, pos1, pos2 = worldedit.transpose(pos1, pos2, axis1, axis2, tenv)
+		local count, pos1, pos2 = worldedit.transpose(pos1, pos2, axis1, axis2)
 
 		--reset markers to transposed positions
 		worldedit.pos1[name] = pos1
@@ -790,11 +734,7 @@ minetest.register_chatcommand("/flip", {
 			return
 		end
 
-		local tenv = minetest.env
-		if worldedit.ENABLE_QUEUE then
-			tenv = worldedit.queue_aliasenv
-		end
-		local count = worldedit.flip(pos1, pos2, param, tenv)
+		local count = worldedit.flip(pos1, pos2, param)
 		worldedit.player_notify(name, count .. " nodes flipped")
 	end,
 })
@@ -856,11 +796,7 @@ minetest.register_chatcommand("/orient", {
 			return
 		end
 
-		local tenv = minetest.env
-		if worldedit.ENABLE_QUEUE then
-			tenv = worldedit.queue_aliasenv
-		end
-		local count = worldedit.orient(pos1, pos2, angle, tenv)
+		local count = worldedit.orient(pos1, pos2, angle)
 
 		worldedit.player_notify(name, count .. " nodes oriented")
 	end,
@@ -877,11 +813,7 @@ minetest.register_chatcommand("/fixlight", {
 			return
 		end
 
-		local tenv = minetest.env
-		if worldedit.ENABLE_QUEUE then
-			tenv = worldedit.queue_aliasenv
-		end
-		local count = worldedit.fixlight(pos1, pos2, tenv)
+		local count = worldedit.fixlight(pos1, pos2)
 		worldedit.player_notify(name, count .. " nodes updated")
 	end,
 })
@@ -919,11 +851,7 @@ minetest.register_chatcommand("/suppress", {
 			return
 		end
 
-		local tenv = minetest.env
-		if worldedit.ENABLE_QUEUE then
-			tenv = worldedit.queue_aliasenv
-		end
-		local count = worldedit.suppress(pos1, pos2, node, tenv)
+		local count = worldedit.suppress(pos1, pos2, node)
 		worldedit.player_notify(name, count .. " nodes suppressed")
 	end,
 })
@@ -945,11 +873,7 @@ minetest.register_chatcommand("/highlight", {
 			return
 		end
 
-		local tenv = minetest.env
-		if worldedit.ENABLE_QUEUE then
-			tenv = worldedit.queue_aliasenv
-		end
-		local count = worldedit.highlight(pos1, pos2, node, tenv)
+		local count = worldedit.highlight(pos1, pos2, node)
 		worldedit.player_notify(name, count .. " nodes highlighted")
 	end,
 })
@@ -965,11 +889,7 @@ minetest.register_chatcommand("/restore", {
 			return
 		end
 
-		local tenv = minetest.env
-		if worldedit.ENABLE_QUEUE then
-			tenv = worldedit.queue_aliasenv
-		end
-		local count = worldedit.restore(pos1, pos2, tenv)
+		local count = worldedit.restore(pos1, pos2)
 		worldedit.player_notify(name, count .. " nodes restored")
 	end,
 })
@@ -1089,11 +1009,7 @@ minetest.register_chatcommand("/load", {
 			return
 		end
 
-		local tenv = minetest.env
-		if worldedit.ENABLE_QUEUE then
-			tenv = worldedit.queue_aliasenv
-		end
-		local count = worldedit.deserialize(pos1, value, tenv)
+		local count = worldedit.deserialize(pos1, value)
 
 		worldedit.player_notify(name, count .. " nodes loaded")
 	end,

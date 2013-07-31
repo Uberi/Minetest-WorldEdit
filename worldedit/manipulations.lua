@@ -113,11 +113,11 @@ worldedit.replaceinverse = function(pos1, pos2, searchnode, replacenode)
 end
 
 --copies the region defined by positions `pos1` and `pos2` along the `axis` axis ("x" or "y" or "z") by `amount` nodes, returning the number of nodes copied
-worldedit.copy = function(pos1, pos2, axis, amount, env)
+worldedit.copy = function(pos1, pos2, axis, amount)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
-	if env == nil then env = minetest.env end
 
 	--wip: copy slice by slice using schematic method in the copy axis and transfer metadata in separate loop (and if the amount is greater than the length in the axis, copy whole thing at a time), use voxelmanip to keep area loaded
+	local get_node, get_meta, add_node = minetest.get_node, minetest.get_meta, minetest.add_node
 	if amount < 0 then
 		local pos = {x=pos1.x, y=0, z=0}
 		while pos.x <= pos2.x do
@@ -125,12 +125,12 @@ worldedit.copy = function(pos1, pos2, axis, amount, env)
 			while pos.y <= pos2.y do
 				pos.z = pos1.z
 				while pos.z <= pos2.z do
-					local node = env:get_node(pos) --obtain current node
-					local meta = env:get_meta(pos):to_table() --get meta of current node
+					local node = get_node(pos) --obtain current node
+					local meta = get_meta(pos):to_table() --get meta of current node
 					local value = pos[axis] --store current position
 					pos[axis] = value + amount --move along axis
-					env:add_node(pos, node) --copy node to new position
-					env:get_meta(pos):from_table(meta) --set metadata of new node
+					add_node(pos, node) --copy node to new position
+					get_meta(pos):from_table(meta) --set metadata of new node
 					pos[axis] = value --restore old position
 					pos.z = pos.z + 1
 				end
@@ -145,12 +145,12 @@ worldedit.copy = function(pos1, pos2, axis, amount, env)
 			while pos.y >= pos1.y do
 				pos.z = pos2.z
 				while pos.z >= pos1.z do
-					local node = minetest.env:get_node(pos) --obtain current node
-					local meta = env:get_meta(pos):to_table() --get meta of current node
+					local node = get_node(pos) --obtain current node
+					local meta = get_meta(pos):to_table() --get meta of current node
 					local value = pos[axis] --store current position
 					pos[axis] = value + amount --move along axis
-					minetest.env:add_node(pos, node) --copy node to new position
-					env:get_meta(pos):from_table(meta) --set metadata of new node
+					add_node(pos, node) --copy node to new position
+					get_meta(pos):from_table(meta) --set metadata of new node
 					pos[axis] = value --restore old position
 					pos.z = pos.z - 1
 				end
@@ -163,11 +163,11 @@ worldedit.copy = function(pos1, pos2, axis, amount, env)
 end
 
 --moves the region defined by positions `pos1` and `pos2` along the `axis` axis ("x" or "y" or "z") by `amount` nodes, returning the number of nodes moved
-worldedit.move = function(pos1, pos2, axis, amount, env)
+worldedit.move = function(pos1, pos2, axis, amount)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
-	if env == nil then env = minetest.env end
 
 	--wip: move slice by slice using schematic method in the move axis and transfer metadata in separate loop (and if the amount is greater than the length in the axis, copy whole thing at a time and erase original after, using schematic method), use voxelmanip to keep area loaded
+	local get_node, get_meta, add_node, remove_node = minetest.get_node, minetest.get_meta, minetest.add_node, minetest.remove_node
 	if amount < 0 then
 		local pos = {x=pos1.x, y=0, z=0}
 		while pos.x <= pos2.x do
@@ -175,13 +175,13 @@ worldedit.move = function(pos1, pos2, axis, amount, env)
 			while pos.y <= pos2.y do
 				pos.z = pos1.z
 				while pos.z <= pos2.z do
-					local node = env:get_node(pos) --obtain current node
-					local meta = env:get_meta(pos):to_table() --get metadata of current node
-					env:remove_node(pos)
+					local node = get_node(pos) --obtain current node
+					local meta = get_meta(pos):to_table() --get metadata of current node
+					remove_node(pos)
 					local value = pos[axis] --store current position
 					pos[axis] = value + amount --move along axis
-					env:add_node(pos, node) --move node to new position
-					env:get_meta(pos):from_table(meta) --set metadata of new node
+					add_node(pos, node) --move node to new position
+					get_meta(pos):from_table(meta) --set metadata of new node
 					pos[axis] = value --restore old position
 					pos.z = pos.z + 1
 				end
@@ -196,13 +196,13 @@ worldedit.move = function(pos1, pos2, axis, amount, env)
 			while pos.y >= pos1.y do
 				pos.z = pos2.z
 				while pos.z >= pos1.z do
-					local node = env:get_node(pos) --obtain current node
-					local meta = env:get_meta(pos):to_table() --get metadata of current node
-					env:remove_node(pos)
+					local node = get_node(pos) --obtain current node
+					local meta = get_meta(pos):to_table() --get metadata of current node
+					remove_node(pos)
 					local value = pos[axis] --store current position
 					pos[axis] = value + amount --move along axis
-					env:add_node(pos, node) --move node to new position
-					env:get_meta(pos):from_table(meta) --set metadata of new node
+					add_node(pos, node) --move node to new position
+					get_meta(pos):from_table(meta) --set metadata of new node
 					pos[axis] = value --restore old position
 					pos.z = pos.z - 1
 				end
@@ -249,7 +249,7 @@ worldedit.scale = function(pos1, pos2, factor)
 	--make area stay loaded
 	local manip = minetest.get_voxel_manip()
 	local new_pos2 = {x=pos1.x + (pos2.x - pos1.x) * factor + size, y=pos1.y + (pos2.y - pos1.y) * factor + size, z=pos1.z + (pos2.z - pos1.z) * factor + size}
-	local emerged_pos1, emerged_pos2 = manip:read_from_map(pos1, new_pos2)
+	manip:read_from_map(pos1, new_pos2)
 
 	local pos = {x=pos2.x, y=0, z=0}
 	local bigpos = {x=0, y=0, z=0}
@@ -496,22 +496,25 @@ end
 worldedit.clearobjects = function(pos1, pos2)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 
-	--set up voxel manipulator
+	--make area stay loaded
 	local manip = minetest.get_voxel_manip()
 	manip:read_from_map(pos1, pos2)
 
 	local pos1x, pos1y, pos1z = pos1.x, pos1.y, pos1.z
-	local pos2x, pos2y, pos2z = pos2.x, pos2.y, pos2.z
-	local center = {x=(pos1x + pos2x + 1) / 2, y=(pos1y + pos2y + 1) / 2, z=(pos1z + pos2z + 1) / 2}
-	local radius = ((center.x - pos1x + 0.5) + (center.y - pos1y + 0.5) + (center.z - pos1z + 0.5)) ^ 0.5
+	local pos2x, pos2y, pos2z = pos2.x + 1, pos2.y + 1, pos2.z + 1
+	local center = {x=(pos1x + pos2x) / 2, y=(pos1y + pos2y) / 2, z=(pos1z + pos2z) / 2} --center of region
+	local radius = ((center.x - pos1x + 0.5) + (center.y - pos1y + 0.5) + (center.z - pos1z + 0.5)) ^ 0.5 --bounding sphere radius
 	local count = 0
-	for _, obj in pairs(minetest.get_objects_inside_radius(center, radius)) do
-		local pos = obj:getpos()
-		if pos.x >= pos1x and pos.x <= pos2x
-		and pos.y >= pos1y and pos.y <= pos2y
-		and pos.z >= pos1z and pos.z <= pos2z then
-			obj:remove()
-			count = count + 1
+	for _, obj in pairs(minetest.get_objects_inside_radius(center, radius)) do --all objects in bounding sphere
+		local entity = obj:get_luaentity()
+		if not (entity and entity.name:find("^worldedit:")) then --avoid WorldEdit entities
+			local pos = obj:getpos()
+			if pos.x >= pos1x and pos.x <= pos2x
+			and pos.y >= pos1y and pos.y <= pos2y
+			and pos.z >= pos1z and pos.z <= pos2z then --inside region
+				obj:remove()
+				count = count + 1
+			end
 		end
 	end
 	return count
