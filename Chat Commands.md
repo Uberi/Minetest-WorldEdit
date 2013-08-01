@@ -155,9 +155,9 @@ Add pyramid centered at WorldEdit position 1 along the x/y/z/? axis with height 
     //pyramid 5 glass
     //pyramid 2 mesecons:wire_00000000_off
 
-### //spiral <width> <height> <spacer> <node>
+### //spiral <length> <height> <spacer> <node>
 
-Add spiral centered at WorldEdit position 1 with width <width>, height <height>, space between walls <spacer>, composed of <node>.
+Add spiral centered at WorldEdit position 1 with side length <length>, height <height>, space between walls <spacer>, composed of <node>.
 
     //spiral 20 5 3 Diamond Block
     //spiral 5 2 1 glass

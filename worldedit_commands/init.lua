@@ -536,8 +536,8 @@ minetest.register_chatcommand("/pyramid", {
 })
 
 minetest.register_chatcommand("/spiral", {
-	params = "<width> <height> <space> <node>",
-	description = "Add spiral centered at WorldEdit position 1 with width <width>, height <height>, space between walls <space>, composed of <node>",
+	params = "<length> <height> <space> <node>",
+	description = "Add spiral centered at WorldEdit position 1 with side length <length>, height <height>, space between walls <space>, composed of <node>",
 	privs = {worldedit=true},
 	func = function(name, param)
 		local pos = worldedit.pos1[name]
@@ -546,7 +546,7 @@ minetest.register_chatcommand("/spiral", {
 			return
 		end
 
-		local found, _, width, height, space, nodename = param:find("^(%d+)%s+(%d+)%s+(%d+)%s+(.+)$")
+		local found, _, length, height, space, nodename = param:find("^(%d+)%s+(%d+)%s+(%d+)%s+(.+)$")
 		if found == nil then
 			worldedit.player_notify(name, "invalid usage: " .. param)
 			return
@@ -557,7 +557,7 @@ minetest.register_chatcommand("/spiral", {
 			return
 		end
 
-		local count = worldedit.spiral(pos, tonumber(width), tonumber(height), tonumber(space), node)
+		local count = worldedit.spiral(pos, tonumber(length), tonumber(height), tonumber(space), node)
 		worldedit.player_notify(name, count .. " nodes added")
 	end,
 })

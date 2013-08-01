@@ -21,16 +21,21 @@ minetest.register_entity(":worldedit:region_cube", {
 	end,
 })
 
---wip: use voxelmanip to put the entity in the correct spot
-
 --marks worldedit region position 1
 worldedit.mark_pos1 = function(name)
 	local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
+
+	if pos1 ~= nil then
+		--make area stay loaded
+		local manip = minetest.get_voxel_manip()
+		manip:read_from_map(pos1, pos1) --wip: see if this even works
+	end
 	if worldedit.marker1[name] ~= nil then --marker already exists
 		worldedit.marker1[name]:remove() --remove marker
 		worldedit.marker1[name] = nil
 	end
-	if pos1 ~= nil then --add marker
+	if pos1 ~= nil then
+		--add marker
 		worldedit.marker1[name] = minetest.add_entity(pos1, "worldedit:pos1")
 		worldedit.marker1[name]:get_luaentity().active = true
 		if pos2 ~= nil then --region defined
@@ -42,11 +47,18 @@ end
 --marks worldedit region position 2
 worldedit.mark_pos2 = function(name)
 	local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
+
+	if pos2 ~= nil then
+		--make area stay loaded
+		local manip = minetest.get_voxel_manip()
+		manip:read_from_map(pos2, pos2) --wip: see if this even works
+	end
 	if worldedit.marker2[name] ~= nil then --marker already exists
 		worldedit.marker2[name]:remove() --remove marker
 		worldedit.marker2[name] = nil
 	end
-	if pos2 ~= nil then --add marker
+	if pos2 ~= nil then
+		--add marker
 		worldedit.marker2[name] = minetest.add_entity(pos2, "worldedit:pos2")
 		worldedit.marker2[name]:get_luaentity().active = true
 		if pos1 ~= nil then --region defined
@@ -56,10 +68,16 @@ worldedit.mark_pos2 = function(name)
 end
 
 worldedit.mark_region = function(pos1, pos2)
+	--make area stay loaded
+	local manip = minetest.get_voxel_manip()
+	manip:read_from_map(pos1, pos2)
+
 	if worldedit.marker[name] ~= nil then --marker already exists
 		--wip: remove markers
 	end
-	
+	if pos1 ~= nil and pos2 ~= nil then
+		--wip: place markers
+	end
 end
 
 minetest.register_entity(":worldedit:pos1", {

@@ -326,7 +326,7 @@ worldedit.cylinder = function(pos, axis, length, radius, nodename)
 			local newindex3 = newindex2 + (index3 + offset[other2]) * stride[other2]
 			if index2 * index2 + index3 * index3 <= max_radius then
 				for index1 = min_slice, max_slice do --add column along axis
-					local i = newindex3 + index1 * stride[axis] + 1
+					local i = newindex3 + index1 * stride[axis]
 					nodes[i] = node_id
 				end
 				count = count + length
@@ -358,18 +358,14 @@ worldedit.pyramid = function(pos, axis, height, nodename)
 
 	--handle inverted pyramids
 	local startaxis, endaxis, step
-	local currentpos = {x=pos.x, y=pos.y, z=pos.z}
 	if height > 0 then
 		height = height - 1
-		startaxis, endaxis = 0, height
 		step = 1
 		pos1[axis] = pos[axis] --upper half of box
 	else
-		height = -height - 1
-		startaxis, endaxis = height, 0
+		height = height + 1
 		step = -1
-		pos2[axis] = pos[axis] + 1 --lower half of box
-		currentpos[axis] = pos[axis] - height --bottom of box
+		pos2[axis] = pos[axis] --lower half of box
 	end
 
 	--set up voxel manipulator
@@ -387,19 +383,20 @@ worldedit.pyramid = function(pos, axis, height, nodename)
 	--fill selected area with node
 	local node_id = minetest.get_content_id(nodename)
 	local stride = {x=1, y=area.ystride, z=area.zstride}
-	local offset = {x=currentpos.x - emerged_pos1.x, y=currentpos.y - emerged_pos1.y, z=currentpos.z - emerged_pos1.z}
+	local offset = {x=pos.x - emerged_pos1.x, y=pos.y - emerged_pos1.y, z=pos.z - emerged_pos1.z}
+	local size = height * step
 	local count = 0
-	for index1 = startaxis, endaxis, step do --go through each level of the pyramid
+	for index1 = 0, height, step do --go through each level of the pyramid
 		local newindex1 = (index1 + offset[axis]) * stride[axis] + 1 --offset contributed by axis plus 1 to make it 1-indexed
-		for index2 = -height, height do
+		for index2 = -size, size do
 			local newindex2 = newindex1 + (index2 + offset[other1]) * stride[other1]
-			for index3 = -height, height do
+			for index3 = -size, size do
 				local i = newindex2 + (index3 + offset[other2]) * stride[other2]
 				nodes[i] = node_id
 			end
 		end
-		count = count + (height * 2 + 1) ^ 2
-		height = height - 1
+		count = count + (size * 2 + 1) ^ 2
+		size = size - 1
 	end
 
 	--update map nodes
@@ -410,70 +407,72 @@ worldedit.pyramid = function(pos, axis, height, nodename)
 	return count
 end
 
---adds a spiral centered at `pos` with width `width`, height `height`, space between walls `spacer`, composed of `nodename`, returning the number of nodes added
-worldedit.spiral = function(pos, width, height, spacer, nodename, env) --wip: rewrite this whole thing, nobody can understand it anyways
-	-- spiral matrix - http://rosettacode.org/wiki/Spiral_matrix#Lua
-	local abs = math.abs
-	local sign = function(s) return s ~= 0 and s / av(s) or 0 end
-	local function sindex(z, x) -- returns the value at (x, z) in a spiral that starts at 1 and goes outwards
-		if z == -x and z >= x then return (2*z+1)^2 end
-		local longest = math.max(abs(z), abs(x))
-		return (2*longest-1)^2 + 4*longest + 2*longest*sign(x+z) + sign(z^2-x^2)*(longest-(abs(z)==longest and sign(z)*x or sign(x)*z)) -- OH GOD WHAT
+--adds a spiral centered at `pos` with side length `length`, height `height`, space between walls `spacer`, composed of `nodename`, returning the number of nodes added
+worldedit.spiral = function(pos, length, height, spacer, nodename)
+	local extent = math.ceil(length / 2)
+	local pos1 = {x=pos.x - extent, y=pos.y, z=pos.z - extent}
+	local pos2 = {x=pos.x + extent, y=pos.y + height, z=pos.z + extent}
+
+	--set up voxel manipulator
+	local manip = minetest.get_voxel_manip()
+	local emerged_pos1, emerged_pos2 = manip:read_from_map(pos1, pos2)
+	local area = VoxelArea:new({MinEdge=emerged_pos1, MaxEdge=emerged_pos2})
+
+	--fill emerged area with ignore
+	local nodes = {}
+	local ignore = minetest.get_content_id("ignore")
+	for i = 1, worldedit.volume(emerged_pos1, emerged_pos2) do
+		nodes[i] = ignore
 	end
-	local function spiralt(side)
-		local ret, id, start, stop = {}, 0, math.floor((-side+1)/2), math.floor((side-1)/2)
-		for i = 1, side do
-			for j = 1, side do
-				local id = side^2 - sindex(stop - i + 1,start + j - 1)
-				ret[id] = {x=i,z=j}
+
+	--
+	local node_id = minetest.get_content_id(nodename)
+	local stride = {x=1, y=area.ystride, z=area.zstride}
+	local offsetx, offsety, offsetz = pos.x - emerged_pos1.x, pos.y - emerged_pos1.y, pos.z - emerged_pos1.z
+	local i = offsetz * stride.z + offsety * stride.y + offsetx + 1
+
+	--add first column
+	local column = i
+	for y = 1, height do
+		nodes[column] = node_id
+		column = column + stride.y
+	end
+
+	--add spiral segments
+	local axis, other = "x", "z"
+	local sign = 1
+	local count = height
+	for segment = 1, length / spacer - 1 do --go through each segment except the last
+		for index = 1, segment * spacer do --fill segment
+			i = i + stride[axis] * sign
+			local column = i
+			for y = 1, height do --add column
+				nodes[column] = node_id
+				column = column + stride.y
 			end
+			count = count + height
 		end
-		return ret
-	end
-	if env == nil then env = minetest.env end
-	-- connect the joined parts
-	local spiral = spiralt(width)
-	height = tonumber(height)
-	if height < 1 then height = 1 end
-	spacer = tonumber(spacer)-1
-	if spacer < 1 then spacer = 1 end
-	local count = 0
-	local node = {name=nodename}
-	local np,lp
-	for y=0,height do
-		lp = nil
-		for _,v in ipairs(spiral) do
-			np = {x=pos.x+v.x*spacer, y=pos.y+y, z=pos.z+v.z*spacer}
-			if lp~=nil then
-				if lp.x~=np.x then 
-					if lp.x<np.x then 
-						for i=lp.x+1,np.x do
-							env:add_node({x=i, y=np.y, z=np.z}, node)
-							count = count + 1
-						end
-					else
-						for i=np.x,lp.x-1 do
-							env:add_node({x=i, y=np.y, z=np.z}, node)
-							count = count + 1
-						end
-					end
-				end
-				if lp.z~=np.z then 
-					if lp.z<np.z then 
-						for i=lp.z+1,np.z do
-							env:add_node({x=np.x, y=np.y, z=i}, node)
-							count = count + 1
-						end
-					else
-						for i=np.z,lp.z-1 do
-							env:add_node({x=np.x, y=np.y, z=i}, node)
-							count = count + 1
-						end
-					end
-				end
-			end
-			lp = np
+		axis, other = other, axis --swap axes
+		if segment % 2 == 1 then --change sign every other turn
+			sign = -sign
 		end
 	end
+
+	--add shorter final segment
+	for index = 1, (math.floor(length / spacer) - 2) * spacer do
+		i = i + stride[axis] * sign
+		local column = i
+		for y = 1, height do --add column
+			nodes[column] = node_id
+			column = column + stride.y
+		end
+		count = count + height
+	end
+print(minetest.serialize(nodes))
+	--update map nodes
+	manip:set_data(nodes)
+	manip:write_to_map()
+	manip:update_map()
+
 	return count
 end

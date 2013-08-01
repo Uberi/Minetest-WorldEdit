@@ -1,7 +1,6 @@
 worldedit = worldedit or {}
 local minetest = minetest --local copy of global
 
---wip: remove env parameter where no longer needed in chat commands module
 --wip: fix the queue
 
 --modifies positions `pos1` and `pos2` so that each component of `pos1` is less than or equal to its corresponding conent of `pos2`, returning two new positions
@@ -112,11 +111,68 @@ worldedit.replaceinverse = function(pos1, pos2, searchnode, replacenode)
 	return count
 end
 
+worldedit.copy = function(pos1, pos2, axis, amount)
+	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
+
+	if amount == 0 then
+		return
+	end
+
+	local other1, other2
+	if axis == "x" then
+		other1, other2 = "y", "z"
+	elseif axis == "y" then
+		other1, other2 = "x", "z"
+	else --axis == "z"
+		other1, other2 = "x", "y"
+	end
+
+	--make area stay loaded
+	local manip = minetest.get_voxel_manip()
+	manip:read_from_map(pos1, pos2)
+
+	--prepare slice along axis
+	local extent = {
+		[axis] = 1,
+		[other1]=pos2[other1] - pos1[other1] + 1,
+		[other2]=pos2[other2] - pos1[other2] + 1,
+	}
+	local nodes = {}
+	local schematic = {size=extent, data=nodes}
+
+	local currentpos = {x=pos1.x, y=pos1.y, z=pos1.z}
+	local stride = {x=1, y=extent.x, z=extent.x * extent.y}
+	local get_node = minetest.get_node
+	for index1 = 1, extent[axis] do --go through each slice
+		--copy slice into schematic
+		local newindex1 = (index1 + offset[axis]) * stride[axis] + 1 --offset contributed by axis plus 1 to make it 1-indexed
+		for index2 = 1, extent[other1] do
+			local newindex2 = newindex1 + (index2 + offset[other1]) * stride[other1]
+			for index3 = 1, extent[other2] do
+				local i = newindex2 + (index3 + offset[other2]) * stride[other2]
+				nodes[i] = get_node(pos)
+			end
+		end
+
+		--copy schematic to target
+		currentpos[axis] = currentpos[axis] + amount
+		place_schematic(currentpos, schematic)
+
+		--wip: copy meta
+
+		currentpos[axis] = currentpos[axis] + 1
+	end
+	return worldedit.volume(pos1, pos2)
+end
+
 --copies the region defined by positions `pos1` and `pos2` along the `axis` axis ("x" or "y" or "z") by `amount` nodes, returning the number of nodes copied
 worldedit.copy = function(pos1, pos2, axis, amount)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 
-	--wip: copy slice by slice using schematic method in the copy axis and transfer metadata in separate loop (and if the amount is greater than the length in the axis, copy whole thing at a time), use voxelmanip to keep area loaded
+	--make area stay loaded
+	local manip = minetest.get_voxel_manip()
+	manip:read_from_map(pos1, pos2)
+
 	local get_node, get_meta, add_node = minetest.get_node, minetest.get_meta, minetest.add_node
 	if amount < 0 then
 		local pos = {x=pos1.x, y=0, z=0}
@@ -166,7 +222,11 @@ end
 worldedit.move = function(pos1, pos2, axis, amount)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 
-	--wip: move slice by slice using schematic method in the move axis and transfer metadata in separate loop (and if the amount is greater than the length in the axis, copy whole thing at a time and erase original after, using schematic method), use voxelmanip to keep area loaded
+	--make area stay loaded
+	local manip = minetest.get_voxel_manip()
+	manip:read_from_map(pos1, pos2)
+
+	--wip: move slice by slice using schematic method in the move axis and transfer metadata in separate loop (and if the amount is greater than the length in the axis, copy whole thing at a time and erase original after, using schematic method)
 	local get_node, get_meta, add_node, remove_node = minetest.get_node, minetest.get_meta, minetest.add_node, minetest.remove_node
 	if amount < 0 then
 		local pos = {x=pos1.x, y=0, z=0}
@@ -215,7 +275,7 @@ worldedit.move = function(pos1, pos2, axis, amount)
 end
 
 --duplicates the region defined by positions `pos1` and `pos2` along the `axis` axis ("x" or "y" or "z") `count` times, returning the number of nodes stacked
-worldedit.stack = function(pos1, pos2, axis, count, env)
+worldedit.stack = function(pos1, pos2, axis, count)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 	local length = pos2[axis] - pos1[axis] + 1
 	if count < 0 then
@@ -226,7 +286,7 @@ worldedit.stack = function(pos1, pos2, axis, count, env)
 	local copy = worldedit.copy
 	for i = 1, count do
 		amount = amount + length
-		copy(pos1, pos2, axis, amount, env)
+		copy(pos1, pos2, axis, amount)
 	end
 	return worldedit.volume(pos1, pos2) * count
 end
@@ -291,7 +351,7 @@ worldedit.scale = function(pos1, pos2, factor)
 end
 
 --transposes a region defined by the positions `pos1` and `pos2` between the `axis1` and `axis2` axes, returning the number of nodes transposed, the new transposed position 1, and the new transposed position 2
-worldedit.transpose = function(pos1, pos2, axis1, axis2, env)
+worldedit.transpose = function(pos1, pos2, axis1, axis2)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 
 	local compare
@@ -350,7 +410,7 @@ worldedit.transpose = function(pos1, pos2, axis1, axis2, env)
 end
 
 --flips a region defined by the positions `pos1` and `pos2` along the `axis` axis ("x" or "y" or "z"), returning the number of nodes flipped
-worldedit.flip = function(pos1, pos2, axis, env)
+worldedit.flip = function(pos1, pos2, axis)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 
 	--make area stay loaded
@@ -388,7 +448,7 @@ worldedit.flip = function(pos1, pos2, axis, env)
 end
 
 --rotates a region defined by the positions `pos1` and `pos2` by `angle` degrees clockwise around axis `axis` (90 degree increment), returning the number of nodes rotated
-worldedit.rotate = function(pos1, pos2, axis, angle, env)
+worldedit.rotate = function(pos1, pos2, axis, angle)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 
 	local axis1, axis2
@@ -403,20 +463,20 @@ worldedit.rotate = function(pos1, pos2, axis, angle, env)
 
 	local count
 	if angle == 90 then
-		worldedit.flip(pos1, pos2, axis1, env)
-		count, pos1, pos2 = worldedit.transpose(pos1, pos2, axis1, axis2, env)
+		worldedit.flip(pos1, pos2, axis1)
+		count, pos1, pos2 = worldedit.transpose(pos1, pos2, axis1, axis2)
 	elseif angle == 180 then
-		worldedit.flip(pos1, pos2, axis1, env)
-		count = worldedit.flip(pos1, pos2, axis2, env)
+		worldedit.flip(pos1, pos2, axis1)
+		count = worldedit.flip(pos1, pos2, axis2)
 	elseif angle == 270 then
-		worldedit.flip(pos1, pos2, axis2, env)
-		count, pos1, pos2 = worldedit.transpose(pos1, pos2, axis1, axis2, env)
+		worldedit.flip(pos1, pos2, axis2)
+		count, pos1, pos2 = worldedit.transpose(pos1, pos2, axis1, axis2)
 	end
 	return count, pos1, pos2
 end
 
 --rotates all oriented nodes in a region defined by the positions `pos1` and `pos2` by `angle` degrees clockwise (90 degree increment) around the Y axis, returning the number of nodes oriented
-worldedit.orient = function(pos1, pos2, angle, env) --wip: support 6D facedir rotation along arbitrary axis
+worldedit.orient = function(pos1, pos2, angle) --wip: support 6D facedir rotation along arbitrary axis
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 	local registered_nodes = minetest.registered_nodes
 
@@ -477,7 +537,7 @@ worldedit.orient = function(pos1, pos2, angle, env) --wip: support 6D facedir ro
 end
 
 --fixes the lighting in a region defined by positions `pos1` and `pos2`, returning the number of nodes updated
-worldedit.fixlight = function(pos1, pos2, env)
+worldedit.fixlight = function(pos1, pos2)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 
 	--make area stay loaded

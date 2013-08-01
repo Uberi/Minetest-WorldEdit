@@ -134,9 +134,9 @@ Adds a pyramid centered at `pos` along the `axis` axis ("x" or "y" or "z") with 
 
 Returns the number of nodes added.
 
-### count = worldedit.spiral(pos, width, height, spacer, nodename)
+### count = worldedit.spiral(pos, length, height, spacer, nodename)
 
-Adds a spiral centered at `pos` with width `width`, height `height`, space between walls `spacer`, composed of `nodename`.
+Adds a spiral centered at `pos` with side length `length`, height `height`, space between walls `spacer`, composed of `nodename`.
 
 Returns the number of nodes added.
 
