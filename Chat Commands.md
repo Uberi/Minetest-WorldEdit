@@ -151,9 +151,10 @@ Add cylinder at WorldEdit position 1 along the x/y/z/? axis with length <length>
 
 Add pyramid centered at WorldEdit position 1 along the x/y/z/? axis with height <height>, composed of <node>.
 
-    //pyramid 8 Diamond Block
-    //pyramid 5 glass
-    //pyramid 2 mesecons:wire_00000000_off
+    //pyramid x 8 Diamond Block
+    //pyramid y -5 glass
+    //pyramid z 2 mesecons:wire_00000000_off
+    //pyramid ? 12 mesecons:wire_00000000_off
 
 ### //spiral <length> <height> <spacer> <node>
 
