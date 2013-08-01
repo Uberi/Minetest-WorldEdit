@@ -1,15 +1,12 @@
 local path = minetest.get_modpath(minetest.get_current_modname())
 
 local loadmodule = function(path)
-	local results = {pcall(function()
-		return dofile(path)
-	end)}
-	if results[1] then --successfully loaded module
-		table.remove(results, 1) --remove status indicator
-		return unpack(results) --return all results
-	else --load error
-		print(results[2])
+	local file = io.open(path)
+	if not file then
+		return
 	end
+	file:close()
+	return dofile(path)
 end
 
 loadmodule(path .. "/manipulations.lua")
