@@ -1,6 +1,6 @@
-WorldEdit v0.6 for MineTest 0.4.8+
+WorldEdit v1.0 for MineTest 0.4.8+
 ==================================
-In-game world editing for [Minetest](http://minetest.net/)! Tons of functionality to help with building, fixing, and more.
+The ultimate in-game world editing tool for [Minetest](http://minetest.net/)! Tons of functionality to help with building, fixing, and more.
 
 For more information, see the [forum topic](https://forum.minetest.net/viewtopic.php?id=572) at the Minetest forums.
 

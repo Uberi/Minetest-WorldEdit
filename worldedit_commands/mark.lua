@@ -28,7 +28,7 @@ worldedit.mark_pos1 = function(name)
 	if pos1 ~= nil then
 		--make area stay loaded
 		local manip = minetest.get_voxel_manip()
-		manip:read_from_map(pos1, pos1) --wip: see if this even works
+		manip:read_from_map(pos1, pos1)
 	end
 	if worldedit.marker1[name] ~= nil then --marker already exists
 		worldedit.marker1[name]:remove() --remove marker
@@ -51,7 +51,7 @@ worldedit.mark_pos2 = function(name)
 	if pos2 ~= nil then
 		--make area stay loaded
 		local manip = minetest.get_voxel_manip()
-		manip:read_from_map(pos2, pos2) --wip: see if this even works
+		manip:read_from_map(pos2, pos2)
 	end
 	if worldedit.marker2[name] ~= nil then --marker already exists
 		worldedit.marker2[name]:remove() --remove marker
