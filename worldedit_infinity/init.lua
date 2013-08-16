@@ -1,4 +1,5 @@
 worldedit = worldedit or {}
+local minetest = minetest --local copy of global
 
 local get_pointed = function(pos, nearest, distance)
 	if distance > 100 then
@@ -6,7 +7,7 @@ local get_pointed = function(pos, nearest, distance)
 	end
 
 	--check for collision with node
-	local nodename = env:get_node(pos).name
+	local nodename = minetest.get_node(pos).name
 	if nodename ~= "air"
 	and nodename ~= "default:water_source"
 	and nodename ~= "default:water_flowing" then

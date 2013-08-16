@@ -224,7 +224,7 @@ worldedit.hollow_cylinder = function(pos, axis, length, radius, nodename) --wip:
 	manip:read_from_map(pos1, pos2)
 
 	--create schematic for single node column along the axis
-	local node = {name=nodename, param1=0, param2=0}
+	local node = {name=nodename, param1=255, param2=0}
 	local nodes = {}
 	for i = 1, length do
 		nodes[i] = node

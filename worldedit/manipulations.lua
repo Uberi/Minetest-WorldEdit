@@ -148,7 +148,9 @@ worldedit.copy = function(pos1, pos2, axis, amount)
 			local newindex2 = newindex1 + (index2 + offset[other1]) * stride[other1]
 			for index3 = 1, extent[other2] do
 				local i = newindex2 + (index3 + offset[other2]) * stride[other2]
-				nodes[i] = get_node(pos)
+				local node = get_node(pos)
+				node.param1 = 255 --node will always appear
+				nodes[i] = node
 			end
 		end
 
@@ -295,7 +297,7 @@ worldedit.scale = function(pos1, pos2, factor)
 
 	--prepare schematic of large node
 	local get_node, get_meta, place_schematic = minetest.get_node, minetest.get_meta, minetest.place_schematic
-	local placeholder_node = {name="", param1=0, param2=0}
+	local placeholder_node = {name="", param1=255, param2=0}
 	local nodes = {}
 	for i = 1, factor ^ 3 do
 		nodes[i] = placeholder_node
@@ -324,7 +326,7 @@ worldedit.scale = function(pos1, pos2, factor)
 
 				--create large node
 				placeholder_node.name = node.name
-				placeholder_node.param1, placeholder_node.param2 = node.param1, node.param2
+				placeholder_node.param2 = node.param2
 				bigpos.x, bigpos.y, bigpos.z = posx, posy, posz
 				place_schematic(bigpos, schematic)
 
