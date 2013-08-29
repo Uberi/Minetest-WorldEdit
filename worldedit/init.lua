@@ -17,3 +17,5 @@ loadmodule(path .. "/visualization.lua")
 loadmodule(path .. "/serialization.lua")
 loadmodule(path .. "/code.lua")
 loadmodule(path .. "/compatibility.lua")
+
+print("[MOD] WorldEdit loaded!")

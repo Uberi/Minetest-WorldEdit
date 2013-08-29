@@ -2,6 +2,12 @@ Chat Commands
 -------------
 For more information, see the [README](README.md).
 
+### //about
+
+Get information about the mod.
+
+    //about
+
 ### //inspect
 
 Enable or disable node inspection.

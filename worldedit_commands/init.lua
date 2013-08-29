@@ -50,6 +50,14 @@ worldedit.player_axis = function(name)
 	return "z", dir.z > 0 and 1 or -1
 end
 
+minetest.register_chatcommand("/about", {
+	params = "",
+	description = "Get information about the mod",
+	func = function(name, param)
+		worldedit.player_notify(name, "WorldEdit 1.0 is available on this server. Type /help to get a list of commands, or get more information at https://github.com/Uberi/MineTest-WorldEdit/")
+	end,
+})
+
 minetest.register_chatcommand("/inspect", {
 	params = "on/off/1/0/true/false/yes/no/enable/disable",
 	description = "Enable or disable node inspection",
