@@ -1,4 +1,4 @@
-assert(minetest.get_voxel_manip, string.rep(">", 300) .. "HEY YOU! YES, YOU OVER THERE. THIS VERSION OF WORLDEDIT REQUIRES MINETEST 0.4.8 OR LATER! YOU HAVE AN OLD VERSION." .. string.rep("<", 300))
+assert(minetest.get_voxel_manip, string.rep(">", 300) .. "HEY YOU! YES, YOU OVER THERE. THIS VERSION OF WORLDEDIT REQUIRES MINETEST 0.4.7-DEV OR NEWER! MINETEST 0.4.7-STABLE WILL NOT WORK! YOU HAVE AN OLD VERSION." .. string.rep("<", 300))
 
 local path = minetest.get_modpath(minetest.get_current_modname())
 
