@@ -1,5 +1,5 @@
-WorldEdit v1.0 for MineTest 0.4.7-dev+
-======================================
+WorldEdit v1.0 for MineTest 0.4.8+
+==================================
 The ultimate in-game world editing tool for [Minetest](http://minetest.net/)! Tons of functionality to help with building, fixing, and more.
 
 For more information, see the [forum topic](https://forum.minetest.net/viewtopic.php?id=572) at the Minetest forums.
@@ -22,9 +22,7 @@ If visual manipulation of nodes is desired, the [WorldEdit GUI](https://forum.mi
 
 Compatibility
 -------------
-This mod supports Minetest versions 0.4.7-dev and newer. Note that the stable Minetest 0.4.7 will not work.
-
-Older versions of WorldEdit may work with older versions of Minetest, but are not recommended.
+This mod supports Minetest versions 0.4.8 and newer. Older versions of WorldEdit may work with older versions of Minetest, but are not recommended.
 
 WorldEdit works quite well with other mods, and does not have any known mod conflicts.
 
