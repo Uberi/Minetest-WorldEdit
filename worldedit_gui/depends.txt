@@ -1,0 +1,3 @@
+worldedit
+worldedit_commands
+inventory_plus?
