@@ -6,13 +6,24 @@ If needed, individual modules such as visualization.lua can be removed without a
 
 For more information, see the [README](README.md).
 
+General
+-------
+
+### value = worldedit.version
+
+Contains the current version of WorldEdit in a table of the form `{major=MAJOR_INTEGER, minor=MINOR_INTEGER}`, where `MAJOR_INTEGER` is the major version (the number before the period) as an integer, and `MINOR_INTEGER` is the minor version (the number after the period) as an integer. This is intended for version checking purposes.
+
+### value = worldedit.version_string
+
+Contains the current version of WorldEdit in the form of a string `"MAJOR_INTEGER.MINOR_INTEGER"`, where `MAJOR_INTEGER` is the major version (the number before the period) as an integer, and `MINOR_INTEGER` is the minor version (the number after the period) as an integer. This is intended for display purposes.
+
 Manipulations
 -------------
 Contained in manipulations.lua, this module allows several node operations to be applied over a region.
 
 ### count = worldedit.set(pos1, pos2, nodename)
 
-Sets a region defined by positions `pos1` and `pos2` to `nodename`. To clear to region, use "air" as the value of `nodename`.
+Sets a region defined by positions `pos1` and `pos2` to `nodename`. To clear a region, use "air" as the value of `nodename`.
 
 Returns the number of nodes set.
 

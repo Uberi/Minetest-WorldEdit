@@ -54,7 +54,7 @@ minetest.register_chatcommand("/about", {
 	params = "",
 	description = "Get information about the mod",
 	func = function(name, param)
-		worldedit.player_notify(name, "WorldEdit 1.0 is available on this server. Type /help to get a list of commands, or get more information at https://github.com/Uberi/MineTest-WorldEdit/")
+		worldedit.player_notify(name, "WorldEdit " .. worldedit.version_string .. " is available on this server. Type /help to get a list of commands, or get more information at https://github.com/Uberi/MineTest-WorldEdit/")
 	end,
 })
 
@@ -247,9 +247,9 @@ minetest.register_chatcommand("/volume", {
 		local volume = worldedit.volume(pos1, pos2)
 		local abs = math.abs
 		worldedit.player_notify(name, "current region has a volume of " .. volume .. " nodes ("
-			.. abs(pos2.x - pos1.x) .. "*"
-			.. abs(pos2.y - pos1.y) .. "*"
-			.. abs(pos2.z - pos1.z) .. ")")
+			.. abs(pos2.x - pos1.x) + 1 .. "*"
+			.. abs(pos2.y - pos1.y) + 1 .. "*"
+			.. abs(pos2.z - pos1.z) + 1 .. ")")
 	end,
 })
 
