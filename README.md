@@ -6,6 +6,24 @@ For more information, see the [forum topic](https://forum.minetest.net/viewtopic
 
 # New users should see the [tutorial](Tutorial.md).
 
+Installing
+----------
+If you are using Windows, consider installing this mod using [MODSTER](https://forum.minetest.net/viewtopic.php?id=6497), a super simple mod installer that will take care of everything for you. If you are using MODSTER, skip directly to step 6 in the instructions below.
+
+There is a nice installation guide over at the [Minetest Wiki](http://wiki.minetest.com/wiki/Installing_mods). Here is a short summary:
+
+1. Download the mod from the [official releases page](https://github.com/Uberi/Minetest-WorldEdit/releases). The download links are labelled "Source Code". If you are using Windows, you will probably want to download the ZIP version.
+2. You should have a file named `SOMETHING.zip` or `SOMETHING.tar.gz`.
+3. Extract this file using your archiver of choice. If you are using Windows, open the ZIP file and move the folder inside to a safe place outside of the ZIP file.
+4. Make sure that you now have a folder with a file named README.md inside it. If you just have another folder inside this folder, use this nested folder instead.
+5. Move this folder into the `MINETEST_FOLDER/mods` folder, where `MINETEST_FOLDER` is the folder Minetest is located in.
+6. Open Minetest to a world selection screen.
+7. Select a world you want to use WorldEdit in by left clicking on it once, and press the **Configure** button.
+8. You should have a mod selection screen. Select the one named something like `Minetest-WorldEdit` by left clicking once and press the **Enable MP** button.
+9. Press the **Save** button. You can now use WorldEdit in that world. Repeat steps 7 to 9 to enable WorldEdit for other worlds too.
+
+If you are having trouble, try asking for help in the [IRC channel](http://webchat.freenode.net/?channels=#minetest) (faster but may not always have helpers online) or ask on the [forum topic](https://forum.minetest.net/viewtopic.php?id=572) (slower but more likely to get help).
+
 Usage
 -----
 WorldEdit works primarily through chat commands. Depending on your key bindings, you can invoke chat entry with the "t" key, and open the chat console with the "F10" key.
