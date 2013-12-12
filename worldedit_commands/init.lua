@@ -19,7 +19,7 @@ end
 --determines whether `nodename` is a valid node name, returning a boolean
 worldedit.normalize_nodename = function(nodename)
 	local fullname = ItemStack({name=nodename}):get_name() --resolve aliases of node names to full names
-	if minetest.registered_nodes[fullname] then --directly found node name or alias of nodename
+	if minetest.registered_nodes[fullname] or fullname == "air" then --directly found node name or alias of nodename
 		return fullname
 	end
 	for key, value in pairs(minetest.registered_nodes) do

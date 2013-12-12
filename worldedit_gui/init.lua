@@ -1,5 +1,6 @@
 --wip: make back buttons images in all screens
 --wip: support unified_inventory, it even seems to have some sort of API now
+--wip: make it look good with image buttons and stuff
 
 worldedit = worldedit or {}
 
@@ -55,11 +56,17 @@ worldedit.register_gui_handler = function(identifier, handler)
 	end)
 end
 
+worldedit.get_formspec_header = function(identifier)
+	local entry = worldedit.pages[identifier] or {}
+	return "button[0,0;2,0.5;worldedit_gui;Back]" ..
+		string.format("label[2,0;WorldEdit GUI > %s]", entry.name or "")
+end
+
 local get_formspec = function(name, identifier)
 	if worldedit.pages[identifier] then
 		return worldedit.pages[identifier].get_formspec(name)
 	end
-	return worldedit.pages["worldedit_gui"].get_formspec(name)
+	return worldedit.pages["worldedit_gui"].get_formspec(name) --default to showing main page if an unknown page is given
 end
 
 worldedit.show_page = function(name, page)
@@ -70,25 +77,13 @@ end
 --add button to inventory_plus if it is installed
 if inventory_plus then
 	minetest.register_on_joinplayer(function(player)
-		--ensure player has permission to perform action
-		if minetest.check_player_privs(player:get_player_name(), {worldedit=true}) then
-			inventory_plus.register_button(player, "worldedit_gui", "WorldEdit")
-		end
+		inventory_plus.register_button(player, "worldedit_gui", "WorldEdit")
 	end)
 
 	--show the form when the button is pressed
 	minetest.register_on_player_receive_fields(function(player, formname, fields)
-		local name = player:get_player_name()
-
-		--ensure player has permission to perform action
-		if not minetest.check_player_privs(name, {worldedit=true}) then
-			return false
-		end
-
-		--check for showing of main GUI
-		local next_page = nil
 		if fields.worldedit_gui then --main page
-			worldedit.show_page(name, "worldedit_gui")
+			worldedit.show_page(player:get_player_name(), "worldedit_gui")
 			return true
 		end
 		return false
@@ -119,7 +114,7 @@ worldedit.register_gui_function("worldedit_gui", {
 				end
 			end
 		end
-		return string.format("size[%g,%g]", columns * width, y + 0.5) ..
+		return string.format("size[%g,%g]", math.max(columns * width, 5), math.max(y + 0.5, 3)) ..
 			(inventory_plus and "button[0,0;2,0.5;main;Back]" or "button_exit[0,0;2,0.5;main;Exit]") ..
 			"label[2,0;WorldEdit GUI]" ..
 			table.concat(buttons)
@@ -131,7 +126,9 @@ worldedit.register_gui_handler("worldedit_gui", function(name, fields)
 	for identifier, entry in pairs(worldedit.pages) do
 		if fields[identifier] then
 			--ensure player has permission to perform action
-			if not minetest.check_player_privs(name, entry.privs or {}) then
+			local has_privs, missing_privs = minetest.check_player_privs(name, entry.privs or {})
+			if not has_privs then
+				worldedit.player_notify(name, "you are not allowed to use this function (missing privileges: " .. table.concat(missing_privs, ", ") .. ")")
 				return false
 			end
 			if entry.on_select then
