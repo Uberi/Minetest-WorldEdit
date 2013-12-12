@@ -82,6 +82,7 @@ worldedit.register_gui_handler("worldedit_gui_fixedpos", function(name, fields)
 		if x2 and y2 and z2 then
 			minetest.chatcommands["/fixedpos"].func(name, string.format("set2 %d %d %d", x2, y2, z2))
 		end
+		worldedit.show_page(name, "worldedit_gui_fixedpos")
 		return true
 	end
 	return false
@@ -110,6 +111,7 @@ worldedit.register_gui_handler("worldedit_gui_set", function(name, fields)
 		return true
 	elseif fields.worldedit_gui_set_submit then
 		gui_nodename1[name] = fields.worldedit_gui_set_node
+		worldedit.show_page(name, "worldedit_gui_set")
 		minetest.chatcommands["/set"].func(name, gui_nodename1[name])
 		return true
 	end
@@ -149,6 +151,7 @@ worldedit.register_gui_handler("worldedit_gui_replace", function(name, fields)
 	elseif fields.worldedit_gui_replace_submit or fields.worldedit_gui_replace_submit_inverse then
 		gui_nodename1[name] = fields.worldedit_gui_replace_search
 		gui_nodename2[name] = fields.worldedit_gui_replace_replace
+		worldedit.show_page(name, "worldedit_gui_replace")
 		if fields.worldedit_gui_replace_submit then
 			minetest.chatcommands["/replace"].func(name, string.format("%s %s", gui_nodename1[name], gui_nodename2[name]))
 		else
@@ -159,36 +162,43 @@ worldedit.register_gui_handler("worldedit_gui_replace", function(name, fields)
 	return false
 end)
 
-worldedit.register_gui_function("worldedit_gui_sphere", {
-	name = "Sphere", privs = minetest.chatcommands["/sphere"].privs,
+worldedit.register_gui_function("worldedit_gui_sphere_dome", {
+	name = "Sphere/Dome", privs = minetest.chatcommands["/sphere"].privs,
 	get_formspec = function(name)
 		local value = gui_nodename1[name] or "Cobblestone"
 		local radius = gui_radius[name] or "5"
 		local nodename = worldedit.normalize_nodename(value)
-		return "size[6.5,4]" .. worldedit.get_formspec_header("worldedit_gui_sphere") ..
-			string.format("field[0.5,1.5;4,0.8;worldedit_gui_sphere_node;Name;%s]", minetest.formspec_escape(value)) ..
-			"button[4,1.18;1.5,0.8;worldedit_gui_sphere_search;Search]" ..
+		return "size[6.5,5]" .. worldedit.get_formspec_header("worldedit_gui_sphere_dome") ..
+			string.format("field[0.5,1.5;4,0.8;worldedit_gui_sphere_dome_node;Name;%s]", minetest.formspec_escape(value)) ..
+			"button[4,1.18;1.5,0.8;worldedit_gui_sphere_dome_search;Search]" ..
 			(nodename and string.format("item_image[5.5,1.1;1,1;%s]", nodename)
 				or "image[5.5,1.1;1,1;unknown_node.png]") ..
-			string.format("field[0.5,2.5;4,0.8;worldedit_gui_sphere_radius;Radius;%s]", minetest.formspec_escape(radius)) ..
-			"button_exit[0,3.5;3,0.8;worldedit_gui_sphere_submit_hollow;Hollow Sphere]" ..
-			"button_exit[3.5,3.5;3,0.8;worldedit_gui_sphere_submit_solid;Solid Sphere]"
+			string.format("field[0.5,2.5;4,0.8;worldedit_gui_sphere_dome_radius;Radius;%s]", minetest.formspec_escape(radius)) ..
+			"button_exit[0,3.5;3,0.8;worldedit_gui_sphere_dome_submit_hollow;Hollow Sphere]" ..
+			"button_exit[3.5,3.5;3,0.8;worldedit_gui_sphere_dome_submit_solid;Solid Sphere]" ..
+			"button_exit[0,4.5;3,0.8;worldedit_gui_sphere_dome_submit_hollow_dome;Hollow Dome]" ..
+			"button_exit[3.5,4.5;3,0.8;worldedit_gui_sphere_dome_submit_solid_dome;Solid Dome]"
 	end,
 })
 
-worldedit.register_gui_handler("worldedit_gui_sphere", function(name, fields)
-	if fields.worldedit_gui_sphere_search then
-		gui_nodename1[name] = fields.worldedit_gui_sphere_node
-		worldedit.show_page(name, "worldedit_gui_sphere")
+worldedit.register_gui_handler("worldedit_gui_sphere_dome", function(name, fields)
+	if fields.worldedit_gui_sphere_dome_search then
+		gui_nodename1[name] = fields.worldedit_gui_sphere_dome_node
+		worldedit.show_page(name, "worldedit_gui_sphere_dome")
 		return true
-	elseif fields.worldedit_gui_sphere_submit_hollow or fields.worldedit_gui_sphere_submit_solid then
-		gui_nodename1[name] = fields.worldedit_gui_sphere_node
-		gui_radius[name] = fields.worldedit_gui_sphere_radius
-		print(minetest.serialize(fields))
-		if fields.worldedit_gui_sphere_submit_hollow then
+	elseif fields.worldedit_gui_sphere_dome_submit_hollow or fields.worldedit_gui_sphere_dome_submit_solid
+	or fields.worldedit_gui_sphere_dome_submit_hollow_dome or fields.worldedit_gui_sphere_dome_submit_solid_dome then
+		gui_nodename1[name] = fields.worldedit_gui_sphere_dome_node
+		gui_radius[name] = fields.worldedit_gui_sphere_dome_radius
+		worldedit.show_page(name, "worldedit_gui_sphere_dome")
+		if fields.worldedit_gui_sphere_dome_submit_hollow then
 			minetest.chatcommands["/hollowsphere"].func(name, string.format("%s %s", gui_radius[name], gui_nodename1[name]))
-		else
+		elseif fields.worldedit_gui_sphere_dome_submit_solid then
 			minetest.chatcommands["/sphere"].func(name, string.format("%s %s", gui_radius[name], gui_nodename1[name]))
+		elseif fields.worldedit_gui_sphere_dome_submit_hollow_dome then
+			minetest.chatcommands["/hollowdome"].func(name, string.format("%s %s", gui_radius[name], gui_nodename1[name]))
+		else --fields.worldedit_gui_sphere_dome_submit_solid_dome
+			minetest.chatcommands["/dome"].func(name, string.format("%s %s", gui_radius[name], gui_nodename1[name]))
 		end
 		return true
 	end
