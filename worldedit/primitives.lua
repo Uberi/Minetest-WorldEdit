@@ -192,7 +192,7 @@ worldedit.dome = function(pos, radius, nodename)
 end
 
 --adds a hollow cylinder at `pos` along the `axis` axis ("x" or "y" or "z") with length `length` and radius `radius`, composed of `nodename`, returning the number of nodes added
-worldedit.hollow_cylinder = function(pos, axis, length, radius, nodename) --wip: rewrite this using voxelmanip
+worldedit.hollow_cylinder = function(pos, axis, length, radius, nodename)
 	local other1, other2
 	if axis == "x" then
 		other1, other2 = "y", "z"
@@ -209,7 +209,7 @@ worldedit.hollow_cylinder = function(pos, axis, length, radius, nodename) --wip:
 		currentpos[axis] = currentpos[axis] - length
 	end
 
-	--make area stay loaded
+	--set up voxel manipulator
 	local manip = minetest.get_voxel_manip()
 	local pos1 = {
 		[axis]=currentpos[axis],
@@ -221,55 +221,43 @@ worldedit.hollow_cylinder = function(pos, axis, length, radius, nodename) --wip:
 		[other1]=currentpos[other1] + radius,
 		[other2]=currentpos[other2] + radius
 	}
-	manip:read_from_map(pos1, pos2)
+	local emerged_pos1, emerged_pos2 = manip:read_from_map(pos1, pos2)
+	local area = VoxelArea:new({MinEdge=emerged_pos1, MaxEdge=emerged_pos2})
 
-	--create schematic for single node column along the axis
-	local node = {name=nodename, param1=255, param2=0}
+	--fill emerged area with ignore
 	local nodes = {}
-	for i = 1, length do
-		nodes[i] = node
+	local ignore = minetest.get_content_id("ignore")
+	for i = 1, worldedit.volume(emerged_pos1, emerged_pos2) do
+		nodes[i] = ignore
 	end
-	local schematic = {size={[axis]=length, [other1]=1, [other2]=1}, data=nodes}
 
-	--add columns in a circle around axis to form cylinder
-	local place_schematic = minetest.place_schematic
+	--fill selected area with node
+	local node_id = minetest.get_content_id(nodename)
+	local min_radius, max_radius = radius * (radius - 1), radius * (radius + 1)
+	local stride = {x=1, y=area.ystride, z=area.zstride}
+	local offset = {x=currentpos.x - emerged_pos1.x, y=currentpos.y - emerged_pos1.y, z=currentpos.z - emerged_pos1.z}
+	local min_slice, max_slice = offset[axis], offset[axis] + length - 1
 	local count = 0
-	local offset1, offset2 = 0, radius
-	local delta = -radius
-	while offset1 <= offset2 do
-		--add node at each octant
-		local first1, first2 = pos[other1] + offset1, pos[other1] - offset1
-		local second1, second2 = pos[other2] + offset2, pos[other2] - offset2
-		currentpos[other1], currentpos[other2] = first1, second1
-		place_schematic(currentpos, schematic) --octant 1
-		currentpos[other1] = first2
-		place_schematic(currentpos, schematic) --octant 4
-		currentpos[other2] = second2
-		place_schematic(currentpos, schematic) --octant 5
-		currentpos[other1] = first1
-		place_schematic(currentpos, schematic) --octant 8
-		local first1, first2 = pos[other1] + offset2, pos[other1] - offset2
-		local second1, second2 = pos[other2] + offset1, pos[other2] - offset1
-		currentpos[other1], currentpos[other2] = first1, second1
-		place_schematic(currentpos, schematic) --octant 2
-		currentpos[other1] = first2
-		place_schematic(currentpos, schematic) --octant 3
-		currentpos[other2] = second2
-		place_schematic(currentpos, schematic) --octant 6
-		currentpos[other1] = first1
-		place_schematic(currentpos, schematic) --octant 7
-
-		count = count + 8 --wip: broken because sometimes currentpos is repeated
-
-		--move to next location
-		delta = delta + (offset1 * 2) + 1
-		if delta >= 0 then
-			offset2 = offset2 - 1
-			delta = delta - (offset2 * 2)
+	for index2 = -radius, radius do
+		local newindex2 = (index2 + offset[other1]) * stride[other1] + 1 --offset contributed by other axis 1 plus 1 to make it 1-indexed
+		for index3 = -radius, radius do
+			local newindex3 = newindex2 + (index3 + offset[other2]) * stride[other2]
+			local squared = index2 * index2 + index3 * index3
+			if squared >= min_radius and squared <= max_radius then --position is on surface of cylinder
+				for index1 = min_slice, max_slice do --add column along axis
+					local i = newindex3 + index1 * stride[axis]
+					nodes[i] = node_id
+				end
+				count = count + length
+			end
 		end
-		offset1 = offset1 + 1
 	end
-	count = count * length --apply the length to the number of nodes
+
+	--update map nodes
+	manip:set_data(nodes)
+	manip:write_to_map()
+	manip:update_map()
+
 	return count
 end
 
@@ -324,7 +312,7 @@ worldedit.cylinder = function(pos, axis, length, radius, nodename)
 		local newindex2 = (index2 + offset[other1]) * stride[other1] + 1 --offset contributed by other axis 1 plus 1 to make it 1-indexed
 		for index3 = -radius, radius do
 			local newindex3 = newindex2 + (index3 + offset[other2]) * stride[other2]
-			if index2 * index2 + index3 * index3 <= max_radius then
+			if index2 * index2 + index3 * index3 <= max_radius then --position is within cylinder
 				for index1 = min_slice, max_slice do --add column along axis
 					local i = newindex3 + index1 * stride[axis]
 					nodes[i] = node_id
