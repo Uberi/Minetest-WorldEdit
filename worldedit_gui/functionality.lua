@@ -1,10 +1,13 @@
 --saved state for each player
-local gui_nodename1 = {}
-local gui_nodename2 = {}
-local gui_radius = {}
-local gui_axis = {}
-local gui_length = {}
-local gui_formspec = {}
+local gui_nodename1 = {} --mapping of player names to node names (arbitrary strings may also appear as values)
+local gui_nodename2 = {} --mapping of player names to node names (arbitrary strings may also appear as values)
+local gui_radius = {} --mapping of player names to radii (arbitrary strings may also appear as values)
+local gui_axis = {} --mapping of player names to axes (one of 1, 2, 3, or 4, representing the axes in the `axis_indices` table below)
+local gui_length = {} --mapping of player names to lengths (arbitrary strings may also appear as values)
+local gui_formspec = {} --mapping of player names to formspecs (arbitrary strings may also appear as values)
+
+local axis_indices = {["X axis"]=1, ["Y axis"]=2, ["Z axis"]=3, ["Look direction"]=4}
+local axis_values = {"x", "y", "z", "?"}
 
 local register_gui_chatcommand = function(identifier, name, command, callback)
 	callback = callback or function(name, command) command(name, "") end
@@ -222,9 +225,6 @@ worldedit.register_gui_function("worldedit_gui_cylinder", {
 	end,
 })
 
-local axis_indices = {["X axis"]=1, ["Y axis"]=2, ["Z axis"]=3, ["Look direction"]=4}
-local axis_values = {"x", "y", "z", "?"}
-
 worldedit.register_gui_handler("worldedit_gui_cylinder", function(name, fields)
 	if fields.worldedit_gui_cylinder_search then
 		gui_nodename1[name] = fields.worldedit_gui_cylinder_node
@@ -240,6 +240,34 @@ worldedit.register_gui_handler("worldedit_gui_cylinder", function(name, fields)
 			minetest.chatcommands["/hollowcylinder"].func(name, string.format("%s %s %s %s", axis_values[gui_axis[name]], gui_length[name], gui_radius[name], gui_nodename1[name]))
 		else --fields.worldedit_gui_cylinder_submit_solid
 			minetest.chatcommands["/cylinder"].func(name, string.format("%s %s %s %s", axis_values[gui_axis[name]], gui_length[name], gui_radius[name], gui_nodename1[name]))
+		end
+		return true
+	end
+	return false
+end)
+
+worldedit.register_gui_function("worldedit_gui_copy_move", {
+	name = "Copy/Move", privs = minetest.chatcommands["/move"].privs,
+	get_formspec = function(name)
+		local axis = gui_axis[name] or 4
+		local amount = gui_length[name] or "10"
+		return "size[6.5,3]" .. worldedit.get_formspec_header("worldedit_gui_copy_move") ..
+			string.format("field[0.5,1.5;4,0.8;worldedit_gui_copy_move_amount;Amount;%s]", minetest.formspec_escape(amount)) ..
+			string.format("dropdown[4,1.18;2.5;worldedit_gui_copy_move_axis;X axis,Y axis,Z axis,Look direction;%d]", axis) ..
+			"button_exit[0,2.5;3,0.8;worldedit_gui_copy_move_copy;Copy Region]" ..
+			"button_exit[3.5,2.5;3,0.8;worldedit_gui_copy_move_move;Move Region]"
+	end,
+})
+
+worldedit.register_gui_handler("worldedit_gui_copy_move", function(name, fields)
+	if fields.worldedit_gui_copy_move_copy or fields.worldedit_gui_copy_move_move then
+		gui_axis[name] = axis_indices[fields.worldedit_gui_cylinder_axis] or 4
+		gui_length[name] = tostring(fields.worldedit_gui_copy_move_amount)
+		worldedit.show_page(name, "worldedit_gui_copy_move")
+		if fields.worldedit_gui_copy_move_copy then
+			minetest.chatcommands["/copy"].func(name, string.format("%s %s", axis_values[gui_axis[name]], gui_length[name]))
+		else --fields.worldedit_gui_copy_move_move
+			minetest.chatcommands["/move"].func(name, string.format("%s %s", axis_values[gui_axis[name]], gui_length[name]))
 		end
 		return true
 	end
