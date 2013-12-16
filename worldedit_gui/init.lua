@@ -1,4 +1,3 @@
---wip: make back buttons images in all screens
 --wip: support unified_inventory, it even seems to have some sort of API now
 --wip: make it look good with image buttons and stuff
 
@@ -113,6 +112,9 @@ worldedit.register_gui_function("worldedit_gui", {
 					index = 0
 				end
 			end
+		end
+		if index == 0 then --empty row
+			y = y - height
 		end
 		return string.format("size[%g,%g]", math.max(columns * width, 5), math.max(y + 0.5, 3)) ..
 			(inventory_plus and "button[0,0;2,0.5;main;Back]" or "button_exit[0,0;2,0.5;main;Exit]") ..

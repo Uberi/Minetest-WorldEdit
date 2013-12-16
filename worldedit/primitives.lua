@@ -413,13 +413,14 @@ worldedit.spiral = function(pos, length, height, spacer, nodename)
 		nodes[i] = ignore
 	end
 
-	--
+	--set up variables
 	local node_id = minetest.get_content_id(nodename)
 	local stride = {x=1, y=area.ystride, z=area.zstride}
 	local offsetx, offsety, offsetz = pos.x - emerged_pos1.x, pos.y - emerged_pos1.y, pos.z - emerged_pos1.z
 	local i = offsetz * stride.z + offsety * stride.y + offsetx + 1
 
 	--add first column
+	local count = height
 	local column = i
 	for y = 1, height do
 		nodes[column] = node_id
@@ -427,36 +428,39 @@ worldedit.spiral = function(pos, length, height, spacer, nodename)
 	end
 
 	--add spiral segments
-	local axis, other = "x", "z"
-	local sign = 1
-	local count = height
-	for segment = 1, length / spacer - 1 do --go through each segment except the last
-		for index = 1, segment * spacer do --fill segment
-			i = i + stride[axis] * sign
+	local strideaxis, strideother = stride.x, stride.z
+	local sign = -1
+	local segment_length = 0
+	spacer = spacer + 1
+	for segment = 1, math.floor(length / spacer) * 2 do --go through each segment except the last
+		if segment % 2 == 1 then --change sign and length every other turn starting with the first
+			sign = -sign
+			segment_length = segment_length + spacer
+		end
+		for index = 1, segment_length do --fill segment
+			i = i + strideaxis * sign --move along the direction of the segment
 			local column = i
 			for y = 1, height do --add column
 				nodes[column] = node_id
 				column = column + stride.y
 			end
-			count = count + height
 		end
-		axis, other = other, axis --swap axes
-		if segment % 2 == 1 then --change sign every other turn
-			sign = -sign
-		end
+		count = count + segment_length * height
+		strideaxis, strideother = strideother, strideaxis --swap axes
 	end
 
 	--add shorter final segment
-	for index = 1, (math.floor(length / spacer) - 2) * spacer do
-		i = i + stride[axis] * sign
+	sign = -sign
+	for index = 1, segment_length do
+		i = i + strideaxis * sign
 		local column = i
 		for y = 1, height do --add column
 			nodes[column] = node_id
 			column = column + stride.y
 		end
-		count = count + height
 	end
-print(minetest.serialize(nodes))
+	count = count + segment_length * height
+
 	--update map nodes
 	manip:set_data(nodes)
 	manip:write_to_map()
