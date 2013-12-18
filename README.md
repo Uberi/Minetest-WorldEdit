@@ -8,6 +8,13 @@ For more information, see the [forum topic](https://forum.minetest.net/viewtopic
 
 Installing
 ----------
+In order to use the WorldEdit GUI, you must have one of the following mods installed:
+
+* [Unified Inventory](https://forum.minetest.net/viewtopic.php?id=3933) (RECOMMENDED)
+* [Inventory++](https://forum.minetest.net/viewtopic.php?id=6204)
+
+Installation of Unified Inventory is highly recommended. If neither of these mods are installed, the WorldEdit GUI will not be available, though the rest of WorldEdit will work fine.
+
 If you are using Windows, consider installing this mod using [MODSTER](https://forum.minetest.net/viewtopic.php?id=6497), a super simple mod installer that will take care of everything for you. If you are using MODSTER, skip directly to step 6 in the instructions below.
 
 There is a nice installation guide over at the [Minetest Wiki](http://wiki.minetest.com/wiki/Installing_mods). Here is a short summary:
@@ -26,23 +33,29 @@ If you are having trouble, try asking for help in the [IRC channel](http://webch
 
 Usage
 -----
-WorldEdit works primarily through chat commands. Depending on your key bindings, you can invoke chat entry with the "t" key, and open the chat console with the "F10" key.
+WorldEdit works primarily through the WorldEdit GUI and chat commands. Depending on your key bindings, you can invoke chat entry with the "t" key, and open the chat console with the "F10" key.
 
-WorldEdit has a huge potential for abuse by untrusted players. Therefore, users will not be able to use WorldEdit unless they have the "worldedit" privelege. This is available by default in single player, but in multiplayer the permission must be explicitly given by someone with the right credentials, using the follwoing chat command: `/grant <player name> worldedit`. This privelege can later be removed using the following chat command: `/revoke <player name> worldedit`.
+WorldEdit has a huge potential for abuse by untrusted players. Therefore, users will not be able to use WorldEdit unless they have the `worldedit` privelege. This is available by default in single player, but in multiplayer the permission must be explicitly given by someone with the right credentials, using the follwoing chat command: `/grant <player name> worldedit`. This privelege can later be removed using the following chat command: `/revoke <player name> worldedit`.
+
+Certain functions/commands such as WorldEdit GUI's "Run Lua" (equivalent to the `//lua` chat command) additionally require the `server` privilege. This is because it is extremely dangerous to give access to these commands to untrusted players, since they essentially are able to control the computer the server is running on. Give this privilege only to people you trust with your computer.
 
 For in-game information about these commands, type `/help <command name>` in the chat. For example, to learn more about the `//copy` command, simply type `/help /copy` to display information relevant to copying a region.
 
-Chat Commands
--------------
-WorldEdit is accessed in-game through an interface. By default, the mod distribution includes a chat interface for this purpose. It is documented in the [Chat Commands Reference](Chat Commands.md).
+Interface
+---------
+WorldEdit is accessed in-game in two main ways.
 
-If visual manipulation of nodes is desired, the [WorldEdit GUI](https://forum.minetest.net/viewtopic.php?id=3112) mod provides a simple interface with buttons and text entry fields for this purpose.
+The GUI adds a screen to each player's inventory that gives access to various WorldEdit functions. The [tutorial](Tutorial.md) and the [Chat Commands Reference](Chat Commands.md) may be helpful in learning to use it.
+
+The chat interface adds many chat commands that perform various WorldEdit powered tasks. It is documented in the [Chat Commands Reference](Chat Commands.md).
 
 Compatibility
 -------------
-This mod supports Minetest versions 0.4.8 and newer. Older versions of WorldEdit may work with older versions of Minetest, but are not recommended.
+This mod supports Minetest versions 0.4.8 and newer. Older versions of WorldEdit may work with older versions of Minetest, but are not recommended or supported.
 
 WorldEdit works quite well with other mods, and does not have any known mod conflicts.
+
+WorldEdit GUI requires either [Unified Inventory](https://forum.minetest.net/viewtopic.php?id=3933) or [Inventory++](https://forum.minetest.net/viewtopic.php?id=6204) to be installed in order to use it. This is optional but highly recommended.
 
 WorldEdit API
 -------------
@@ -58,11 +71,13 @@ This API is documented in the [WorldEdit API Reference](WorldEdit API.md).
 
 Axes
 ----
-The coordinate system is the same as that used by MineTest; Y is upwards, X is perpendicular, and Z is parallel.
+The coordinate system is the same as that used by Minetest; positive Y is upwards, positive X is rightwards, and positive Z is forwards, if a player is facing North (positive Z axis).
 
-When an axis is specified in a WorldEdit command, it is specified as one of the following values: x, y, z, or ?.
+When an axis is specified in a WorldEdit chat command, it is specified as one of the following values: `x`, `y`, `z`, or `?`.
 
-The value ? represents the axis the player is currently facing. If the player is facing more than one axis, the axis the player face direction is closest to will be used.
+In the GUI, there is a dropdown menu for this purpose. The "Look direction" option has the same effect as `?` does in chat commands.
+
+The value `?` represents the axis the player is currently facing. If the player is facing more than one axis, the axis the player face direction is closest to will be used.
 
 Nodes
 -----
@@ -111,7 +126,7 @@ The current version of the WorldEdit Schematic format, internally known as versi
         <...>
     }
 
-Value ordering and minor aspects of the syntax, such as trailing commas or newlines, are not guaranteed.
+The ordering of the values and minor aspects of the syntax, such as trailing commas or newlines, are not guaranteed to stay the same in future versions.
 
 The WorldEdit Schematic format is accessed via the WorldEdit API, or WorldEdit serialization chat commands such as `//serialize` and `//deserialize`.
 

@@ -21,49 +21,62 @@ local axis_values = {"x", "y", "z", "?"}
 setmetatable(axis_indices, {__index = function () return 4 end})
 setmetatable(axis_values, {__index = function () return "?" end})
 
-local register_gui_chatcommand = function(identifier, name, command, callback)
-	callback = callback or function(name, command) command(name, "") end
-	worldedit.register_gui_function(identifier, {
-		name = name,
-		privs = minetest.chatcommands[command].privs,
-		on_select = function(name)
-			return callback(name, minetest.chatcommands[command].func)
-		end,
-	})
+--given multiple sets of privileges, produces a single set of privs that would have the same effect as requiring all of them at the same time
+local combine_privs = function(...)
+	local result = {}
+	for i, privs in ipairs({...}) do
+		for name, value in pairs(privs) do
+			if result[name] ~= nil and result[name] ~= value then --the priv must be both true and false, which can never happen
+				return {__fake_priv_that_nobody_has__=true} --priviledge table that can never be satisfied
+			end
+			result[name] = value
+		end
+	end
+	return result
 end
 
-register_gui_chatcommand("worldedit_gui_about", "About", "/about")
-register_gui_chatcommand("worldedit_gui_inspect", "Toggle Inspection", "/inspect", function(name, command)
-	command(name, worldedit.inspect[name] and "disable" or "enable")
-end)
-register_gui_chatcommand("worldedit_gui_reset", "Reset Region", "/reset")
-register_gui_chatcommand("worldedit_gui_mark", "Mark Region", "/mark")
-register_gui_chatcommand("worldedit_gui_unmark", "Unmark Region", "/unmark")
+worldedit.register_gui_function("worldedit_gui_about", {
+	name = "About", privs = minetest.chatcommands["/about"].privs,
+	on_select = function(name)
+		minetest.chatcommands["/about"].func(name, "")
+	end,
+})
 
-worldedit.register_gui_function("worldedit_gui_p", {
-	name = "Get/Set Positions", privs = minetest.chatcommands["/p"].privs,
+worldedit.register_gui_function("worldedit_gui_inspect", {
+	name = "Toggle Inspect", privs = minetest.chatcommands["/inspect"].privs,
+	on_select = function(name)
+		minetest.chatcommands["/inspect"].func(name, worldedit.inspect[name] and "disable" or "enable")
+	end,
+})
+
+worldedit.register_gui_function("worldedit_gui_region", {
+	name = "Get/Set Region", privs = combine_privs(minetest.chatcommands["/p"].privs, minetest.chatcommands["/pos1"].privs, minetest.chatcommands["/pos2"].privs, minetest.chatcommands["/reset"].privs, minetest.chatcommands["/mark"].privs, minetest.chatcommands["/unmark"].privs, minetest.chatcommands["/volume"].privs, minetest.chatcommands["/fixedpos"].privs),
 	get_formspec = function(name)
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
-		return "size[9,6]" .. worldedit.get_formspec_header("worldedit_gui_p") ..
+		return "size[9,7]" .. worldedit.get_formspec_header("worldedit_gui_region") ..
 			"button_exit[0,1;3,0.8;worldedit_gui_p_get;Get Positions]" ..
 			"button_exit[3,1;3,0.8;worldedit_gui_p_set1;Choose Position 1]" ..
 			"button_exit[6,1;3,0.8;worldedit_gui_p_set2;Choose Position 2]" ..
 			"button_exit[0,2;3,0.8;worldedit_gui_pos1;Position 1 Here]" ..
 			"button_exit[3,2;3,0.8;worldedit_gui_pos2;Position 2 Here]" ..
-			"label[0,3.7;Position 1]" ..
-			string.format("field[2,4;1.5,0.8;worldedit_gui_fixedpos_pos1x;X ;%s]", pos1 and pos1.x or "") ..
-			string.format("field[3.5,4;1.5,0.8;worldedit_gui_fixedpos_pos1y;Y ;%s]", pos1 and pos1.y or "") ..
-			string.format("field[5,4;1.5,0.8;worldedit_gui_fixedpos_pos1z;Z ;%s]", pos1 and pos1.z or "") ..
-			"button_exit[6.5,3.68;2.5,0.8;worldedit_gui_fixed_pos1_submit;Set Position 1]" ..
-			"label[0,5.2;Position 2]" ..
-			string.format("field[2,5.5;1.5,0.8;worldedit_gui_fixedpos_pos2x;X ;%s]", pos2 and pos2.x or "") ..
-			string.format("field[3.5,5.5;1.5,0.8;worldedit_gui_fixedpos_pos2y;Y ;%s]", pos2 and pos2.y or "") ..
-			string.format("field[5,5.5;1.5,0.8;worldedit_gui_fixedpos_pos2z;Z ;%s]", pos2 and pos2.z or "") ..
-			"button_exit[6.5,5.18;2.5,0.8;worldedit_gui_fixed_pos2_submit;Set Position 2]"
+			"button_exit[6,2;3,0.8;worldedit_gui_reset;Reset Region]" ..
+			"button_exit[0,3;3,0.8;worldedit_gui_mark;Mark Region]" ..
+			"button_exit[3,3;3,0.8;worldedit_gui_unmark;Unmark Region]" ..
+			"button_exit[6,3;3,0.8;worldedit_gui_volume;Region Volume]" ..
+			"label[0,4.7;Position 1]" ..
+			string.format("field[2,5;1.5,0.8;worldedit_gui_fixedpos_pos1x;X ;%s]", pos1 and pos1.x or "") ..
+			string.format("field[3.5,5;1.5,0.8;worldedit_gui_fixedpos_pos1y;Y ;%s]", pos1 and pos1.y or "") ..
+			string.format("field[5,5;1.5,0.8;worldedit_gui_fixedpos_pos1z;Z ;%s]", pos1 and pos1.z or "") ..
+			"button_exit[6.5,4.68;2.5,0.8;worldedit_gui_fixed_pos1_submit;Set Position 1]" ..
+			"label[0,6.2;Position 2]" ..
+			string.format("field[2,6.5;1.5,0.8;worldedit_gui_fixedpos_pos2x;X ;%s]", pos2 and pos2.x or "") ..
+			string.format("field[3.5,6.5;1.5,0.8;worldedit_gui_fixedpos_pos2y;Y ;%s]", pos2 and pos2.y or "") ..
+			string.format("field[5,6.5;1.5,0.8;worldedit_gui_fixedpos_pos2z;Z ;%s]", pos2 and pos2.z or "") ..
+			"button_exit[6.5,6.18;2.5,0.8;worldedit_gui_fixed_pos2_submit;Set Position 2]"
 	end,
 })
 
-worldedit.register_gui_handler("worldedit_gui_p", function(name, fields)
+worldedit.register_gui_handler("worldedit_gui_region", function(name, fields)
 	if fields.worldedit_gui_p_get then
 		minetest.chatcommands["/p"].func(name, "get")
 		return true
@@ -75,31 +88,45 @@ worldedit.register_gui_handler("worldedit_gui_p", function(name, fields)
 		return true
 	elseif fields.worldedit_gui_pos1 then
 		minetest.chatcommands["/pos1"].func(name, "")
-		worldedit.show_page(name, "worldedit_gui_p")
+		worldedit.show_page(name, "worldedit_gui_region")
 		return true
 	elseif fields.worldedit_gui_pos2 then
 		minetest.chatcommands["/pos2"].func(name, "")
-		worldedit.show_page(name, "worldedit_gui_p")
+		worldedit.show_page(name, "worldedit_gui_region")
+		return true
+	elseif fields.worldedit_gui_reset then
+		minetest.chatcommands["/reset"].func(name, "")
+		worldedit.show_page(name, "worldedit_gui_region")
+		return true
+	elseif fields.worldedit_gui_mark then
+		minetest.chatcommands["/mark"].func(name, "")
+		worldedit.show_page(name, "worldedit_gui_region")
+		return true
+	elseif fields.worldedit_gui_unmark then
+		minetest.chatcommands["/unmark"].func(name, "")
+		worldedit.show_page(name, "worldedit_gui_region")
+		return true
+	elseif fields.worldedit_gui_volume then
+		minetest.chatcommands["/volume"].func(name, "")
+		worldedit.show_page(name, "worldedit_gui_region")
 		return true
 	elseif fields.worldedit_gui_fixedpos_pos1_submit then
 		minetest.chatcommands["/fixedpos"].func(name, string.format("set1 %s %s %s",
 			tostring(fields.worldedit_gui_fixedpos_pos1x),
 			tostring(fields.worldedit_gui_fixedpos_pos1y),
 			tostring(fields.worldedit_gui_fixedpos_pos1z)))
-		worldedit.show_page(name, "worldedit_gui_p")
+		worldedit.show_page(name, "worldedit_gui_region")
 		return true
 	elseif fields.worldedit_gui_fixedpos_pos2_submit then
 		minetest.chatcommands["/fixedpos"].func(name, string.format("set2 %s %s %s",
 			tostring(fields.worldedit_gui_fixedpos_pos2x),
 			tostring(fields.worldedit_gui_fixedpos_pos2y),
 			tostring(fields.worldedit_gui_fixedpos_pos2z)))
-		worldedit.show_page(name, "worldedit_gui_p")
+		worldedit.show_page(name, "worldedit_gui_region")
 		return true
 	end
 	return false
 end)
-
-register_gui_chatcommand("worldedit_gui_volume", "Region Volume", "/volume")
 
 worldedit.register_gui_function("worldedit_gui_set", {
 	name = "Set Nodes", privs = minetest.chatcommands["/set"].privs,
@@ -128,7 +155,7 @@ worldedit.register_gui_handler("worldedit_gui_set", function(name, fields)
 end)
 
 worldedit.register_gui_function("worldedit_gui_replace", {
-	name = "Replace Nodes", privs = minetest.chatcommands["/replace"].privs,
+	name = "Replace Nodes", privs = combine_privs(minetest.chatcommands["/replace"].privs, minetest.chatcommands["/replaceinverse"].privs),
 	get_formspec = function(name)
 		local search, replace = gui_nodename1[name], gui_nodename2[name]
 		local search_nodename, replace_nodename = worldedit.normalize_nodename(search), worldedit.normalize_nodename(replace)
@@ -163,7 +190,7 @@ worldedit.register_gui_handler("worldedit_gui_replace", function(name, fields)
 end)
 
 worldedit.register_gui_function("worldedit_gui_sphere_dome", {
-	name = "Sphere/Dome", privs = minetest.chatcommands["/sphere"].privs,
+	name = "Sphere/Dome", privs = combine_privs(minetest.chatcommands["/hollowsphere"].privs, minetest.chatcommands["/sphere"].privs, minetest.chatcommands["/hollowdome"].privs, minetest.chatcommands["/dome"].privs),
 	get_formspec = function(name)
 		local node, radius = gui_nodename1[name], gui_distance2[name]
 		local nodename = worldedit.normalize_nodename(node)
@@ -202,7 +229,7 @@ worldedit.register_gui_handler("worldedit_gui_sphere_dome", function(name, field
 end)
 
 worldedit.register_gui_function("worldedit_gui_cylinder", {
-	name = "Cylinder", privs = minetest.chatcommands["/cylinder"].privs,
+	name = "Cylinder", privs = combine_privs(minetest.chatcommands["/hollowcylinder"].privs, minetest.chatcommands["/cylinder"].privs),
 	get_formspec = function(name)
 		local node, axis, length, radius = gui_nodename1[name], gui_axis[name], gui_distance1[name], gui_distance2[name]
 		local nodename = worldedit.normalize_nodename(node)
@@ -300,7 +327,7 @@ worldedit.register_gui_handler("worldedit_gui_spiral", function(name, fields)
 end)
 
 worldedit.register_gui_function("worldedit_gui_copy_move", {
-	name = "Copy/Move", privs = minetest.chatcommands["/move"].privs,
+	name = "Copy/Move", privs = combine_privs(minetest.chatcommands["/copy"].privs, minetest.chatcommands["/move"].privs),
 	get_formspec = function(name)
 		local axis = gui_axis[name] or 4
 		local amount = gui_distance1[name] or "10"
@@ -346,3 +373,6 @@ worldedit.register_gui_handler("worldedit_gui_formspec_tester", function(name, f
 	end
 	return false
 end)
+
+--wip: those other commands
+--wip: Run Lua and Lua Transform

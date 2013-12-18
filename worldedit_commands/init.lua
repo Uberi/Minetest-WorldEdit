@@ -1,5 +1,7 @@
 minetest.register_privilege("worldedit", "Can use WorldEdit commands")
 
+--wip: fold the hollow stuff into the main functions and add a hollow flag at the end, then add the compatibility stuff
+
 worldedit.set_pos = {}
 worldedit.inspect = {}
 
