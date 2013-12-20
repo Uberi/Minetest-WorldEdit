@@ -22,6 +22,7 @@ Enable or disable node inspection.
     //inspect no
     //inspect enable
     //inspect disable
+    //inspect
 
 ### //reset
 

@@ -37,7 +37,7 @@ WorldEdit works primarily through the WorldEdit GUI and chat commands. Depending
 
 WorldEdit has a huge potential for abuse by untrusted players. Therefore, users will not be able to use WorldEdit unless they have the `worldedit` privelege. This is available by default in single player, but in multiplayer the permission must be explicitly given by someone with the right credentials, using the follwoing chat command: `/grant <player name> worldedit`. This privelege can later be removed using the following chat command: `/revoke <player name> worldedit`.
 
-Certain functions/commands such as WorldEdit GUI's "Run Lua" (equivalent to the `//lua` chat command) additionally require the `server` privilege. This is because it is extremely dangerous to give access to these commands to untrusted players, since they essentially are able to control the computer the server is running on. Give this privilege only to people you trust with your computer.
+Certain functions/commands such as WorldEdit GUI's "Run Lua" function (equivalent to the `//lua` and `//luatransform` chat command) additionally require the `server` privilege. This is because it is extremely dangerous to give access to these commands to untrusted players, since they essentially are able to control the computer the server is running on. Give this privilege only to people you trust with your computer.
 
 For in-game information about these commands, type `/help <command name>` in the chat. For example, to learn more about the `//copy` command, simply type `/help /copy` to display information relevant to copying a region.
 

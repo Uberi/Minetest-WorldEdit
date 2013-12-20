@@ -109,7 +109,7 @@ worldedit.replaceinverse = function(pos1, pos2, searchnode, replacenode)
 	return count
 end
 
-worldedit.copy = function(pos1, pos2, axis, amount)
+worldedit.copy = function(pos1, pos2, axis, amount) --wip: replace the old version below
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 
 	if amount == 0 then
@@ -291,24 +291,28 @@ worldedit.stack = function(pos1, pos2, axis, count)
 	return worldedit.volume(pos1, pos2) * count
 end
 
---scales the region defined by positions `pos1` and `pos2` by an factor of positive integer `factor` with `pos1` as the origin, returning the number of nodes scaled, the new scaled position 1, and the new scaled position 2
-worldedit.scale = function(pos1, pos2, factor)
+--stretches the region defined by positions `pos1` and `pos2` by an factor of positive integers `stretchx`, `stretchy`. and `stretchz` along the X, Y, and Z axes, respectively, with `pos1` as the origin, returning the number of nodes scaled, the new scaled position 1, and the new scaled position 2
+worldedit.stretch = function(pos1, pos2, stretchx, stretchy, stretchz) --wip: test this
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 
 	--prepare schematic of large node
 	local get_node, get_meta, place_schematic = minetest.get_node, minetest.get_meta, minetest.place_schematic
 	local placeholder_node = {name="", param1=255, param2=0}
 	local nodes = {}
-	for i = 1, factor ^ 3 do
+	for i = 1, stretchx * stretchy * stretchz do
 		nodes[i] = placeholder_node
 	end
-	local schematic = {size={x=factor, y=factor, z=factor}, data=nodes}
+	local schematic = {size={x=stretchx, y=stretchy, z=stretchz}, data=nodes}
 
-	local size = factor - 1
+	local sizex, sizey, sizez = stretchx - 1, stretchy - 1, stretchz - 1
 
 	--make area stay loaded
 	local manip = minetest.get_voxel_manip()
-	local new_pos2 = {x=pos1.x + (pos2.x - pos1.x) * factor + size, y=pos1.y + (pos2.y - pos1.y) * factor + size, z=pos1.z + (pos2.z - pos1.z) * factor + size}
+	local new_pos2 = {
+		x=pos1.x + (pos2.x - pos1.x) * stretchx + sizex,
+		y=pos1.y + (pos2.y - pos1.y) * stretchy + sizey,
+		z=pos1.z + (pos2.z - pos1.z) * stretchz + sizez,
+	}
 	manip:read_from_map(pos1, new_pos2)
 
 	local pos = {x=pos2.x, y=0, z=0}
@@ -321,8 +325,10 @@ worldedit.scale = function(pos1, pos2, factor)
 				local node = get_node(pos) --obtain current node
 				local meta = get_meta(pos):to_table() --get meta of current node
 
-				local value = pos[axis] --store current position
-				local posx, posy, posz = pos1.x + (pos.x - pos1.x) * factor, pos1.y + (pos.y - pos1.y) * factor, pos1.z + (pos.z - pos1.z) * factor
+				--calculate far corner of the big node
+				local posx = pos1.x + (pos.x - pos1.x) * stretchx
+				local posy = pos1.y + (pos.y - pos1.y) * stretchy
+				local posz = pos1.z + (pos.z - pos1.z) * stretchz
 
 				--create large node
 				placeholder_node.name = node.name
@@ -331,10 +337,10 @@ worldedit.scale = function(pos1, pos2, factor)
 				place_schematic(bigpos, schematic)
 
 				--fill in large node meta
-				if next(meta.fields) ~= nil and next(meta.inventory) ~= nil then --node has meta fields
-					for x = 0, size do
-						for y = 0, size do
-							for z = 0, size do
+				if next(meta.fields) ~= nil or next(meta.inventory) ~= nil then --node has meta fields
+					for x = 0, sizex do
+						for y = 0, sizey do
+							for z = 0, sizez do
 								bigpos.x, bigpos.y, bigpos.z = posx + x, posy + y, posz + z
 								get_meta(bigpos):from_table(meta) --set metadata of new node
 							end
@@ -347,7 +353,7 @@ worldedit.scale = function(pos1, pos2, factor)
 		end
 		pos.x = pos.x - 1
 	end
-	return worldedit.volume(pos1, pos2) * (factor ^ 3), pos1, new_pos2
+	return worldedit.volume(pos1, pos2) * stretchx * stretchy * stretchz, pos1, new_pos2
 end
 
 --transposes a region defined by the positions `pos1` and `pos2` between the `axis1` and `axis2` axes, returning the number of nodes transposed, the new transposed position 1, and the new transposed position 2

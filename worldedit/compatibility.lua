@@ -18,3 +18,6 @@ worldedit.metaload = function(originpos, filename)
 	local data = file:read("*a")
 	return worldedit.deserialize(originpos, data)
 end
+worldedit.scale = function(pos1, pos2, factor)
+	return worldedit.stretch(pos1, pos2, factor, factor, factor)
+end

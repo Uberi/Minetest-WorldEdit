@@ -61,16 +61,18 @@ minetest.register_chatcommand("/about", {
 })
 
 minetest.register_chatcommand("/inspect", {
-	params = "on/off/1/0/true/false/yes/no/enable/disable",
+	params = "on/off/1/0/true/false/yes/no/enable/disable/<blank>",
 	description = "Enable or disable node inspection",
 	privs = {worldedit=true},
 	func = function(name, param)
-		if param == "on" or param == "1" or param == "true" or param == "yes" or param == "enable" then
+		if param == "on" or param == "1" or param == "true" or param == "yes" or param == "enable" or param == "" then
 			worldedit.inspect[name] = true
-			worldedit.player_notify(name, "node inspection enabled")
+			local axis, sign = worldedit.player_axis(name)
+			worldedit.player_notify(name, string.format("inspector: inspection enabled for %s, currently facing the %s axis",
+				name, axis .. (sign > 0 and "+" or "-")))
 		elseif param == "off" or param == "0" or param == "false" or param == "no" or param == "disable" then
 			worldedit.inspect[name] = nil
-			worldedit.player_notify(name, "node inspection disabled")
+			worldedit.player_notify(name, "inspector: inspection disabled")
 		else
 			worldedit.player_notify(name, "invalid usage: " .. param)
 		end
@@ -81,7 +83,9 @@ minetest.register_on_punchnode(function(pos, node, puncher)
 	local name = puncher:get_player_name()
 	if worldedit.inspect[name] then
 		if minetest.check_player_privs(name, {worldedit=true}) then
-			message = "inspector: " .. node.name .. " at " .. minetest.pos_to_string(pos) .. " (param1=" .. node.param1 .. ", param2=" .. node.param2 .. ")"
+			local axis, sign = worldedit.player_axis(name)
+			message = string.format("inspector: %s at %s (param1=%d, param2=%d) punched by %s facing the %s axis",
+				node.name, minetest.pos_to_string(pos), node.param1, node.param2, name, axis .. (sign > 0 and "+" or "-"))
 		else
 			message = "inspector: worldedit privileges required"
 		end
@@ -658,9 +662,9 @@ minetest.register_chatcommand("/stack", {
 	end,
 })
 
-minetest.register_chatcommand("/scale", {
-	params = "<factor>",
-	description = "Scale the current WorldEdit positions and region by a factor of positive integer <factor> with position 1 as the origin",
+minetest.register_chatcommand("/stretch", {
+	params = "<stretchx> <stretchy> <stretchz>",
+	description = "Scale the current WorldEdit positions and region by a factor of <stretchx>, <stretchy>, <stretchz> along the X, Y, and Z axes, repectively, with position 1 as the origin",
 	privs = {worldedit=true},
 	func = function(name, param)
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
@@ -669,12 +673,17 @@ minetest.register_chatcommand("/scale", {
 			return
 		end
 
-		local factor = tonumber(param)
-		if not factor or factor ~= math.floor(factor) or factor <= 0 then
+		local found, _, stretchx, stretchy, stretchz = param:find("^(%d+)%s+(%d+)%s+(%d+)$")
+		if found == nil then
+			worldedit.player_notify(name, "invalid usage: " .. param)
+			return
+		end
+		stretchx, stretchy, stretchz = tonumber(stretchx), tonumber(stretchy), tonumber(stretchz)
+		if stretchx == 0 or stretchy == 0 or stretchz == 0 then
 			worldedit.player_notify(name, "invalid scaling factor: " .. param)
 		end
 
-		local count, pos1, pos2 = worldedit.scale(pos1, pos2, factor)
+		local count, pos1, pos2 = worldedit.stretch(pos1, pos2, stretchx, stretchy, stretchz)
 
 		--reset markers to scaled positions
 		worldedit.pos1[name] = pos1
@@ -682,7 +691,7 @@ minetest.register_chatcommand("/scale", {
 		worldedit.mark_pos1(name)
 		worldedit.mark_pos2(name)
 
-		worldedit.player_notify(name, count .. " nodes scaled")
+		worldedit.player_notify(name, count .. " nodes stretched")
 	end,
 })
 
@@ -919,6 +928,10 @@ minetest.register_chatcommand("/save", {
 			worldedit.player_notify(name, "invalid usage: " .. param)
 			return
 		end
+		if not string.find(param, "^[%w \t.,+-_=!@#$%%^&*()%[%]{};'\"]+$") then
+			worldedit.player_notify(name, "invalid file name: " .. param)
+			return
+		end
 
 		local result, count = worldedit.serialize(pos1, pos2)
 
@@ -951,6 +964,10 @@ minetest.register_chatcommand("/allocate", {
 
 		if param == "" then
 			worldedit.player_notify(name, "invalid usage: " .. param)
+			return
+		end
+		if not string.find(param, "^[%w \t.,+-_=!@#$%%^&*()%[%]{};'\"]+$") then
+			worldedit.player_notify(name, "invalid file name: " .. param)
 			return
 		end
 
@@ -991,6 +1008,10 @@ minetest.register_chatcommand("/load", {
 
 		if param == "" then
 			worldedit.player_notify(name, "invalid usage: " .. param)
+			return
+		end
+		if not string.find(param, "^[%w \t.,+-_=!@#$%%^&*()%[%]{};'\"]+$") then
+			worldedit.player_notify(name, "invalid file name: " .. param)
 			return
 		end
 
