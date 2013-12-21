@@ -1,6 +1,3 @@
---wip: support unified_inventory, it even seems to have some sort of API now
---wip: make it look good with image buttons and stuff
-
 worldedit = worldedit or {}
 
 --[[
@@ -20,6 +17,8 @@ Use `nil` for the `get_formspec` field to denote that the function does not have
 Use `nil` for the `privs` field to denote that no special privileges are required to use the function.
 
 If the identifier is already registered to another function, it will be replaced by the new one.
+
+The `on_select` function must not call `worldedit.show_page`
 ]]
 
 worldedit.pages = {} --mapping of identifiers to options
@@ -68,21 +67,47 @@ local get_formspec = function(name, identifier)
 	return worldedit.pages["worldedit_gui"].get_formspec(name) --default to showing main page if an unknown page is given
 end
 
-worldedit.show_page = function(name, page)
-	--wip
-	print("not implemented")
-end
 
---add button to inventory_plus if it is installed
-if inventory_plus then
+if unified_inventory then
+	local old_func = worldedit.register_gui_function
+	worldedit.register_gui_function = function(identifier, options)
+		old_func(identifier, options)
+		unified_inventory.register_page(identifier, {get_formspec=function(player) return {formspec=options.get_formspec(player:get_player_by_name())} end})
+	end
+
+	unified_inventory.register_button("worldedit_gui", {
+		type = "image",
+		image = "inventory_plus_worldedit_gui.png",
+	})
+
+	minetest.register_on_player_receive_fields(function(player, formname, fields)
+		if fields.worldedit_gui_exit then
+			unified_inventory.set_inventory_formspec(minetest.get_player_by_name(name), "craft")
+			return true
+		end
+		return false
+	end)
+
+	worldedit.show_page = function(name, page)
+		minetest.get_player_by_name(name):set_inventory_formspec(get_formspec(name, page))
+	end
+elseif inventory_plus then
 	minetest.register_on_joinplayer(function(player)
 		inventory_plus.register_button(player, "worldedit_gui", "WorldEdit")
 	end)
 
-	--show the form when the button is pressed
+	--show the form when the button is pressed and hide it when done
+	local gui_player_formspecs = {}
 	minetest.register_on_player_receive_fields(function(player, formname, fields)
+		local name = player:get_player_name()
 		if fields.worldedit_gui then --main page
-			worldedit.show_page(player:get_player_name(), "worldedit_gui")
+			gui_player_formspecs[name] = player:get_inventory_formspec()
+			worldedit.show_page(name, "worldedit_gui")
+			return true
+		elseif fields.worldedit_gui_exit then --return to original page
+			if gui_player_formspecs[name] then
+				inventory_plus.set_inventory_formspec(player, gui_player_formspecs[name])
+			end
 			return true
 		end
 		return false
@@ -91,6 +116,11 @@ if inventory_plus then
 	worldedit.show_page = function(name, page)
 		inventory_plus.set_inventory_formspec(minetest.get_player_by_name(name), get_formspec(name, page))
 	end
+else
+	worldedit.show_page = function(name, page)
+		minetest.log("error", "WorldEdit GUI cannot be shown, requires unified_inventory or inventory_plus")
+	end
+	minetest.log("error", "WorldEdit GUI is unavailable, requires unified_inventory or inventory_plus")
 end
 
 worldedit.register_gui_function("worldedit_gui", {
@@ -117,16 +147,15 @@ worldedit.register_gui_function("worldedit_gui", {
 			y = y - height
 		end
 		return string.format("size[%g,%g]", math.max(columns * width, 5), math.max(y + 0.5, 3)) ..
-			(inventory_plus and "button[0,0;2,0.5;main;Back]" or "button_exit[0,0;2,0.5;main;Exit]") ..
+			"button[0,0;2,0.5;worldedit_gui_exit;Back]" ..
 			"label[2,0;WorldEdit GUI]" ..
 			table.concat(buttons)
 	end,
 })
 
 worldedit.register_gui_handler("worldedit_gui", function(name, fields)
-	--check for WorldEdit GUI main formspec button selection
-	for identifier, entry in pairs(worldedit.pages) do
-		if fields[identifier] then
+	for identifier, entry in pairs(worldedit.pages) do --check for WorldEdit GUI main formspec button selection
+		if fields[identifier] and identifier ~= "worldedit_gui" then
 			--ensure player has permission to perform action
 			local has_privs, missing_privs = minetest.check_player_privs(name, entry.privs or {})
 			if not has_privs then
