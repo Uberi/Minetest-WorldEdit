@@ -72,7 +72,7 @@ if unified_inventory then
 	local old_func = worldedit.register_gui_function
 	worldedit.register_gui_function = function(identifier, options)
 		old_func(identifier, options)
-		unified_inventory.register_page(identifier, {get_formspec=function(player) return {formspec=options.get_formspec(player:get_player_by_name())} end})
+		unified_inventory.register_page(identifier, {get_formspec=function(player) return {formspec=options.get_formspec(player:get_player_name())} end})
 	end
 
 	unified_inventory.register_button("worldedit_gui", {
@@ -81,6 +81,7 @@ if unified_inventory then
 	})
 
 	minetest.register_on_player_receive_fields(function(player, formname, fields)
+		local name = player:get_player_name()
 		if fields.worldedit_gui_exit then
 			unified_inventory.set_inventory_formspec(minetest.get_player_by_name(name), "craft")
 			return true
