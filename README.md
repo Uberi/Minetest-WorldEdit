@@ -6,6 +6,8 @@ For more information, see the [forum topic](https://forum.minetest.net/viewtopic
 
 # New users should see the [tutorial](Tutorial.md).
 
+![Screenshot](http://i.imgur.com/lwhodrv.png)
+
 Installing
 ----------
 In order to use the WorldEdit GUI, you must have one of the following mods installed:
