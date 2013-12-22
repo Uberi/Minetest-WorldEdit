@@ -67,7 +67,6 @@ local get_formspec = function(name, identifier)
 	return worldedit.pages["worldedit_gui"].get_formspec(name) --default to showing main page if an unknown page is given
 end
 
-
 if unified_inventory then
 	local old_func = worldedit.register_gui_function
 	worldedit.register_gui_function = function(identifier, options)
@@ -82,7 +81,10 @@ if unified_inventory then
 
 	minetest.register_on_player_receive_fields(function(player, formname, fields)
 		local name = player:get_player_name()
-		if fields.worldedit_gui_exit then
+		if fields.worldedit_gui then --main page
+			worldedit.show_page(name, "worldedit_gui")
+			return true
+		elseif fields.worldedit_gui_exit then --return to original page
 			unified_inventory.set_inventory_formspec(minetest.get_player_by_name(name), "craft")
 			return true
 		end
