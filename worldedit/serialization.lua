@@ -183,7 +183,7 @@ end
 --loads the nodes represented by string `value` at position `originpos`, returning the number of nodes deserialized
 --contains code based on [table.save/table.load](http://lua-users.org/wiki/SaveTableToFile) by ChillCode, available under the MIT license (GPL compatible)
 worldedit.deserialize = function(originpos, value)
-	--make area stay loaded --wip: not very performant
+	--make area stay loaded
 	local pos1, pos2 = worldedit.allocate(originpos, value)
 	local manip = minetest.get_voxel_manip()
 	manip:read_from_map(pos1, pos2)

@@ -1,5 +1,7 @@
 worldedit = worldedit or {}
 
+--wip: simply add a button to the player inventory if unified_inventory AND inventory++ are both not installed
+
 --[[
 Example:
 
@@ -129,7 +131,7 @@ end
 worldedit.register_gui_function("worldedit_gui", {
 	name = "WorldEdit GUI",
 	get_formspec = function(name)
-		--create a form with all the buttons arranged in a grid --wip: show only buttons that the player has privs for
+		--create a form with all the buttons arranged in a grid
 		local buttons, x, y, index = {}, 0, 1, 0
 		local width, height = 3, 0.8
 		local columns = 5
