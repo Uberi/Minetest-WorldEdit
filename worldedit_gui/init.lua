@@ -1,7 +1,5 @@
 worldedit = worldedit or {}
 
---wip: simply add a button to the player inventory if unified_inventory AND inventory++ are both not installed
-
 --[[
 Example:
 
@@ -69,7 +67,8 @@ local get_formspec = function(name, identifier)
 	return worldedit.pages["worldedit_gui"].get_formspec(name) --default to showing main page if an unknown page is given
 end
 
-if unified_inventory then
+--implement worldedit.show_page(name, page) in different ways depending on the available APIs
+if unified_inventory then --unified inventory installed
 	local old_func = worldedit.register_gui_function
 	worldedit.register_gui_function = function(identifier, options)
 		old_func(identifier, options)
@@ -96,7 +95,7 @@ if unified_inventory then
 	worldedit.show_page = function(name, page)
 		minetest.get_player_by_name(name):set_inventory_formspec(get_formspec(name, page))
 	end
-elseif inventory_plus then
+elseif inventory_plus then --inventory++ installed
 	minetest.register_on_joinplayer(function(player)
 		inventory_plus.register_button(player, "worldedit_gui", "WorldEdit")
 	end)
@@ -121,11 +120,57 @@ elseif inventory_plus then
 	worldedit.show_page = function(name, page)
 		inventory_plus.set_inventory_formspec(minetest.get_player_by_name(name), get_formspec(name, page))
 	end
-else
-	worldedit.show_page = function(name, page)
-		minetest.log("error", "WorldEdit GUI cannot be shown, requires unified_inventory or inventory_plus")
+else --fallback button
+	local player_formspecs = {}
+
+	local update_main_formspec = function(name)
+		local formspec = player_formspecs[name]
+		if not formspec then
+			return
+		end
+		local player = minetest.get_player_by_name(name)
+		if minetest.setting_getbool("creative_mode") and creative_inventory then --creative_inventory is active
+			formspec = formspec .. "image_button[6,0;1,1;inventory_plus_worldedit_gui.png;worldedit_gui;]"
+		else
+			formspec = formspec .. "image_button[0,0;1,1;inventory_plus_worldedit_gui.png;worldedit_gui;]"
+		end
+		player:set_inventory_formspec(formspec)
 	end
-	minetest.log("error", "WorldEdit GUI is unavailable, requires unified_inventory or inventory_plus")
+
+	minetest.register_on_joinplayer(function(player)
+		local name = player:get_player_name()
+		minetest.after(1, function()
+			player_formspecs[name] = player:get_inventory_formspec()
+			minetest.after(0.01, function()
+				update_main_formspec(name)
+			end)
+		end)
+	end)
+
+	minetest.register_on_leaveplayer(function(player)
+		player_formspecs[player:get_player_name()] = nil
+	end)
+
+	minetest.register_on_player_receive_fields(function(player, formname, fields)
+		local name = player:get_player_name()
+		if fields.worldedit_gui then --main page
+			worldedit.show_page(name, "worldedit_gui")
+			return true
+		elseif fields.worldedit_gui_exit then --return to original page
+			update_main_formspec(name)
+			return true
+		else --deal with creative_inventory setting the formspec on every single message
+			minetest.after(0.01,function()
+				update_main_formspec(name)
+			end)
+			return false --continue processing in creative inventory
+		end
+	end)
+
+	worldedit.show_page = function(name, page)
+		local player = minetest.get_player_by_name(name)
+		player:set_inventory_formspec(get_formspec(name, page))
+	end
 end
 
 worldedit.register_gui_function("worldedit_gui", {

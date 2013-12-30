@@ -9,7 +9,6 @@ Let's start with a few assumptions:
 * You have WorldEdit installed as a mod.
   * If using Windows, [MODSTER](https://forum.minetest.net/viewtopic.php?pid=101463) makes installing mods totally painless.
   * Simply download the file, extract the archive, and move it to the correct mod folder for Minetest.
-  * If you want to use the WorldEdit GUI, you have installed either [Unified Inventory](https://forum.minetest.net/viewtopic.php?id=3933) (recommended), or [Inventory++](https://forum.minetest.net/viewtopic.php?id=6204).
   * See the installation instructions in [README](README.md) if you need more details.
 * You are familiar with the basics of the game.
   * How to walk, jump, and climb.
@@ -38,7 +37,7 @@ Walk away from the node you just punched. Now, punch another node. A black cube 
 
 ### WorldEdit GUI
 
-Open the main WorldEdit GUI from your inventory screen.
+Open the main WorldEdit GUI from your inventory screen. The icon looks like a globe with a red dot in the center.
 
 Press the "Get/Set Positions" button. On the new screen, press the "Set Position 1" button. The inventory screen should close.
 

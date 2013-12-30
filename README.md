@@ -10,12 +10,6 @@ For more information, see the [forum topic](https://forum.minetest.net/viewtopic
 
 Installing
 ----------
-In order to use the WorldEdit GUI, you must have one of the following mods installed:
-
-* [Unified Inventory](https://forum.minetest.net/viewtopic.php?id=3933) (RECOMMENDED)
-* [Inventory++](https://forum.minetest.net/viewtopic.php?id=6204)
-
-Installation of Unified Inventory is highly recommended. If neither of these mods are installed, the WorldEdit GUI will not be available, though the rest of WorldEdit will work fine.
 
 If you are using Windows, consider installing this mod using [MODSTER](https://forum.minetest.net/viewtopic.php?id=6497), a super simple mod installer that will take care of everything for you. If you are using MODSTER, skip directly to step 6 in the instructions below.
 
@@ -57,7 +51,9 @@ This mod supports Minetest versions 0.4.8 and newer. Older versions of WorldEdit
 
 WorldEdit works quite well with other mods, and does not have any known mod conflicts.
 
-WorldEdit GUI requires either [Unified Inventory](https://forum.minetest.net/viewtopic.php?id=3933) or [Inventory++](https://forum.minetest.net/viewtopic.php?id=6204) to be installed in order to use it. This is optional but highly recommended.
+WorldEdit GUI works with [Unified Inventory](https://forum.minetest.net/viewtopic.php?id=3933) and [Inventory++](https://forum.minetest.net/viewtopic.php?id=6204), but these are not required to use the mod.
+
+If you use any other inventory manager mods, note that they may conflict with the WorldEdit GUI. If this is the case, it may be necessary to disable them.
 
 WorldEdit API
 -------------
