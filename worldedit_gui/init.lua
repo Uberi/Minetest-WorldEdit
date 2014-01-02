@@ -151,13 +151,17 @@ else --fallback button
 		player_formspecs[player:get_player_name()] = nil
 	end)
 
+	local gui_player_formspecs = {}
 	minetest.register_on_player_receive_fields(function(player, formname, fields)
 		local name = player:get_player_name()
 		if fields.worldedit_gui then --main page
+			gui_player_formspecs[name] = player:get_inventory_formspec()
 			worldedit.show_page(name, "worldedit_gui")
 			return true
 		elseif fields.worldedit_gui_exit then --return to original page
-			update_main_formspec(name)
+			if gui_player_formspecs[name] then
+				player:set_inventory_formspec(gui_player_formspecs[name])
+			end
 			return true
 		else --deal with creative_inventory setting the formspec on every single message
 			minetest.after(0.01,function()
