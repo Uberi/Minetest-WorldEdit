@@ -129,7 +129,7 @@ else --fallback button
 			return
 		end
 		local player = minetest.get_player_by_name(name)
-		if minetest.setting_getbool("creative_mode") and creative_inventory then --creative_inventory is active, add button to modified formspec
+		if (minetest.check_player_privs(name, {creative=true}) or minetest.setting_getbool("creative_mode")) and creative_inventory then --creative_inventory is active, add button to modified formspec
 			formspec = player:get_inventory_formspec() .. "image_button[6,0;1,1;inventory_plus_worldedit_gui.png;worldedit_gui;]"
 		else
 			formspec = formspec .. "image_button[0,0;1,1;inventory_plus_worldedit_gui.png;worldedit_gui;]"
