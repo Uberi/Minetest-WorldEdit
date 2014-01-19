@@ -1051,6 +1051,12 @@ minetest.register_chatcommand("/lua", {
 	description = "Executes <code> as a Lua chunk in the global namespace",
 	privs = {worldedit=true, server=true},
 	func = function(name, param)
+		local admin = minetest.setting_get("name")
+		if not admin or not name == admin then
+			worldedit.player_notify(name, "This command can only"
+					.." be run by the server administrator")
+			return
+		end
 		local err = worldedit.lua(param)
 		if err then
 			worldedit.player_notify(name, "code error: " .. err)
@@ -1065,6 +1071,12 @@ minetest.register_chatcommand("/luatransform", {
 	description = "Executes <code> as a Lua chunk in the global namespace with the variable pos available, for each node in the current WorldEdit region",
 	privs = {worldedit=true, server=true},
 	func = function(name, param)
+		local admin = minetest.setting_get("name")
+		if not admin or not name == admin then
+			worldedit.player_notify(name, "This command can only"
+					.." be run by the server administrator")
+			return
+		end
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
 		if pos1 == nil or pos2 == nil then
 			worldedit.player_notify(name, "no region selected")
