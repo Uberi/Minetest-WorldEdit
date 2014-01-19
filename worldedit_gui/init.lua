@@ -86,14 +86,20 @@ if unified_inventory then --unified inventory installed
 			worldedit.show_page(name, "worldedit_gui")
 			return true
 		elseif fields.worldedit_gui_exit then --return to original page
-			unified_inventory.set_inventory_formspec(minetest.get_player_by_name(name), "craft")
+			local player = minetest.get_player_by_name(name)
+			if player then
+				unified_inventory.set_inventory_formspec(player, "craft")
+			end
 			return true
 		end
 		return false
 	end)
 
 	worldedit.show_page = function(name, page)
-		minetest.get_player_by_name(name):set_inventory_formspec(get_formspec(name, page))
+		local player = minetest.get_player_by_name(name)
+		if player then
+			player:set_inventory_formspec(get_formspec(name, page))
+		end
 	end
 elseif inventory_plus then --inventory++ installed
 	minetest.register_on_joinplayer(function(player)
@@ -118,7 +124,10 @@ elseif inventory_plus then --inventory++ installed
 	end)
 
 	worldedit.show_page = function(name, page)
-		inventory_plus.set_inventory_formspec(minetest.get_player_by_name(name), get_formspec(name, page))
+		local player = minetest.get_player_by_name(name)
+		if player then
+			inventory_plus.set_inventory_formspec(player, get_formspec(name, page))
+		end
 	end
 else --fallback button
 	local player_formspecs = {}
@@ -129,6 +138,9 @@ else --fallback button
 			return
 		end
 		local player = minetest.get_player_by_name(name)
+		if not player then --this is in case the player signs off while the media is loading
+			return
+		end
 		if (minetest.check_player_privs(name, {creative=true}) or minetest.setting_getbool("creative_mode")) and creative_inventory then --creative_inventory is active, add button to modified formspec
 			formspec = player:get_inventory_formspec() .. "image_button[6,0;1,1;inventory_plus_worldedit_gui.png;worldedit_gui;]"
 		else
@@ -140,10 +152,12 @@ else --fallback button
 	minetest.register_on_joinplayer(function(player)
 		local name = player:get_player_name()
 		minetest.after(1, function()
-			player_formspecs[name] = player:get_inventory_formspec()
-			minetest.after(0.01, function()
-				update_main_formspec(name)
-			end)
+			if minetest.get_player_by_name(name) then --ensure the player is still signed in
+				player_formspecs[name] = player:get_inventory_formspec()
+				minetest.after(0.01, function()
+					update_main_formspec(name)
+				end)
+			end
 		end)
 	end)
 
@@ -173,7 +187,9 @@ else --fallback button
 
 	worldedit.show_page = function(name, page)
 		local player = minetest.get_player_by_name(name)
-		player:set_inventory_formspec(get_formspec(name, page))
+		if player then
+			player:set_inventory_formspec(get_formspec(name, page))
+		end
 	end
 end
 
