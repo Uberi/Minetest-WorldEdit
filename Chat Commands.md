@@ -2,6 +2,27 @@ Chat Commands
 -------------
 For more information, see the [README](README.md).
 
+Many commands also have shorter names that can be typed faster. For example, if we wanted to use `//move ? 5`, we could instead type `//m ? 5`. All shortened names are listed below:
+
+| Short Name | Original Name      |
+|:-----------|:-------------------|
+| `//i`      | `//inspect`        |
+| `//rst`    | `//reset`          |
+| `//mk`     | `//mark`           |
+| `//umk`    | `//unmark`         |
+| `//1`      | `//pos1`           |
+| `//2`      | `//pos2`           |
+| `//fp`     | `//fixedpos`       |
+| `//v`      | `//volume`         |
+| `//s`      | `//set`            |
+| `//r`      | `//replace`        |
+| `//ri`     | `//replaceinverse` |
+| `//hspr`   | `//hollowsphere`   |
+| `//spr`    | `//sphere`         |
+| `//hdo`    | `//hollowdome`     |
+| `//do`     | `//dome`           |
+| `//hcyl`   | `//hollowcylinder` |
+
 ### `//about`
 
 Get information about the mod.
