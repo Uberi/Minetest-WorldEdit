@@ -14,12 +14,95 @@ end
 
 dofile(minetest.get_modpath("worldedit_commands") .. "/mark.lua")
 
+local get_position = function(name)
+	local pos1 = worldedit.pos1[name]
+	if pos1 == nil then
+		worldedit.player_notify(name, "no position 1 selected")
+	end
+	return pos1
+end
+
+local get_node = function(name, nodename)
+	local node = worldedit.normalize_nodename(nodename)
+	if not node then
+		worldedit.player_notify(name, "invalid node name: " .. nodename)
+		return nil
+	end
+	return node
+end
+
+
+--`callback` is a callback to run when the user confirms
+--`nodes_needed` is a function accepting `param`, `pos1`, and `pos2` to calculate the number of nodes needed
+local safe_region
+do --safe region wrapper function
+	local safe_region_callback
+	local safe_region_name
+	local safe_region_param
+	safe_region = function(callback, nodes_needed)
+		nodes_needed = nodes_needed or worldedit.volume
+		return function(name, param)
+			--obtain positions
+			local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
+			if pos1 == nil or pos2 == nil then
+				worldedit.player_notify(name, "no region selected")
+				return nil
+			end
+
+			--check volume
+			local count = nodes_needed(pos1, pos2, name, param)
+			if not count or count < 10000 then
+				return callback(name, param, pos1, pos2)
+			end
+
+			--save callback to call later
+			safe_region_callback, safe_region_name, safe_region_param = callback, name, param
+			worldedit.player_notify(name, "WARNING: this operation could affect up to " .. count .. " nodes; type //y to continue or //n to cancel")
+		end
+	end
+
+	minetest.register_chatcommand("/y", {
+		params = "",
+		description = "Confirm a pending operation",
+		func = function()
+			local callback, name, param = safe_region_callback, safe_region_name, safe_region_param
+			if not callback then
+				worldedit.player_notify(name, "no operation pending")
+				return
+			end
+
+			--obtain positions
+			local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
+			if pos1 == nil or pos2 == nil then
+				worldedit.player_notify(name, "no region selected")
+				return
+			end
+
+			safe_region_callback, safe_region_name, safe_region_param = nil, nil, nil --reset pending operation
+			callback(name, param, pos1, pos2)
+		end,
+	})
+
+	minetest.register_chatcommand("/n", {
+		params = "",
+		description = "Confirm a pending operation",
+		func = function()
+			if not safe_region_callback then 
+				worldedit.player_notify(name, "no operation pending")
+				return
+			end
+			safe_region_callback, safe_region_name, safe_region_param = nil, nil, nil
+		end,
+	})
+end
+	
 worldedit.player_notify = function(name, message)
 	minetest.chat_send_player(name, "WorldEdit -!- " .. message, false)
 end
 
 --determines whether `nodename` is a valid node name, returning a boolean
 worldedit.normalize_nodename = function(nodename)
+	if nodename == "" then return nil end
 	local fullname = ItemStack({name=nodename}):get_name() --resolve aliases of node names to full names
 	if minetest.registered_nodes[fullname] or fullname == "air" then --directly found node name or alias of nodename
 		return fullname
@@ -51,6 +134,8 @@ worldedit.player_axis = function(name)
 	end
 	return "z", dir.z > 0 and 1 or -1
 end
+
+
 
 minetest.register_chatcommand("/about", {
 	params = "",
@@ -247,7 +332,7 @@ minetest.register_chatcommand("/volume", {
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
 		if pos1 == nil or pos2 == nil then
 			worldedit.player_notify(name, "no region selected")
-			return
+			return nil
 		end
 
 		local volume = worldedit.volume(pos1, pos2)
@@ -263,35 +348,20 @@ minetest.register_chatcommand("/set", {
 	params = "<node>",
 	description = "Set the current WorldEdit region to <node>",
 	privs = {worldedit=true},
-	func = function(name, param)
-		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
-		if pos1 == nil or pos2 == nil then
-			worldedit.player_notify(name, "no region selected")
-			return
-		end
-
-		local node = worldedit.normalize_nodename(param)
-		if param == "" or not node then
-			worldedit.player_notify(name, "invalid node name: " .. param)
-			return
-		end
+	func = safe_region(function(name, param, pos1, pos2)
+		local node = get_node(name, param)
+		if not node then return end
 
 		local count = worldedit.set(pos1, pos2, node)
 		worldedit.player_notify(name, count .. " nodes set")
-	end,
+	end),
 })
 
 minetest.register_chatcommand("/replace", {
 	params = "<search node> <replace node>",
 	description = "Replace all instances of <search node> with <replace node> in the current WorldEdit region",
 	privs = {worldedit=true},
-	func = function(name, param)
-		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
-		if pos1 == nil or pos2 == nil then
-			worldedit.player_notify(name, "no region selected")
-			return
-		end
-
+	func = safe_region(function(name, param, pos1, pos2)
 		local found, _, searchnode, replacenode = param:find("^([^%s]+)%s+(.+)$")
 		if found == nil then
 			worldedit.player_notify(name, "invalid usage: " .. param)
@@ -310,20 +380,14 @@ minetest.register_chatcommand("/replace", {
 
 		local count = worldedit.replace(pos1, pos2, newsearchnode, newreplacenode)
 		worldedit.player_notify(name, count .. " nodes replaced")
-	end,
+	end),
 })
 
 minetest.register_chatcommand("/replaceinverse", {
 	params = "<search node> <replace node>",
 	description = "Replace all nodes other than <search node> with <replace node> in the current WorldEdit region",
 	privs = {worldedit=true},
-	func = function(name, param)
-		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
-		if pos1 == nil or pos2 == nil then
-			worldedit.player_notify(name, "no region selected")
-			return
-		end
-
+	func = safe_region(function(name, param, pos1, pos2)
 		local found, _, searchnode, replacenode = param:find("^([^%s]+)%s+(.+)$")
 		if found == nil then
 			worldedit.player_notify(name, "invalid usage: " .. param)
@@ -342,7 +406,7 @@ minetest.register_chatcommand("/replaceinverse", {
 
 		local count = worldedit.replaceinverse(pos1, pos2, searchnode, replacenode)
 		worldedit.player_notify(name, count .. " nodes replaced")
-	end,
+	end),
 })
 
 minetest.register_chatcommand("/hollowsphere", {
@@ -350,22 +414,16 @@ minetest.register_chatcommand("/hollowsphere", {
 	description = "Add hollow sphere centered at WorldEdit position 1 with radius <radius>, composed of <node>",
 	privs = {worldedit=true},
 	func = function(name, param)
-		local pos = worldedit.pos1[name]
-		if pos == nil then
-			worldedit.player_notify(name, "no region selected")
-			return
-		end
+		local pos = get_position(name)
+		if pos == nil then return end
 
 		local found, _, radius, nodename = param:find("^(%d+)%s+(.+)$")
 		if found == nil then
 			worldedit.player_notify(name, "invalid usage: " .. param)
 			return
 		end
-		local node = worldedit.normalize_nodename(nodename)
-		if not node then
-			worldedit.player_notify(name, "invalid node name: " .. nodename)
-			return
-		end
+		local node = get_node(name, nodename)
+		if not node then return end
 
 		local count = worldedit.hollow_sphere(pos, tonumber(radius), node)
 		worldedit.player_notify(name, count .. " nodes added")
@@ -377,22 +435,16 @@ minetest.register_chatcommand("/sphere", {
 	description = "Add sphere centered at WorldEdit position 1 with radius <radius>, composed of <node>",
 	privs = {worldedit=true},
 	func = function(name, param)
-		local pos = worldedit.pos1[name]
-		if pos == nil then
-			worldedit.player_notify(name, "no region selected")
-			return
-		end
+		local pos = get_position(name)
+		if pos == nil then return end
 
 		local found, _, radius, nodename = param:find("^(%d+)%s+(.+)$")
 		if found == nil then
 			worldedit.player_notify(name, "invalid usage: " .. param)
 			return
 		end
-		local node = worldedit.normalize_nodename(nodename)
-		if not node then
-			worldedit.player_notify(name, "invalid node name: " .. nodename)
-			return
-		end
+		local node = get_node(name, nodename)
+		if not node then return end
 
 		local count = worldedit.sphere(pos, tonumber(radius), node)
 		worldedit.player_notify(name, count .. " nodes added")
@@ -404,22 +456,16 @@ minetest.register_chatcommand("/hollowdome", {
 	description = "Add hollow dome centered at WorldEdit position 1 with radius <radius>, composed of <node>",
 	privs = {worldedit=true},
 	func = function(name, param)
-		local pos = worldedit.pos1[name]
-		if pos == nil then
-			worldedit.player_notify(name, "no region selected")
-			return
-		end
+		local pos = get_position(name)
+		if pos == nil then return end
 
 		local found, _, radius, nodename = param:find("^([+-]?%d+)%s+(.+)$")
 		if found == nil then
 			worldedit.player_notify(name, "invalid usage: " .. param)
 			return
 		end
-		local node = worldedit.normalize_nodename(nodename)
-		if not node then
-			worldedit.player_notify(name, "invalid node name: " .. nodename)
-			return
-		end
+		local node = get_node(name, nodename)
+		if not node then return end
 
 		local count = worldedit.hollow_dome(pos, tonumber(radius), node)
 		worldedit.player_notify(name, count .. " nodes added")
@@ -431,22 +477,16 @@ minetest.register_chatcommand("/dome", {
 	description = "Add dome centered at WorldEdit position 1 with radius <radius>, composed of <node>",
 	privs = {worldedit=true},
 	func = function(name, param)
-		local pos = worldedit.pos1[name]
-		if pos == nil then
-			worldedit.player_notify(name, "no region selected")
-			return
-		end
+		local pos = get_position(name)
+		if pos == nil then return end
 
 		local found, _, radius, nodename = param:find("^([+-]?%d+)%s+(.+)$")
 		if found == nil then
 			worldedit.player_notify(name, "invalid usage: " .. param)
 			return
 		end
-		local node = worldedit.normalize_nodename(nodename)
-		if not node then
-			worldedit.player_notify(name, "invalid node name: " .. nodename)
-			return
-		end
+		local node = get_node(name, nodename)
+		if not node then return end
 
 		local count = worldedit.dome(pos, tonumber(radius), node)
 		worldedit.player_notify(name, count .. " nodes added")
@@ -458,11 +498,8 @@ minetest.register_chatcommand("/hollowcylinder", {
 	description = "Add hollow cylinder at WorldEdit position 1 along the x/y/z/? axis with length <length> and radius <radius>, composed of <node>",
 	privs = {worldedit=true},
 	func = function(name, param)
-		local pos = worldedit.pos1[name]
-		if pos == nil then
-			worldedit.player_notify(name, "no region selected")
-			return
-		end
+		local pos = get_position(name)
+		if pos == nil then return end
 
 		local found, _, axis, length, radius, nodename = param:find("^([xyz%?])%s+([+-]?%d+)%s+(%d+)%s+(.+)$")
 		if found == nil then
@@ -474,11 +511,8 @@ minetest.register_chatcommand("/hollowcylinder", {
 			axis, sign = worldedit.player_axis(name)
 			length = length * sign
 		end
-		local node = worldedit.normalize_nodename(nodename)
-		if not node then
-			worldedit.player_notify(name, "invalid node name: " .. nodename)
-			return
-		end
+		local node = get_node(name, nodename)
+		if not node then return end
 
 		local count = worldedit.hollow_cylinder(pos, axis, length, radius, node)
 		worldedit.player_notify(name, count .. " nodes added")
@@ -490,11 +524,8 @@ minetest.register_chatcommand("/cylinder", {
 	description = "Add cylinder at WorldEdit position 1 along the x/y/z/? axis with length <length> and radius <radius>, composed of <node>",
 	privs = {worldedit=true},
 	func = function(name, param)
-		local pos = worldedit.pos1[name]
-		if pos == nil then
-			worldedit.player_notify(name, "no region selected")
-			return
-		end
+		local pos = get_position(name)
+		if pos == nil then return end
 
 		local found, _, axis, length, radius, nodename = param:find("^([xyz%?])%s+([+-]?%d+)%s+(%d+)%s+(.+)$")
 		if found == nil then
@@ -506,11 +537,8 @@ minetest.register_chatcommand("/cylinder", {
 			axis, sign = worldedit.player_axis(name)
 			length = length * sign
 		end
-		local node = worldedit.normalize_nodename(nodename)
-		if not node then
-			worldedit.player_notify(name, "invalid node name: " .. nodename)
-			return
-		end
+		local node = get_node(name, nodename)
+		if not node then return end
 
 		local count = worldedit.cylinder(pos, axis, length, radius, node)
 		worldedit.player_notify(name, count .. " nodes added")
@@ -522,11 +550,8 @@ minetest.register_chatcommand("/pyramid", {
 	description = "Add pyramid centered at WorldEdit position 1 along the x/y/z/? axis with height <height>, composed of <node>",
 	privs = {worldedit=true},
 	func = function(name, param)
-		local pos = worldedit.pos1[name]
-		if pos == nil then
-			worldedit.player_notify(name, "no region selected")
-			return
-		end
+		local pos = get_position(name)
+		if pos == nil then return end
 
 		local found, _, axis, height, nodename = param:find("^([xyz%?])%s+([+-]?%d+)%s+(.+)$")
 		if found == nil then
@@ -538,11 +563,8 @@ minetest.register_chatcommand("/pyramid", {
 			axis, sign = worldedit.player_axis(name)
 			height = height * sign
 		end
-		local node = worldedit.normalize_nodename(nodename)
-		if not node then
-			worldedit.player_notify(name, "invalid node name: " .. nodename)
-			return
-		end
+		local node = get_node(name, nodename)
+		if not node then return end
 
 		local count = worldedit.pyramid(pos, axis, height, node)
 		worldedit.player_notify(name, count .. " nodes added")
@@ -554,22 +576,16 @@ minetest.register_chatcommand("/spiral", {
 	description = "Add spiral centered at WorldEdit position 1 with side length <length>, height <height>, space between walls <space>, composed of <node>",
 	privs = {worldedit=true},
 	func = function(name, param)
-		local pos = worldedit.pos1[name]
-		if pos == nil then
-			worldedit.player_notify(name, "no region selected")
-			return
-		end
+		local pos = get_position(name)
+		if pos == nil then return end
 
 		local found, _, length, height, space, nodename = param:find("^(%d+)%s+(%d+)%s+(%d+)%s+(.+)$")
 		if found == nil then
 			worldedit.player_notify(name, "invalid usage: " .. param)
 			return
 		end
-		local node = worldedit.normalize_nodename(nodename)
-		if not node then
-			worldedit.player_notify(name, "invalid node name: " .. nodename)
-			return
-		end
+		local node = get_node(name, nodename)
+		if not node then return end
 
 		local count = worldedit.spiral(pos, tonumber(length), tonumber(height), tonumber(space), node)
 		worldedit.player_notify(name, count .. " nodes added")
@@ -580,13 +596,7 @@ minetest.register_chatcommand("/copy", {
 	params = "x/y/z/? <amount>",
 	description = "Copy the current WorldEdit region along the x/y/z/? axis by <amount> nodes",
 	privs = {worldedit=true},
-	func = function(name, param)
-		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
-		if pos1 == nil or pos2 == nil then
-			worldedit.player_notify(name, "no region selected")
-			return
-		end
-
+	func = safe_region(function(name, param, pos1, pos2)
 		local found, _, axis, amount = param:find("^([xyz%?])%s+([+-]?%d+)$")
 		if found == nil then
 			worldedit.player_notify(name, "invalid usage: " .. param)
@@ -600,20 +610,14 @@ minetest.register_chatcommand("/copy", {
 
 		local count = worldedit.copy(pos1, pos2, axis, amount)
 		worldedit.player_notify(name, count .. " nodes copied")
-	end,
+	end),
 })
 
 minetest.register_chatcommand("/move", {
 	params = "x/y/z/? <amount>",
 	description = "Move the current WorldEdit region along the x/y/z/? axis by <amount> nodes",
 	privs = {worldedit=true},
-	func = function(name, param)
-		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
-		if pos1 == nil or pos2 == nil then
-			worldedit.player_notify(name, "no region selected")
-			return
-		end
-
+	func = safe_region(function(name, param, pos1, pos2)
 		local found, _, axis, amount = param:find("^([xyz%?])%s+([+-]?%d+)$")
 		if found == nil then
 			worldedit.player_notify(name, "invalid usage: " .. param)
@@ -632,47 +636,41 @@ minetest.register_chatcommand("/move", {
 		worldedit.mark_pos1(name)
 		worldedit.mark_pos2(name)
 		worldedit.player_notify(name, count .. " nodes moved")
-	end,
+	end),
 })
 
 minetest.register_chatcommand("/stack", {
 	params = "x/y/z/? <count>",
 	description = "Stack the current WorldEdit region along the x/y/z/? axis <count> times",
 	privs = {worldedit=true},
-	func = function(name, param)
-		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
-		if pos1 == nil or pos2 == nil then
-			worldedit.player_notify(name, "no region selected")
-			return
-		end
-
-		local found, _, axis, count = param:find("^([xyz%?])%s+([+-]?%d+)$")
+	func = safe_region(function(name, param, pos1, pos2)
+		local found, _, axis, repetitions = param:find("^([xyz%?])%s+([+-]?%d+)$")
 		if found == nil then
 			worldedit.player_notify(name, "invalid usage: " .. param)
 			return
 		end
-		count = tonumber(count)
+		repetitions = tonumber(repetitions)
 		if axis == "?" then
 			axis, sign = worldedit.player_axis(name)
-			count = count * sign
+			repetitions = repetitions * sign
 		end
 
-		local count = worldedit.stack(pos1, pos2, axis, count)
+		local count = worldedit.stack(pos1, pos2, axis, repetitions)
 		worldedit.player_notify(name, count .. " nodes stacked")
 	end,
+	function(pos1, pos2, name, param)
+		local found, _, axis, repetitions = param:find("^([xyz%?])%s+([+-]?%d+)$")
+		if found then
+			return tonumber(repetitions) * worldedit.volume(pos1, pos2)
+		end
+	end),
 })
 
 minetest.register_chatcommand("/stretch", {
 	params = "<stretchx> <stretchy> <stretchz>",
 	description = "Scale the current WorldEdit positions and region by a factor of <stretchx>, <stretchy>, <stretchz> along the X, Y, and Z axes, repectively, with position 1 as the origin",
 	privs = {worldedit=true},
-	func = function(name, param)
-		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
-		if pos1 == nil or pos2 == nil then
-			worldedit.player_notify(name, "no region selected")
-			return
-		end
-
+	func = safe_region(function(name, param, pos1, pos2)
 		local found, _, stretchx, stretchy, stretchz = param:find("^(%d+)%s+(%d+)%s+(%d+)$")
 		if found == nil then
 			worldedit.player_notify(name, "invalid usage: " .. param)
@@ -680,7 +678,7 @@ minetest.register_chatcommand("/stretch", {
 		end
 		stretchx, stretchy, stretchz = tonumber(stretchx), tonumber(stretchy), tonumber(stretchz)
 		if stretchx == 0 or stretchy == 0 or stretchz == 0 then
-			worldedit.player_notify(name, "invalid scaling factor: " .. param)
+			worldedit.player_notify(name, "invalid scaling factors: " .. param)
 		end
 
 		local count, pos1, pos2 = worldedit.stretch(pos1, pos2, stretchx, stretchy, stretchz)
@@ -693,19 +691,19 @@ minetest.register_chatcommand("/stretch", {
 
 		worldedit.player_notify(name, count .. " nodes stretched")
 	end,
+	function(pos1, pos2, name, param)
+		local found, _, stretchx, stretchy, stretchz = param:find("^(%d+)%s+(%d+)%s+(%d+)$")
+		if found then
+			return tonumber(stretchx) * tonumber(stretchy) * tonumber(stretchz) * worldedit.volume(pos1, pos2)
+		end
+	end),
 })
 
 minetest.register_chatcommand("/transpose", {
 	params = "x/y/z/? x/y/z/?",
 	description = "Transpose the current WorldEdit region along the x/y/z/? and x/y/z/? axes",
 	privs = {worldedit=true},
-	func = function(name, param)
-		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
-		if pos1 == nil or pos2 == nil then
-			worldedit.player_notify(name, "no region selected")
-			return
-		end
-
+	func = safe_region(function(name, param, pos1, pos2)
 		local found, _, axis1, axis2 = param:find("^([xyz%?])%s+([xyz%?])$")
 		if found == nil then
 			worldedit.player_notify(name, "invalid usage: " .. param)
@@ -731,20 +729,14 @@ minetest.register_chatcommand("/transpose", {
 		worldedit.mark_pos2(name)
 
 		worldedit.player_notify(name, count .. " nodes transposed")
-	end,
+	end),
 })
 
 minetest.register_chatcommand("/flip", {
 	params = "x/y/z/?",
 	description = "Flip the current WorldEdit region along the x/y/z/? axis",
 	privs = {worldedit=true},
-	func = function(name, param)
-		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
-		if pos1 == nil or pos2 == nil then
-			worldedit.player_notify(name, "no region selected")
-			return
-		end
-
+	func = safe_region(function(name, param, pos1, pos2)
 		if param == "?" then
 			param = worldedit.player_axis(name)
 		end
@@ -755,20 +747,14 @@ minetest.register_chatcommand("/flip", {
 
 		local count = worldedit.flip(pos1, pos2, param)
 		worldedit.player_notify(name, count .. " nodes flipped")
-	end,
+	end),
 })
 
 minetest.register_chatcommand("/rotate", {
 	params = "<axis> <angle>",
 	description = "Rotate the current WorldEdit region around the axis <axis> by angle <angle> (90 degree increment)",
 	privs = {worldedit=true},
-	func = function(name, param)
-		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
-		if pos1 == nil or pos2 == nil then
-			worldedit.player_notify(name, "no region selected")
-			return
-		end
-
+	func = safe_region(function(name, param, pos1, pos2)
 		local found, _, axis, angle = param:find("^([xyz%?])%s+([+-]?%d+)$")
 		if found == nil then
 			worldedit.player_notify(name, "invalid usage: " .. param)
@@ -791,20 +777,14 @@ minetest.register_chatcommand("/rotate", {
 		worldedit.mark_pos2(name)
 
 		worldedit.player_notify(name, count .. " nodes rotated")
-	end,
+	end),
 })
 
 minetest.register_chatcommand("/orient", {
 	params = "<angle>",
 	description = "Rotate oriented nodes in the current WorldEdit region around the Y axis by angle <angle> (90 degree increment)",
 	privs = {worldedit=true},
-	func = function(name, param)
-		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
-		if pos1 == nil or pos2 == nil then
-			worldedit.player_notify(name, "no region selected")
-			return
-		end
-
+	func = safe_region(function(name, param, pos1, pos2)
 		local found, _, angle = param:find("^([+-]?%d+)$")
 		if found == nil then
 			worldedit.player_notify(name, "invalid usage: " .. param)
@@ -818,112 +798,70 @@ minetest.register_chatcommand("/orient", {
 		local count = worldedit.orient(pos1, pos2, angle)
 
 		worldedit.player_notify(name, count .. " nodes oriented")
-	end,
+	end),
 })
 
 minetest.register_chatcommand("/fixlight", {
 	params = "",
 	description = "Fix the lighting in the current WorldEdit region",
 	privs = {worldedit=true},
-	func = function(name, param)
-		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
-		if pos1 == nil or pos2 == nil then
-			worldedit.player_notify(name, "no region selected")
-			return
-		end
-
+	func = safe_region(function(name, param, pos1, pos2)
 		local count = worldedit.fixlight(pos1, pos2)
 		worldedit.player_notify(name, count .. " nodes updated")
-	end,
+	end),
 })
 
 minetest.register_chatcommand("/hide", {
 	params = "",
 	description = "Hide all nodes in the current WorldEdit region non-destructively",
 	privs = {worldedit=true},
-	func = function(name, param)
-		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
-		if pos1 == nil or pos2 == nil then
-			worldedit.player_notify(name, "no region selected")
-			return
-		end
-
+	func = safe_region(function(name, param, pos1, pos2)
 		local count = worldedit.hide(pos1, pos2)
 		worldedit.player_notify(name, count .. " nodes hidden")
-	end,
+	end),
 })
 
 minetest.register_chatcommand("/suppress", {
 	params = "<node>",
 	description = "Suppress all <node> in the current WorldEdit region non-destructively",
 	privs = {worldedit=true},
-	func = function(name, param)
-		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
-		if pos1 == nil or pos2 == nil then
-			worldedit.player_notify(name, "no region selected")
-			return
-		end
-
-		local node = worldedit.normalize_nodename(param)
-		if param == "" or not node then
-			worldedit.player_notify(name, "invalid node name: " .. param)
-			return
-		end
+	func = safe_region(function(name, param, pos1, pos2)
+		local node = get_node(name, param)
+		if not node then return end
 
 		local count = worldedit.suppress(pos1, pos2, node)
 		worldedit.player_notify(name, count .. " nodes suppressed")
-	end,
+	end),
 })
 
 minetest.register_chatcommand("/highlight", {
 	params = "<node>",
 	description = "Highlight <node> in the current WorldEdit region by hiding everything else non-destructively",
 	privs = {worldedit=true},
-	func = function(name, param)
-		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
-		if pos1 == nil or pos2 == nil then
-			worldedit.player_notify(name, "no region selected")
-			return
-		end
-
-		local node = worldedit.normalize_nodename(param)
-		if param == "" or not node then
-			worldedit.player_notify(name, "invalid node name: " .. param)
-			return
-		end
+	func = safe_region(function(name, param, pos1, pos2)
+		local node = get_node(name, param)
+		if not node then return end
 
 		local count = worldedit.highlight(pos1, pos2, node)
 		worldedit.player_notify(name, count .. " nodes highlighted")
-	end,
+	end),
 })
 
 minetest.register_chatcommand("/restore", {
 	params = "",
 	description = "Restores nodes hidden with WorldEdit in the current WorldEdit region",
 	privs = {worldedit=true},
-	func = function(name, param)
-		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
-		if pos1 == nil or pos2 == nil then
-			worldedit.player_notify(name, "no region selected")
-			return
-		end
-
+	func = safe_region(function(name, param, pos1, pos2)
 		local count = worldedit.restore(pos1, pos2)
 		worldedit.player_notify(name, count .. " nodes restored")
-	end,
+	end),
 })
 
 minetest.register_chatcommand("/save", {
 	params = "<file>",
 	description = "Save the current WorldEdit region to \"(world folder)/schems/<file>.we\"",
 	privs = {worldedit=true},
-	func = function(name, param)
-		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
-		if pos1 == nil or pos2 == nil then
-			worldedit.player_notify(name, "no region selected")
-			return
-		end
-
+	func = safe_region(function(name, param, pos1, pos2)
 		if param == "" then
 			worldedit.player_notify(name, "invalid usage: " .. param)
 			return
@@ -937,6 +875,7 @@ minetest.register_chatcommand("/save", {
 
 		local path = minetest.get_worldpath() .. "/schems"
 		local filename = path .. "/" .. param .. ".we"
+		filename = filename:gsub("\"", "\\\""):gsub("\\", "\\\\") --escape any nasty characters
 		os.execute("mkdir \"" .. path .. "\"") --create directory if it does not already exist
 		local file, err = io.open(filename, "wb")
 		if err ~= nil then
@@ -948,7 +887,7 @@ minetest.register_chatcommand("/save", {
 		file:close()
 
 		worldedit.player_notify(name, count .. " nodes saved")
-	end,
+	end),
 })
 
 minetest.register_chatcommand("/allocate", {
@@ -956,11 +895,8 @@ minetest.register_chatcommand("/allocate", {
 	description = "Set the region defined by nodes from \"(world folder)/schems/<file>.we\" as the current WorldEdit region",
 	privs = {worldedit=true},
 	func = function(name, param)
-		local pos1 = worldedit.pos1[name]
-		if pos1 == nil then
-			worldedit.player_notify(name, "no region selected")
-			return
-		end
+		local pos = get_position(name)
+		if pos == nil then return end
 
 		if param == "" then
 			worldedit.player_notify(name, "invalid usage: " .. param)
@@ -984,7 +920,7 @@ minetest.register_chatcommand("/allocate", {
 			worldedit.player_notify(name, "invalid file: file is invalid or created with newer version of WorldEdit")
 			return
 		end
-		local nodepos1, nodepos2, count = worldedit.allocate(pos1, value)
+		local nodepos1, nodepos2, count = worldedit.allocate(pos, value)
 
 		worldedit.pos1[name] = nodepos1
 		worldedit.mark_pos1(name)
@@ -1000,11 +936,8 @@ minetest.register_chatcommand("/load", {
 	description = "Load nodes from \"(world folder)/schems/<file>[.we[m]]\" with position 1 of the current WorldEdit region as the origin",
 	privs = {worldedit=true},
 	func = function(name, param)
-		local pos1 = worldedit.pos1[name]
-		if pos1 == nil then
-			worldedit.player_notify(name, "no region selected")
-			return
-		end
+		local pos = get_position(name)
+		if pos == nil then return end
 
 		if param == "" then
 			worldedit.player_notify(name, "invalid usage: " .. param)
@@ -1040,7 +973,7 @@ minetest.register_chatcommand("/load", {
 			return
 		end
 
-		local count = worldedit.deserialize(pos1, value)
+		local count = worldedit.deserialize(pos, value)
 
 		worldedit.player_notify(name, count .. " nodes loaded")
 	end,
@@ -1053,8 +986,7 @@ minetest.register_chatcommand("/lua", {
 	func = function(name, param)
 		local admin = minetest.setting_get("name")
 		if not admin or not name == admin then
-			worldedit.player_notify(name, "This command can only"
-					.." be run by the server administrator")
+			worldedit.player_notify(name, "this command can only be run by the server administrator")
 			return
 		end
 		local err = worldedit.lua(param)
@@ -1070,16 +1002,10 @@ minetest.register_chatcommand("/luatransform", {
 	params = "<code>",
 	description = "Executes <code> as a Lua chunk in the global namespace with the variable pos available, for each node in the current WorldEdit region",
 	privs = {worldedit=true, server=true},
-	func = function(name, param)
+	func = safe_region(function(name, param, pos1, pos2)
 		local admin = minetest.setting_get("name")
 		if not admin or not name == admin then
-			worldedit.player_notify(name, "This command can only"
-					.." be run by the server administrator")
-			return
-		end
-		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
-		if pos1 == nil or pos2 == nil then
-			worldedit.player_notify(name, "no region selected")
+			worldedit.player_notify(name, "this command can only be run by the server administrator")
 			return
 		end
 
@@ -1089,20 +1015,14 @@ minetest.register_chatcommand("/luatransform", {
 		else
 			worldedit.player_notify(name, "code successfully executed", false)
 		end
-	end,
+	end),
 })
 
-if minetest.place_schematic then
 minetest.register_chatcommand("/mtschemcreate", {
 	params = "<file>",
 	description = "Save the current WorldEdit region using the Minetest Schematic format to \"(world folder)/schems/<filename>.mts\"",
 	privs = {worldedit=true},
-	func = function(name, param)
-		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
-		if pos1 == nil or pos2 == nil then
-			worldedit.player_notify(name, "No region selected")
-			return
-		end
+	func = safe_region(function(name, param, pos1, pos2)
 		if param == nil then
 			worldedit.player_notify(name, "No filename specified")
 			return
@@ -1110,16 +1030,17 @@ minetest.register_chatcommand("/mtschemcreate", {
 
 		local path = minetest.get_worldpath() .. "/schems"
 		local filename = path .. "/" .. param .. ".mts"
+		filename = filename:gsub("\"", "\\\""):gsub("\\", "\\\\") --escape any nasty characters
 		os.execute("mkdir \"" .. path .. "\"") --create directory if it does not already exist
 
 		local ret = minetest.create_schematic(pos1, pos2, worldedit.prob_list[name], filename)
 		if ret == nil then
-			worldedit.player_notify(name, "Failed to create Minetest schematic", false)
+			worldedit.player_notify(name, "failed to create Minetest schematic", false)
 		else
-			worldedit.player_notify(name, "Saved Minetest schematic to " .. param, false)
+			worldedit.player_notify(name, "saved Minetest schematic to " .. param, false)
 		end
 		worldedit.prob_list[name] = {}
-	end,
+	end),
 })
 
 minetest.register_chatcommand("/mtschemplace", {
@@ -1127,21 +1048,19 @@ minetest.register_chatcommand("/mtschemplace", {
 	description = "Load nodes from \"(world folder)/schems/<file>.mts\" with position 1 of the current WorldEdit region as the origin",
 	privs = {worldedit=true},
 	func = function(name, param)
-		local pos = worldedit.pos1[name]
-		if pos == nil then
-			worldedit.player_notify(name, "No position selected")
-			return
-		end
 		if param == nil then
-			worldedit.player_notify(name, "No filename specified")
+			worldedit.player_notify(name, "no filename specified")
 			return
 		end
 
+		local pos = get_position(name)
+		if pos == nil then return end
+
 		local path = minetest.get_worldpath() .. "/schems/" .. param .. ".mts"
 		if minetest.place_schematic(pos, path) == nil then
-			worldedit.player_notify(name, "Failed to place Minetest schematic", false)
+			worldedit.player_notify(name, "failed to place Minetest schematic", false)
 		else
-			worldedit.player_notify(name, "Placed Minetest schematic " .. param ..
+			worldedit.player_notify(name, "placed Minetest schematic " .. param ..
 				" at " .. minetest.pos_to_string(pos), false)
 		end
 	end,
@@ -1169,7 +1088,7 @@ minetest.register_chatcommand("/mtschemprob", {
 				local prob = math.floor(((v["prob"] / 256) * 100) * 100 + 0.5) / 100
 				text = text .. minetest.pos_to_string(v["pos"]) .. ": " .. prob .. "% | "
 			end
-			worldedit.player_notify(name, "Currently set node probabilities:")
+			worldedit.player_notify(name, "currently set node probabilities:")
 			worldedit.player_notify(name, text)
 		else
 			worldedit.player_notify(name, "unknown subcommand: " .. param)
@@ -1187,20 +1106,13 @@ minetest.register_on_player_receive_fields(
 		end
 	end
 )
-end
 
 minetest.register_chatcommand("/clearobjects", {
 	params = "",
 	description = "Clears all objects within the WorldEdit region",
 	privs = {worldedit=true},
-	func = function(name, param)
-		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
-		if pos1 == nil or pos2 == nil then
-			worldedit.player_notify(name, "no region selected")
-			return
-		end
-
+	func = safe_region(function(name, param, pos1, pos2)
 		local count = worldedit.clearobjects(pos1, pos2)
 		worldedit.player_notify(name, count .. " objects cleared")
-	end,
+	end),
 })
