@@ -71,17 +71,6 @@ worldedit.player_axis = function(name)
 	return "z", dir.z > 0 and 1 or -1
 end
 
-local check_region = function(name, param)
-	--obtain positions
-	local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
-	if pos1 == nil or pos2 == nil then
-		worldedit.player_notify(name, "no region selected")
-		return nil
-	end
-
-	return worldedit.volume(pos1, pos2)
-end
-
 minetest.register_chatcommand("/about", {
 	params = "",
 	description = "Get information about the mod",
