@@ -1,5 +1,3 @@
---I am assuming it's creative mode. What should I do in survival?
-
 --if there's no protection mod, no worldedit means no editing, worldedit means editing anywhere (old behaviour)
 --if there's a protection mod, no worldedit means editing only in your area, worldedit means editing in no-man's land too, areas means editing anywhere.
 
@@ -14,8 +12,9 @@ end)
 --this is privs= within chatcommands that actually change land
 --(should be the same functions as safe_region)
 function worldedit.get_privs()
-	if not PROTECTION_MOD_EXISTS then
-		--no protection mod, worldedit means editing anywhere
+	if not PROTECTION_MOD_EXISTS or not minetest.setting_getbool("creative_mode") then
+		--no protection mod, or not the kind of world where people can just create nodes out of thin air,
+		--worldedit privilege means editing anywhere
 		return {worldedit=true}
 	end
 	--protection mod, can edit inside your area without worldedit privilege
