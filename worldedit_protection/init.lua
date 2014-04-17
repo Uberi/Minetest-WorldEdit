@@ -14,18 +14,22 @@ end)
 --privs={worldedit=worldedit.priv() [, server=true]}
 --instead, I had to wrap the rest of func = .
 worldedit.privs = function(func)
-	if not minetest.setting_getbool("creative_mode") or not PROTECTION_MOD_EXISTS then
-		--no protection mod, or not the kind of world where people can just create nodes out of thin air,
-		--worldedit privilege means editing anywhere
-		if minetest.check_player_privs(name, {worldedit=true}) then
-			func(name, param)
+	--this silly syntax was copied from safe_region, which is actually executed on chatcommand registration, and must return a function instead of the result of a function.
+	--The innermost anonymous function is declared. Then safe_region executes, adding a function wrapper around that function. Then worldedit.privs gets that as an argument, and adds another wrapper. The doubly-wrapped function is the one registered as a chatcommand.
+	return function(name, param)
+		if not minetest.setting_getbool("creative_mode") or not PROTECTION_MOD_EXISTS then
+			--no protection mod, or not the kind of world where people can just create nodes out of thin air,
+			--worldedit privilege means editing anywhere
+			if minetest.check_player_privs(name, {worldedit=true}) then
+				func(name, param)
+			else
+				return
+			end
 		else
-			return
+			--protection mod, can edit inside your area without worldedit privilege
+			--(worldedit and areas let you edit in no-man's land and other-owned area)
+			func(name, param)
 		end
-	else
-		--protection mod, can edit inside your area without worldedit privilege
-		--(worldedit and areas let you edit in no-man's land and other-owned area)
-		func(name, param)
 	end
 end
 
@@ -33,17 +37,13 @@ end
 --(should be the same functions as safe_region)
 --also check for permission when region is set?
 worldedit.can_edit_volume = function(name, pos1, pos2)
-	--old you-can-worldedit-everything behaviour
-	if not PROTECTION_MOD_EXISTS then
-		--then if you were able to run this command, then you have the worldedit privilege.
+	--old you-can-worldedit-everything behaviour.
+	if not PROTECTION_MOD_EXISTS or minetest.check_player_privs(name, {areas=true}) then
+		--If there's no mod, worldedit.privs already required that you have the worldedit privilege,then if you were able to run this command, then you have the worldedit privilege.
+		--Or, you can set areas, so you are allowed to worldedit them too. The ability to set the whole world as owned by yourself is already potentially destructive, what's more destructive capability?
 		return true
 	end
 	--new ownership-based behaviour
-
-	--You can set areas, so you can worldedit them too.
-	if minetest.check_player_privs(name, {areas=true}) then
-		return true
-	end
 
 	--[[I need to use a special per-command region (think /stack, or even worse, /move), the same one safe_region uses, but corner points instead of count... instead of a for loop interpolating between pos1 and pos2]]--
 
