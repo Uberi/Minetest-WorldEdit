@@ -13,7 +13,7 @@ end)
 --privs={worldedit=true             [, server=true]}
 --privs={worldedit=worldedit.priv() [, server=true]}
 --instead, I had to wrap the rest of func = .
-function worldedit.privs(func)
+worldedit.privs = function(func)
 	if not minetest.setting_getbool("creative_mode") or not PROTECTION_MOD_EXISTS then
 		--no protection mod, or not the kind of world where people can just create nodes out of thin air,
 		--worldedit privilege means editing anywhere
@@ -32,7 +32,7 @@ end
 --this is... within chatcommands that actually change land
 --(should be the same functions as safe_region)
 --also check for permission when region is set?
-function worldedit.can_edit_volume(name, pos1, pos2)
+worldedit.can_edit_volume = function(name, pos1, pos2)
 	--old you-can-worldedit-everything behaviour
 	if not PROTECTION_MOD_EXISTS then
 		--then if you were able to run this command, then you have the worldedit privilege.
