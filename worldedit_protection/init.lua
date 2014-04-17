@@ -9,17 +9,17 @@ minetest.after(0, function()
 	--worldedit privilege is permission to edit everything
 end)
 
---this is privs= within chatcommands that actually change land
+--this is privs={worldedit=this()} within chatcommands that actually change land
 --(should be the same functions as safe_region)
-function worldedit.get_privs()
+function worldedit.priv()
 	if not PROTECTION_MOD_EXISTS or not minetest.setting_getbool("creative_mode") then
 		--no protection mod, or not the kind of world where people can just create nodes out of thin air,
 		--worldedit privilege means editing anywhere
-		return {worldedit=true}
+		return true
 	end
 	--protection mod, can edit inside your area without worldedit privilege
 	--(worldedit and areas let you edit in no-man's land and other-owned area)
-	return {worldedit=false} -- this array could also be empty
+	return false
 end
 
 function worldedit.can_edit_volume(name)
