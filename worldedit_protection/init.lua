@@ -35,8 +35,9 @@ end
 
 --this is... within chatcommands that actually change land
 --(should be the same functions as safe_region)
---also check for permission when region is set?
-worldedit.can_edit_volume = function(name, pos1, pos2)
+--also check for permission when region is set? no, //stack goes outside the boundaries.
+--so the region is defined per-command on exec.
+worldedit.can_edit_volume = function(name, pos1, pos2) --, func?
 	--old you-can-worldedit-everything behaviour.
 	if not PROTECTION_MOD_EXISTS or minetest.check_player_privs(name, {areas=true}) then
 		--If there's no mod, worldedit.privs already required that you have the worldedit privilege,then if you were able to run this command, then you have the worldedit privilege.
@@ -48,8 +49,8 @@ worldedit.can_edit_volume = function(name, pos1, pos2)
 	--[[I need to use a special per-command region (think /stack, or even worse, /move), the same one safe_region uses, but corner points instead of count... instead of a for loop interpolating between pos1 and pos2]]--
 
 	--all-or-nothing here
-	local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
-	--pos1, pos2 = worldedit.sort_pos(pos1, pos2) --does this matter?
+	--local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
+	pos1, pos2 = worldedit.sort_pos(pos1, pos2) --does this matter?
 	for i in area:iterp(pos1, pos2) do
 --[[
 		THIS SECTION IGNORES the distinction of area that is owned by someone else, but still editable
@@ -81,6 +82,6 @@ worldedit.can_edit_volume = function(name, pos1, pos2)
 	--the whole thing is
 	--a) owned by me,
 	--b) owned by no one and I have the worldedit privilege, and/or
-	--c) owned by someone else and I have the areas privilege.
+	--c) I have the areas privilege and it's possibly owned by someone else.
 	return true
 end

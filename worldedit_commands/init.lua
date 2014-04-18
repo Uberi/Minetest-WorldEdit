@@ -107,6 +107,7 @@ minetest.register_on_punchnode(function(pos, node, puncher)
 				node.name, minetest.pos_to_string(pos), node.param1, node.param2, name, axis .. (sign > 0 and "+" or "-"))
 		else
 			message = "inspector: worldedit privileges required"
+			worldedit.inspect[name] = nil
 		end
 		worldedit.player_notify(name, message)
 	end
