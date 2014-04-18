@@ -9,11 +9,27 @@ minetest.after(0, function()
 	--worldedit privilege is permission to edit everything
 end)
 
+--[[
+Usage:
+  In chatcommand:
+    privs = {}
+    func = worldedit.privs(function(name, param)...end)
+
+  In if statement:
+    name = minetest.get_player_name(node)
+    if worldedit.privs() then
+--]]
 --I wanted this function to directly choose the privileges for the chat command, but it only applies once.
 --privs={worldedit=true             [, server=true]}
 --privs={worldedit=worldedit.priv() [, server=true]}
 --instead, I had to wrap the rest of func = .
 worldedit.privs = function(func)
+	--This runs a function for a chatcommand's func = ,
+	--or it can be used directly in an if statement.
+	if func == nil then
+		func = function(name, param) end
+	end
+
 	--this silly syntax was copied from safe_region, which is actually executed on chatcommand registration, and must return a function instead of the result of a function.
 	--The innermost anonymous function is declared. Then safe_region executes, adding a function wrapper around that function. Then worldedit.privs gets that as an argument, and adds another wrapper. The doubly-wrapped function is the one registered as a chatcommand.
 	return function(name, param)
@@ -22,13 +38,15 @@ worldedit.privs = function(func)
 			--worldedit privilege means editing anywhere
 			if minetest.check_player_privs(name, {worldedit=true}) then
 				func(name, param)
+				return true
 			else
-				return
+				return false
 			end
 		else
 			--protection mod, can edit inside your area without worldedit privilege
 			--(worldedit and areas let you edit in no-man's land and other-owned area)
 			func(name, param)
+			return true
 		end
 	end
 end

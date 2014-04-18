@@ -101,7 +101,7 @@ minetest.register_chatcommand("/inspect", {
 minetest.register_on_punchnode(function(pos, node, puncher)
 	local name = puncher:get_player_name()
 	if worldedit.inspect[name] then
-		if minetest.check_player_privs(name, {worldedit=true}) then
+		if worldedit.privs() then
 			local axis, sign = worldedit.player_axis(name)
 			message = string.format("inspector: %s at %s (param1=%d, param2=%d) punched by %s facing the %s axis",
 				node.name, minetest.pos_to_string(pos), node.param1, node.param2, name, axis .. (sign > 0 and "+" or "-"))
