@@ -87,9 +87,16 @@ worldedit.can_edit_volume = function(--[[name, ]]volume, func--[[, param]])
 	--	return value 1 (or 2) before this function was run.
 
 	--Try skipping volume permission checks.
-	if worldedit.privs() == 2 then
+	local wp = worldedit.privs()
+	if wp == 2 then
 		func(name, param)
 		return true
+	elseif wp == nil then
+		--safety feature in case worldedit.can_edit_volume is ever run alone, without being surrounded by worldedit.privs()
+		--Shouldn't ever get here.
+		--Any volume-changing function is surrounded by this, then safe_region, then worldedit.privs()
+		--func(name, param) placeholder
+		return false
 	end
 
 	--[[I need to use a special per-command region (think /stack, or even worse, /move), the same one safe_region uses, but corner points instead of count... instead of a for loop interpolating between pos1 and pos2]]--
@@ -126,9 +133,9 @@ worldedit.can_edit_volume = function(--[[name, ]]volume, func--[[, param]])
 	end
 
 	--the whole thing is
-	--a) owned by me,
-	--b) owned by no one and I have the worldedit privilege, and/or
-	--c) I have the areas privilege and it's possibly owned by someone else.
+	--a) owned by me, and/or
+	--b) owned by no one and I have the worldedit privilege.
+	--c) I have the areas privilege and it's possibly owned by someone else. (returned earlier)
 	func(name, param)
 	return true
 end
