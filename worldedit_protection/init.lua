@@ -102,6 +102,9 @@ worldedit.can_edit_volume = function(--[[name, ]]volume, volfunc--[[, param]])
 
 		--[[I need to use a special per-command region (think /stack, or even worse, /move), the same one safe_region uses, but corner points instead of count... instead of a for loop interpolating between pos1 and pos2]]--
 
+		--cache the result of this function for later
+		local has_worldedit = minetest.check_player_privs(name, {worldedit=true})
+
 		--all or nothing here
 		for i in volume do
 			--[[
@@ -112,6 +115,7 @@ worldedit.can_edit_volume = function(--[[name, ]]volume, volfunc--[[, param]])
 
 			This needs testing for the other changes first.
 			--]]
+
 			--Is it owned?
 			if minetest.is_protected(i) then
 				--Is it someone else's?
@@ -126,7 +130,7 @@ worldedit.can_edit_volume = function(--[[name, ]]volume, volfunc--[[, param]])
 
 			--no-man's land
 			--can I edit that?
-			elseif not minetest.check_player_privs(name, {worldedit=true}) then --cache this check?
+			elseif not has_worldedit then --use cached check
 				minetest.chat_send_player(name, "You can only edit area in which you own a plot (missing worldedit privilege)")
 				--volfunc(name, param) placeholder
 				return false
