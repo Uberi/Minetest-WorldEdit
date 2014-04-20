@@ -1,15 +1,12 @@
-local safe_region_callback
-local safe_region_name
-local safe_region_param
+local safe_region_callback = {}
+local safe_region_param = {}
 
 check_region = function(name, param)
-	--obtain positions
-	local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
+	local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name] --obtain positions
 	if pos1 == nil or pos2 == nil then
 		worldedit.player_notify(name, "no region selected")
 		return nil
 	end
-
 	return worldedit.volume(pos1, pos2)
 end
 
@@ -28,7 +25,7 @@ safe_region = function(callback, nodes_needed)
 		end
 
 		--save callback to call later
-		safe_region_callback, safe_region_name, safe_region_param = callback, name, param
+		safe_region_callback[name], safe_region_param[name] = callback, param
 		worldedit.player_notify(name, "WARNING: this operation could affect up to " .. count .. " nodes; type //y to continue or //n to cancel")
 	end
 end
@@ -36,8 +33,8 @@ end
 minetest.register_chatcommand("/y", {
 	params = "",
 	description = "Confirm a pending operation",
-	func = function()
-		local callback, name, param = safe_region_callback, safe_region_name, safe_region_param
+	func = function(name)
+		local callback, param = safe_region_callback[name], safe_region_param[name]
 		if not callback then
 			worldedit.player_notify(name, "no operation pending")
 			return
@@ -50,7 +47,7 @@ minetest.register_chatcommand("/y", {
 			return
 		end
 
-		safe_region_callback, safe_region_name, safe_region_param = nil, nil, nil --reset pending operation
+		safe_region_callback[name], safe_region_param[name] = nil, nil --reset pending operation
 		callback(name, param, pos1, pos2)
 	end,
 })
@@ -58,11 +55,11 @@ minetest.register_chatcommand("/y", {
 minetest.register_chatcommand("/n", {
 	params = "",
 	description = "Confirm a pending operation",
-	func = function()
-		if not safe_region_callback then 
+	func = function(name)
+		if not safe_region_callback[name] then
 			worldedit.player_notify(name, "no operation pending")
 			return
 		end
-		safe_region_callback, safe_region_name, safe_region_param = nil, nil, nil
+		safe_region_callback[name], safe_region_param[name] = nil, nil
 	end,
 })
