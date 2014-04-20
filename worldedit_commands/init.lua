@@ -291,7 +291,7 @@ minetest.register_chatcommand("/set", {
 	privs = {},
 	func = worldedit.privs(safe_region(function(name, param)
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
-		if worldedit.can_edit_volume(VoxelArea:iterp(pos1, pos2)) then
+		if worldedit.can_edit_volume(name, {pos1, pos2}) then
 			local node = get_node(name, param)
 			local count = worldedit.set(pos1, pos2, node)
 			worldedit.player_notify(name, count .. " nodes set")
