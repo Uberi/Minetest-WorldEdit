@@ -1081,6 +1081,36 @@ minetest.register_chatcommand("/mtschemcreate", {
 	end)),
 })
 
+minetest.allocate_schematic = function(originpos, schematic)
+	--[[
+	u32 MTSM
+	u16 version 3
+	u16 x
+	u16 y
+	u16 z
+	...
+	--]]
+	--8 bits in a byte
+	local offset = 0
+	if string.byte(schematic, offset+1, offset+32/8) == "MTSM" then --32 bits
+		offset = offset + 32/8
+		if string.byte(schematic, offset+1, offset+16/8) == "3" then
+			offset = offset + 16/8
+			local x = string.byte(schematic, offset+1, offset+16/8)
+			offset = offset + 16/8
+			local y = string.byte(schematic, offset+1, offset+16/8)
+			offset = offset + 16/8
+			local z = string.byte(schematic, offset+1, offset+16/8)
+			offset = offset + 16/8
+			return originpos, {x=originpos.x+x, y=originpos.y+y, z=originpos.z+z}
+		else
+			--not version 3
+		end
+	else
+		--not a schematic?
+	end
+end
+
 minetest.register_chatcommand("/mtschemplace", {
 	params = "<file>",
 	description = "Load nodes from \"(world folder)/schems/<file>.mts\" with position 1 of the current WorldEdit region as the origin",
@@ -1095,14 +1125,18 @@ minetest.register_chatcommand("/mtschemplace", {
 		if pos == nil then return end
 
 		local path = minetest.get_worldpath() .. "/schems/" .. param .. ".mts"
-		--if worldedit.can_edit_volume(name, {pos1, ?}) then
+
+		local value = file:read("*a")
+		file:close()
+
+		if worldedit.can_edit_volume(name, {minetest.allocate_schematic(pos, value)}) then
 			if minetest.place_schematic(pos, path) == nil then
 				worldedit.player_notify(name, "failed to place Minetest schematic", false)
 			else
 				worldedit.player_notify(name, "placed Minetest schematic " .. param ..
 					" at " .. minetest.pos_to_string(pos), false)
 			end
-		--end
+		end
 	end),
 })
 
