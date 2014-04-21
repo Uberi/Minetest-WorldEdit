@@ -324,11 +324,13 @@ minetest.register_chatcommand("/replace", {
 	privs = {},
 	func = worldedit.privs(safe_region(function(name, param)
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
-		local found, _, searchnode, replacenode = param:find("^([^%s]+)%s+(.+)$")
-		local newsearchnode = worldedit.normalize_nodename(searchnode)
-		local newreplacenode = worldedit.normalize_nodename(replacenode)
-		local count = worldedit.replace(pos1, pos2, newsearchnode, newreplacenode)
-		worldedit.player_notify(name, count .. " nodes replaced")
+		if worldedit.can_edit_volume(name, {pos1, pos2}) then
+			local found, _, searchnode, replacenode = param:find("^([^%s]+)%s+(.+)$")
+			local newsearchnode = worldedit.normalize_nodename(searchnode)
+			local newreplacenode = worldedit.normalize_nodename(replacenode)
+			local count = worldedit.replace(pos1, pos2, newsearchnode, newreplacenode)
+			worldedit.player_notify(name, count .. " nodes replaced")
+		end
 	end, check_replace)),
 })
 
@@ -338,11 +340,13 @@ minetest.register_chatcommand("/replaceinverse", {
 	privs = {},
 	func = worldedit.privs(safe_region(function(name, param)
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
-		local found, _, searchnode, replacenode = param:find("^([^%s]+)%s+(.+)$")
-		local newsearchnode = worldedit.normalize_nodename(searchnode)
-		local newreplacenode = worldedit.normalize_nodename(replacenode)
-		local count = worldedit.replaceinverse(pos1, pos2, searchnode, replacenode)
-		worldedit.player_notify(name, count .. " nodes replaced")
+		if worldedit.can_edit_volume(name, {pos1, pos2}) then
+			local found, _, searchnode, replacenode = param:find("^([^%s]+)%s+(.+)$")
+			local newsearchnode = worldedit.normalize_nodename(searchnode)
+			local newreplacenode = worldedit.normalize_nodename(replacenode)
+			local count = worldedit.replaceinverse(pos1, pos2, searchnode, replacenode)
+			worldedit.player_notify(name, count .. " nodes replaced")
+		end
 	end, check_replace)),
 })
 
@@ -368,9 +372,11 @@ minetest.register_chatcommand("/hollowsphere", {
 	func = worldedit.privs(safe_region(function(name, param)
 		local pos = worldedit.pos1[name]
 		local found, _, radius, nodename = param:find("^(%d+)%s+(.+)$")
-		local node = get_node(name, nodename)
-		local count = worldedit.hollow_sphere(pos, tonumber(radius), node)
-		worldedit.player_notify(name, count .. " nodes added")
+		if worldedit.can_edit_volume(name, {{x=pos.x-radius, y=pos.y-radius, z=pos.z-radius}, {x=pos.x+radius, y=pos.y+radius, z=pos.z+radius}}) then
+			local node = get_node(name, nodename)
+			local count = worldedit.hollow_sphere(pos, tonumber(radius), node)
+			worldedit.player_notify(name, count .. " nodes added")
+		end
 	end, check_sphere)),
 })
 
@@ -381,9 +387,11 @@ minetest.register_chatcommand("/sphere", {
 	func = worldedit.privs(safe_region(function(name, param)
 		local pos = worldedit.pos1[name]
 		local found, _, radius, nodename = param:find("^(%d+)%s+(.+)$")
-		local node = get_node(name, nodename)
-		local count = worldedit.sphere(pos, tonumber(radius), node)
-		worldedit.player_notify(name, count .. " nodes added")
+		if worldedit.can_edit_volume(name, {{x=pos.x-radius, y=pos.y-radius, z=pos.z-radius}, {x=pos.x+radius, y=pos.y+radius, z=pos.z+radius}}) then
+			local node = get_node(name, nodename)
+			local count = worldedit.sphere(pos, tonumber(radius), node)
+			worldedit.player_notify(name, count .. " nodes added")
+		end
 	end, check_sphere)),
 })
 
@@ -409,9 +417,11 @@ minetest.register_chatcommand("/hollowdome", {
 	func = worldedit.privs(safe_region(function(name, param)
 		local pos = worldedit.pos1[name]
 		local found, _, radius, nodename = param:find("^(%d+)%s+(.+)$")
-		local node = get_node(name, nodename)
-		local count = worldedit.hollow_dome(pos, tonumber(radius), node)
-		worldedit.player_notify(name, count .. " nodes added")
+		if worldedit.can_edit_volume(name, {{x=pos.x-radius, y=pos.y, z=pos.z-radius}, {x=pos.x+radius, y=pos.y+radius, z=pos.z+radius}}) then
+			local node = get_node(name, nodename)
+			local count = worldedit.hollow_dome(pos, tonumber(radius), node)
+			worldedit.player_notify(name, count .. " nodes added")
+		end
 	end, check_dome)),
 })
 
@@ -422,9 +432,11 @@ minetest.register_chatcommand("/dome", {
 	func = worldedit.privs(safe_region(function(name, param)
 		local pos = worldedit.pos1[name]
 		local found, _, radius, nodename = param:find("^(%d+)%s+(.+)$")
-		local node = get_node(name, nodename)
-		local count = worldedit.dome(pos, tonumber(radius), node)
-		worldedit.player_notify(name, count .. " nodes added")
+		if worldedit.can_edit_volume(name, {{x=pos.x-radius, y=pos.y, z=pos.z-radius}, {x=pos.x+radius, y=pos.y+radius, z=pos.z+radius}}) then
+			local node = get_node(name, nodename)
+			local count = worldedit.dome(pos, tonumber(radius), node)
+			worldedit.player_notify(name, count .. " nodes added")
+		end
 	end, check_dome)),
 })
 
@@ -455,9 +467,11 @@ minetest.register_chatcommand("/hollowcylinder", {
 			axis, sign = worldedit.player_axis(name)
 			length = length * sign
 		end
-		local node = get_node(name, nodename)
-		local count = worldedit.hollow_cylinder(pos, axis, length, tonumber(radius), node)
-		worldedit.player_notify(name, count .. " nodes added")
+		if worldedit.can_edit_volume(name, {{x=pos.x-(axis~="x" and radius or 0), y=pos.y-(axis~="y" and radius or 0), z=pos.z-(axis~="z" and radius or 0)}, {x=pos.x+(axis~="x" and radius or length), y=pos.y+(axis~="y" and radius or length-1*sign), z=pos.z+(axis~="z" and radius or length-1*sign)}}) then
+			local node = get_node(name, nodename)
+			local count = worldedit.hollow_cylinder(pos, axis, length, tonumber(radius), node)
+			worldedit.player_notify(name, count .. " nodes added")
+		end
 	end, check_cylinder)),
 })
 
@@ -473,9 +487,11 @@ minetest.register_chatcommand("/cylinder", {
 			axis, sign = worldedit.player_axis(name)
 			length = length * sign
 		end
-		local node = get_node(name, nodename)
-		local count = worldedit.cylinder(pos, axis, length, tonumber(radius), node)
-		worldedit.player_notify(name, count .. " nodes added")
+		if worldedit.can_edit_volume(name, {{x=pos.x-(axis~="x" and radius or 0), y=pos.y-(axis~="y" and radius or 0), z=pos.z-(axis~="z" and radius or 0)}, {x=pos.x+(axis~="x" and radius or length-1*sign), y=pos.y+(axis~="y" and radius or length-1*sign), z=pos.z+(axis~="z" and radius or length-1*sign)}}) then
+			local node = get_node(name, nodename)
+			local count = worldedit.cylinder(pos, axis, length, tonumber(radius), node)
+			worldedit.player_notify(name, count .. " nodes added")
+		end
 	end, check_cylinder)),
 })
 
@@ -491,9 +507,11 @@ minetest.register_chatcommand("/pyramid", {
 			axis, sign = worldedit.player_axis(name)
 			height = height * sign
 		end
-		local node = get_node(name, nodename)
-		local count = worldedit.pyramid(pos, axis, height, node)
-		worldedit.player_notify(name, count .. " nodes added")
+		if worldedit.can_edit_volume(name, {{x=pos.x-(axis~="x" and height-1*sign or 0), y=pos.y-(axis~="y" and height-1*sign or 0), z=pos.z-(axis~="y" and height-1*sign or 0)}, {x=pos.x+height-1*sign, y=pos.y+height-1*sign, z=pos.z+height-1*sign}}) then
+			local node = get_node(name, nodename)
+			local count = worldedit.pyramid(pos, axis, height, node)
+			worldedit.player_notify(name, count .. " nodes added")
+		end
 	end,
 	function(name, param)
 		if worldedit.pos1[name] == nil then
@@ -519,9 +537,12 @@ minetest.register_chatcommand("/spiral", {
 	func = worldedit.privs(safe_region(function(name, param)
 		local pos = worldedit.pos1[name]
 		local found, _, length, height, space, nodename = param:find("^(%d+)%s+(%d+)%s+(%d+)%s+(.+)$")
-		local node = get_node(name, nodename)
-		local count = worldedit.spiral(pos, tonumber(length), tonumber(height), tonumber(space), node)
-		worldedit.player_notify(name, count .. " nodes added")
+		local extent = math.ceil(length / 2)
+		if worldedit.can_edit_volume(name, {{x=0.5+pos.x-0.5-extent, y=pos.y, z=0.5+pos.z-0.5-extent}, {x=0.5+pos.x+0.5+extent, y=pos.y+height-1, z=0.5+pos.z+0.5+extent}}) then
+			local node = get_node(name, nodename)
+			local count = worldedit.spiral(pos, tonumber(length), tonumber(height), tonumber(space), node)
+			worldedit.player_notify(name, count .. " nodes added")
+		end
 	end,
 	function(name, param)
 		if worldedit.pos1[name] == nil then
@@ -555,9 +576,10 @@ minetest.register_chatcommand("/copy", {
 			axis, sign = worldedit.player_axis(name)
 			amount = amount * sign
 		end
-
-		local count = worldedit.copy(pos1, pos2, axis, amount)
-		worldedit.player_notify(name, count .. " nodes copied")
+		if worldedit.can_edit_volume(name, {{x=pos1.x+(axis=="x" and amount or 0), y=pos1.y+(axis=="y" and amount or 0), z=pos1.z+(axis=="z" and amount or 0)}, {x=pos2.x+(axis=="x" and amount or 0), y=pos2.y+(axis=="y" and amount or 0), z=pos2.z+(axis=="z" and amount or 0)}}) then
+			local count = worldedit.copy(pos1, pos2, axis, amount)
+			worldedit.player_notify(name, count .. " nodes copied")
+		end
 	end,
 	function(name, param)
 		local volume = check_region(name, param)
@@ -581,14 +603,15 @@ minetest.register_chatcommand("/move", {
 			axis, sign = worldedit.player_axis(name)
 			amount = amount * sign
 		end
+		if worldedit.can_edit_volume(name, {pos1, pos2, {x=pos1.x+(axis=="x" and amount or 0), y=pos1.y+(axis=="y" and amount or 0), z=pos1.z+(axis=="z" and amount or 0)}, {x=pos2.x+(axis=="x" and amount or 0), y=pos2.y+(axis=="y" and amount or 0), z=pos2.z+(axis=="z" and amount or 0)}}) then
+			local count = worldedit.move(pos1, pos2, axis, amount)
 
-		local count = worldedit.move(pos1, pos2, axis, amount)
-
-		pos1[axis] = pos1[axis] + amount
-		pos2[axis] = pos2[axis] + amount
-		worldedit.mark_pos1(name)
-		worldedit.mark_pos2(name)
-		worldedit.player_notify(name, count .. " nodes moved")
+			pos1[axis] = pos1[axis] + amount
+			pos2[axis] = pos2[axis] + amount
+			worldedit.mark_pos1(name)
+			worldedit.mark_pos2(name)
+			worldedit.player_notify(name, count .. " nodes moved")
+		end
 	end, check_region)),
 })
 
@@ -604,8 +627,10 @@ minetest.register_chatcommand("/stack", {
 			axis, sign = worldedit.player_axis(name)
 			repetitions = repetitions * sign
 		end
-		local count = worldedit.stack(pos1, pos2, axis, repetitions)
-		worldedit.player_notify(name, count .. " nodes stacked")
+		if worldedit.can_edit_volume(name, {{x=(axis=="x" and pos2.x+1*sign or pos1.x), y=(axis=="y" and pos2.y+1*sign or pos1.x), z=(axis=="z" and pos2.z+1*sign or pos1.z)}, {x=pos2.x+repetitions*(axis=="x" and pos2.x-pos1.x+1*sign or 0), y=pos2.y+repititions*(axis=="y" and pos2.y-pos1.y+1*sign or 0), z=pos2.z+repititions*(axis=="z" and pos2.z-pos1.z+1*sign or 0)}}) then
+			local count = worldedit.stack(pos1, pos2, axis, repetitions)
+			worldedit.player_notify(name, count .. " nodes stacked")
+		end
 	end,
 	function(name, param)
 		local found, _, axis, repetitions = param:find("^([xyz%?])%s+([+-]?%d+)$")
@@ -626,15 +651,17 @@ minetest.register_chatcommand("/stretch", {
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
 		local found, _, stretchx, stretchy, stretchz = param:find("^(%d+)%s+(%d+)%s+(%d+)$")
 		stretchx, stretchy, stretchz = tonumber(stretchx), tonumber(stretchy), tonumber(stretchz)
-		local count, pos1, pos2 = worldedit.stretch(pos1, pos2, stretchx, stretchy, stretchz)
+		if worldedit.can_edit_volume(name, {pos1, {x=pos1.x + (pos2.x - pos1.x) * stretchx, y=pos1.y + (pos2.y - pos1.y) * stretchy, z=pos1.z + (pos2.z - pos1.z) * stretchz}}) then
+			local count, pos1, pos2 = worldedit.stretch(pos1, pos2, stretchx, stretchy, stretchz)
 
-		--reset markers to scaled positions
-		worldedit.pos1[name] = pos1
-		worldedit.pos2[name] = pos2
-		worldedit.mark_pos1(name)
-		worldedit.mark_pos2(name)
+			--reset markers to scaled positions
+			worldedit.pos1[name] = pos1
+			worldedit.pos2[name] = pos2
+			worldedit.mark_pos1(name)
+			worldedit.mark_pos2(name)
 
-		worldedit.player_notify(name, count .. " nodes stretched")
+			worldedit.player_notify(name, count .. " nodes stretched")
+		end
 	end,
 	function(name, param)
 		local found, _, stretchx, stretchy, stretchz = param:find("^(%d+)%s+(%d+)%s+(%d+)$")
@@ -661,15 +688,29 @@ minetest.register_chatcommand("/transpose", {
 		local found, _, axis1, axis2 = param:find("^([xyz%?])%s+([xyz%?])$")
 		if axis1 == "?" then axis1 = worldedit.player_axis(name) end
 		if axis2 == "?" then axis2 = worldedit.player_axis(name) end
-		local count, pos1, pos2 = worldedit.transpose(pos1, pos2, axis1, axis2)
+		local notaxis = (axis1~="x" and axis2~="x") and "x" or (
+			(axis1~="y" and axis2~="y") and "y" or (
+				(axis1~="z" and axis2~="z") and "z" or (
+					assert(0)
+				)
+			)
+		)
+		local side = math.max( --does not include pos1 in the length
+			(axis2=="x" or "x"==axis1) and pos2.x-pos1.x or 0,
+			(axis2=="y" or "y"==axis1) and pos2.y-pos1.y or 0,
+			(axis2=="z" or "z"==axis1) and pos2.z-pos1.z or 0
+		)
+		if worldedit.can_edit_volume(name, {pos1, {x=notaxis=="x" and pos2.x or pos1.x+side, y=notaxis=="y" and pos2.y or pos1.y+side, z=notaxis=="z" and pos2.z or pos1.z+side}}) then
+			local count, pos1, pos2 = worldedit.transpose(pos1, pos2, axis1, axis2)
 
-		--reset markers to transposed positions
-		worldedit.pos1[name] = pos1
-		worldedit.pos2[name] = pos2
-		worldedit.mark_pos1(name)
-		worldedit.mark_pos2(name)
+			--reset markers to transposed positions
+			worldedit.pos1[name] = pos1
+			worldedit.pos2[name] = pos2
+			worldedit.mark_pos1(name)
+			worldedit.mark_pos2(name)
 
-		worldedit.player_notify(name, count .. " nodes transposed")
+			worldedit.player_notify(name, count .. " nodes transposed")
+		end
 	end,
 	function(name, param)
 		local found, _, axis1, axis2 = param:find("^([xyz%?])%s+([xyz%?])$")
@@ -692,8 +733,10 @@ minetest.register_chatcommand("/flip", {
 	func = worldedit.privs(safe_region(function(name, param)
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
 		if param == "?" then param = worldedit.player_axis(name) end
-		local count = worldedit.flip(pos1, pos2, param)
-		worldedit.player_notify(name, count .. " nodes flipped")
+		if worldedit.can_edit_volume(name, {pos1, pos2}) then
+			local count = worldedit.flip(pos1, pos2, param)
+			worldedit.player_notify(name, count .. " nodes flipped")
+		end
 	end,
 	function(name, param)
 		if param ~= "x" and param ~= "y" and param ~= "z" and param ~= "?" then
@@ -712,15 +755,22 @@ minetest.register_chatcommand("/rotate", {
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
 		local found, _, axis, angle = param:find("^([xyz%?])%s+([+-]?%d+)$")
 		if axis == "?" then axis = worldedit.player_axis(name) end
-		local count, pos1, pos2 = worldedit.rotate(pos1, pos2, axis, angle)
+		local side = math.max(
+			axis~="x" and pos2.x-pos1.x or 0,
+			axis~="y" and pos2.y-pos1.y or 0,
+			axis~="z" and pos2.z-pos1.z or 0
+		)
+		if worldedit.can_edit_volume(name, {pos1, {x=axis=="x" and pos2.x or pos1.x+side, y=axis=="y" and pos22.y or pos1.y+side, z=axis=="z" and pos2.z or pos1.z+side}}) then
+			local count, pos1, pos2 = worldedit.rotate(pos1, pos2, axis, angle)
 
-		--reset markers to rotated positions
-		worldedit.pos1[name] = pos1
-		worldedit.pos2[name] = pos2
-		worldedit.mark_pos1(name)
-		worldedit.mark_pos2(name)
+			--reset markers to rotated positions
+			worldedit.pos1[name] = pos1
+			worldedit.pos2[name] = pos2
+			worldedit.mark_pos1(name)
+			worldedit.mark_pos2(name)
 
-		worldedit.player_notify(name, count .. " nodes rotated")
+			worldedit.player_notify(name, count .. " nodes rotated")
+		end
 	end,
 	function(name, param)
 		local found, _, axis, angle = param:find("^([xyz%?])%s+([+-]?%d+)$")
@@ -743,8 +793,10 @@ minetest.register_chatcommand("/orient", {
 	func = worldedit.privs(safe_region(function(name, param)
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
 		local found, _, angle = param:find("^([+-]?%d+)$")
-		local count = worldedit.orient(pos1, pos2, angle)
-		worldedit.player_notify(name, count .. " nodes oriented")
+		if worldedit.can_edit_volume(name, {pos1, pos2}) then
+			local count = worldedit.orient(pos1, pos2, angle)
+			worldedit.player_notify(name, count .. " nodes oriented")
+		end
 	end,
 	function(name, param)
 		local found, _, angle = param:find("^([+-]?%d+)$")
@@ -766,8 +818,10 @@ minetest.register_chatcommand("/fixlight", {
 	privs = {},
 	func = worldedit.privs(safe_region(function(name, param)
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
-		local count = worldedit.fixlight(pos1, pos2)
-		worldedit.player_notify(name, count .. " nodes updated")
+		if worldedit.can_edit_volume(name, {pos1, pos2}) then
+			local count = worldedit.fixlight(pos1, pos2)
+			worldedit.player_notify(name, count .. " nodes updated")
+		end
 	end)),
 })
 
@@ -777,8 +831,10 @@ minetest.register_chatcommand("/hide", {
 	privs = {},
 	func = worldedit.privs(safe_region(function(name, param)
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
-		local count = worldedit.hide(pos1, pos2)
-		worldedit.player_notify(name, count .. " nodes hidden")
+		if worldedit.can_edit_volume(name, {pos1, pos2}) then
+			local count = worldedit.hide(pos1, pos2)
+			worldedit.player_notify(name, count .. " nodes hidden")
+		end
 	end)),
 })
 
@@ -788,9 +844,11 @@ minetest.register_chatcommand("/suppress", {
 	privs = {},
 	func = worldedit.privs(safe_region(function(name, param)
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
-		local node = get_node(name, param)
-		local count = worldedit.suppress(pos1, pos2, node)
-		worldedit.player_notify(name, count .. " nodes suppressed")
+		if worldedit.can_edit_volume(name, {pos1, pos2}) then
+			local node = get_node(name, param)
+			local count = worldedit.suppress(pos1, pos2, node)
+			worldedit.player_notify(name, count .. " nodes suppressed")
+		end
 	end, check_set)),
 })
 
@@ -800,9 +858,11 @@ minetest.register_chatcommand("/highlight", {
 	privs = {},
 	func = worldedit.privs(safe_region(function(name, param)
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
-		local node = get_node(name, param)
-		local count = worldedit.highlight(pos1, pos2, node)
-		worldedit.player_notify(name, count .. " nodes highlighted")
+		if worldedit.can_edit_volume(name, {pos1, pos2}) then
+			local node = get_node(name, param)
+			local count = worldedit.highlight(pos1, pos2, node)
+			worldedit.player_notify(name, count .. " nodes highlighted")
+		end
 	end, check_set)),
 })
 
@@ -812,24 +872,31 @@ minetest.register_chatcommand("/restore", {
 	privs = {},
 	func = worldedit.privs(safe_region(function(name, param)
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
-		local count = worldedit.restore(pos1, pos2)
-		worldedit.player_notify(name, count .. " nodes restored")
+		if worldedit.can_edit_volume(name, {pos1, pos2}) then
+			local count = worldedit.restore(pos1, pos2)
+			worldedit.player_notify(name, count .. " nodes restored")
+		end
 	end)),
 })
 
 minetest.register_chatcommand("/save", {
 	params = "<file>",
 	description = "Save the current WorldEdit region to \"(world folder)/schems/<file>.we\"",
-	privs = {server=true},
+	privs = {}, --worldedit, server
 	func = worldedit.privs(safe_region(function(name, param)
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
-		if param == "" then
-			worldedit.player_notify(name, "invalid usage: " .. param)
-			return
-		end
-		if not string.find(param, "^[%w \t.,+-_=!@#$%%^&*()%[%]{};'\"]+$") then
-			worldedit.player_notify(name, "invalid file name: " .. param)
-			return
+		if minetest.check_player_privs(name, {server=true}) then
+			if param == "" then
+				worldedit.player_notify(name, "invalid usage: " .. param)
+				return
+			end
+			if not string.find(param, "^[%w \t.,+-_=!@#$%%^&*()%[%]{};'\"]+$") then
+				worldedit.player_notify(name, "invalid file name: " .. param)
+				return
+			end
+		else
+			worldedit.player_notify(name, "saving as worldedit.we (missing privileges: server)")
+			param = "worldedit"
 		end
 
 		local result, count = worldedit.serialize(pos1, pos2)
@@ -934,9 +1001,12 @@ minetest.register_chatcommand("/load", {
 			return
 		end
 
-		local count = worldedit.deserialize(pos, value)
+		local nodepos1, nodepos2, _ = worldedit.allocate(pos, value)
+		if worldedit.can_edit_volume(name, {nodepos1, nodepos2}) then
+			local count = worldedit.deserialize(pos, value)
 
-		worldedit.player_notify(name, count .. " nodes loaded")
+			worldedit.player_notify(name, count .. " nodes loaded")
+		end
 	end),
 })
 
@@ -983,12 +1053,17 @@ minetest.register_chatcommand("/luatransform", {
 minetest.register_chatcommand("/mtschemcreate", {
 	params = "<file>",
 	description = "Save the current WorldEdit region using the Minetest Schematic format to \"(world folder)/schems/<filename>.mts\"",
-	privs = {server=true},
+	privs = {},
 	func = worldedit.privs(safe_region(function(name, param)
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
-		if param == nil then
-			worldedit.player_notify(name, "No filename specified")
-			return
+		if minetest.check_player_privs(name, {server=true}) then
+			if param == nil then
+				worldedit.player_notify(name, "No filename specified")
+				return
+			end
+		else
+			worldedit.player_notify(name, "saving as worldedit.mts (missing privileges: server)")
+			param = "worldedit"
 		end
 
 		local path = minetest.get_worldpath() .. "/schems"
@@ -1020,12 +1095,14 @@ minetest.register_chatcommand("/mtschemplace", {
 		if pos == nil then return end
 
 		local path = minetest.get_worldpath() .. "/schems/" .. param .. ".mts"
-		if minetest.place_schematic(pos, path) == nil then
-			worldedit.player_notify(name, "failed to place Minetest schematic", false)
-		else
-			worldedit.player_notify(name, "placed Minetest schematic " .. param ..
-				" at " .. minetest.pos_to_string(pos), false)
-		end
+		--if worldedit.can_edit_volume(name, {pos1, ?}) then
+			if minetest.place_schematic(pos, path) == nil then
+				worldedit.player_notify(name, "failed to place Minetest schematic", false)
+			else
+				worldedit.player_notify(name, "placed Minetest schematic " .. param ..
+					" at " .. minetest.pos_to_string(pos), false)
+			end
+		--end
 	end),
 })
 
@@ -1076,7 +1153,9 @@ minetest.register_chatcommand("/clearobjects", {
 	privs = {},
 	func = worldedit.privs(safe_region(function(name, param)
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
-		local count = worldedit.clearobjects(pos1, pos2)
-		worldedit.player_notify(name, count .. " objects cleared")
+		if worldedit.can_edit_volume(name, {pos1, pos2}) then
+			local count = worldedit.clearobjects(pos1, pos2)
+			worldedit.player_notify(name, count .. " objects cleared")
+		end
 	end)),
 })
