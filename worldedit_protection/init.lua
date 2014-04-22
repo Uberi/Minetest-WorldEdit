@@ -81,6 +81,12 @@ end
 --//move has disconnected sections, so it's passed as a list of points.
 --which are deduplicated.
 worldedit.can_edit_volume = function(name, volume) --does not return a function like .privs does
+	--debug info, remove after testing
+	minetest.chat_send_player(name, minetest.pos_to_string(volume[1])..minetest.pos_to_string(volume[2]))
+	if volume[3] ~= nil then
+		minetest.chat_send_player(name, minetest.pos_to_string(volume[3])..minetest.pos_to_string(volume[4]))
+	end
+
 	--volume is before func, unlike safe_region having func before count
 	--because func may be removed to have can_edit_volume in an if statement
 	--like worldedit.privs can be

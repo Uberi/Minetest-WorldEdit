@@ -463,6 +463,7 @@ minetest.register_chatcommand("/hollowcylinder", {
 		local pos = worldedit.pos1[name]
 		local found, _, axis, length, radius, nodename = param:find("^([xyz%?])%s+([+-]?%d+)%s+(%d+)%s+(.+)$")
 		length = tonumber(length)
+		sign = 1
 		if axis == "?" then
 			axis, sign = worldedit.player_axis(name)
 			length = length * sign
@@ -483,6 +484,7 @@ minetest.register_chatcommand("/cylinder", {
 		local pos = worldedit.pos1[name]
 		local found, _, axis, length, radius, nodename = param:find("^([xyz%?])%s+([+-]?%d+)%s+(%d+)%s+(.+)$")
 		length = tonumber(length)
+		sign = 1
 		if axis == "?" then
 			axis, sign = worldedit.player_axis(name)
 			length = length * sign
@@ -503,6 +505,7 @@ minetest.register_chatcommand("/pyramid", {
 		local pos = get_position(name)
 		local found, _, axis, height, nodename = param:find("^([xyz%?])%s+([+-]?%d+)%s+(.+)$")
 		height = tonumber(height)
+		sign = 1
 		if axis == "?" then
 			axis, sign = worldedit.player_axis(name)
 			height = height * sign
@@ -572,6 +575,7 @@ minetest.register_chatcommand("/copy", {
 			return
 		end
 		amount = tonumber(amount)
+		sign = 1
 		if axis == "?" then
 			axis, sign = worldedit.player_axis(name)
 			amount = amount * sign
@@ -599,6 +603,7 @@ minetest.register_chatcommand("/move", {
 			return
 		end
 		amount = tonumber(amount)
+		sign = 1
 		if axis == "?" then
 			axis, sign = worldedit.player_axis(name)
 			amount = amount * sign
@@ -623,11 +628,12 @@ minetest.register_chatcommand("/stack", {
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
 		local found, _, axis, repetitions = param:find("^([xyz%?])%s+([+-]?%d+)$")
 		repetitions = tonumber(repetitions)
+		sign = 1
 		if axis == "?" then
 			axis, sign = worldedit.player_axis(name)
 			repetitions = repetitions * sign
 		end
-		if worldedit.can_edit_volume(name, {{x=(axis=="x" and pos2.x+1*sign or pos1.x), y=(axis=="y" and pos2.y+1*sign or pos1.x), z=(axis=="z" and pos2.z+1*sign or pos1.z)}, {x=pos2.x+repetitions*(axis=="x" and pos2.x-pos1.x+1*sign or 0), y=pos2.y+repititions*(axis=="y" and pos2.y-pos1.y+1*sign or 0), z=pos2.z+repititions*(axis=="z" and pos2.z-pos1.z+1*sign or 0)}}) then
+		if worldedit.can_edit_volume(name, {{x=(axis=="x" and pos2.x+1*sign or pos1.x), y=(axis=="y" and pos2.y+1*sign or pos1.x), z=(axis=="z" and pos2.z+1*sign or pos1.z)}, {x=pos2.x+repetitions*(axis=="x" and pos2.x-pos1.x+1*sign or 0), y=pos2.y+repetitions*(axis=="y" and pos2.y-pos1.y+1*sign or 0), z=pos2.z+repetitions*(axis=="z" and pos2.z-pos1.z+1*sign or 0)}}) then
 			local count = worldedit.stack(pos1, pos2, axis, repetitions)
 			worldedit.player_notify(name, count .. " nodes stacked")
 		end
