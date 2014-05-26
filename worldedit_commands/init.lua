@@ -900,6 +900,7 @@ minetest.register_chatcommand("/load", {
 	func = function(name, param)
 		local pos = get_position(name)
 		if pos == nil then return end
+		local missingMods = ""
 
 		if param == "" then
 			worldedit.player_notify(name, "invalid usage: " .. param)
@@ -935,9 +936,12 @@ minetest.register_chatcommand("/load", {
 			return
 		end
 
-		local count = worldedit.deserialize(pos, value)
+		local count, missingMods = worldedit.deserialize(pos, value)
 
 		worldedit.player_notify(name, count .. " nodes loaded")
+		if missingMods ~= "" then
+			worldedit.player_notify(name, "Warning: schem file contains references to the following missing mods: ".. missingMods)
+		end
 	end,
 })
 
@@ -1016,6 +1020,7 @@ minetest.register_chatcommand("/loadalign", {
 		local player = minetest.get_player_by_name(name)
 		local plPos = player:getpos()
 		local pos
+		local missingMods = ""
 
 
 		-- There's probably a snazzy way of using patterns to enable multiple optional parameters including a filename, but I don't know how...
@@ -1094,7 +1099,7 @@ minetest.register_chatcommand("/loadalign", {
 			if usePlayer == "p" then player:setpos({x=plPos.x, y=plPos.y, z=(plPos.z+1-posOffz)}) end
 		end
 
-		local count, pos1, pos2 = worldedit.deserializeAligned(pos, value, axis)
+		local count, pos1, pos2, missingMods = worldedit.deserializeAligned(pos, value, axis)
 
 		-- placer pos1 and pos2 markers around the loaded region
 		if markImport == "m" then
@@ -1105,6 +1110,9 @@ minetest.register_chatcommand("/loadalign", {
 		end
 
 		worldedit.player_notify(name, (count .. " nodes loaded. PlayerFacing: ".. axis.. " Location: x=".. pos.x.. " y=".. pos.y.. " z=".. pos.z.. " Offset: x=".. posOffx.. " y=".. posOffy.. " z=".. posOffz )) --.. x ", y=".. y, "z=".. z)
+		if missingMods ~= "" then
+			worldedit.player_notify(name, "Warning: schem file contains references to the following missing mods: ".. missingMods)
+		end
 	end,
 })
 
