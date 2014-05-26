@@ -200,7 +200,7 @@ end
 --contains code based on [table.save/table.load](http://lua-users.org/wiki/SaveTableToFile) by ChillCode, available under the MIT license (GPL compatible)
 worldedit.deserialize = function(originpos, value)
 	--make area stay loaded
-	local pos1, pos2 = worldedit.allocate(originpos, value)
+	local pos1, pos2, count, missingMods = worldedit.allocate(originpos, value)
 	local manip = minetest.get_voxel_manip()
 	manip:read_from_map(pos1, pos2)
 
@@ -285,7 +285,7 @@ worldedit.deserialize = function(originpos, value)
 			get_meta(entry):from_table(entry.meta)
 		end
 	end
-	return count
+	return count, missingMods
 end
 
 
@@ -348,7 +348,7 @@ end
 --contains code based on [table.save/table.load](http://lua-users.org/wiki/SaveTableToFile) by ChillCode, available under the MIT license (GPL compatible)
 worldedit.deserializeAligned = function(originpos, value, axis)
 	--make area stay loaded
-	local pos1, pos2 = worldedit.allocate(originpos, value)
+	local pos1, pos2, count, missingMods = worldedit.allocate(originpos, value)
 	local manip = minetest.get_voxel_manip()
 	manip:read_from_map(pos1, pos2)
 
@@ -539,5 +539,5 @@ worldedit.deserializeAligned = function(originpos, value, axis)
 		pos1x, pos2x = pos2x, pos1x
 		pos1z, pos2z = pos2z, pos1z
 	end
-	return count, {x=pos1x, y=pos1y, z=pos1z}, {x=pos2x, y=pos2y, z=pos2z}
+	return count, {x=pos1x, y=pos1y, z=pos1z}, {x=pos2x, y=pos2y, z=pos2z}, missingMods
 end
