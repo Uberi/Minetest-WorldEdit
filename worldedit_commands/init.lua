@@ -1028,7 +1028,7 @@ minetest.register_chatcommand("/loadalign", {
 
 
 		-- if set use the global posOffset (as this enables offset to be set once and reused)
-		if posOffset == nil then
+		if laPosOffset == nil then
 			posOffx, posOffy, posOffz = 0, 0, 0
 		else
 			posOffx, posOffy, posOffz = laPosOffset.x, laPosOffset.y, laPosOffset.z
