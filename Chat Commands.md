@@ -311,6 +311,7 @@ Save the current WorldEdit region to "(world folder)/schems/`<file>`.we".
 ### `//allocate <file>`
 
 Set the region defined by nodes from "(world folder)/schems/`<file>`.we" as the current WorldEdit region.
+Also display any mods which are not currently enabled in the world, but are referenced in the schem file.
 
     //allocate some random filename
     //allocate huge_base
@@ -318,6 +319,7 @@ Set the region defined by nodes from "(world folder)/schems/`<file>`.we" as the 
 ### `//load <file>`
 
 Load nodes from "(world folder)/schems/`<file>`.we" with position 1 of the current WorldEdit region as the origin.
+NB is it suggested you do a dummy-run with //allocate to list referenced mods not currently enabled (which will cause errors)
 
     //load some random filename
     //load huge_base
@@ -343,6 +345,8 @@ Set a global variable to enable an offset to the player location for /loadalign
 ### `//loadalign <file>`
 
 Load nodes from "(world folder)/schems/`<file>`.we" with player location as the origin. The loaded schem will be in a region to the front, right and above the players location.
+NB is it suggested you do a dummy-run with //allocate to list referenced mods not currently enabled (which will cause errors)
+
 If the location is not easily accessible (eg if you want a file y-origin to be below ground level, or x- or z- inside a cliff), you can set an offset with /loadalignoffset
 The player is moved backwards one space to moved them out of the load zone (or more if there is and offset). This may mean the player ends up inside a node (if it suddenly gets dark). You may be able to step out. If not you'll have to teleport to an unblocked location.
 The /save command saves the file with the origin at the xmin,ymin,zmin, irrespective of where pos1 and pos2 are. To reduce confusion it is suggested that you use the /correctorigin command before saving
