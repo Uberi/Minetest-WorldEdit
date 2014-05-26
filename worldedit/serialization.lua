@@ -89,11 +89,12 @@ worldedit.allocate = function(originpos, value)
 	local originx, originy, originz = originpos.x, originpos.y, originpos.z
 	local count = 0
 	local version = worldedit.valueversion(value)
+	local missingMods = ""
 	if version == 1 or version == 2 then --flat table format
 		--obtain the node table
 		local get_tables = loadstring(value)
 		if get_tables then --error loading value
-			return originpos, originpos, count
+			return originpos, originpos, count, missingMods
 		end
 		local tables = get_tables()
 
@@ -166,7 +167,6 @@ worldedit.allocate = function(originpos, value)
 		-- The following loop sets up pos1 and pos2 to encompass the boundary of the region,  
 		--   and checks all nodes reference mods present in the current world. If they are not present, they are returned for processing if required.
 		count = #nodes
-		local missingMods = ""
 		for index = 1, count do
 			local entry = nodes[index]
 			x, y, z = originx + entry.x, originy + entry.y, originz + entry.z
