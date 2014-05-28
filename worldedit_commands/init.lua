@@ -937,6 +937,271 @@ minetest.register_chatcommand("/load", {
 	end,
 })
 
+-- Chat command to move pos1 and pos2 to correct origin (ie pos1 located with minimum x,y,z, pos2 with maximum x,y,z)
+--  this is ideally used before /save to decrease confusion with placement for /load and /loadalign
+-- This command has a helper function of worldedit.correctOrigin (located below) 
+-- Shortcut of /co and /oc (to ease confusion) is set in worldedit_shortcommands/init.lua
+minetest.register_chatcommand("/correctorigin", {
+	params = "",
+	description = "Moves pos1 and pos2 so region is marked with pos1 at the origin (ie minimum x,y,z)",
+	privs = {worldedit=true},
+	func = function(name)
+		worldedit.correctOrigin(name)
+	end,
+})
+
+--Corrects pos1 and pos2 so pos1 is located at the region origin - (ie pos1 located with minimum x,y,z, pos2 with maximum z,y,z)
+-- not sure where best located, so left with the chat command which uses it.
+worldedit.correctOrigin = function(name)
+	local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
+
+	if pos1 == nil or pos2 == nil then
+		worldedit.player_notify(name, "no region selected")
+		return nil
+	end
+
+	pos1, pos2 = worldedit.sort_pos(pos1, pos2)
+
+	worldedit.pos1[name] = pos1
+	worldedit.mark_pos1(name)
+	worldedit.pos2[name] = pos2
+	worldedit.mark_pos2(name)
+end
+
+-- Chat command to enable a global variable which enables an offset to the player (or pos1) location for /loadalign
+-- This can be useful it a particular location is not easily accessible (eg if you want a file y-origin to be below ground level, or x- or z- inside a cliff)
+-- the offset is cleared by using the command without params (=arguments)
+-- Shortcut of /lao is set in worldedit_shortcommands/init.lua
+minetest.register_chatcommand("/loadalignoffset", {
+	params = "x y z",
+	description = "Set an offset for the worldedit command /loadaligned (x y z)",
+	privs = {worldedit=true},
+	func = function(name, param)
+		local found, _, x, y, z = param:find("^([+-]?%d+)%s+([+-]?%d+)%s+([+-]?%d+)$")
+		if x == nil or y == nil or z == nil then
+			worldedit.player_notify(name, "LoadAlign Offset set to 0 for all axes (to set provide: 'x y z')")
+			laPosOffset = {x=tonumber(0), y=tonumber(0), z=tonumber(0)}
+		else
+			laPosOffset = {x=tonumber(x), y=tonumber(y), z=tonumber(z)}
+		end
+	end,
+})
+
+
+-- Uncomment the following for a simple way of replacing /load (except for the more detailed message)
+--minetest.register_chatcommand("/load", {
+--	params = "<file>",
+--	description = "Load nodes from \"(world folder)/schems/<file>[.we[m]]\" with position 1 of the current WorldEdit region as the origin",
+--	privs = {worldedit=true},
+--	func = function(name, param)  minetest.loadAlign(name, param, false, false, false, false)  end,
+--})
+
+-- Uncomment the following for a simple way of replacing /allocate (except for the more detailed message)
+--minetest.register_chatcommand("/allocate", {
+--	params = "<file>",
+--	description = "Set the region defined by nodes from \"(world folder)/schems/<file>.we\" as the current WorldEdit region",
+--	privs = {worldedit=true},
+--	func = function(name, param)  minetest.loadAlign(name, param, false, false, true, false) end,
+--})
+
+
+-- /loadalign
+-- Chat command to allow loading of a schem file which is aligned to player location and forward direction. The loaded schem will be in a region to the front, right and above the players location.
+-- If the location is not easily accessible (eg if you want a file y-origin to be below ground level, or x- or z- inside a cliff), you can set an offset with /loadalignoffset
+-- The player is moved backwards one space to moved them out of the load zone (or more if there is and offset). This may mean the player ends up inside a node (if it suddenly gets dark). You may be able to step out. If not you'll have to teleport to an unblocked location.
+-- The /save command saves the file with the origin at the xmin,ymin,zmin, irrespective of where pos1 and pos2 are. To reduce confusion it is suggested that you use the /correctorigin command before saving
+--   to move the markers to reflect this, but if you are copying a section one node wide, there are two possible orientations. 
+--   You need to be facing in the positive z direction to correctly orient yourself to the orientation when it is reloaded. 
+--   If you are using a schem regularly, and markers are not in your prefered orientation, it is best to do an initial /loadalign to get the correct orientation, then resave it
+-- The loaded region is marked with pos1/pos2 with pos1 where the origin would have been when the schem was saved.
+-- The function has only been tested with the current (version 4) schem files, so consider use with older schem files to be at your own risk. 
+--   The most likely bugs with untested versions are: either the entire region is incorrectly rotated or individual nodes are incorrectly oriented (so faces point in the incorrect direction)
+-- The functions is a modifications of the original register //load to support alignment relative to player, so code from the screwdriver mod was used as a starter for node orientation.
+--   The main functions are in the WorldEdit/worldedit/serialization.lua (worldedit.deserializeAligned which also uses worldedit.getNewRotation, and might need worldedit.screwdriver_handler 
+--   depending on compatibility with old files)
+-- Shortcut of /la is set in worldedit_shortcommands/init.lua
+minetest.register_chatcommand("/loadalign", {
+	params = "<file>",
+	--  usePlLoc (p) forces using player location rather than position markers prior to load. markImport (m) places pos1/pos2 around the new region"
+	description = "Load nodes from \"(world folder)/schems/<file>[.we[m]]\" with player location as the origin. xyz offset from the player position (eg for foundations), can be set with /loadalignoffset.",
+	privs = {worldedit=true},
+	func = function(name, param)
+		-- There's probably a snazzy way of using patterns to enable multiple optional parameters including a filename, but I don't know how...
+		-- ideally I would like to be able to supply as params: filename, posOrigin, usePlLoc, markImport
+		local fileName = param
+		local usePlLoc = true	-- determine if player should be used as the origin
+		local usePlDir = true	-- determine if player direction should be used to orient load
+		local runTest = false	-- test run
+		local markImport = true	-- mark the dimensions of the loaded section
+		minetest.loadAlign(name, fileName, usePlLoc, usePlDir, runTest, markImport)
+	end,
+})
+
+-- same as /loadalign but in test mode (ie doesn't actually place nodes)
+-- Shortcut of /lat is set in worldedit_shortcommands/init.lua
+minetest.register_chatcommand("/loadaligntest", {
+	params = "<file>",
+	--  usePlLoc (p) forces using player location rather than position markers prior to load. markImport (m) places pos1/pos2 around the new region"
+	description = "Test run of /loadalign (ie marks load zone and reports statistics, but doesn't place nodes)",
+	privs = {worldedit=true},
+	func = function(name, param)
+		local fileName = param
+		local usePlLoc = true	-- determine if player should be used as the origin
+		local usePlDir = true	-- determine if player direction should be used to orient load
+		local runTest = true	-- Test run
+		local markImport = true	-- mark the dimensions of the loaded section
+		minetest.loadAlign(name, fileName, usePlLoc, usePlDir, runTest, markImport)
+	end,
+})
+
+
+-- same as /loadalign but uses pos1 rather than player location (ie still uses player orientation)
+-- Shortcut of /lap is set in worldedit_shortcommands/init.lua
+minetest.register_chatcommand("/loadalignpos", {
+	params = "<file>",
+	--  usePlLoc (p) forces using player location rather than position markers prior to load. markImport (m) places pos1/pos2 around the new region"
+	description = "Load nodes from \"(world folder)/schems/<file>[.we[m]]\" with pos1 of the current WorldEdit region as the origin. xyz offset from the pos1 position (eg for foundations), can be set with /loadalignoffset.",
+	privs = {worldedit=true},
+	func = function(name, param)
+		-- There's probably a snazzy way of using patterns to enable multiple optional parameters including a filename, but I don't know how...
+		-- ideally I would like to be able to supply as params: filename, posOrigin, usePlLoc, markImport
+		local fileName = param
+		local usePlLoc = false	-- determine if player should be used as the origin
+		local usePlDir = true	-- determine if player direction should be used to orient load
+		local runTest = false	-- test run
+		local markImport = true	-- mark the dimensions of the loaded section
+		minetest.loadAlign(name, fileName, usePlLoc, usePlDir, runTest, markImport)
+	end,
+})
+
+-- same as /loadalignpos but in test mode (ie doesn't actually place nodes)
+-- Shortcut of /lapt is set in worldedit_shortcommands/init.lua
+minetest.register_chatcommand("/loadalignpostest", {
+	params = "<file>",
+	--  usePlLoc (p) forces using player location rather than position markers prior to load. markImport (m) places pos1/pos2 around the new region"
+	description = "Test run of /loadalignpos (ie marks load zone and reports statistics, but doesn't place nodes)",
+	privs = {worldedit=true},
+	func = function(name, param)
+		-- There's probably a snazzy way of using patterns to enable multiple optional parameters including a filename, but I don't know how...
+		-- ideally I would like to be able to supply as params: filename, posOrigin, usePlLoc, markImport
+		local fileName = param
+		local usePlLoc = false	-- determine if player should be used as the origin
+		local usePlDir = true	-- determine if player direction should be used to orient load
+		local runTest = true	-- test run
+		local markImport = true	-- mark the dimensions of the loaded section
+		minetest.loadAlign(name, fileName, usePlLoc, usePlDir, runTest, markImport)
+	end,
+})
+
+
+minetest.loadAlign = function(plName, fileName, usePlLoc, usePlDir, runTest, markImport)
+	local posOffx, posOffy, posOffz
+	local player = minetest.get_player_by_name(plName)
+	local plPos = player:getpos()
+	local posOrigin
+	local axis
+
+	-- assign defaults to optional variables if not provided
+	if usePlLoc == nil then usePlLoc = true end	-- determine if player should be used as the origin
+	if usePlDir == nil then usePlDir = true end	-- determine if player should be used for orientation
+	if runTest == nil then runTest = false end	-- test run
+	if markImport == nil then markImport = -1 end	-- mark the dimensions of the loaded section (anything but 'm' will not mark
+
+
+	-- if set use the global posOffset (as this enables offset to be set once and reused)
+	if laPosOffset == nil then
+		posOffx, posOffy, posOffz = 0, 0, 0
+	else
+		posOffx, posOffy, posOffz = laPosOffset.x, laPosOffset.y, laPosOffset.z
+	end
+
+	if usePlLoc then 
+		posOrigin = plPos
+		posOrigin = {x=(posOrigin.x+0.51),y=(posOrigin.y+0.51),z=(posOrigin.z+0.51)}
+	else
+		posOrigin = get_position(plName) 
+		if posOrigin == nil then
+			worldedit.player_notify(plName, "FATAL ERROR: pos1 not set for origin of file load")
+			return
+		end
+	end
+	if runTest then usePlLoc = 0 end
+	posOrigin = {x=math.floor(posOrigin.x+posOffx),y=math.floor(posOrigin.y+posOffy),z=math.floor(posOrigin.z+posOffz)}
+
+
+	if fileName == "" or fileName == nil then
+		worldedit.player_notify(plName, "invalid usage: <fileName>")
+		return
+	end
+	if not string.find(fileName, "^[%w \t.,+-_=!@#$%%^&*()%[%]{};'\"]+$") then
+		worldedit.player_notify(plName, "invalid file name: " .. fileName)
+		return
+	end
+
+	--find the file in the world path, check it exists
+	local testpaths = {
+		minetest.get_worldpath() .. "/schems/" .. fileName,
+		minetest.get_worldpath() .. "/schems/" .. fileName .. ".we",
+		minetest.get_worldpath() .. "/schems/" .. fileName .. ".wem",
+	}
+	local file, err
+	for index, path in ipairs(testpaths) do
+		file, err = io.open(path, "rb")
+		if not err then
+			break
+		end
+	end
+	if err then
+		worldedit.player_notify(plName, "could not open file \"" .. fileName .. "\"")
+		return
+	end
+	local value = file:read("*a")
+	file:close()
+
+	-- check the schem version is recognised
+	if worldedit.valueversion(value) == 0 then --unknown version
+		worldedit.player_notify(plName, "invalid file: file is invalid or created with newer version of WorldEdit")
+		return
+	end
+
+	if not usePlDir then
+		axis = "Z"
+	else
+		-- identify the direction the player is facing, and move them player out of the load region
+		local dir = player:get_look_dir()
+		local axx, axy, axz = math.abs(dir.x), math.abs(dir.y), math.abs(dir.z)
+		if axx > axz and dir.x >= 0 then 
+			axis = "X"
+			if usePlLoc then player:setpos({x=(plPos.x-1+posOffx), y=plPos.y, z=plPos.z}) end
+		elseif axx > axz and dir.x < 0 then 
+			axis = "x"
+			if usePlLoc then player:setpos({x=(plPos.x+1-posOffx), y=plPos.y, z=plPos.z}) end
+		elseif axx < axz and dir.z >= 0 then 
+			axis = "Z"
+			if usePlLoc then player:setpos({x=plPos.x, y=plPos.y, z=(plPos.z-1+posOffz)}) end
+		elseif axx < axz and dir.z < 0 then
+			axis = "z"
+			if usePlLoc then player:setpos({x=plPos.x, y=plPos.y, z=(plPos.z+1-posOffz)}) end
+		end
+	end
+
+	local count, pos1, pos2, unknownModCnt, missingMods = worldedit.deserializeAlign(posOrigin, value, axis, runTest)
+
+	-- placer pos1 and pos2 markers around the loaded region
+	if markImport then
+		worldedit.pos1[plName] = pos1
+		worldedit.mark_pos1(plName)
+		worldedit.pos2[plName] = pos2
+		worldedit.mark_pos2(plName)
+	end
+
+	if runTest then worldedit.player_notify(plName, "TEST RUN: Load zone marked. Live run will result in:-") end
+	worldedit.player_notify(plName, (count .. " nodes loaded. Oriented to: ".. axis.. " Location: x=".. posOrigin.x.. " y=".. posOrigin.y.. " z=".. posOrigin.z.. " Offset: x=".. posOffx.. " y=".. posOffy.. " z=".. posOffz )) --.. x ", y=".. y, "z=".. z)
+	if missingMods ~= "" then
+		worldedit.player_notify(plName, "Warning: ".. unknownModCnt.. " of ".. count.. " nodes not loaded due to missing mods: ".. missingMods)
+	end
+end
+
 minetest.register_chatcommand("/lua", {
 	params = "<code>",
 	description = "Executes <code> as a Lua chunk in the global namespace",
