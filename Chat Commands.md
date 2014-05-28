@@ -22,6 +22,14 @@ Many commands also have shorter names that can be typed faster. For example, if 
 | `//hdo`    | `//hollowdome`     |
 | `//do`     | `//dome`           |
 | `//hcyl`   | `//hollowcylinder` |
+| `//co`     | `//correctorigin`  |
+| `//lao`    | `//loadalignoffset`|
+| `//la`     | `//loadalign`      |
+| `//lat`    | `//loadaligntest`  |
+| `//lap`    | `//loadalignpos`   |
+| `//lapt`   | `//loadalignpostest`|
+
+
 
 ### `//about`
 
@@ -317,6 +325,56 @@ Load nodes from "(world folder)/schems/`<file>`.we" with position 1 of the curre
 
     //load some random filename
     //load huge_base
+
+### `//correctorigin`
+
+Moves pos1 and pos2 so pos1 is at the origin of the region (ie pos1 located with minimum x,y,z, pos2 with maximum x,y,z)
+This is ideally used before /save to decrease confusion with placement for /load and /loadalign
+Shortcut of /co and /oc (to ease confusion) is set in worldedit_shortcommands/init.lua
+
+    //correctorigin
+
+### `//loadalignoffset [x y z]`
+
+Set a global variable to enable an offset to the player location for /loadalign and if family of functions
+-- This can be useful it a particular location is not easily accessible (eg if you want a file y-origin to be below ground level, or x- or z- inside a cliff)
+-- the offset is cleared by using the command without params (=arguments)
+-- Shortcut of /lao is set in worldedit_shortcommands/init.lua
+
+    //load
+    //load x y z
+
+### `//loadalign <file>`
+
+Load nodes from "(world folder)/schems/`<file>`.we[m]" with player location as the origin. The loaded schem will be in a region to the front, right and above the players location.
+NB is it suggested you do a test-run with /loadaligntest to mark the load zone and list unknown mods
+
+If the location is not easily accessible (eg if you want a file y-origin to be below ground level, or x- or z- inside a cliff), you can set an offset with /loadalignoffset
+The player is moved backwards one space (or more if there is an offset) to move them out of the load zone. This may mean the player ends up inside a node (if it suddenly gets dark). You may be able to step out. If not you'll have to teleport to an unblocked location.
+The /save command saves the file with the origin at the xmin,ymin,zmin, irrespective of where pos1 and pos2 are. To reduce confusion it is suggested that you use the /correctorigin command before saving, which will correct the markers to reflect this (NB if you are copying a section one node wide, there are two possible orientations). 
+  If you are using a schem regularly, and markers are not in your prefered orientation, it is best to do an initial /loadalign (facing Z+ direction) to get the correct orientation, then resave it
+The loaded region is marked with pos1/pos2 with pos1 where the origin would have been when the schem was saved.
+The function has only been tested with the current (version 4) schem files, so consider use with older schem files to be at your own risk. 
+  The most likely bugs with untested versions are: either the entire region is incorrectly rotated or individual nodes are incorrectly oriented (so faces point in the incorrect direction)
+The function is a modifications of the original /load, adding support alignment relative to player, so code from the screwdriver mod was used as a starter for node orientation.
+  The main functions are in the WorldEdit/worldedit/serialization.lua (worldedit.deserializeAlign which also uses worldedit.getNewRotation, and might need worldedit.screwdriver_handler depending on compatibility with old files)
+Shortcut of /la is set in worldedit_shortcommands/init.lua
+
+    //loadalign some random filename
+    //loadalign huge_base
+
+### `/loadaligntest <file>`
+
+Test run of /loadalign (ie marks load zone and reports statistics, but doesn't place nodes)
+
+### `/loadalignpos <file>`
+
+same as /loadalign but uses pos1 rather than player location (ie still uses player orientation)
+
+### `/loadalignpostest <file>`
+
+Test run of /loadalignpos (ie marks load zone and reports statistics, but doesn't place nodes)
+
 
 ### `//lua <code>`
 
