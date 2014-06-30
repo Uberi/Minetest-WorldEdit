@@ -24,7 +24,11 @@ worldedit.volume = function(pos1, pos2)
 end
 
 --sets a region defined by positions `pos1` and `pos2` to `nodename`, returning the number of nodes filled
-worldedit.set = function(pos1, pos2, nodename)
+worldedit.set = function(pos1, pos2, nodenames)
+    if type(nodenames) == 'string' then
+        nodenames = {nodenames}
+    end
+
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 
 	--set up voxel manipulator
@@ -40,9 +44,12 @@ worldedit.set = function(pos1, pos2, nodename)
 	end
 
 	--fill selected area with node
-	local node_id = minetest.get_content_id(nodename)
+	local node_ids = {}
+    for i,v in ipairs(nodenames) do
+        node_ids[i] = minetest.get_content_id(nodenames[i])
+    end
 	for i in area:iterp(pos1, pos2) do
-		nodes[i] = node_id
+		nodes[i] = node_ids[math.random(#node_ids)]
 	end
 
 	--update map nodes

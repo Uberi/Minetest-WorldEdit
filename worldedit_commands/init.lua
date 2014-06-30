@@ -278,22 +278,26 @@ minetest.register_chatcommand("/volume", {
 	end,
 })
 
-local check_set = function(name, param)
-	local node = get_node(name, param)
-	if not node then return nil end
-	return check_region(name, param)
-end
-
 minetest.register_chatcommand("/set", {
 	params = "<node>",
 	description = "Set the current WorldEdit region to <node>",
 	privs = {worldedit=true},
 	func = safe_region(function(name, param)
+        local nodes = {}
+
+        for nodename in param:gmatch("[^%s]+") do
+            local node = get_node(name, nodename)
+            if not node then
+                worldedit.player_notify(name, 'Could not identify node "'..name..'"')
+                return
+            end
+            nodes[#nodes+1] = node
+        end
+
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
-		local node = get_node(name, param)
-		local count = worldedit.set(pos1, pos2, node)
+		local count = worldedit.set(pos1, pos2, nodes)
 		worldedit.player_notify(name, count .. " nodes set")
-	end, check_set),
+	end, check_region),
 })
 
 local check_replace = function(name, param)
