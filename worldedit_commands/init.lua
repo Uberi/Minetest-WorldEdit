@@ -619,6 +619,52 @@ minetest.register_chatcommand("/stack", {
 	end),
 })
 
+minetest.register_chatcommand("/stack2", {
+	params = "<count> <x>/<y>/<z>",
+	description = "Stack the current WorldEdit region <count> times translating each time by x, y and z in the respective directions.",
+	privs = {worldedit=true},
+	func = function(name, param)
+		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
+        if pos1 == nil or pos2 == nil then
+            worldedit.player_notify(name, "Select a position first!")
+            return
+        end
+        local repetitions, incs = param:match("([0-9]+)%s*(.+)")
+        repetitions = repetitions and tonumber(repetitions)
+        if repetitions == nil then
+			worldedit.player_notify(name, "invalid count: " .. param)
+            return 
+        end
+
+        local x,y,z = incs:match("(.+)/(.+)/(.+)")
+        if x == nil then
+            worldedit.player_notify(name, "invalid increments: " .. param)
+            return
+        end
+        x = tonumber(x)
+        y = tonumber(y)
+        z = tonumber(z)
+        if x == nil or y == nil or z == nil then
+            worldedit.player_notify(name, "increments must be numbers: " .. param)
+            return
+        end
+
+        local count = worldedit.volume(pos1,pos2) * repetitions
+
+        return safe_region(function()
+   		  worldedit.stack2(pos1, pos2, {x=x,y=y,z=z}, repetitions,
+          function()
+		    worldedit.player_notify(name, count .. " nodes stacked")
+        end)
+
+        end,
+        function() 
+            return count
+    	end)(name,param) -- more hax
+	end
+})
+
+
 minetest.register_chatcommand("/stretch", {
 	params = "<stretchx> <stretchy> <stretchz>",
 	description = "Scale the current WorldEdit positions and region by a factor of <stretchx>, <stretchy>, <stretchz> along the X, Y, and Z axes, repectively, with position 1 as the origin",
