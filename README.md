@@ -130,6 +130,21 @@ The WorldEdit Schematic format is accessed via the WorldEdit API, or WorldEdit s
 
 The second is the Minetest Schematic format (MTS). The details of this format may be found in the Minetest documentation and are out of the scope of this document. Access to this format is done via specialized MTS commands such as `//mtschemcreate` and `//mtschemplace`.
 
+Authors
+-------
+WorldEdit would not be possible without the contributions of many developers and designers. Below, they are listed alphabetically:
+
+    cheapie
+    cornernote
+    cyisfor
+    electricface
+    kaeza
+    khonkhortisan
+    sfan5
+    ShadowNinja
+    spillz
+    Uberi/Temperest
+
 License
 -------
 Copyright 2013 sfan5, Anthony Zhang (Uberi/Temperest), and Brett O'Donnell (cornernote).

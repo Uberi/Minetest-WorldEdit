@@ -98,13 +98,13 @@ Display the volume of the current WorldEdit region.
 
     //volume
 
-### `//set <node>`
+### `//set <node1> ...`
 
-Set the current WorldEdit region to `<node>`.
+Set the current WorldEdit region to a random mix of `<node1>`, `...`.
 
     //set air
-    //set cactus
-    //set Bronze Block
+    //set cactus stone glass
+    //set Bronze
     //set mesecons:wire_00000000_off
 
 ### `//replace <search node> <replace node>`
@@ -218,6 +218,13 @@ Stack the current WorldEdit region along the x/y/z/? axis `<count>` times.
     //stack y -1
     //stack z +5
     //stack ? 12
+
+### `//stack2 <count> <x> <y> <z>`
+
+Stack the current WorldEdit region `<count>` times by offset `<x>`, `<y>`, `<z>`.
+
+    //stack2 5 3 8 2
+    //stack2 1 -1 -1 -1
 
 ### `//scale <factor>`
 
