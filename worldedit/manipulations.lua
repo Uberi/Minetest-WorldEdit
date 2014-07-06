@@ -124,6 +124,7 @@ worldedit.replaceinverse = function(pos1, pos2, searchnode, replacenode)
 	return count
 end
 
+--copies the region defined by positions `pos1` and `pos2` along the `axis` axis ("x" or "y" or "z") by `amount` nodes, returning the number of nodes copied
 worldedit.copy = function(pos1, pos2, axis, amount) --wip: replace the old version below
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 
@@ -282,6 +283,7 @@ worldedit.copy2 = function(pos1, pos2, direction, volume)
 	end
 end
 
+--duplicates the region defined by positions `pos1` and `pos2` `amount` times with offset vector `direction`, returning the number of nodes stacked
 worldedit.stack2 = function(pos1, pos2, direction, amount, finished)
 	local i = 0
 	local translated = {x=0,y=0,z=0}
@@ -300,7 +302,7 @@ worldedit.stack2 = function(pos1, pos2, direction, amount, finished)
 		end
 	end
 	nextone()
-	return nil
+	return worldedit.volume(pos1, pos2) * amount
 end
 
 --copies the region defined by positions `pos1` and `pos2` along the `axis` axis ("x" or "y" or "z") by `amount` nodes, returning the number of nodes copied

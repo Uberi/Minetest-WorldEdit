@@ -57,6 +57,12 @@ Duplicates the region defined by positions `pos1` and `pos2` along the `axis` ax
 
 Returns the number of nodes stacked.
 
+### count = worldedit.stack2(pos1, pos2, direction, amount)
+
+Duplicates the region defined by positions `pos1` and `pos2` `amount` times with offset vector `direction`.
+
+Returns the number of nodes stacked.
+
 ### count, newpos1, newpos2 = worldedit.stretch(pos1, pos2, stretchx, stretchy, stretchz)
 
 Stretches the region defined by positions `pos1` and `pos2` by an factor of positive integers `stretchx`, `stretchy`. and `stretchz` along the X, Y, and Z axes, respectively, with `pos1` as the origin.
