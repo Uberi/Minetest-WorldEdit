@@ -50,14 +50,10 @@ worldedit.set = function(pos1, pos2, nodenames)
     end
 	if #node_ids == 1 then --only one type of node
 		local id = node_ids[1]
-		for i in area:iterp(pos1, pos2) do
-			nodes[i] = node_ids[id]
-		end
-	else --fill randomly with all types of specified nodes
+		for i in area:iterp(pos1, pos2) do nodes[i] = id end --fill area with node
+	else --several tpyes of nodes specified
 		local id_count, rand = #node_ids, math.random
-		for i in area:iterp(pos1, pos2) do
-			nodes[i] = node_ids[rand(id_count)]
-		end
+		for i in area:iterp(pos1, pos2) do nodes[i] = node_ids[rand(id_count)] end --fill randomly with all types of specified nodes
 	end
 
 	--update map nodes
