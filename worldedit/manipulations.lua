@@ -420,13 +420,19 @@ worldedit.stack = function(pos1, pos2, axis, count)
 	if count < 0 then
 		count = -count
 		length = -length
-	end
-	local amount = 0
-	local copy = worldedit.copy
-	for i = 1, count do
-		amount = amount + length
-		copy(pos1, pos2, axis, amount)
-	end
+    end
+    local amount = 0
+    local copy = worldedit.copy
+    local i = 1
+    function nextone() 
+        if i <= count then
+            i = i + 1
+            amount = amount + length
+            copy(pos1, pos2, axis, amount)
+            minetest.after(0,nextone)
+        end
+    end
+    nextone()
 	return worldedit.volume(pos1, pos2) * count
 end
 
