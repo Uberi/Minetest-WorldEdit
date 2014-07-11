@@ -37,14 +37,13 @@ Example:
 ]]
 
 worldedit.register_gui_handler = function(identifier, handler)
+	local enabled = true
 	minetest.register_on_player_receive_fields(function(player, formname, fields)
-		--ensure the form is not being exited since this is a duplicate message
-		if fields.quit then
-			return false
-		end
-		
+		if not enabled then return false end
+		enabled = false
+		minetest.after(0.2, function() enabled = true end)
 		local name = player:get_player_name()
-		
+
 		--ensure the player has permission to perform the action
 		local entry = worldedit.pages[identifier]
 		if entry and minetest.check_player_privs(name, entry.privs or {}) then
