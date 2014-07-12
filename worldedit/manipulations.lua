@@ -25,12 +25,9 @@ end
 
 --sets a region defined by positions `pos1` and `pos2` to `nodename`, returning the number of nodes filled
 worldedit.set = function(pos1, pos2, nodenames)
-    local oneNode
-    if type(nodenames) == 'string' then
-        oneNode = true
-    else
-        oneNode = false
-    end
+	if type(nodenames) == "string" then
+		nodenames = {nodenames}
+	end
 
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 
@@ -48,10 +45,10 @@ worldedit.set = function(pos1, pos2, nodenames)
 
 	--fill selected area with node
 	local node_ids = {}
-    for i,v in ipairs(nodenames) do
-        node_ids[i] = minetest.get_content_id(nodenames[i])
-    end
-	if oneNode then --only one type of node
+	for i,v in ipairs(nodenames) do
+		node_ids[i] = minetest.get_content_id(nodenames[i])
+	end
+	if #node_ids then --only one type of node
 		local id = node_ids
 		for i in area:iterp(pos1, pos2) do nodes[i] = id end --fill area with node
 	else --several types of nodes specified
@@ -420,19 +417,19 @@ worldedit.stack = function(pos1, pos2, axis, count)
 	if count < 0 then
 		count = -count
 		length = -length
-    end
-    local amount = 0
-    local copy = worldedit.copy
-    local i = 1
-    function nextone() 
-        if i <= count then
-            i = i + 1
-            amount = amount + length
-            copy(pos1, pos2, axis, amount)
-            minetest.after(0,nextone)
-        end
-    end
-    nextone()
+	end
+	local amount = 0
+	local copy = worldedit.copy
+	local i = 1
+	function nextone()
+		if i <= count then
+			i = i + 1
+			amount = amount + length
+			copy(pos1, pos2, axis, amount)
+			minetest.after(0, nextone)
+		end
+	end
+	nextone()
 	return worldedit.volume(pos1, pos2) * count
 end
 
