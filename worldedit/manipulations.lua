@@ -48,8 +48,8 @@ worldedit.set = function(pos1, pos2, nodenames)
 	for i,v in ipairs(nodenames) do
 		node_ids[i] = minetest.get_content_id(nodenames[i])
 	end
-	if #node_ids then --only one type of node
-		local id = node_ids
+	if #node_ids == 1 then --only one type of node
+		local id = node_ids[1]
 		for i in area:iterp(pos1, pos2) do nodes[i] = id end --fill area with node
 	else --several types of nodes specified
 		local id_count, rand = #node_ids, math.random
