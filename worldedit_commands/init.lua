@@ -38,6 +38,7 @@ end
 
 --determines whether `nodename` is a valid node name, returning a boolean
 worldedit.normalize_nodename = function(nodename)
+	nodename = nodename:gsub("^%s*(.-)%s*$", "%1")
 	if nodename == "" then return nil end
 	local fullname = ItemStack({name=nodename}):get_name() --resolve aliases of node names to full names
 	if minetest.registered_nodes[fullname] or fullname == "air" then --directly found node name or alias of nodename
@@ -300,7 +301,7 @@ minetest.register_chatcommand("/mix", {
 	privs = {worldedit=true},
 	func = safe_region(function(name, param)
 		local nodes = {}
-		for nodename in param:gmatch("[^,]+") do
+		for nodename in param:gmatch("[^%s]+") do
 			local node = get_node(name, nodename)
 			if not node then
 				worldedit.player_notify(name, "Could not identify node \"" .. name .. "\"")
