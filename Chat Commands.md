@@ -98,14 +98,23 @@ Display the volume of the current WorldEdit region.
 
     //volume
 
-### `//set <node1> ...`
+### `//set <node>`
 
-Set the current WorldEdit region to a random mix of `<node1>`, `...`.
+Set the current WorldEdit region to `<node>`.
 
     //set air
-    //set cactus stone glass
-    //set Bronze
-    //set mesecons:wire_00000000_off
+    //set cactus
+    //set Blue Lightstone
+    //set dirt with grass
+
+### `//mix <node1> ...`
+
+Fill the current WorldEdit region with a random mix of `<node1>`, `...`.
+
+    //mix air
+    //mix cactus stone glass sandstone
+    //mix Bronze
+    //mix default:cobble air
 
 ### `//replace <search node> <replace node>`
 
