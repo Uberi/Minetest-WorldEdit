@@ -1,6 +1,22 @@
 worldedit = worldedit or {}
 local minetest = minetest --local copy of global
 
+--modifies positions `pos1` and `pos2` so that each component of `pos1` is less than or equal to its corresponding conent of `pos2`, returning two new positions
+worldedit.sort_pos = function(pos1, pos2)
+	pos1 = {x=pos1.x, y=pos1.y, z=pos1.z}
+	pos2 = {x=pos2.x, y=pos2.y, z=pos2.z}
+	if pos1.x > pos2.x then
+		pos2.x, pos1.x = pos1.x, pos2.x
+	end
+	if pos1.y > pos2.y then
+		pos2.y, pos1.y = pos1.y, pos2.y
+	end
+	if pos1.z > pos2.z then
+		pos2.z, pos1.z = pos1.z, pos2.z
+	end
+	return pos1, pos2
+end
+
 --executes `code` as a Lua chunk in the global namespace, returning an error if the code fails or nil otherwise
 worldedit.lua = function(code)
 	local operation, message = loadstring(code)
