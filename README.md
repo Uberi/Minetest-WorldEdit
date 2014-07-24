@@ -63,7 +63,7 @@ If you don't add WorldEdit to your "depends.txt" file, each file in the WorldEdi
 
     dofile(minetest.get_modpath("worldedit").."/primitives.lua")
 
-AGPLv3 compatible mods may further include WorldEdit files in their own mods. This may be useful if a modder wishes to completely avoid any dependencies on WorldEdit. Note that it is required to give credit to the authors.
+LGPLv2.1+ compatible mods may further include WorldEdit files in their own mods. This may be useful if a modder wishes to completely avoid any dependencies on WorldEdit. Note that you have to give credit to the authors.
 
 This API is documented in the [WorldEdit API Reference](WorldEdit API.md).
 
@@ -149,8 +149,7 @@ License
 -------
 Copyright 2013 sfan5, Anthony Zhang (Uberi/Temperest), and Brett O'Donnell (cornernote).
 
-This mod is licensed under the [GNU Affero General Public License](http://www.gnu.org/licenses/agpl-3.0.html).
+This mod is licensed under the [GNU Lesser General Public License version 2.1](http://www.gnu.org/licenses/lgpl-2.1.html) or any later version.
 
-Basically, this means everyone is free to use, modify, and distribute the files, as long as these modifications are also licensed the same way.
+Basically, this means everyone is free to use, modify, and distribute the files, as long as they credit the authors.
 
-Most importantly, the Affero variant of the GPL requires you to publish your modifications in source form, even if the mod is run only on the server, and not distributed.
