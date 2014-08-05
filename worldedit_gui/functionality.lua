@@ -360,7 +360,7 @@ worldedit.register_gui_function("worldedit_gui_copy_move", {
 
 worldedit.register_gui_handler("worldedit_gui_copy_move", function(name, fields)
 	if fields.worldedit_gui_copy_move_copy or fields.worldedit_gui_copy_move_move then
-		gui_axis1[name] = axis_indices[fields.worldedit_gui_cylinder_axis] or 4
+		gui_axis1[name] = axis_indices[fields.worldedit_gui_copy_move_axis] or 4
 		gui_distance1[name] = tostring(fields.worldedit_gui_copy_move_amount)
 		worldedit.show_page(name, "worldedit_gui_copy_move")
 		if fields.worldedit_gui_copy_move_copy then
