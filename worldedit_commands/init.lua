@@ -616,6 +616,7 @@ minetest.register_chatcommand("/stack", {
 		local found, _, axis, repetitions = param:find("^([xyz%?])%s+([+-]?%d+)$")
 		if found == nil then
 			worldedit.player_notify(name, "invalid usage: " .. param)
+			return
 		end
 		local count = check_region(name, param)
 		if count then return (tonumber(repetitions) + 1) * count end
