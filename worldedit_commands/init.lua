@@ -911,9 +911,12 @@ minetest.register_chatcommand("/allocate", {
 		local value = file:read("*a")
 		file:close()
 
-		if worldedit.valueversion(value) == 0 then --unknown version
-			worldedit.player_notify(name, "invalid file: file is invalid or created with newer version of WorldEdit")
+		local version = worldedit.read_header(value)
+		if version == 0 then
+			worldedit.player_notify(name, "File is invalid!")
 			return
+		elseif version > worldedit.LATEST_SERIALIZATION_VERSION then
+			worldedit.player_notify(name, "File was created with newer version of WorldEdit!")
 		end
 		local nodepos1, nodepos2, count = worldedit.allocate(pos, value)
 
@@ -963,8 +966,12 @@ minetest.register_chatcommand("/load", {
 		local value = file:read("*a")
 		file:close()
 
-		if worldedit.valueversion(value) == 0 then --unknown version
-			worldedit.player_notify(name, "invalid file: file is invalid or created with newer version of WorldEdit")
+		local version = worldedit.read_header(value)
+		if version == 0 then
+			worldedit.player_notify(name, "File is invalid!")
+			return
+		elseif version > worldedit.LATEST_SERIALIZATION_VERSION then
+			worldedit.player_notify(name, "File was created with newer version of WorldEdit!")
 			return
 		end
 

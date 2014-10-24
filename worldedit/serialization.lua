@@ -1,40 +1,58 @@
 worldedit = worldedit or {}
-local minetest = minetest --local copy of global
+local minetest = minetest -- Local copy of global
 
---modifies positions `pos1` and `pos2` so that each component of `pos1` is less than or equal to its corresponding conent of `pos2`, returning two new positions
-worldedit.sort_pos = function(pos1, pos2)
-	pos1 = {x=pos1.x, y=pos1.y, z=pos1.z}
-	pos2 = {x=pos2.x, y=pos2.y, z=pos2.z}
-	if pos1.x > pos2.x then
-		pos2.x, pos1.x = pos1.x, pos2.x
-	end
-	if pos1.y > pos2.y then
-		pos2.y, pos1.y = pos1.y, pos2.y
-	end
-	if pos1.z > pos2.z then
-		pos2.z, pos1.z = pos1.z, pos2.z
-	end
-	return pos1, pos2
-end
+worldedit.LATEST_SERIALIZATION_VERSION = 5
+local LATEST_SERIALIZATION_HEADER = worldedit.LATEST_SERIALIZATION_VERSION .. ":"
 
---determines the version of serialized data `value`, returning the version as a positive integer or 0 for unknown versions
-worldedit.valueversion = function(value)
-	if value:find("([+-]?%d+)%s+([+-]?%d+)%s+([+-]?%d+)") and not value:find("%{") then --previous list format
-		return 3
+
+--[[
+Serialization version history:
+  1: Original format.  Serialized Lua table with a weird linked format...
+  2: Position and node seperated into sub-tables in fields `1` and `2`.
+  3: List of nodes, one per line, with fields seperated by spaces.
+      Format: <X> <Y> <Z> <Name> <Param1> <Param2>
+  4: Serialized Lua table containing a list of nodes with `x`, `y`, `z`,
+      `name`, `param1`, `param2`, and `meta` fields.
+  5: Added header and made `param1`, `param2`, and `meta` fields optional.
+      Header format: <Version>,<ExtraHeaderField1>,...:<Content>
+--]]
+
+
+--- Reads the header of serialized data.
+-- @param value Serialized WorldEdit data.
+-- @return The version as a positive natural number, or 0 for unknown versions.
+-- @return Extra header fields as a list of strings, or nil if not supported.
+-- @return Content (data after header).
+function worldedit.read_header(value)
+	if value:find("^[0-9]+[%-:]") then
+		local header_end = value:find(":", 1, true)
+		local header = value:sub(1, header_end - 1):split(",")
+		local version = tonumber(header[1])
+		table.remove(header, 1)
+		local content = value:sub(header_end + 1)
+		return version, header, content
+	end
+	-- Old versions that didn't include a header with a version number
+	if value:find("([+-]?%d+)%s+([+-]?%d+)%s+([+-]?%d+)") and not value:find("%{") then -- List format
+		return 3, nil, value
 	elseif value:find("^[^\"']+%{%d+%}") then
-		if value:find("%[\"meta\"%]") then --previous meta flat table format
-			return 2
+		if value:find("%[\"meta\"%]") then -- Meta flat table format
+			return 2, nil, value
 		end
-		return 1 --original flat table format
-	elseif value:find("%{") then --current nested table format
-		return 4
+		return 1, nil, value -- Flat table format
+	elseif value:find("%{") then -- Raw nested table format
+		return 4, nil, value
 	end
-	return 0 --unknown format
+	return nil
 end
 
---converts the region defined by positions `pos1` and `pos2` into a single string, returning the serialized data and the number of nodes serialized
-worldedit.serialize = function(pos1, pos2)
-	--make area stay loaded
+
+--- Converts the region defined by positions `pos1` and `pos2`
+-- into a single string.
+-- @return The serialized data.
+-- @return The number of nodes serialized.
+function worldedit.serialize(pos1, pos2)
+	-- Keep area loaded
 	local manip = minetest.get_voxel_manip()
 	manip:read_from_map(pos1, pos2)
 
@@ -53,10 +71,18 @@ worldedit.serialize = function(pos1, pos2)
 					count = count + 1
 					local meta = get_meta(pos):to_table()
 
-					--convert metadata itemstacks to itemstrings
+					local meta_empty = true
+					-- Convert metadata item stacks to item strings
 					for name, inventory in pairs(meta.inventory) do
 						for index, stack in ipairs(inventory) do
+							meta_empty = false
 							inventory[index] = stack.to_string and stack:to_string() or stack
+						end
+					end
+					for k in pairs(meta) do
+						if k ~= "inventory" then
+							meta_empty = false
+							break
 						end
 					end
 
@@ -65,9 +91,9 @@ worldedit.serialize = function(pos1, pos2)
 						y = pos.y - pos1.y,
 						z = pos.z - pos1.z,
 						name = node.name,
-						param1 = node.param1,
-						param2 = node.param2,
-						meta = meta,
+						param1 = node.param1 ~= 0 and node.param1 or nil,
+						param2 = node.param2 ~= 0 and node.param2 or nil,
+						meta = not meta_empty and meta or nil,
 					}
 				end
 				pos.z = pos.z + 1
@@ -76,198 +102,139 @@ worldedit.serialize = function(pos1, pos2)
 		end
 		pos.x = pos.x + 1
 	end
-	result = minetest.serialize(result) --convert entries to a string
-	return result, count
+	-- Serialize entries
+	result = minetest.serialize(result)
+	return LATEST_SERIALIZATION_HEADER .. result, count
 end
 
---determines the volume the nodes represented by string `value` would occupy if deserialized at `originpos`, returning the two corner positions and the number of nodes
---contains code based on [table.save/table.load](http://lua-users.org/wiki/SaveTableToFile) by ChillCode, available under the MIT license (GPL compatible)
-worldedit.allocate = function(originpos, value)
+
+--- Loads the schematic in `value` into a node list in the latest format.
+-- Contains code based on [table.save/table.load](http://lua-users.org/wiki/SaveTableToFile)
+-- by ChillCode, available under the MIT license.
+-- @return A node list in the latest format, or nil on failure.
+function worldedit.load_schematic(value)
+	local version, header, content = worldedit.read_header(value)
+	local nodes
+	if version == 1 or version == 2 then -- Original flat table format
+		local tables = minetest.deserialize(content)
+		if not tables then return nil end
+
+		-- Transform the node table into an array of nodes
+		for i = 1, #tables do
+			for j, v in pairs(tables[i]) do
+				if type(v) == "table" then
+					tables[i][j] = tables[v[1]]
+				end
+			end
+		end
+		nodes = tables[1]
+
+		if version == 1 then --original flat table format
+			for i, entry in ipairs(nodes) do
+				local pos = entry[1]
+				entry.x, entry.y, entry.z = pos.x, pos.y, pos.z
+				entry[1] = nil
+				local node = entry[2]
+				entry.name, entry.param1, entry.param2 = node.name, node.param1, node.param2
+				entry[2] = nil
+			end
+		end
+	elseif version == 3 then -- List format
+		for x, y, z, name, param1, param2 in content:gmatch(
+				"([+-]?%d+)%s+([+-]?%d+)%s+([+-]?%d+)%s+" ..
+				"([^%s]+)%s+(%d+)%s+(%d+)[^\r\n]*[\r\n]*") do
+			param1, param2 = tonumber(param1), tonumber(param2)
+			table.insert(nodes, {
+				x = originx + tonumber(x),
+				y = originy + tonumber(y),
+				z = originz + tonumber(z),
+				name = name,
+				param1 = param1 ~= 0 and param1 or nil,
+				param2 = param2 ~= 0 and param2 or nil,
+			})
+		end
+	elseif version == 4 or version == 5 then -- Nested table format
+		if not jit then
+			-- This is broken for larger tables in the current version of LuaJIT
+			nodes = minetest.deserialize(content)
+		else
+			-- XXX: This is a filthy hack that works surprisingly well
+			nodes = {}
+			value = value:gsub("return%s*{", "", 1):gsub("}%s*$", "", 1)
+			local escaped = value:gsub("\\\\", "@@"):gsub("\\\"", "@@"):gsub("(\"[^\"]*\")", function(s) return string.rep("@", #s) end)
+			local startpos, startpos1, endpos = 1, 1
+			while true do
+				startpos, endpos = escaped:find("},%s*{", startpos)
+				if not startpos then
+					break
+				end
+				local current = value:sub(startpos1, startpos)
+				table.insert(nodes, minetest.deserialize("return " .. current))
+				startpos, startpos1 = endpos, endpos
+			end
+			table.insert(nodes, minetest.deserialize("return " .. value:sub(startpos1)))
+		end
+	else
+		return nil
+	end
+	return nodes
+end
+
+--- Determines the volume the nodes represented by string `value` would occupy
+-- if deserialized at `origin_pos`.
+-- @return Low corner position.
+-- @return High corner position.
+-- @return The number of nodes.
+worldedit.allocate = function(origin_pos, value)
+	local nodes = worldedit.load_schematic(value)
+	if not nodes then return nil end
+	return worldedit.allocate_with_nodes(origin_pos, nodes)
+end
+
+
+-- Internal
+worldedit.allocate_with_nodes = function(origin_pos, nodes)
 	local huge = math.huge
 	local pos1x, pos1y, pos1z = huge, huge, huge
 	local pos2x, pos2y, pos2z = -huge, -huge, -huge
-	local originx, originy, originz = originpos.x, originpos.y, originpos.z
-	local count = 0
-	local version = worldedit.valueversion(value)
-	if version == 1 or version == 2 then --flat table format
-		--obtain the node table
-		local get_tables = loadstring(value)
-		if get_tables then --error loading value
-			return originpos, originpos, count
-		end
-		local tables = get_tables()
-
-		--transform the node table into an array of nodes
-		for i = 1, #tables do
-			for j, v in pairs(tables[i]) do
-				if type(v) == "table" then
-					tables[i][j] = tables[v[1]]
-				end
-			end
-		end
-		local nodes = tables[1]
-
-		--check the node array
-		count = #nodes
-		if version == 1 then --original flat table format
-			for index = 1, count do
-				local entry = nodes[index]
-				local pos = entry[1]
-				local x, y, z = originx - pos.x, originy - pos.y, originz - pos.z
-				if x < pos1x then pos1x = x end
-				if y < pos1y then pos1y = y end
-				if z < pos1z then pos1z = z end
-				if x > pos2x then pos2x = x end
-				if y > pos2y then pos2y = y end
-				if z > pos2z then pos2z = z end
-			end
-		else --previous meta flat table format
-			for index = 1, count do
-				local entry = nodes[index]
-				local x, y, z = originx - entry.x, originy - entry.y, originz - entry.z
-				if x < pos1x then pos1x = x end
-				if y < pos1y then pos1y = y end
-				if z < pos1z then pos1z = z end
-				if x > pos2x then pos2x = x end
-				if y > pos2y then pos2y = y end
-				if z > pos2z then pos2z = z end
-			end
-		end
-	elseif version == 3 then --previous list format
-		for x, y, z, name, param1, param2 in value:gmatch("([+-]?%d+)%s+([+-]?%d+)%s+([+-]?%d+)%s+([^%s]+)%s+(%d+)%s+(%d+)[^\r\n]*[\r\n]*") do --match node entries
-			x, y, z = originx + tonumber(x), originy + tonumber(y), originz + tonumber(z)
-			if x < pos1x then pos1x = x end
-			if y < pos1y then pos1y = y end
-			if z < pos1z then pos1z = z end
-			if x > pos2x then pos2x = x end
-			if y > pos2y then pos2y = y end
-			if z > pos2z then pos2z = z end
-			count = count + 1
-		end
-	elseif version == 4 then --current nested table format
-		--wip: this is a filthy hack that works surprisingly well
-		value = value:gsub("return%s*{", "", 1):gsub("}%s*$", "", 1)
-		local escaped = value:gsub("\\\\", "@@"):gsub("\\\"", "@@"):gsub("(\"[^\"]*\")", function(s) return string.rep("@", #s) end)
-		local startpos, startpos1, endpos = 1, 1
-		local nodes = {}
-		while true do
-			startpos, endpos = escaped:find("},%s*{", startpos)
-			if not startpos then
-				break
-			end
-			local current = value:sub(startpos1, startpos)
-			table.insert(nodes, minetest.deserialize("return " .. current))
-			startpos, startpos1 = endpos, endpos
-		end
-		table.insert(nodes, minetest.deserialize("return " .. value:sub(startpos1)))
-
-		--local nodes = minetest.deserialize(value) --wip: this is broken for larger tables in the current version of LuaJIT
-
-		count = #nodes
-		for index = 1, count do
-			local entry = nodes[index]
-			x, y, z = originx + entry.x, originy + entry.y, originz + entry.z
-			if x < pos1x then pos1x = x end
-			if y < pos1y then pos1y = y end
-			if z < pos1z then pos1z = z end
-			if x > pos2x then pos2x = x end
-			if y > pos2y then pos2y = y end
-			if z > pos2z then pos2z = z end
-		end
+	local origin_x, origin_y, origin_z = origin_pos.x, origin_pos.y, origin_pos.z
+	for i, entry in ipairs(nodes) do
+		x, y, z = origin_x + entry.x, origin_y + entry.y, origin_z + entry.z
+		if x < pos1x then pos1x = x end
+		if y < pos1y then pos1y = y end
+		if z < pos1z then pos1z = z end
+		if x > pos2x then pos2x = x end
+		if y > pos2y then pos2y = y end
+		if z > pos2z then pos2z = z end
 	end
 	local pos1 = {x=pos1x, y=pos1y, z=pos1z}
 	local pos2 = {x=pos2x, y=pos2y, z=pos2z}
-	return pos1, pos2, count
+	return pos1, pos2, #nodes
 end
 
---loads the nodes represented by string `value` at position `originpos`, returning the number of nodes deserialized
---contains code based on [table.save/table.load](http://lua-users.org/wiki/SaveTableToFile) by ChillCode, available under the MIT license (GPL compatible)
-worldedit.deserialize = function(originpos, value)
-	--make area stay loaded
-	local pos1, pos2 = worldedit.allocate(originpos, value)
+
+--- Loads the nodes represented by string `value` at position `origin_pos`.
+-- @return The number of nodes deserialized.
+worldedit.deserialize = function(origin_pos, value)
+	local nodes = worldedit.load_schematic(value)
+	if not nodes then return nil end
+
+	-- Make area stay loaded
+	local pos1, pos2 = worldedit.allocate_with_nodes(origin_pos, nodes)
 	local manip = minetest.get_voxel_manip()
 	manip:read_from_map(pos1, pos2)
 
-	local originx, originy, originz = originpos.x, originpos.y, originpos.z
+	local origin_x, origin_y, origin_z = origin_pos.x, origin_pos.y, origin_pos.z
 	local count = 0
 	local add_node, get_meta = minetest.add_node, minetest.get_meta
-	local version = worldedit.valueversion(value)
-	if version == 1 or version == 2 then --original flat table format
-		--obtain the node table
-		local get_tables = loadstring(value)
-		if not get_tables then --error loading value
-			return count
-		end
-		local tables = get_tables()
-
-		--transform the node table into an array of nodes
-		for i = 1, #tables do
-			for j, v in pairs(tables[i]) do
-				if type(v) == "table" then
-					tables[i][j] = tables[v[1]]
-				end
-			end
-		end
-		local nodes = tables[1]
-
-		--load the node array
-		count = #nodes
-		if version == 1 then --original flat table format
-			for index = 1, count do
-				local entry = nodes[index]
-				local pos = entry[1]
-				pos.x, pos.y, pos.z = originx - pos.x, originy - pos.y, originz - pos.z
-				add_node(pos, entry[2])
-			end
-		else --previous meta flat table format
-			for index = 1, #nodes do
-				local entry = nodes[index]
-				entry.x, entry.y, entry.z = originx + entry.x, originy + entry.y, originz + entry.z
-				add_node(entry, entry) --entry acts both as position and as node
-				get_meta(entry):from_table(entry.meta)
-			end
-		end
-	elseif version == 3 then --previous list format
-		local pos = {x=0, y=0, z=0}
-		local node = {name="", param1=0, param2=0}
-		for x, y, z, name, param1, param2 in value:gmatch("([+-]?%d+)%s+([+-]?%d+)%s+([+-]?%d+)%s+([^%s]+)%s+(%d+)%s+(%d+)[^\r\n]*[\r\n]*") do --match node entries
-			pos.x, pos.y, pos.z = originx + tonumber(x), originy + tonumber(y), originz + tonumber(z)
-			node.name, node.param1, node.param2 = name, param1, param2
-			add_node(pos, node)
-			count = count + 1
-		end
-	elseif version == 4 then --current nested table format
-		--wip: this is a filthy hack that works surprisingly well
-		value = value:gsub("return%s*{", "", 1):gsub("}%s*$", "", 1)
-		local escaped = value:gsub("\\\\", "@@"):gsub("\\\"", "@@"):gsub("(\"[^\"]*\")", function(s) return string.rep("@", #s) end)
-		local startpos, startpos1, endpos = 1, 1
-		local nodes = {}
-		while true do
-			startpos, endpos = escaped:find("},%s*{", startpos)
-			if not startpos then
-				break
-			end
-			local current = value:sub(startpos1, startpos)
-			table.insert(nodes, minetest.deserialize("return " .. current))
-			startpos, startpos1 = endpos, endpos
-		end
-		table.insert(nodes, minetest.deserialize("return " .. value:sub(startpos1)))
-
-		--local nodes = minetest.deserialize(value) --wip: this is broken for larger tables in the current version of LuaJIT
-
-		--load the nodes
-		count = #nodes
-		for index = 1, count do
-			local entry = nodes[index]
-			entry.x, entry.y, entry.z = originx + entry.x, originy + entry.y, originz + entry.z
-			add_node(entry, entry) --entry acts both as position and as node
-		end
-
-		--load the metadata
-		for index = 1, count do
-			local entry = nodes[index]
+	for i, entry in ipairs(nodes) do
+		entry.x, entry.y, entry.z = origin_x + entry.x, origin_y + entry.y, origin_z + entry.z
+		-- Entry acts as both position and node
+		add_node(entry, entry)
+		if entry.meta then
 			get_meta(entry):from_table(entry.meta)
 		end
 	end
-	return count
+	return #nodes
 end
+
