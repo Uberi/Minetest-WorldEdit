@@ -53,10 +53,32 @@ worldedit.serialize = function(pos1, pos2)
 					count = count + 1
 					local meta = get_meta(pos):to_table()
 
-					--convert metadata itemstacks to itemstrings
-					for name, inventory in pairs(meta.inventory) do
-						for index, stack in ipairs(inventory) do
-							inventory[index] = stack.to_string and stack:to_string() or stack
+					local empty_meta = true
+					if type(meta) == "table" then
+						for n,j in pairs(meta) do
+							if n ~= "fields"
+							and n ~= "inventory" then
+								empty_meta = false
+								break
+							end
+							if type(j) ~= "table"
+							or next(j) then
+								empty_meta = false
+								break
+							end
+						end
+					else
+						empty_meta = false
+					end
+
+					if empty_meta then
+						meta = nil
+					else
+						--convert metadata itemstacks to itemstrings
+						for name, inventory in pairs(meta.inventory) do
+							for index, stack in ipairs(inventory) do
+								inventory[index] = stack.to_string and stack:to_string() or stack
+							end
 						end
 					end
 
@@ -65,8 +87,8 @@ worldedit.serialize = function(pos1, pos2)
 						y = pos.y - pos1.y,
 						z = pos.z - pos1.z,
 						name = node.name,
-						param1 = node.param1,
-						param2 = node.param2,
+						param1 = (node.param1 ~= 0 and node.param1) or nil,
+						param2 = (node.param2 ~= 0 and node.param2) or nil,
 						meta = meta,
 					}
 				end
@@ -266,7 +288,11 @@ worldedit.deserialize = function(originpos, value)
 		--load the metadata
 		for index = 1, count do
 			local entry = nodes[index]
-			get_meta(entry):from_table(entry.meta)
+			local meta = entry.meta
+			if meta
+			and meta ~= "" then
+				get_meta(entry):from_table(meta)
+			end
 		end
 	end
 	return count
