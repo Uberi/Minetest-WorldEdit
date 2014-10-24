@@ -72,7 +72,7 @@ worldedit.player_axis = function(name)
 	return "z", dir.z > 0 and 1 or -1
 end
 
-minetest.register_chatcommand("/about", {
+minetest.register_chatcommand("we-about", {
 	params = "",
 	description = "Get information about the mod",
 	func = function(name, param)
@@ -80,7 +80,7 @@ minetest.register_chatcommand("/about", {
 	end,
 })
 
-minetest.register_chatcommand("/inspect", {
+minetest.register_chatcommand("we-inspect", {
 	params = "on/off/1/0/true/false/yes/no/enable/disable/<blank>",
 	description = "Enable or disable node inspection",
 	privs = {worldedit=true},
@@ -113,7 +113,7 @@ minetest.register_on_punchnode(function(pos, node, puncher)
 	end
 end)
 
-minetest.register_chatcommand("/reset", {
+minetest.register_chatcommand("we-reset", {
 	params = "",
 	description = "Reset the region so that it is empty",
 	privs = {worldedit=true},
@@ -127,7 +127,7 @@ minetest.register_chatcommand("/reset", {
 	end,
 })
 
-minetest.register_chatcommand("/mark", {
+minetest.register_chatcommand("we-mark", {
 	params = "",
 	description = "Show markers at the region positions",
 	privs = {worldedit=true},
@@ -138,7 +138,7 @@ minetest.register_chatcommand("/mark", {
 	end,
 })
 
-minetest.register_chatcommand("/unmark", {
+minetest.register_chatcommand("we-unmark", {
 	params = "",
 	description = "Hide markers if currently shown",
 	privs = {worldedit=true},
@@ -154,7 +154,7 @@ minetest.register_chatcommand("/unmark", {
 	end,
 })
 
-minetest.register_chatcommand("/pos1", {
+minetest.register_chatcommand("we-pos1", {
 	params = "",
 	description = "Set WorldEdit region position 1 to the player's location",
 	privs = {worldedit=true},
@@ -167,7 +167,7 @@ minetest.register_chatcommand("/pos1", {
 	end,
 })
 
-minetest.register_chatcommand("/pos2", {
+minetest.register_chatcommand("we-pos2", {
 	params = "",
 	description = "Set WorldEdit region position 2 to the player's location",
 	privs = {worldedit=true},
@@ -180,7 +180,7 @@ minetest.register_chatcommand("/pos2", {
 	end,
 })
 
-minetest.register_chatcommand("/p", {
+minetest.register_chatcommand("we-p", {
 	params = "set/set1/set2/get",
 	description = "Set WorldEdit region, WorldEdit position 1, or WorldEdit position 2 by punching nodes, or display the current WorldEdit region",
 	privs = {worldedit=true},
@@ -211,7 +211,7 @@ minetest.register_chatcommand("/p", {
 	end,
 })
 
-minetest.register_chatcommand("/fixedpos", {
+minetest.register_chatcommand("we-fixedpos", {
 	params = "set1/set2 x y z",
 	description = "Set a WorldEdit region position to the position at (<x>, <y>, <z>)",
 	privs = {worldedit=true},
@@ -259,7 +259,7 @@ minetest.register_on_punchnode(function(pos, node, puncher)
 	end
 end)
 
-minetest.register_chatcommand("/volume", {
+minetest.register_chatcommand("we-volume", {
 	params = "",
 	description = "Display the volume of the current WorldEdit region",
 	privs = {worldedit=true},
@@ -279,7 +279,7 @@ minetest.register_chatcommand("/volume", {
 	end,
 })
 
-minetest.register_chatcommand("/set", {
+minetest.register_chatcommand("we-set", {
 	params = "<node>",
 	description = "Set the current WorldEdit region to <node>",
 	privs = {worldedit=true},
@@ -295,7 +295,7 @@ minetest.register_chatcommand("/set", {
 	end, check_region),
 })
 
-minetest.register_chatcommand("/mix", {
+minetest.register_chatcommand("we-mix", {
 	params = "<node1> ...",
 	description = "Fill the current WorldEdit region with a random mix of <node1>, ...",
 	privs = {worldedit=true},
@@ -335,7 +335,7 @@ local check_replace = function(name, param)
 	return check_region(name, param)
 end
 
-minetest.register_chatcommand("/replace", {
+minetest.register_chatcommand("we-replace", {
 	params = "<search node> <replace node>",
 	description = "Replace all instances of <search node> with <replace node> in the current WorldEdit region",
 	privs = {worldedit=true},
@@ -348,7 +348,7 @@ minetest.register_chatcommand("/replace", {
 	end, check_replace),
 })
 
-minetest.register_chatcommand("/replaceinverse", {
+minetest.register_chatcommand("we-replaceinverse", {
 	params = "<search node> <replace node>",
 	description = "Replace all nodes other than <search node> with <replace node> in the current WorldEdit region",
 	privs = {worldedit=true},
@@ -376,7 +376,7 @@ local check_sphere = function(name, param)
 	return math.ceil((4 * math.pi * (tonumber(radius) ^ 3)) / 3) --volume of sphere
 end
 
-minetest.register_chatcommand("/hollowsphere", {
+minetest.register_chatcommand("we-hollowsphere", {
 	params = "<radius> <node>",
 	description = "Add hollow sphere centered at WorldEdit position 1 with radius <radius>, composed of <node>",
 	privs = {worldedit=true},
@@ -388,7 +388,7 @@ minetest.register_chatcommand("/hollowsphere", {
 	end, check_sphere),
 })
 
-minetest.register_chatcommand("/sphere", {
+minetest.register_chatcommand("we-sphere", {
 	params = "<radius> <node>",
 	description = "Add sphere centered at WorldEdit position 1 with radius <radius>, composed of <node>",
 	privs = {worldedit=true},
@@ -415,7 +415,7 @@ local check_dome = function(name, param)
 	return math.ceil((2 * math.pi * (tonumber(radius) ^ 3)) / 3) --volume of dome
 end
 
-minetest.register_chatcommand("/hollowdome", {
+minetest.register_chatcommand("we-hollowdome", {
 	params = "<radius> <node>",
 	description = "Add hollow dome centered at WorldEdit position 1 with radius <radius>, composed of <node>",
 	privs = {worldedit=true},
@@ -427,7 +427,7 @@ minetest.register_chatcommand("/hollowdome", {
 	end, check_dome),
 })
 
-minetest.register_chatcommand("/dome", {
+minetest.register_chatcommand("we-dome", {
 	params = "<radius> <node>",
 	description = "Add dome centered at WorldEdit position 1 with radius <radius>, composed of <node>",
 	privs = {worldedit=true},
@@ -454,7 +454,7 @@ local check_cylinder = function(name, param)
 	return math.ceil(math.pi * (tonumber(radius) ^ 2) * tonumber(length))
 end
 
-minetest.register_chatcommand("/hollowcylinder", {
+minetest.register_chatcommand("we-hollowcylinder", {
 	params = "x/y/z/? <length> <radius> <node>",
 	description = "Add hollow cylinder at WorldEdit position 1 along the x/y/z/? axis with length <length> and radius <radius>, composed of <node>",
 	privs = {worldedit=true},
@@ -471,7 +471,7 @@ minetest.register_chatcommand("/hollowcylinder", {
 	end, check_cylinder),
 })
 
-minetest.register_chatcommand("/cylinder", {
+minetest.register_chatcommand("we-cylinder", {
 	params = "x/y/z/? <length> <radius> <node>",
 	description = "Add cylinder at WorldEdit position 1 along the x/y/z/? axis with length <length> and radius <radius>, composed of <node>",
 	privs = {worldedit=true},
@@ -488,7 +488,7 @@ minetest.register_chatcommand("/cylinder", {
 	end, check_cylinder),
 })
 
-minetest.register_chatcommand("/pyramid", {
+minetest.register_chatcommand("we-pyramid", {
 	params = "x/y/z/? <height> <node>",
 	description = "Add pyramid centered at WorldEdit position 1 along the x/y/z/? axis with height <height>, composed of <node>",
 	privs = {worldedit=true},
@@ -520,7 +520,7 @@ minetest.register_chatcommand("/pyramid", {
 	end),
 })
 
-minetest.register_chatcommand("/spiral", {
+minetest.register_chatcommand("we-spiral", {
 	params = "<length> <height> <space> <node>",
 	description = "Add spiral centered at WorldEdit position 1 with side length <length>, height <height>, space between walls <space>, composed of <node>",
 	privs = {worldedit=true},
@@ -546,7 +546,7 @@ minetest.register_chatcommand("/spiral", {
 	end),
 })
 
-minetest.register_chatcommand("/copy", {
+minetest.register_chatcommand("we-copy", {
 	params = "x/y/z/? <amount>",
 	description = "Copy the current WorldEdit region along the x/y/z/? axis by <amount> nodes",
 	privs = {worldedit=true},
@@ -571,7 +571,7 @@ minetest.register_chatcommand("/copy", {
 	end),
 })
 
-minetest.register_chatcommand("/move", {
+minetest.register_chatcommand("we-move", {
 	params = "x/y/z/? <amount>",
 	description = "Move the current WorldEdit region along the x/y/z/? axis by <amount> nodes",
 	privs = {worldedit=true},
@@ -598,7 +598,7 @@ minetest.register_chatcommand("/move", {
 	end, check_region),
 })
 
-minetest.register_chatcommand("/stack", {
+minetest.register_chatcommand("we-stack", {
 	params = "x/y/z/? <count>",
 	description = "Stack the current WorldEdit region along the x/y/z/? axis <count> times",
 	privs = {worldedit=true},
@@ -624,7 +624,7 @@ minetest.register_chatcommand("/stack", {
 	end),
 })
 
-minetest.register_chatcommand("/stack2", {
+minetest.register_chatcommand("we-stack2", {
 	params = "<count> <x> <y> <z>",
 	description = "Stack the current WorldEdit region <count> times by offset <x>, <y>, <z>",
 	privs = {worldedit=true},
@@ -660,7 +660,7 @@ minetest.register_chatcommand("/stack2", {
 })
 
 
-minetest.register_chatcommand("/stretch", {
+minetest.register_chatcommand("we-stretch", {
 	params = "<stretchx> <stretchy> <stretchz>",
 	description = "Scale the current WorldEdit positions and region by a factor of <stretchx>, <stretchy>, <stretchz> along the X, Y, and Z axes, repectively, with position 1 as the origin",
 	privs = {worldedit=true},
@@ -694,7 +694,7 @@ minetest.register_chatcommand("/stretch", {
 	end),
 })
 
-minetest.register_chatcommand("/transpose", {
+minetest.register_chatcommand("we-transpose", {
 	params = "x/y/z/? x/y/z/?",
 	description = "Transpose the current WorldEdit region along the x/y/z/? and x/y/z/? axes",
 	privs = {worldedit=true},
@@ -727,7 +727,7 @@ minetest.register_chatcommand("/transpose", {
 	end),
 })
 
-minetest.register_chatcommand("/flip", {
+minetest.register_chatcommand("we-flip", {
 	params = "x/y/z/?",
 	description = "Flip the current WorldEdit region along the x/y/z/? axis",
 	privs = {worldedit=true},
@@ -745,7 +745,7 @@ minetest.register_chatcommand("/flip", {
 	end),
 })
 
-minetest.register_chatcommand("/rotate", {
+minetest.register_chatcommand("we-rotate", {
 	params = "<axis> <angle>",
 	description = "Rotate the current WorldEdit region around the axis <axis> by angle <angle> (90 degree increment)",
 	privs = {worldedit=true},
@@ -777,7 +777,7 @@ minetest.register_chatcommand("/rotate", {
 	end),
 })
 
-minetest.register_chatcommand("/orient", {
+minetest.register_chatcommand("we-orient", {
 	params = "<angle>",
 	description = "Rotate oriented nodes in the current WorldEdit region around the Y axis by angle <angle> (90 degree increment)",
 	privs = {worldedit=true},
@@ -800,7 +800,7 @@ minetest.register_chatcommand("/orient", {
 	end),
 })
 
-minetest.register_chatcommand("/fixlight", {
+minetest.register_chatcommand("we-fixlight", {
 	params = "",
 	description = "Fix the lighting in the current WorldEdit region",
 	privs = {worldedit=true},
@@ -810,7 +810,7 @@ minetest.register_chatcommand("/fixlight", {
 	end),
 })
 
-minetest.register_chatcommand("/hide", {
+minetest.register_chatcommand("we-hide", {
 	params = "",
 	description = "Hide all nodes in the current WorldEdit region non-destructively",
 	privs = {worldedit=true},
@@ -820,7 +820,7 @@ minetest.register_chatcommand("/hide", {
 	end),
 })
 
-minetest.register_chatcommand("/suppress", {
+minetest.register_chatcommand("we-suppress", {
 	params = "<node>",
 	description = "Suppress all <node> in the current WorldEdit region non-destructively",
 	privs = {worldedit=true},
@@ -831,7 +831,7 @@ minetest.register_chatcommand("/suppress", {
 	end, check_set),
 })
 
-minetest.register_chatcommand("/highlight", {
+minetest.register_chatcommand("we-highlight", {
 	params = "<node>",
 	description = "Highlight <node> in the current WorldEdit region by hiding everything else non-destructively",
 	privs = {worldedit=true},
@@ -842,7 +842,7 @@ minetest.register_chatcommand("/highlight", {
 	end, check_set),
 })
 
-minetest.register_chatcommand("/restore", {
+minetest.register_chatcommand("we-restore", {
 	params = "",
 	description = "Restores nodes hidden with WorldEdit in the current WorldEdit region",
 	privs = {worldedit=true},
@@ -852,7 +852,7 @@ minetest.register_chatcommand("/restore", {
 	end),
 })
 
-minetest.register_chatcommand("/save", {
+minetest.register_chatcommand("we-save", {
 	params = "<file>",
 	description = "Save the current WorldEdit region to \"(world folder)/schems/<file>.we\"",
 	privs = {worldedit=true},
@@ -885,7 +885,7 @@ minetest.register_chatcommand("/save", {
 	end),
 })
 
-minetest.register_chatcommand("/allocate", {
+minetest.register_chatcommand("we-allocate", {
 	params = "<file>",
 	description = "Set the region defined by nodes from \"(world folder)/schems/<file>.we\" as the current WorldEdit region",
 	privs = {worldedit=true},
@@ -926,7 +926,7 @@ minetest.register_chatcommand("/allocate", {
 	end,
 })
 
-minetest.register_chatcommand("/load", {
+minetest.register_chatcommand("we-load", {
 	params = "<file>",
 	description = "Load nodes from \"(world folder)/schems/<file>[.we[m]]\" with position 1 of the current WorldEdit region as the origin",
 	privs = {worldedit=true},
@@ -974,7 +974,7 @@ minetest.register_chatcommand("/load", {
 	end,
 })
 
-minetest.register_chatcommand("/lua", {
+minetest.register_chatcommand("we-lua", {
 	params = "<code>",
 	description = "Executes <code> as a Lua chunk in the global namespace",
 	privs = {worldedit=true, server=true},
@@ -993,7 +993,7 @@ minetest.register_chatcommand("/lua", {
 	end,
 })
 
-minetest.register_chatcommand("/luatransform", {
+minetest.register_chatcommand("we-luatransform", {
 	params = "<code>",
 	description = "Executes <code> as a Lua chunk in the global namespace with the variable pos available, for each node in the current WorldEdit region",
 	privs = {worldedit=true, server=true},
@@ -1013,7 +1013,7 @@ minetest.register_chatcommand("/luatransform", {
 	end),
 })
 
-minetest.register_chatcommand("/mtschemcreate", {
+minetest.register_chatcommand("we-mtschemcreate", {
 	params = "<file>",
 	description = "Save the current WorldEdit region using the Minetest Schematic format to \"(world folder)/schems/<filename>.mts\"",
 	privs = {worldedit=true},
@@ -1038,7 +1038,7 @@ minetest.register_chatcommand("/mtschemcreate", {
 	end),
 })
 
-minetest.register_chatcommand("/mtschemplace", {
+minetest.register_chatcommand("we-mtschemplace", {
 	params = "<file>",
 	description = "Load nodes from \"(world folder)/schems/<file>.mts\" with position 1 of the current WorldEdit region as the origin",
 	privs = {worldedit=true},
@@ -1061,7 +1061,7 @@ minetest.register_chatcommand("/mtschemplace", {
 	end,
 })
 
-minetest.register_chatcommand("/mtschemprob", {
+minetest.register_chatcommand("we-mtschemprob", {
 	params = "start/finish/get",
 	description = "Begins node probability entry for Minetest schematics, gets the nodes that have probabilities set, or ends node probability entry",
 	privs = {worldedit=true},
@@ -1102,7 +1102,7 @@ minetest.register_on_player_receive_fields(
 	end
 )
 
-minetest.register_chatcommand("/clearobjects", {
+minetest.register_chatcommand("we-clearobjects", {
 	params = "",
 	description = "Clears all objects within the WorldEdit region",
 	privs = {worldedit=true},
