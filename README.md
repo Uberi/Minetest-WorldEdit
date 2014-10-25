@@ -33,7 +33,7 @@ WorldEdit works primarily through the WorldEdit GUI and chat commands. Depending
 
 WorldEdit has a huge potential for abuse by untrusted players. Therefore, users will not be able to use WorldEdit unless they have the `worldedit` privelege. This is available by default in single player, but in multiplayer the permission must be explicitly given by someone with the right credentials, using the follwoing chat command: `/grant <player name> worldedit`. This privelege can later be removed using the following chat command: `/revoke <player name> worldedit`.
 
-Certain functions/commands such as WorldEdit GUI's "Run Lua" function (equivalent to the `/we-lua` and `/we-luatransform` chat commands) additionally only work for the server administrator. This is because it is extremely dangerous to give access to these commands to untrusted players, since they essentially are able to control the computer the server is running on.
+Certain functions/commands such as WorldEdit GUI's "Run Lua" function (equivalent to the `//lua` and `//luatransform` chat command) additionally require the `server` privilege. This is because it is extremely dangerous to give access to these commands to untrusted players, since they essentially are able to control the computer the server is running on. Give this privilege only to people you trust with your computer.
 
 For in-game information about these commands, type `/help <command name>` in the chat. For example, to learn more about the `//copy` command, simply type `/help /copy` to display information relevant to copying a region.
 
@@ -81,13 +81,13 @@ Nodes
 -----
 Node names are required for many types of commands that identify or modify specific types of nodes. They can be specified in a number of ways.
 
-First, by description - the tooltip that appears when hovering over the item in an inventory. This is case insensitive and includes values such as "Cobblestone" and "bronze block". Note that certain commands (namely, `/we-replace` and `/we-replaceinverse`) do not support descriptions that contain spaces in the `<searchnode>` field.
+First, by description - the tooltip that appears when hovering over the item in an inventory. This is case insensitive and includes values such as "Cobblestone" and "bronze block". Note that certain commands (namely, `//replace` and `//replaceinverse`) do not support descriptions that contain spaces in the `<searchnode>` field.
 
 Second, by name - the node name that is defined by code, but without the mod name prefix. This is case sensitive and includes values such as "piston_normal_off" and "cactus". Nodes defined in the `default` mod always take precedence over other nodes when searching for the correct one, and if there are multiple possible nodes (such as "a:celery" and "b:celery"), one is chosen in no particular order.
 
 Finally, by full name - the unambiguous identifier of the node, prefixes and all. This is case sensitive and includes values such as "default:stone" and "mesecons:wire_00000000_off".
 
-The node name "air" can be used anywhere a normal node name can, and acts as a blank node. This is useful for clearing or removing nodes. For example, `/we-set air` would remove all the nodes in the current WorldEdit region. Similarly, `/we-sphere 10 air`, when WorldEdit position 1 underground, would dig a large sphere out of the ground.
+The node name "air" can be used anywhere a normal node name can, and acts as a blank node. This is useful for clearing or removing nodes. For example, `//set air` would remove all the nodes in the current WorldEdit region. Similarly, `//sphere 10 air`, when WorldEdit position 1 underground, would dig a large sphere out of the ground.
 
 Regions
 -------
@@ -130,9 +130,9 @@ Specifically it looks like this:
 
 The ordering of the values and minor aspects of the syntax, such as trailing commas or newlines, are not guaranteed to stay the same in future versions.
 
-The WorldEdit Schematic format is accessed via the WorldEdit API, or WorldEdit serialization chat commands such as `/save` and `/load`.
+The WorldEdit Schematic format is accessed via the WorldEdit API, or WorldEdit serialization chat commands such as `//serialize` and `//deserialize`.
 
-The second is the Minetest Schematic format (MTS). The details of this format may be found in the Minetest documentation and are out of the scope of this document. Access to this format is done via specialized MTS commands such as `/we-mtschemcreate` and `/we-mtschemplace`.
+The second is the Minetest Schematic format (MTS). The details of this format may be found in the Minetest documentation and are out of the scope of this document. Access to this format is done via specialized MTS commands such as `//mtschemcreate` and `//mtschemplace`.
 
 Authors
 -------

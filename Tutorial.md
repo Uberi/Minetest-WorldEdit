@@ -29,7 +29,7 @@ Step 1: Selecting a region
 --------------------------
 ### Chat Commands
 
-In the chat prompt, enter `/we-p set`. In the chat, you are prompted to punch two nodes to set the positions of the two markers.
+In the chat prompt, enter `//p set`. In the chat, you are prompted to punch two nodes to set the positions of the two markers.
 
 Punch a nearby node. Be careful of breakable ones such as torches. A black cube reading "1" will appear around the node. This is the marker for WorldEdit position 1.
 
@@ -53,13 +53,13 @@ Step 2: Region commands
 -----------------------
 ### Chat Commands
 
-In the chat prompt, enter `/we-set mese`. In the chat, you will see a message showing the number of nodes set after a small delay.
+In the chat prompt, enter `//set mese`. In the chat, you will see a message showing the number of nodes set after a small delay.
 
 Look at the place between the two markers: it is now filled with MESE blocks!
 
-The `/we-set <node>` command fills the region with whatever node you want. It is a region-oriented command, which means it works inside the WorldEdit region only.
+The `//set <node>` command fills the region with whatever node you want. It is a region-oriented command, which means it works inside the WorldEdit region only.
 
-Now, try a few different variations, such as `/we-set torch`, `/we-set cobble`, and `/we-set water`.
+Now, try a few different variations, such as `//set torch`, `//set cobble`, and `//set water`.
 
 ### WorldEdit GUI
 
@@ -81,11 +81,11 @@ Step 3: Position commands
 -------------------------
 ### Chat Commands
 
-In the chat prompt, enter `/we-hollowdome 30 glass`. In the chat, you will see a message showing the number of nodes set after a small delay.
+In the chat prompt, enter `//hollowdome 30 glass`. In the chat, you will see a message showing the number of nodes set after a small delay.
 
 Look around marker 1: it is now surrounded by a hollow glass dome!
 
-The `/we-hollowdome <radius> <node>` command creates a hollow dome centered around marker 1, made of any node you want. It is a position-oriented command, which means it works around marker 1 and can go outside the WorldEdit region.
+The `//hollowdome <radius> <node>` command creates a hollow dome centered around marker 1, made of any node you want. It is a position-oriented command, which means it works around marker 1 and can go outside the WorldEdit region.
 
 ### WorldEdit GUI
 
@@ -109,9 +109,9 @@ Step 4: Other commands
 
 There are many more commands than what is shown here. See the [Chat Commands Reference](Chat Commands.md) for a detailed list of them, along with descriptions and examples for every single one.
 
-If you're in-game and forgot how a command works, just use the `/help <command name>` command, without the first forward slash. For example, to see some information about the `/we-set <node>` command mentioned earlier, simply use `/help /set`.
+If you're in-game and forgot how a command works, just use the `/help <command name>` command, without the first forward slash. For example, to see some information about the `//set <node>` command mentioned earlier, simply use `/help /set`.
 
-A very useful command to check out is the `/we-save <schematic>` command, which can save everything inside the WorldEdit region to a file, stored on the computer hosting the server (the player's computer, in single player mode). You can then later use `/we-load <schematic>` to load the data in a file into a world, even another world on another computer.
+A very useful command to check out is the `//save <schematic>` command, which can save everything inside the WorldEdit region to a file, stored on the computer hosting the server (the player's computer, in single player mode). You can then later use `//load <schematic>` to load the data in a file into a world, even another world on another computer.
 
 ### WorldEdit GUI
 

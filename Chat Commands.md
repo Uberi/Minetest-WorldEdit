@@ -2,377 +2,375 @@ Chat Commands
 -------------
 For more information, see the [README](README.md).
 
-Many commands also have shorter names that can be typed faster. For example,
-if we wanted to use `/we-move ? 5`, we could instead type `/m ? 5`.
-All shortened names are listed below:
+Many commands also have shorter names that can be typed faster. For example, if we wanted to use `//move ? 5`, we could instead type `//m ? 5`. All shortened names are listed below:
 
-| Short Name | Original Name       |
-|:-----------|:--------------------|
-| `i`        | `we-inspect`        |
-| `rst`      | `we-reset`          |
-| `mk`       | `we-mark`           |
-| `umk`      | `we-unmark`         |
-| `1`        | `we-pos1`           |
-| `2`        | `we-pos2`           |
-| `fp`       | `we-fixedpos`       |
-| `v`        | `we-volume`         |
-| `s`        | `we-set`            |
-| `r`        | `we-replace`        |
-| `ri`       | `we-replaceinverse` |
-| `hspr`     | `we-hollowsphere`   |
-| `spr`      | `we-sphere`         |
-| `hdo`      | `we-hollowdome`     |
-| `do`       | `we-dome`           |
-| `hcyl`     | `we-hollowcylinder` |
+| Short Name | Original Name      |
+|:-----------|:-------------------|
+| `//i`      | `//inspect`        |
+| `//rst`    | `//reset`          |
+| `//mk`     | `//mark`           |
+| `//umk`    | `//unmark`         |
+| `//1`      | `//pos1`           |
+| `//2`      | `//pos2`           |
+| `//fp`     | `//fixedpos`       |
+| `//v`      | `//volume`         |
+| `//s`      | `//set`            |
+| `//r`      | `//replace`        |
+| `//ri`     | `//replaceinverse` |
+| `//hspr`   | `//hollowsphere`   |
+| `//spr`    | `//sphere`         |
+| `//hdo`    | `//hollowdome`     |
+| `//do`     | `//dome`           |
+| `//hcyl`   | `//hollowcylinder` |
 
-### `/we-about`
+### `//about`
 
 Get information about the mod.
 
-    /we-about
+    //about
 
-### `/we-inspect on/off/1/0/true/false/yes/no/enable/disable/<blank>`
+### `//inspect on/off/1/0/true/false/yes/no/enable/disable/<blank>`
 
 Enable or disable node inspection.
 
-    /we-inspect on
-    /we-inspect off
-    /we-inspect 1
-    /we-inspect 0
-    /we-inspect true
-    /we-inspect false
-    /we-inspect yes
-    /we-inspect no
-    /we-inspect enable
-    /we-inspect disable
-    /we-inspect
+    //inspect on
+    //inspect off
+    //inspect 1
+    //inspect 0
+    //inspect true
+    //inspect false
+    //inspect yes
+    //inspect no
+    //inspect enable
+    //inspect disable
+    //inspect
 
-### `/we-reset`
+### `//reset`
 
 Reset the region so that it is empty.
 
-    /we-reset
+    //reset
 
-### `/we-mark`
+### `//mark`
 
 Show markers at the region positions.
 
-    /we-mark
+    //mark
 
-### `/we-unmark`
+### `//unmark`
 
 Hide markers if currently shown.
 
-    /we-unmark
+    //unmark
 
-### `/we-pos1`
+### `//pos1`
 
 Set WorldEdit region position 1 to the player's location.
 
-    /we-pos1
+    //pos1
 
-### `/we-pos2`
+### `//pos2`
 
 Set WorldEdit region position 2 to the player's location.
 
-    /we-pos2
+    //pos2
 
-### `/we-p set/set1/set2/get`
+### `//p set/set1/set2/get`
 
 Set WorldEdit region, WorldEdit position 1, or WorldEdit position 2 by punching nodes, or display the current WorldEdit region.
 
-    /we-p set
-    /we-p set1
-    /we-p set2
-    /we-p get
+    //p set
+    //p set1
+    //p set2
+    //p get
 
-### `/we-fixedpos set1 x y z`
+### `//fixedpos set1 x y z`
 
 Set a WorldEdit region position to the position at (`<x>`, `<y>`, `<z>`).
 
-    /we-fixedpos set1 0  0 0
-    /we-fixedpos set1 -30 5 28
-    /we-fixedpos set2 1004 -200 432
+    //fixedpos set1 0  0 0
+    //fixedpos set1 -30 5 28
+    //fixedpos set2 1004 -200 432
 
-### `/we-volume`
+### `//volume`
 
 Display the volume of the current WorldEdit region.
 
-    /we-volume
+    //volume
 
-### `/we-set <node>`
+### `//set <node>`
 
 Set the current WorldEdit region to `<node>`.
 
-    /we-set air
-    /we-set cactus
-    /we-set Blue Lightstone
-    /we-set dirt with grass
+    //set air
+    //set cactus
+    //set Blue Lightstone
+    //set dirt with grass
 
-### `/we-mix <node1> ...`
+### `//mix <node1> ...`
 
 Fill the current WorldEdit region with a random mix of `<node1>`, `...`.
 
-    /we-mix air
-    /we-mix cactus stone glass sandstone
-    /we-mix Bronze
-    /we-mix default:cobble air
+    //mix air
+    //mix cactus stone glass sandstone
+    //mix Bronze
+    //mix default:cobble air
 
-### `/we-replace <search node> <replace node>`
+### `//replace <search node> <replace node>`
 
 Replace all instances of `<search node>` with `<replace node>` in the current WorldEdit region.
 
-    /we-replace Cobblestone air
-    /we-replace lightstone_blue glass
-    /we-replace dirt Bronze Block
-    /we-replace mesecons:wire_00000000_off flowers:flower_tulip
+    //replace Cobblestone air
+    //replace lightstone_blue glass
+    //replace dirt Bronze Block
+    //replace mesecons:wire_00000000_off flowers:flower_tulip
 
-### `/we-replaceinverse <search node> <replace node>`
+### `//replaceinverse <search node> <replace node>`
 
 Replace all nodes other than `<search node>` with `<replace node>` in the current WorldEdit region.
 
-    /we-replaceinverse Cobblestone air
-    /we-replaceinverse flowers:flower_waterlily glass
-    /we-replaceinverse dirt Bronze Block
-    /we-replaceinverse mesecons:wire_00000000_off flowers:flower_tulip
+    //replaceinverse Cobblestone air
+    //replaceinverse flowers:flower_waterlily glass
+    //replaceinverse dirt Bronze Block
+    //replaceinverse mesecons:wire_00000000_off flowers:flower_tulip
 
-### `/we-hollowsphere <radius> <node>`
+### `//hollowsphere <radius> <node>`
 
 Add hollow sphere centered at WorldEdit position 1 with radius `<radius>`, composed of `<node>`.
 
-    /we-hollowsphere 5 Diamond Block
-    /we-hollowsphere 12 glass
-    /we-hollowsphere 17 mesecons:wire_00000000_off
+    //hollowsphere 5 Diamond Block
+    //hollowsphere 12 glass
+    //hollowsphere 17 mesecons:wire_00000000_off
 
-### `/we-sphere <radius> <node>`
+### `//sphere <radius> <node>`
 
 Add sphere centered at WorldEdit position 1 with radius `<radius>`, composed of `<node>`.
 
-    /we-sphere 5 Diamond Block
-    /we-sphere 12 glass
-    /we-sphere 17 mesecons:wire_00000000_off
+    //sphere 5 Diamond Block
+    //sphere 12 glass
+    //sphere 17 mesecons:wire_00000000_off
 
-### `/we-hollowdome <radius> <node>`
+### `//hollowdome <radius> <node>`
 
 Add hollow dome centered at WorldEdit position 1 with radius `<radius>`, composed of `<node>`.
 
-    /we-hollowdome 5 Diamond Block
-    /we-hollowdome -12 glass
-    /we-hollowdome 17 mesecons:wire_00000000_off
+    //hollowdome 5 Diamond Block
+    //hollowdome -12 glass
+    //hollowdome 17 mesecons:wire_00000000_off
 
-### `/we-dome <radius> <node>`
+### `//dome <radius> <node>`
 
 Add dome centered at WorldEdit position 1 with radius `<radius>`, composed of `<node>`.
 
-    /we-dome 5 Diamond Block
-    /we-dome -12 glass
-    /we-dome 17 mesecons:wire_00000000_off
+    //dome 5 Diamond Block
+    //dome -12 glass
+    //dome 17 mesecons:wire_00000000_off
 
-### `/we-hollowcylinder x/y/z/? <length> <radius> <node>`
+### `//hollowcylinder x/y/z/? <length> <radius> <node>`
 
 Add hollow cylinder at WorldEdit position 1 along the x/y/z/? axis with length `<length>` and radius `<radius>`, composed of `<node>`.
 
-    /we-hollowcylinder x +5 8 Bronze Block
-    /we-hollowcylinder y 28 10 glass
-    /we-hollowcylinder z -12 3 mesecons:wire_00000000_off
-    /we-hollowcylinder ? 2 4 default:stone
+    //hollowcylinder x +5 8 Bronze Block
+    //hollowcylinder y 28 10 glass
+    //hollowcylinder z -12 3 mesecons:wire_00000000_off
+    //hollowcylinder ? 2 4 default:stone
 
-### `/we-cylinder x/y/z/? <length> <radius> <node>`
+### `//cylinder x/y/z/? <length> <radius> <node>`
 
 Add cylinder at WorldEdit position 1 along the x/y/z/? axis with length `<length>` and radius `<radius>`, composed of `<node>`.
 
-    /we-cylinder x +5 8 Bronze Block
-    /we-cylinder y 28 10 glass
-    /we-cylinder z -12 3 mesecons:wire_00000000_off
-    /we-cylinder ? 2 4 default:stone
+    //cylinder x +5 8 Bronze Block
+    //cylinder y 28 10 glass
+    //cylinder z -12 3 mesecons:wire_00000000_off
+    //cylinder ? 2 4 default:stone
     
-### `/we-pyramid x/y/z? <height> <node>`
+### `//pyramid x/y/z? <height> <node>`
 
 Add pyramid centered at WorldEdit position 1 along the x/y/z/? axis with height `<height>`, composed of `<node>`.
 
-    /we-pyramid x 8 Diamond Block
-    /we-pyramid y -5 glass
-    /we-pyramid z 2 mesecons:wire_00000000_off
-    /we-pyramid ? 12 mesecons:wire_00000000_off
+    //pyramid x 8 Diamond Block
+    //pyramid y -5 glass
+    //pyramid z 2 mesecons:wire_00000000_off
+    //pyramid ? 12 mesecons:wire_00000000_off
 
-### `/we-spiral <length> <height> <spacer> <node>`
+### `//spiral <length> <height> <spacer> <node>`
 
 Add spiral centered at WorldEdit position 1 with side length `<length>`, height `<height>`, space between walls `<spacer>`, composed of `<node>`.
 
-    /we-spiral 20 5 3 Diamond Block
-    /we-spiral 5 2 1 glass
-    /we-spiral 7 1 5 mesecons:wire_00000000_off
+    //spiral 20 5 3 Diamond Block
+    //spiral 5 2 1 glass
+    //spiral 7 1 5 mesecons:wire_00000000_off
 
-### `/we-copy x/y/z/? <amount>`
+### `//copy x/y/z/? <amount>`
 
 Copy the current WorldEdit region along the x/y/z/? axis by `<amount>` nodes.
 
-    /we-copy x 15
-    /we-copy y -7
-    /we-copy z +4
-    /we-copy ? 8
+    //copy x 15
+    //copy y -7
+    //copy z +4
+    //copy ? 8
 
-### `/we-move x/y/z/? <amount>`
+### `//move x/y/z/? <amount>`
 
 Move the current WorldEdit positions and region along the x/y/z/? axis by `<amount>` nodes.
 
-    /we-move x 15
-    /we-move y -7
-    /we-move z +4
-    /we-move ? -1
+    //move x 15
+    //move y -7
+    //move z +4
+    //move ? -1
 
-### `/we-stack x/y/z/? <count>`
+### `//stack x/y/z/? <count>`
 
 Stack the current WorldEdit region along the x/y/z/? axis `<count>` times.
 
-    /we-stack x 3
-    /we-stack y -1
-    /we-stack z +5
-    /we-stack ? 12
+    //stack x 3
+    //stack y -1
+    //stack z +5
+    //stack ? 12
 
-### `/we-stack2 <count> <x> <y> <z>`
+### `//stack2 <count> <x> <y> <z>`
 
 Stack the current WorldEdit region `<count>` times by offset `<x>`, `<y>`, `<z>`.
 
-    /we-stack2 5 3 8 2
-    /we-stack2 1 -1 -1 -1
+    //stack2 5 3 8 2
+    //stack2 1 -1 -1 -1
 
-### `/we-scale <factor>`
+### `//scale <factor>`
 
 Scale the current WorldEdit positions and region by a factor of positive integer `<factor>` with position 1 as the origin.
 
-    /we-scale 2
-    /we-scale 1
-    /we-scale 10
+    //scale 2
+    //scale 1
+    //scale 10
 
-### `/we-transpose x/y/z/? x/y/z/?`
+### `//transpose x/y/z/? x/y/z/?`
 
 Transpose the current WorldEdit positions and region along the x/y/z/? and x/y/z/? axes.
 
-    /we-transpose x y
-    /we-transpose x z
-    /we-transpose y z
-    /we-transpose ? y
+    //transpose x y
+    //transpose x z
+    //transpose y z
+    //transpose ? y
 
-### `/we-flip x/y/z/?`
+### `//flip x/y/z/?`
 
 Flip the current WorldEdit region along the x/y/z/? axis.
 
-    /we-flip x
-    /we-flip y
-    /we-flip z
-    /we-flip ?
+    //flip x
+    //flip y
+    //flip z
+    //flip ?
 
-### `/we-rotate x/y/z/? <angle>`
+### `//rotate x/y/z/? <angle>`
 
 Rotate the current WorldEdit positions and region along the x/y/z/? axis by angle `<angle>` (90 degree increment).
 
-    /we-rotate x 90
-    /we-rotate y 180
-    /we-rotate z 270
-    /we-rotate ? -90
+    //rotate x 90
+    //rotate y 180
+    //rotate z 270
+    //rotate ? -90
 
-### `/we-orient <angle>`
+### `//orient <angle>`
 
 Rotate oriented nodes in the current WorldEdit region around the Y axis by angle `<angle>` (90 degree increment)
 
-    /we-orient 90
-    /we-orient 180
-    /we-orient 270
-    /we-orient -90
+    //orient 90
+    //orient 180
+    //orient 270
+    //orient -90
 
-### `/we-fixlight`
+### `//fixlight`
 
 Fixes the lighting in the current WorldEdit region.
 
-    /we-fixlight
+    //fixlight
 
-### `/we-hide`
+### `//hide`
 
 Hide all nodes in the current WorldEdit region non-destructively.
 
-    /we-hide
+    //hide
 
-### `/we-suppress <node>`
+### `//suppress <node>`
 
 Suppress all <node> in the current WorldEdit region non-destructively.
 
-    /we-suppress Diamond Block
-    /we-suppress glass
-    /we-suppress mesecons:wire_00000000_off
+    //suppress Diamond Block
+    //suppress glass
+    //suppress mesecons:wire_00000000_off
 
-### `/we-highlight <node>`
+### `//highlight <node>`
 
 Highlight <node> in the current WorldEdit region by hiding everything else non-destructively.
 
-    /we-highlight Diamond Block
-    /we-highlight glass
-    /we-highlight mesecons:wire_00000000_off
+    //highlight Diamond Block
+    //highlight glass
+    //highlight mesecons:wire_00000000_off
 
-### `/we-restore`
+### `//restore`
 
 Restores nodes hidden with WorldEdit in the current WorldEdit region.
 
-    /we-restore
+    //restore
 
-### `/we-save <file>`
+### `//save <file>`
 
 Save the current WorldEdit region to "(world folder)/schems/`<file>`.we".
 
-    /we-save some random filename
-    /we-save huge_base
+    //save some random filename
+    //save huge_base
 
-### `/we-allocate <file>`
+### `//allocate <file>`
 
 Set the region defined by nodes from "(world folder)/schems/`<file>`.we" as the current WorldEdit region.
 
-    /we-allocate some random filename
-    /we-allocate huge_base
+    //allocate some random filename
+    //allocate huge_base
 
-### `/we-load <file>`
+### `//load <file>`
 
 Load nodes from "(world folder)/schems/`<file>`.we" with position 1 of the current WorldEdit region as the origin.
 
-    /we-load some random filename
-    /we-load huge_base
+    //load some random filename
+    //load huge_base
 
-### `/we-lua <code>`
+### `//lua <code>`
 
 Executes `<code>` as a Lua chunk in the global namespace.
 
-    /we-lua worldedit.pos1["singleplayer"] = {x=0, y=0, z=0}
-    /we-lua worldedit.rotate(worldedit.pos1["singleplayer"], worldedit.pos2["singleplayer"], "y", 90)
+    //lua worldedit.pos1["singleplayer"] = {x=0, y=0, z=0}
+    //lua worldedit.rotate(worldedit.pos1["singleplayer"], worldedit.pos2["singleplayer"], "y", 90)
 
-### `/we-luatransform <code>`
+### `//luatransform <code>`
 
 Executes `<code>` as a Lua chunk in the global namespace with the variable pos available, for each node in the current WorldEdit region.
 
-    /we-luatransform minetest.add_node(pos, {name="default:stone"})
-    /we-luatransform if minetest.get_node(pos).name == "air" then minetest.add_node(pos, {name="default:water_source"})
+    //luatransform minetest.add_node(pos, {name="default:stone"})
+    //luatransform if minetest.get_node(pos).name == "air" then minetest.add_node(pos, {name="default:water_source"})
 
-### `/we-mtschemcreate <file>`
+### `//mtschemcreate <file>`
 
 Save the current WorldEdit region using the Minetest Schematic format to "(world folder)/schems/`<file>`.mts".
 
-    /we-mtschemcreate some random filename
-    /we-mtschemcreate huge_base
+    //mtschemcreate some random filename
+    //mtschemcreate huge_base
 
-### `/we-mtschemplace <file>`
+### `//mtschemplace <file>`
 
 Load nodes from "(world folder)/schems/`<file>`.mts" with position 1 of the current WorldEdit region as the origin.
 
-    /we-mtschemplace some random filename
-    /we-mtschemplace huge_base
+    //mtschemplace some random filename
+    //mtschemplace huge_base
 
-### `/we-mtschemprob start/finish/get`
+### `//mtschemprob start/finish/get`
 
-After using `/we-mtschemprob start` all nodes punched will bring up a text field where a probablity can be entered.
-This mode can be left with `/we-mtschemprob finish`. `/we-mtschemprob get` will display the probabilities saved for the nodes.
+After using `//mtschemprob start` all nodes punched will bring up a text field where a probablity can be entered.
+This mode can be left with `//mtschemprob finish`. `//mtschemprob get` will display the probabilities saved for the nodes.
 
-    /we-mtschemprob get
+    //mtschemprob get
 
-### `/we-clearobjects`
+### `//clearobjects`
 
 Clears all objects within the WorldEdit region.
 
-    /we-clearobjects
+    //clearobjects

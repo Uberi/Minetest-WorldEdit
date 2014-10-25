@@ -26,11 +26,11 @@ safe_region = function(callback, nodes_needed)
 
 		--save callback to call later
 		safe_region_callback[name], safe_region_param[name] = callback, param
-		worldedit.player_notify(name, "WARNING: this operation could affect up to " .. count .. " nodes; type /we-y to continue or /we-n to cancel")
+		worldedit.player_notify(name, "WARNING: this operation could affect up to " .. count .. " nodes; type //y to continue or //n to cancel")
 	end
 end
 
-minetest.register_chatcommand("we-y", {
+minetest.register_chatcommand("/y", {
 	params = "",
 	description = "Confirm a pending operation",
 	func = function(name)
@@ -52,7 +52,7 @@ minetest.register_chatcommand("we-y", {
 	end,
 })
 
-minetest.register_chatcommand("we-n", {
+minetest.register_chatcommand("/n", {
 	params = "",
 	description = "Confirm a pending operation",
 	func = function(name)
