@@ -195,29 +195,30 @@ Serialization
 -------------
 Contained in serialization.lua, this module allows regions of nodes to be serialized and deserialized to formats suitable for use outside MineTest.
 
-### version = worldedit.valueversion(value)
+### version, extra_fields, content = worldedit.read_header(value)
 
-Determines the version of serialized data `value`.
+Reads the header from serialized data `value`.
 
-Returns the version as a positive integer or 0 for unknown versions.
+Returns the version as a positive integer (nil for unknown versions),
+extra header fields (nil if not supported), and the content after the header.
 
 ### data, count = worldedit.serialize(pos1, pos2)
 
 Converts the region defined by positions `pos1` and `pos2` into a single string.
 
-Returns the serialized data and the number of nodes serialized.
+Returns the serialized data and the number of nodes serialized, or nil.
 
-### pos1, pos2, count = worldedit.allocate(originpos, value)
+### pos1, pos2, count = worldedit.allocate(origin_pos, value)
 
-Determines the volume the nodes represented by string `value` would occupy if deserialized at `originpos`.
+Determines the volume the nodes represented by string `value` would occupy if deserialized at `origin_pos`.
 
-Returns the two corner positions and the number of nodes.
+Returns the two corner positions and the number of nodes, or nil.
 
-### count = worldedit.deserialize(originpos, value)
+### count = worldedit.deserialize(origin_pos, value)
 
-Loads the nodes represented by string `value` at position `originpos`.
+Loads the nodes represented by string `value` at position `origin_pos`.
 
-Returns the number of nodes deserialized.
+Returns the number of nodes deserialized or nil.
 
 Code
 ----
