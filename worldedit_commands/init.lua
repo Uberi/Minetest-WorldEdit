@@ -1,7 +1,5 @@
 minetest.register_privilege("worldedit", "Can use WorldEdit commands")
 
---wip: fold the hollow stuff into the main functions and add a hollow flag at the end, then add the compatibility stuff
-
 worldedit.set_pos = {}
 worldedit.inspect = {}
 
@@ -340,10 +338,11 @@ minetest.register_chatcommand("/replace", {
 	description = "Replace all instances of <search node> with <replace node> in the current WorldEdit region",
 	privs = {worldedit=true},
 	func = safe_region(function(name, param)
-		local found, _, searchnode, replacenode = param:find("^([^%s]+)%s+(.+)$")
-		local newsearchnode = worldedit.normalize_nodename(searchnode)
-		local newreplacenode = worldedit.normalize_nodename(replacenode)
-		local count = worldedit.replace(worldedit.pos1[name], worldedit.pos2[name], newsearchnode, newreplacenode)
+		local found, _, search_node, replace_node = param:find("^([^%s]+)%s+(.+)$")
+		local norm_search_node = worldedit.normalize_nodename(search_node)
+		local norm_replace_node = worldedit.normalize_nodename(replace_node)
+		local count = worldedit.replace(worldedit.pos1[name], worldedit.pos2[name],
+				norm_search_node, norm_replace_node)
 		worldedit.player_notify(name, count .. " nodes replaced")
 	end, check_replace),
 })
@@ -353,10 +352,11 @@ minetest.register_chatcommand("/replaceinverse", {
 	description = "Replace all nodes other than <search node> with <replace node> in the current WorldEdit region",
 	privs = {worldedit=true},
 	func = safe_region(function(name, param)
-		local found, _, searchnode, replacenode = param:find("^([^%s]+)%s+(.+)$")
-		local newsearchnode = worldedit.normalize_nodename(searchnode)
-		local newreplacenode = worldedit.normalize_nodename(replacenode)
-		local count = worldedit.replaceinverse(worldedit.pos1[name], worldedit.pos2[name], searchnode, replacenode)
+		local found, _, search_node, replace_node = param:find("^([^%s]+)%s+(.+)$")
+		local norm_search_node = worldedit.normalize_nodename(search_node)
+		local norm_replace_node = worldedit.normalize_nodename(replace_node)
+		local count = worldedit.replace(worldedit.pos1[name], worldedit.pos2[name],
+				norm_search_node, norm_replace_node, true)
 		worldedit.player_notify(name, count .. " nodes replaced")
 	end, check_replace),
 })
@@ -383,7 +383,7 @@ minetest.register_chatcommand("/hollowsphere", {
 	func = safe_region(function(name, param)
 		local found, _, radius, nodename = param:find("^(%d+)%s+(.+)$")
 		local node = get_node(name, nodename)
-		local count = worldedit.hollow_sphere(worldedit.pos1[name], tonumber(radius), node)
+		local count = worldedit.sphere(worldedit.pos1[name], tonumber(radius), node, true)
 		worldedit.player_notify(name, count .. " nodes added")
 	end, check_sphere),
 })
@@ -422,7 +422,7 @@ minetest.register_chatcommand("/hollowdome", {
 	func = safe_region(function(name, param)
 		local found, _, radius, nodename = param:find("^(%d+)%s+(.+)$")
 		local node = get_node(name, nodename)
-		local count = worldedit.hollow_dome(worldedit.pos1[name], tonumber(radius), node)
+		local count = worldedit.dome(worldedit.pos1[name], tonumber(radius), node, true)
 		worldedit.player_notify(name, count .. " nodes added")
 	end, check_dome),
 })
@@ -466,7 +466,7 @@ minetest.register_chatcommand("/hollowcylinder", {
 			length = length * sign
 		end
 		local node = get_node(name, nodename)
-		local count = worldedit.hollow_cylinder(worldedit.pos1[name], axis, length, tonumber(radius), node)
+		local count = worldedit.cylinder(worldedit.pos1[name], axis, length, tonumber(radius), node, true)
 		worldedit.player_notify(name, count .. " nodes added")
 	end, check_cylinder),
 })
@@ -1114,7 +1114,7 @@ minetest.register_chatcommand("/clearobjects", {
 	description = "Clears all objects within the WorldEdit region",
 	privs = {worldedit=true},
 	func = safe_region(function(name, param)
-		local count = worldedit.clearobjects(worldedit.pos1[name], worldedit.pos2[name])
+		local count = worldedit.clear_objects(worldedit.pos1[name], worldedit.pos2[name])
 		worldedit.player_notify(name, count .. " objects cleared")
 	end),
 })

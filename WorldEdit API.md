@@ -21,9 +21,9 @@ Manipulations
 -------------
 Contained in manipulations.lua, this module allows several node operations to be applied over a region.
 
-### count = worldedit.set(pos1, pos2, nodename)
+### count = worldedit.set(pos1, pos2, node_name)
 
-Sets a region defined by positions `pos1` and `pos2` to `nodename`. To clear a region, use "air" as the value of `nodename`.
+Sets a region defined by positions `pos1` and `pos2` to `node_name`. To clear a region, use "air" as the value of `node_name`.
 
 Returns the number of nodes set.
 
@@ -109,51 +109,33 @@ Primitives
 ----------
 Contained in primitives.lua, this module allows the creation of several geometric primitives.
 
-### count = worldedit.hollow_sphere(pos, radius, nodename)
+### count = worldedit.sphere(pos, radius, node_name, hollow)
 
-Adds a hollow sphere centered at `pos` with radius `radius`, composed of `nodename`.
-
-Returns the number of nodes added.
-
-### count = worldedit.sphere(pos, radius, nodename)
-
-Adds a sphere centered at `pos` with radius `radius`, composed of `nodename`.
+Adds a sphere centered at `pos` with radius `radius`, composed of `node_name`.
 
 Returns the number of nodes added.
 
-### count = worldedit.hollow_dome(pos, radius, nodename)
+### count = worldedit.dome(pos, radius, node_name, hollow)
 
-Adds a hollow dome centered at `pos` with radius `radius`, composed of `nodename`.
-
-Returns the number of nodes added.
-
-### count = worldedit.dome(pos, radius, nodename)
-
-Adds a dome centered at `pos` with radius `radius`, composed of `nodename`.
+Adds a dome centered at `pos` with radius `radius`, composed of `node_name`.
 
 Returns the number of nodes added.
 
-### count = worldedit.hollow_cylinder(pos, axis, length, radius, nodename)
+### count = worldedit.cylinder(pos, axis, length, radius, node_name, hollow)
 
-Adds a hollow cylinder at `pos` along the `axis` axis ("x" or "y" or "z") with length `length` and radius `radius`, composed of `nodename`.
-
-Returns the number of nodes added.
-
-### count = worldedit.cylinder(pos, axis, length, radius, nodename)
-
-Adds a cylinder at `pos` along the `axis` axis ("x" or "y" or "z") with length `length` and radius `radius`, composed of `nodename`.
+Adds a cylinder at `pos` along the `axis` axis ("x" or "y" or "z") with length `length` and radius `radius`, composed of `node_name`.
 
 Returns the number of nodes added.
 
-### count = worldedit.pyramid(pos, axis, height, nodename)
+### count = worldedit.pyramid(pos, axis, height, node_name)
 
 Adds a pyramid centered at `pos` along the `axis` axis ("x" or "y" or "z") with height `height`.
 
 Returns the number of nodes added.
 
-### count = worldedit.spiral(pos, length, height, spacer, nodename)
+### count = worldedit.spiral(pos, length, height, spacer, node_name)
 
-Adds a spiral centered at `pos` with side length `length`, height `height`, space between walls `spacer`, composed of `nodename`.
+Adds a spiral centered at `pos` with side length `length`, height `height`, space between walls `spacer`, composed of `node_name`.
 
 Returns the number of nodes added.
 
@@ -173,15 +155,15 @@ Hides all nodes in a region defined by positions `pos1` and `pos2` by non-destru
 
 Returns the number of nodes hidden.
 
-### count = worldedit.suppress(pos1, pos2, nodename)
+### count = worldedit.suppress(pos1, pos2, node_name)
 
-Suppresses all instances of `nodename` in a region defined by positions `pos1` and `pos2` by non-destructively replacing them with invisible nodes.
+Suppresses all instances of `node_name` in a region defined by positions `pos1` and `pos2` by non-destructively replacing them with invisible nodes.
 
 Returns the number of nodes suppressed.
 
-### count = worldedit.highlight(pos1, pos2, nodename)
+### count = worldedit.highlight(pos1, pos2, node_name)
 
-Highlights all instances of `nodename` in a region defined by positions `pos1` and `pos2` by non-destructively hiding all other nodes.
+Highlights all instances of `node_name` in a region defined by positions `pos1` and `pos2` by non-destructively hiding all other nodes.
 
 Returns the number of nodes found.
 

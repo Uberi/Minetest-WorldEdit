@@ -19,7 +19,7 @@ worldedit.mark_pos1 = function(name)
 		--add marker
 		worldedit.marker1[name] = minetest.add_entity(pos1, "worldedit:pos1")
 		if worldedit.marker1[name] ~= nil then
-			worldedit.marker1[name]:get_luaentity().name = name
+			worldedit.marker1[name]:get_luaentity().player_name = name
 		end
 	end
 	worldedit.mark_region(name)
@@ -42,7 +42,7 @@ worldedit.mark_pos2 = function(name)
 		--add marker
 		worldedit.marker2[name] = minetest.add_entity(pos2, "worldedit:pos2")
 		if worldedit.marker2[name] ~= nil then
-			worldedit.marker2[name]:get_luaentity().name = name
+			worldedit.marker2[name]:get_luaentity().player_name = name
 		end
 	end
 	worldedit.mark_region(name)
@@ -76,7 +76,7 @@ worldedit.mark_region = function(name)
 				visual_size={x=sizex * 2, y=sizey * 2},
 				collisionbox = {-sizex, -sizey, -thickness, sizex, sizey, thickness},
 			})
-			marker:get_luaentity().name = name
+			marker:get_luaentity().player_name = name
 			table.insert(markers, marker)
 		end
 
@@ -88,7 +88,7 @@ worldedit.mark_region = function(name)
 				collisionbox = {-thickness, -sizey, -sizez, thickness, sizey, sizez},
 			})
 			marker:setyaw(math.pi / 2)
-			marker:get_luaentity().name = name
+			marker:get_luaentity().player_name = name
 			table.insert(markers, marker)
 		end
 
@@ -107,13 +107,13 @@ minetest.register_entity(":worldedit:pos1", {
 		physical = false,
 	},
 	on_step = function(self, dtime)
-		if worldedit.marker1[self.name] == nil then
+		if worldedit.marker1[self.player_name] == nil then
 			self.object:remove()
 		end
 	end,
 	on_punch = function(self, hitter)
 		self.object:remove()
-		worldedit.marker1[self.name] = nil
+		worldedit.marker1[self.player_name] = nil
 	end,
 })
 
@@ -128,13 +128,13 @@ minetest.register_entity(":worldedit:pos2", {
 		physical = false,
 	},
 	on_step = function(self, dtime)
-		if worldedit.marker2[self.name] == nil then
+		if worldedit.marker2[self.player_name] == nil then
 			self.object:remove()
 		end
 	end,
 	on_punch = function(self, hitter)
 		self.object:remove()
-		worldedit.marker2[self.name] = nil
+		worldedit.marker2[self.player_name] = nil
 	end,
 })
 
@@ -147,15 +147,16 @@ minetest.register_entity(":worldedit:region_cube", {
 		physical = false,
 	},
 	on_step = function(self, dtime)
-		if worldedit.marker_region[self.name] == nil then
+		if worldedit.marker_region[self.player_name] == nil then
 			self.object:remove()
 			return
 		end
 	end,
 	on_punch = function(self, hitter)
-		for _, entity in ipairs(worldedit.marker_region[self.name]) do
+		for _, entity in ipairs(worldedit.marker_region[self.player_name]) do
 			entity:remove()
 		end
-		worldedit.marker_region[self.name] = nil
+		worldedit.marker_region[self.player_name] = nil
 	end,
 })
+

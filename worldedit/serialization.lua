@@ -1,5 +1,5 @@
-worldedit = worldedit or {}
-local minetest = minetest -- Local copy of global
+--- Schematic serialization and deserialiation.
+-- @module worldedit.serialization
 
 worldedit.LATEST_SERIALIZATION_VERSION = 5
 local LATEST_SERIALIZATION_HEADER = worldedit.LATEST_SERIALIZATION_VERSION .. ":"
@@ -52,11 +52,10 @@ end
 -- @return The serialized data.
 -- @return The number of nodes serialized.
 function worldedit.serialize(pos1, pos2)
-	-- Keep area loaded
-	local manip = minetest.get_voxel_manip()
-	manip:read_from_map(pos1, pos2)
+	pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 
-	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
+	worldedit.keep_loaded(pos1, pos2)
+
 	local pos = {x=pos1.x, y=0, z=0}
 	local count = 0
 	local result = {}
@@ -112,7 +111,7 @@ end
 -- Contains code based on [table.save/table.load](http://lua-users.org/wiki/SaveTableToFile)
 -- by ChillCode, available under the MIT license.
 -- @return A node list in the latest format, or nil on failure.
-function worldedit.load_schematic(value)
+local function load_schematic(value)
 	local version, header, content = worldedit.read_header(value)
 	local nodes = {}
 	if version == 1 or version == 2 then -- Original flat table format
@@ -187,15 +186,15 @@ end
 -- @return Low corner position.
 -- @return High corner position.
 -- @return The number of nodes.
-worldedit.allocate = function(origin_pos, value)
-	local nodes = worldedit.load_schematic(value)
+function worldedit.allocate(origin_pos, value)
+	local nodes = load_schematic(value)
 	if not nodes then return nil end
 	return worldedit.allocate_with_nodes(origin_pos, nodes)
 end
 
 
 -- Internal
-worldedit.allocate_with_nodes = function(origin_pos, nodes)
+function worldedit.allocate_with_nodes(origin_pos, nodes)
 	local huge = math.huge
 	local pos1x, pos1y, pos1z = huge, huge, huge
 	local pos2x, pos2y, pos2z = -huge, -huge, -huge
@@ -217,14 +216,12 @@ end
 
 --- Loads the nodes represented by string `value` at position `origin_pos`.
 -- @return The number of nodes deserialized.
-worldedit.deserialize = function(origin_pos, value)
-	local nodes = worldedit.load_schematic(value)
+function worldedit.deserialize(origin_pos, value)
+	local nodes = load_schematic(value)
 	if not nodes then return nil end
 
-	-- Make area stay loaded
 	local pos1, pos2 = worldedit.allocate_with_nodes(origin_pos, nodes)
-	local manip = minetest.get_voxel_manip()
-	manip:read_from_map(pos1, pos2)
+	worldedit.keep_loaded(pos1, pos2)
 
 	local origin_x, origin_y, origin_z = origin_pos.x, origin_pos.y, origin_pos.z
 	local count = 0

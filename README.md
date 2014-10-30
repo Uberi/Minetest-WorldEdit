@@ -1,4 +1,4 @@
-WorldEdit v1.0 for Minetest 0.4.8+
+WorldEdit v1.1 for Minetest 0.4.8+
 ==================================
 The ultimate in-game world editing tool for [Minetest](http://minetest.net/)! Tons of functionality to help with building, fixing, and more.
 
@@ -41,9 +41,9 @@ Interface
 ---------
 WorldEdit is accessed in-game in two main ways.
 
-The GUI adds a screen to each player's inventory that gives access to various WorldEdit functions. The [tutorial](Tutorial.md) and the [Chat Commands Reference](Chat Commands.md) may be helpful in learning to use it.
+The GUI adds a screen to each player's inventory that gives access to various WorldEdit functions. The [tutorial](Tutorial.md) and the [Chat Commands Reference](ChatCommands.md) may be helpful in learning to use it.
 
-The chat interface adds many chat commands that perform various WorldEdit powered tasks. It is documented in the [Chat Commands Reference](Chat Commands.md).
+The chat interface adds many chat commands that perform various WorldEdit powered tasks. It is documented in the [Chat Commands Reference](ChatCommands.md).
 
 Compatibility
 -------------

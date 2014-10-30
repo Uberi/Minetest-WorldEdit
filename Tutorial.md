@@ -107,7 +107,7 @@ Step 4: Other commands
 ----------------------
 ### Chat Commands
 
-There are many more commands than what is shown here. See the [Chat Commands Reference](Chat Commands.md) for a detailed list of them, along with descriptions and examples for every single one.
+There are many more commands than what is shown here. See the [Chat Commands Reference](ChatCommands.md) for a detailed list of them, along with descriptions and examples for every single one.
 
 If you're in-game and forgot how a command works, just use the `/help <command name>` command, without the first forward slash. For example, to see some information about the `//set <node>` command mentioned earlier, simply use `/help /set`.
 
@@ -115,6 +115,6 @@ A very useful command to check out is the `//save <schematic>` command, which ca
 
 ### WorldEdit GUI
 
-This only scratches the surface of what WorldEdit is capable of. Most of the functions in the WorldEdit GUI correspond to chat commands, and so the [Chat Commands Reference](Chat Commands.md) may be useful if you get stuck.
+This only scratches the surface of what WorldEdit is capable of. Most of the functions in the WorldEdit GUI correspond to chat commands, and so the [Chat Commands Reference](ChatCommands.md) may be useful if you get stuck.
 
 It is helpful to explore the various buttons in the interface and check out what they do. Learning the chat command interface is also useful if you use WorldEdit intensively - an experienced chat command user can usually work faster than an experienced WorldEdit GUI user.
