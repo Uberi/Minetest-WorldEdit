@@ -114,7 +114,7 @@ end
 -- @return A node list in the latest format, or nil on failure.
 function worldedit.load_schematic(value)
 	local version, header, content = worldedit.read_header(value)
-	local nodes
+	local nodes = {}
 	if version == 1 or version == 2 then -- Original flat table format
 		local tables = minetest.deserialize(content)
 		if not tables then return nil end
