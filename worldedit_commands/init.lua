@@ -641,7 +641,7 @@ minetest.register_chatcommand("/stack2", {
 		end
 		repetitions = tonumber(repetitions)
 
-		local x, y, z = incs:match("([+-]?%d+) ([+-]%d+) ([+-]%d+)")
+		local x, y, z = incs:match("([+-]?%d+) ([+-]?%d+) ([+-]?%d+)")
 		if x == nil then
 			worldedit.player_notify(name, "invalid increments: " .. param)
 			return

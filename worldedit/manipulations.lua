@@ -286,7 +286,7 @@ worldedit.stack2 = function(pos1, pos2, direction, amount, finished)
 	local i = 0
 	local translated = {x=0,y=0,z=0}
 	local function nextone()
-		if i <= amount then
+		if i < amount then
 			i = i + 1
 			translated.x = translated.x + direction.x
 			translated.y = translated.y + direction.y
