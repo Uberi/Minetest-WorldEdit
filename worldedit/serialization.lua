@@ -199,7 +199,7 @@ worldedit.allocate_with_nodes = function(origin_pos, nodes)
 	local pos2x, pos2y, pos2z = -huge, -huge, -huge
 	local origin_x, origin_y, origin_z = origin_pos.x, origin_pos.y, origin_pos.z
 	for i, entry in ipairs(nodes) do
-		x, y, z = origin_x + entry.x, origin_y + entry.y, origin_z + entry.z
+		local x, y, z = origin_x + entry.x, origin_y + entry.y, origin_z + entry.z
 		if x < pos1x then pos1x = x end
 		if y < pos1y then pos1y = y end
 		if z < pos1z then pos1z = z end
