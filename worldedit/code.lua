@@ -26,7 +26,7 @@ worldedit.lua = function(code)
 	if not func then  -- Syntax error
 		return err
 	end
-	local good, err = pcall(operation)
+	local good, err = pcall(func)
 	if not good then  -- Runtime error
 		return err
 	end
