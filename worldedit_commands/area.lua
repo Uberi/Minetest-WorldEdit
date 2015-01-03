@@ -217,11 +217,11 @@ minetest.register_chatcommand(
 minetest.register_chatcommand(
    "/expand",
    {
-      params = "<amount> [reverse-amount] [x|y|z]",
+      params = "<amount> [reverse-amount] [up|down|left|right|front|back]",
       description = "expand the selection in one or two directions at once",
       privs = {worldedit=true},
       func = function(name, param)
-	 local find, _, amount, arg2, arg3 = param:find("^(%d+)[%s+]?([%w+]?)[%s+]?([xyz]?)$")
+	 local find, _, amount, arg2, arg3 = param:find("(%d+)%s*(%w*)%s*(%l*)")
 
 	 if find == nil then
 	    worldedit.player_notify(name, "invalid use: " .. param)
@@ -239,19 +239,15 @@ minetest.register_chatcommand(
 	 mark = worldedit.get_marker_in_axis(name, axis, direction)
 
 	 if arg3 ~= "" then
-	    axis = arg3
+	    axis, direction = worldedit.translate_directions(name, arg3)
+	    worldedit.player_notify(name, "arg3: " .. arg3)
 	 end
 	 
 	 if arg2 ~= "" then
 	    local tmp = tonumber(arg2)
 
 	    if tmp == nil then
-	       if arg2:find("[xyz]") then
-		  axis = arg2
-	       else
-		  minetest.debug("worldedit: expand command. Something wrong.")
-		  return false
-	       end
+	       axis, direction = worldedit.translate_directions(name, arg2)
 	    else
 	       local tmpmark
 	       if mark == 1 then
@@ -260,10 +256,18 @@ minetest.register_chatcommand(
 		  tmpmark = 1
 	       end
 
+	       if axis == nil or direction == nil then
+		  return false, "Invalid use: " .. param
+	       end
+
 	       worldedit.move_marker(name, tmpmark, axis, tmp * direction * -1)
 	    end
 	 end
 
+	 if axis == nil or direction == nil then
+	    return false, "Invalid use: " .. param
+	 end
+	 
 	 worldedit.player_notify(name, "mark1 x:" .. worldedit.pos1[name].x .. "y:" .. worldedit.pos1[name].y .. "z:" .. worldedit.pos1[name].z)
 	 worldedit.move_marker(name, mark, axis, amount * direction)
 	 worldedit.player_notify(name, "mark1 x:" .. worldedit.pos1[name].x .. "y:" .. worldedit.pos1[name].y .. "z:" .. worldedit.pos1[name].z)
@@ -273,6 +277,7 @@ minetest.register_chatcommand(
    }
 )
 
+-- Return the marker that is closest to the player
 worldedit.get_closest_marker = function(name)
    local playerpos = minetest.get_player_by_name(name):getpos()
 
@@ -325,6 +330,7 @@ worldedit.get_marker_in_axis = function(name, axis, direction)
    end
 end
 
+-- Moves the selected marker in a single axis by amount nodes
 worldedit.move_marker = function(name, marker, axis, amount)
    local pos1 = worldedit.pos1[name]
    local pos2 = worldedit.pos2[name]
@@ -354,6 +360,7 @@ worldedit.move_marker = function(name, marker, axis, amount)
    end
 end
 
+-- Updates the location ingame of the markers
 worldedit.update_markers = function(name, marker)
    if marker == nil then
       worldedit.mark_pos1(name)
@@ -365,4 +372,52 @@ worldedit.update_markers = function(name, marker)
    else
       minetest.debug("worldedit: Invalid execution of function update_markers")
    end
+end
+
+
+-- Translates up, down, left, right, front, back to their corresponding axes and directions according to faced direction
+worldedit.translate_directions = function(name, direction)
+   local axis, dir = worldedit.player_axis(name)
+   local resaxis, resdir
+
+   if direction == "up" then
+      return 'y', 1
+   end
+
+   if direction == "down" then
+      return 'y', -1
+   end
+
+   if direction == "front" then
+      resaxis = axis
+      resdir = dir
+   end
+
+   if direction == "back" then
+      resaxis = axis
+      resdir = -dir
+   end
+
+   if direction == "left" then
+      if axis == 'x' then
+	 resaxis = 'z'
+      elseif axis == 'z' then
+	 resaxis = 'x'
+      end
+
+      resdir = -dir
+   end
+
+   if direction == "right" then
+      if axis == 'x' then
+	 resaxis = 'z'
+      elseif axis == 'z' then
+	 resaxis = 'x'
+      end
+
+      resdir = dir
+   end   
+
+   return resaxis, resdir
+   
 end
