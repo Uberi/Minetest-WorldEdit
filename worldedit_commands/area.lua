@@ -240,7 +240,7 @@ minetest.register_chatcommand(
 
 	 if arg3 ~= "" then
 	    axis, direction = worldedit.translate_directions(name, arg3)
-	    worldedit.player_notify(name, "arg3: " .. arg3)
+	    mark = worldedit.get_marker_in_axis(name, axis, direction)
 	 end
 	 
 	 if arg2 ~= "" then
@@ -248,6 +248,7 @@ minetest.register_chatcommand(
 
 	    if tmp == nil then
 	       axis, direction = worldedit.translate_directions(name, arg2)
+	       mark = worldedit.get_marker_in_axis(name, axis, direction)
 	    else
 	       local tmpmark
 	       if mark == 1 then
@@ -267,15 +268,76 @@ minetest.register_chatcommand(
 	 if axis == nil or direction == nil then
 	    return false, "Invalid use: " .. param
 	 end
-	 
-	 worldedit.player_notify(name, "mark1 x:" .. worldedit.pos1[name].x .. "y:" .. worldedit.pos1[name].y .. "z:" .. worldedit.pos1[name].z)
-	 worldedit.move_marker(name, mark, axis, amount * direction)
-	 worldedit.player_notify(name, "mark1 x:" .. worldedit.pos1[name].x .. "y:" .. worldedit.pos1[name].y .. "z:" .. worldedit.pos1[name].z)
+
+	 worldedit.move_marker(name, mark, axis, amount * direction)	 
 	 worldedit.update_markers(name)
-	 worldedit.player_notify(name, "Area expanded by " .. amount .. " on " .. axis)
+	 worldedit.player_notify(name, "Area expanded by " .. amount)
       end,
    }
 )
+
+minetest.register_chatcommand(
+   "/contract",
+   {
+      params = "<amount> [reverse-amount] [up|down|left|right|front|back]",
+      description = "contract the selection in one or two directions at once",
+      privs = {worldedit=true},
+      func = function(name, param)
+	 local find, _, amount, arg2, arg3 = param:find("(%d+)%s*(%w*)%s*(%l*)")
+
+	 if find == nil then
+	    worldedit.player_notify(name, "invalid use: " .. param)
+	    return
+	 end
+
+	 if worldedit.pos1[name] == nil or worldedit.pos2[name] == nil then
+	    worldedit.player_notify(name, "Undefined region. Region must be defined beforehand.")
+	    return
+	 end
+
+	 local axis, direction, mark
+
+	 axis, direction = worldedit.player_axis(name)
+	 mark = worldedit.get_marker_in_axis(name, axis, direction)
+
+	 if arg3 ~= "" then
+	    axis, direction = worldedit.translate_directions(name, arg3)
+	    mark = worldedit.get_marker_in_axis(name, axis, direction)
+	 end
+	 
+	 if arg2 ~= "" then
+	    local tmp = tonumber(arg2)
+
+	    if tmp == nil then
+	       axis, direction = worldedit.translate_directions(name, arg2)
+	       mark = worldedit.get_marker_in_axis(name, axis, direction)
+	    else
+	       local tmpmark
+	       if mark == 1 then
+		  tmpmark = 2
+	       else
+		  tmpmark = 1
+	       end
+
+	       if axis == nil or direction == nil then
+		  return false, "Invalid use: " .. param
+	       end
+
+	       worldedit.move_marker(name, tmpmark, axis, tmp * direction)
+	    end
+	 end
+
+	 if axis == nil or direction == nil then
+	    return false, "Invalid use: " .. param
+	 end
+
+	 worldedit.move_marker(name, mark, axis, amount * direction * -1)	 
+	 worldedit.update_markers(name)
+	 worldedit.player_notify(name, "Area contracted by " .. amount)
+      end,
+   }
+)
+
 
 -- Return the marker that is closest to the player
 worldedit.get_closest_marker = function(name)
@@ -326,7 +388,7 @@ worldedit.get_marker_in_axis = function(name, axis, direction)
 	 return 2
       end
    else
-      minetest.debug("worldedit.get_marker_in_axis: invalid axis. Value was: " .. axis)
+      minetest.debug("worldedit.get_marker_in_axis: invalid axis.")
    end
 end
 
@@ -401,21 +463,21 @@ worldedit.translate_directions = function(name, direction)
    if direction == "left" then
       if axis == 'x' then
 	 resaxis = 'z'
+	 resdir = dir
       elseif axis == 'z' then
 	 resaxis = 'x'
+	 resdir = -dir
       end
-
-      resdir = -dir
    end
 
    if direction == "right" then
       if axis == 'x' then
 	 resaxis = 'z'
+	 resdir = -dir
       elseif axis == 'z' then
 	 resaxis = 'x'
+	 resdir = dir
       end
-
-      resdir = dir
    end   
 
    return resaxis, resdir
