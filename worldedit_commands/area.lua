@@ -233,39 +233,25 @@ minetest.register_chatcommand(
 	    return
 	 end
 
-	 local pos1 = worldedit.pos1[name]
-	 local pos2 = worldedit.pos2[name]
-	 local axis, dir
-
+	 local axis, direction, closest_mark
+	 
 	 if arg2 == "" and arg3 == "" then
-	    axis, dir = worldedit.player_axis(name)
-	    if worldedit.get_closest_marker(name) == 1 then
-	       if axis == 'x' then
-		  worldedit.pos2[name].x = pos2.x + (amount * dir)
-	       elseif axis == 'y' then
-		  worldedit.pos2[name].y = pos2.y + (amount * dir)
-	       elseif axis == 'z' then
-		  worldedit.pos2[name].z = pos2.z + (amount * dir)
-	       end
-
-	       worldedit.mark_pos2(name)
-	    else
-	       if axis == 'x' then
-		  worldedit.pos1[name].x = pos1.x + (amount * dir)
-	       elseif axis == 'y' then
-		  worldedit.pos1[name].y = pos1.y + (amount * dir)
-	       elseif axis == 'z' then
-		  worldedit.pos1[name].z = pos1.z + (amount * dir)
-	       end
-
-	       worldedit.mark_pos1(name)
-	    end
-	 elseif arg2 ~= "" and arg3 == "" then
-	    -- TODO
-	 elseif arg2 ~= "" and arg3 ~= "" then
-	    -- TODO
+	    axis, direction = worldedit.player_axis(name)
+	 else
+	    worldedit.player_notify("WIP :)")
+	    return
 	 end
 
+	 closest_mark = worldedit.get_closest_marker(name)
+
+	 if closest_mark == 1 then
+	    closest_mark = 2
+	 else
+	    closest_mark = 1
+	 end
+	 
+	 worldedit.move_marker(name, closest_mark, axis, amount * direction)
+	 worldedit.update_markers(name)
 	 worldedit.player_notify(name, "Area expanded by " .. amount .. " on " .. axis)
       end,
    }
@@ -281,5 +267,47 @@ worldedit.get_closest_marker = function(name)
       return 1
    else
       return 2
+   end
+end
+
+worldedit.move_marker = function(name, marker, axis, amount)
+   local pos1 = worldedit.pos1[name]
+   local pos2 = worldedit.pos2[name]
+   
+   if marker == 1 then
+      if axis == 'x' then
+	 worldedit.pos1[name].x = pos1.x + amount
+      elseif axis == 'y' then
+	 worldedit.pos1[name].y = pos1.y + amount
+      elseif axis == 'z' then
+	 worldedit.pos1[name].z = pos1.z + amount
+      else
+	 minetest.debug("worldedit: Invalid axis in move_marker. Value was: " .. axis)
+      end
+   elseif marker == 2 then
+      if axis == 'x' then
+	 worldedit.pos2[name].x = pos2.x + amount
+      elseif axis == 'y' then
+	 worldedit.pos2[name].y = pos2.y + amount
+      elseif axis == 'z' then
+	 worldedit.pos2[name].z = pos2.z + amount
+      else
+	 minetest.debug("worldedit: Invalid axis in move_marker. Value was: " .. axis)
+      end
+   else
+      minetest.debug("Bad marker id at worldedit.move_marker")
+   end
+end
+
+worldedit.update_markers = function(name, marker)
+   if marker == nil then
+      worldedit.mark_pos1(name)
+      worldedit.mark_pos2(name)
+   elseif marker == 1 then
+      worldedit.mark_pos1(name)
+   elseif marker == 2 then
+      worldedit.mark_pos2(name)
+   else
+      minetest.debug("worldedit: Invalid execution of function update_markers")
    end
 end
