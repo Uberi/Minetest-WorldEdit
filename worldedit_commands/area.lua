@@ -217,7 +217,7 @@ minetest.register_chatcommand(
 minetest.register_chatcommand(
    "/expand",
    {
-      params = "<amount> [reverse-amount] [direction]",
+      params = "<amount> [reverse-amount] [x|y|z]",
       description = "expand the selection in one or two directions at once",
       privs = {worldedit=true},
       func = function(name, param)
@@ -233,24 +233,40 @@ minetest.register_chatcommand(
 	    return
 	 end
 
-	 local axis, direction, closest_mark
-	 
-	 if arg2 == "" and arg3 == "" then
-	    axis, direction = worldedit.player_axis(name)
-	 else
-	    worldedit.player_notify("WIP :)")
-	    return
-	 end
+	 local axis, direction, mark
 
-	 closest_mark = worldedit.get_closest_marker(name)
+	 axis, direction = worldedit.player_axis(name)
+	 mark = worldedit.get_marker_in_axis(name, axis, direction)
 
-	 if closest_mark == 1 then
-	    closest_mark = 2
-	 else
-	    closest_mark = 1
+	 if arg3 ~= "" then
+	    axis = arg3
 	 end
 	 
-	 worldedit.move_marker(name, closest_mark, axis, amount * direction)
+	 if arg2 ~= "" then
+	    local tmp = tonumber(arg2)
+
+	    if tmp == nil then
+	       if arg2:find("[xyz]") then
+		  axis = arg2
+	       else
+		  minetest.debug("worldedit: expand command. Something wrong.")
+		  return false
+	       end
+	    else
+	       local tmpmark
+	       if mark == 1 then
+		  tmpmark = 2
+	       else
+		  tmpmark = 1
+	       end
+
+	       worldedit.move_marker(name, tmpmark, axis, tmp * direction * -1)
+	    end
+	 end
+
+	 worldedit.player_notify(name, "mark1 x:" .. worldedit.pos1[name].x .. "y:" .. worldedit.pos1[name].y .. "z:" .. worldedit.pos1[name].z)
+	 worldedit.move_marker(name, mark, axis, amount * direction)
+	 worldedit.player_notify(name, "mark1 x:" .. worldedit.pos1[name].x .. "y:" .. worldedit.pos1[name].y .. "z:" .. worldedit.pos1[name].z)
 	 worldedit.update_markers(name)
 	 worldedit.player_notify(name, "Area expanded by " .. amount .. " on " .. axis)
       end,
@@ -267,6 +283,45 @@ worldedit.get_closest_marker = function(name)
       return 1
    else
       return 2
+   end
+end
+
+
+-- returns which marker is closest to the specified axis and direction
+worldedit.get_marker_in_axis = function(name, axis, direction)
+   local pos1 = {x = 0, y = 0, z = 0}
+   local pos2 = {x = 0, y = 0, z = 0}
+
+   if direction ~= 1 and direction ~= -1 then
+      return nil
+   end
+
+   if axis == 'x' then
+      pos1.x = worldedit.pos1[name].x * direction
+      pos2.x = worldedit.pos2[name].x * direction
+      if pos1.x > pos2.x then
+	 return 1
+      else
+	 return 2
+      end
+   elseif axis == 'y' then
+      pos1.y = worldedit.pos1[name].y * direction
+      pos2.y = worldedit.pos2[name].y * direction
+      if pos1.y > pos2.y then
+	 return 1
+      else
+	 return 2
+      end
+   elseif axis == 'z' then
+      pos1.z = worldedit.pos1[name].z * direction
+      pos2.z = worldedit.pos2[name].z * direction
+      if pos1.z > pos2.z then
+	 return 1
+      else
+	 return 2
+      end
+   else
+      minetest.debug("worldedit.get_marker_in_axis: invalid axis. Value was: " .. axis)
    end
 end
 
