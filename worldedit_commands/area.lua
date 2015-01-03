@@ -159,16 +159,15 @@ end
 minetest.register_chatcommand(
    "/shift",
    {
-      params = "[+|-]<amount> [x|y|z]",
+      params = "<amount> [up|down|left|right|front|back]",
       description = "Moves the selection region. Does not move contents.",
       privs = {worldedit=true},
       func = function(name, param)
 	 local pos1 = worldedit.pos1[name]
 	 local pos2 = worldedit.pos2[name]
-	 local find, _, sign, amount, axis = param:find("^([+-]?)(%d+)[%s+]?([xyz]?)$")
+	 local find, _, amount, direction = param:find("(%d+)%s*(%l*)")
 
 	 if find == nil then
-	    minetest.debug("entering if")
 	    worldedit.player_notify(name, "invalid usage: " .. param)
 	    return
 	 end
@@ -178,36 +177,21 @@ minetest.register_chatcommand(
 	    return
 	 end
 
-	 amount = tonumber(amount)
+	 local axis, dirsign
+	 
+	 if direction ~= "" then
+	    axis, dirsign = worldedit.translate_direction(name, direction)
+	 else
+	    axis, dirsign = worldedit.player_axis(name)
+	 end
 
-	 local direction = ""
-
-	 if sign ~= nil and sign == '-' then
-	    amount = amount * -1
+	 if axis == nil or dirsign == nil then
+	    return false, "Invalid usage: " .. param
 	 end
 	 
-	 if axis == "" then
-	    direction, _ = worldedit.player_axis(name)
-	    amount = amount * _
-	 else
-	    direction = axis
-	 end
-	 
-	 if direction == 'x' then
-	    worldedit.pos1[name].x = pos1.x + amount
-	    worldedit.pos2[name].x = pos2.x + amount
-	 elseif direction == 'y' then
-	    worldedit.pos1[name].y = pos1.y + amount
-	    worldedit.pos2[name].y = pos2.y + amount
-	 elseif direction == 'z' then
-	    worldedit.pos1[name].z = pos1.z + amount
-	    worldedit.pos2[name].z = pos2.z + amount
-	 else
-	    worldedit.player_notify(name, "unexpected error. direction = " .. direction)
-	 end
-
-	 worldedit.mark_pos1(name)
-	 worldedit.mark_pos2(name)
+	 worldedit.move_marker(name, 1, axis, amount * dirsign)
+	 worldedit.move_marker(name, 2, axis, amount * dirsign)
+	 worldedit.update_markers(name)
 
 	 worldedit.player_notify(name, "Area shifted by " .. amount .. " in " .. direction .. " axis")
       end,
@@ -239,7 +223,7 @@ minetest.register_chatcommand(
 	 mark = worldedit.get_marker_in_axis(name, axis, direction)
 
 	 if arg3 ~= "" then
-	    axis, direction = worldedit.translate_directions(name, arg3)
+	    axis, direction = worldedit.translate_direction(name, arg3)
 	    mark = worldedit.get_marker_in_axis(name, axis, direction)
 	 end
 	 
@@ -247,7 +231,7 @@ minetest.register_chatcommand(
 	    local tmp = tonumber(arg2)
 
 	    if tmp == nil then
-	       axis, direction = worldedit.translate_directions(name, arg2)
+	       axis, direction = worldedit.translate_direction(name, arg2)
 	       mark = worldedit.get_marker_in_axis(name, axis, direction)
 	    else
 	       local tmpmark
@@ -301,7 +285,7 @@ minetest.register_chatcommand(
 	 mark = worldedit.get_marker_in_axis(name, axis, direction)
 
 	 if arg3 ~= "" then
-	    axis, direction = worldedit.translate_directions(name, arg3)
+	    axis, direction = worldedit.translate_direction(name, arg3)
 	    mark = worldedit.get_marker_in_axis(name, axis, direction)
 	 end
 	 
@@ -309,7 +293,7 @@ minetest.register_chatcommand(
 	    local tmp = tonumber(arg2)
 
 	    if tmp == nil then
-	       axis, direction = worldedit.translate_directions(name, arg2)
+	       axis, direction = worldedit.translate_direction(name, arg2)
 	       mark = worldedit.get_marker_in_axis(name, axis, direction)
 	    else
 	       local tmpmark
@@ -438,7 +422,7 @@ end
 
 
 -- Translates up, down, left, right, front, back to their corresponding axes and directions according to faced direction
-worldedit.translate_directions = function(name, direction)
+worldedit.translate_direction = function(name, direction)
    local axis, dir = worldedit.player_axis(name)
    local resaxis, resdir
 
