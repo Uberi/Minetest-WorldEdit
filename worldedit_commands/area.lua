@@ -2,56 +2,48 @@ minetest.register_chatcommand(
    "/outset",
    {
       params = "<amount> [h|v]",
-      description = "expand the selection",
+      description = "outset the selection",
       privs = {worldedit=true},
       func = function(name, param)
 	 local find, _, amount, dir = param:find("^(%d+)[%s+]?([hv]?)$")
-	 local message
 
 	 if find == nil then
-	    worldedit.player_notify(name, "invalid usage: " .. param)
-	    return
+	    return false, "invalid usage: " .. param
 	 end
+
+	 local pos1 = worldedit.pos1[name]
+	 local pos2 = worldedit.pos2[name]
 	 
-	 if worldedit.pos1[name] == nil or worldedit.pos2[name] == nil then
-	    message = "Undefined region. Region must be defined beforehand."
-	 else
-	    amount = tonumber(amount)
-	    local curpos1 = worldedit.pos1[name]
-	    local curpos2 = worldedit.pos2[name]
-
-	    local dirs = worldedit.get_outset_directions(curpos1, curpos2)
-
-	    if dir == 'h' then
-	       worldedit.pos1[name].x = curpos1.x + (amount * dirs.x1)
-	       worldedit.pos1[name].z = curpos1.z + (amount * dirs.z1)
-
-	       worldedit.pos2[name].x = curpos2.x + (amount * dirs.x2)
-	       worldedit.pos2[name].z = curpos2.z + (amount * dirs.z2)
-
-	       message = "area expanded by " .. amount .. " blocks horizontally"
-	    elseif dir == 'v' then
-	       worldedit.pos1[name].y = curpos1.y + (amount * dirs.y1)
-	       worldedit.pos2[name].y = curpos2.y + (amount * dirs.y2)
-
-	       message = "area expanded by " .. amount .. " blocks vertically"
-	    else
-	       worldedit.pos1[name].x = curpos1.x + (amount * dirs.x1)
-	       worldedit.pos1[name].z = curpos1.z + (amount * dirs.z1)
-	       worldedit.pos1[name].y = curpos1.y + (amount * dirs.y1)
-
-	       worldedit.pos2[name].x = curpos2.x + (amount * dirs.x2)
-	       worldedit.pos2[name].z = curpos2.z + (amount * dirs.z2)
-	       worldedit.pos2[name].y = curpos2.y + (amount * dirs.y2)
-
-	       message = "area expanded by " .. amount .. " blocks in all axes"
-	    end
-
-	    worldedit.mark_pos1(name)
-	    worldedit.mark_pos2(name)
+	 if pos1 == nil or pos2 == nil then
+	    return false, "Undefined region. Region must be defined beforehand."
 	 end
 
-	 worldedit.player_notify(name, message)
+	 local dirs = worldedit.get_outset_directions(pos1, pos2)
+
+	 if dir == 'h' then
+	    worldedit.move_marker(name, 1, 'x', amount * dirs.x1)
+	    worldedit.move_marker(name, 1, 'z', amount * dirs.z1)
+
+	    worldedit.move_marker(name, 2, 'x', amount * dirs.x2)
+	    worldedit.move_marker(name, 2, 'z', amount * dirs.z2)
+	    message = "area outset by " .. amount .. " blocks horizontally"
+	 elseif dir == 'v' then
+	    worldedit.move_marker(name, 1, 'y', amount * dirs.y1)
+	    worldedit.move_marker(name, 2, 'y', amount * dirs.y2)
+	    message = "area outset by " .. amount .. " blocks vertically"
+	 else
+	    worldedit.move_marker(name, 1, 'x', amount * dirs.x1)
+	    worldedit.move_marker(name, 1, 'y', amount * dirs.y1)
+	    worldedit.move_marker(name, 1, 'z', amount * dirs.z1)
+
+	    worldedit.move_marker(name, 2, 'x', amount * dirs.x2)
+	    worldedit.move_marker(name, 2, 'y', amount * dirs.y2)
+	    worldedit.move_marker(name, 2, 'z', amount * dirs.z2)
+	    message = "area outset by " .. amount .. " blocks in all axes"
+	 end
+
+	 worldedit.update_markers(name)
+	 return true, message
       end,
    }
 )
@@ -60,56 +52,49 @@ minetest.register_chatcommand(
    "/inset",
    {
       params = "<amount> [h|v]",
-      description = "contract",
+      description = "inset the selection",
       privs = {worldedit=true},
       func = function(name, param)
 	 local find, _, amount, dir = param:find("^(%d+)[%s+]?([hv]?)$")
-	 local message = ""
 
 	 if find == nil then
-	    worldedit.player_notify(name, "invalid usage: " .. param)
-	    return
+	    return false, "invalid usage: " .. param
 	 end
+
+	 local pos1 = worldedit.pos1[name]
+	 local pos2 = worldedit.pos2[name]
 	 
-	 if worldedit.pos1[name] == nil or worldedit.pos2[name] == nil then
-	    message = "Undefined region. Region must be defined beforehand."
-	 else
-	    amount = tonumber(amount)
-	    local curpos1 = worldedit.pos1[name]
-	    local curpos2 = worldedit.pos2[name]
-
-	    local dirs = worldedit.get_outset_directions(curpos1, curpos2)
-
-	    if dir == 'h' then
-	       worldedit.pos1[name].x = curpos1.x - (amount * dirs.x1)
-	       worldedit.pos1[name].z = curpos1.z - (amount * dirs.z1)
-
-	       worldedit.pos2[name].x = curpos2.x - (amount * dirs.x2)
-	       worldedit.pos2[name].z = curpos2.z - (amount * dirs.z2)
-
-	       message = "area contracted by " .. amount .. " blocks horizontally"
-	    elseif dir == 'v' then
-	       worldedit.pos1[name].y = curpos1.y - (amount * dirs.y1)
-	       worldedit.pos2[name].y = curpos2.y - (amount * dirs.y2)
-
-	       message = "area contracted by " .. amount .. " blocks vertically"
-	    else
-	       worldedit.pos1[name].x = curpos1.x - (amount * dirs.x1)
-	       worldedit.pos1[name].z = curpos1.z - (amount * dirs.z1)
-	       worldedit.pos1[name].y = curpos1.y - (amount * dirs.y1)
-
-	       worldedit.pos2[name].x = curpos2.x - (amount * dirs.x2)
-	       worldedit.pos2[name].z = curpos2.z - (amount * dirs.z2)
-	       worldedit.pos2[name].y = curpos2.y - (amount * dirs.y2)
-
-	       message = "area contracted by " .. amount .. " blocks in all axes"
-	    end
-
-	    worldedit.mark_pos1(name)
-	    worldedit.mark_pos2(name)
+	 if pos1 == nil or pos2 == nil then
+	    return false, "Undefined region. Region must be defined beforehand."
 	 end
 
-	 worldedit.player_notify(name, message)
+	 local dirs = worldedit.get_outset_directions(pos1, pos2)
+	 amount = -amount
+	 
+	 if dir == 'h' then
+	    worldedit.move_marker(name, 1, 'x', amount * dirs.x1)
+	    worldedit.move_marker(name, 1, 'z', amount * dirs.z1)
+
+	    worldedit.move_marker(name, 2, 'x', amount * dirs.x2)
+	    worldedit.move_marker(name, 2, 'z', amount * dirs.z2)
+	    message = "area inset by " .. amount .. " blocks horizontally"
+	 elseif dir == 'v' then
+	    worldedit.move_marker(name, 1, 'y', amount * dirs.y1)
+	    worldedit.move_marker(name, 2, 'y', amount * dirs.y2)
+	    message = "area inset by " .. amount .. " blocks vertically"
+	 else
+	    worldedit.move_marker(name, 1, 'x', amount * dirs.x1)
+	    worldedit.move_marker(name, 1, 'y', amount * dirs.y1)
+	    worldedit.move_marker(name, 1, 'z', amount * dirs.z1)
+
+	    worldedit.move_marker(name, 2, 'x', amount * dirs.x2)
+	    worldedit.move_marker(name, 2, 'y', amount * dirs.y2)
+	    worldedit.move_marker(name, 2, 'z', amount * dirs.z2)
+	    message = "area inset by " .. amount .. " blocks in all axes"
+	 end
+
+	 worldedit.update_markers(name)
+	 return true, message
       end,
    }
 )
@@ -389,7 +374,7 @@ worldedit.move_marker = function(name, marker, axis, amount)
       elseif axis == 'z' then
 	 worldedit.pos1[name].z = pos1.z + amount
       else
-	 minetest.debug("worldedit: Invalid axis in move_marker. Value was: " .. axis)
+	 minetest.debug("worldedit: Invalid axis in move_marker.")
       end
    elseif marker == 2 then
       if axis == 'x' then
@@ -399,7 +384,7 @@ worldedit.move_marker = function(name, marker, axis, amount)
       elseif axis == 'z' then
 	 worldedit.pos2[name].z = pos2.z + amount
       else
-	 minetest.debug("worldedit: Invalid axis in move_marker. Value was: " .. axis)
+	 minetest.debug("worldedit: Invalid axis in move_marker.")
       end
    else
       minetest.debug("Bad marker id at worldedit.move_marker")
