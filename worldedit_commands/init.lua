@@ -1182,3 +1182,5 @@ minetest.register_chatcommand("/clearobjects", {
 		worldedit.player_notify(name, count .. " objects cleared")
 	end),
 })
+
+dofile(minetest.get_modpath("worldedit_commands") .. "/area.lua")
