@@ -113,27 +113,89 @@ minetest.register_chatcommand("/shift", {
   }
 )
 
-minetest.register_chatcommand(
-  "/expand",
-  {
-      params = "<amount> [reverse-amount] [up|down|left|right|front|back]",
-      description = "expand the selection in one or two directions at once",
-      privs = {worldedit=true},
-      func = function(name, param)
+minetest.register_chatcommand("/expand", {
+	params = "<amount> [reverse-amount] [up|down|left|right|front|back]",
+	description = "expand the selection in one or two directions at once",
+	privs = {worldedit=true},
+	func = function(name, param)
 	local find, _, amount, arg2, arg3 = param:find("(%d+)%s*(%w*)%s*(%l*)")
-
-	if find == nil then
-	    worldedit.player_notify(name, "invalid use: " .. param)
-	    return
-	end
-
-	if worldedit.pos1[name] == nil or worldedit.pos2[name] == nil then
-	    worldedit.player_notify(name, 
-	      "Undefined region. Region must be defined beforehand.")
-	    return
-	end
-
 	
+	if find == nil then
+		worldedit.player_notify(name, "invalid use: " .. param)
+		return
+	end
+	
+	if worldedit.pos1[name] == nil or worldedit.pos2[name] == nil then
+		worldedit.player_notify(name, 
+		"Undefined region. Region must be defined beforehand.")
+		return
+	end
+	
+	local tmp = tonumber(arg2)
+	local axis, dir
+	local reverseamount = 0
+	
+	axis,dir = worldedit.player_axis(name)
+	
+	if arg2 ~= "" then
+		if tmp == nil then
+			axis, dir = worldedit.translate_direction(name, arg2)
+		else
+			reverseamount = tmp
+		end
+	end
+	
+	if arg3 ~= "" then
+		axis, dir = worldedit.translate_direction(name, arg3)
+	end
+	
+	worldedit.cuboid_linealexpand(name, axis, dir, amount)
+	worldedit.cuboid_linealexpand(name, axis, -dir, reverseamount)
+	worldedit.marker_update(name)
+      end,
+  }
+)
+
+
+minetest.register_chatcommand("/contract", {
+	params = "<amount> [reverse-amount] [up|down|left|right|front|back]",
+	description = "contract the selection in one or two directions at once",
+	privs = {worldedit=true},
+	func = function(name, param)
+	local find, _, amount, arg2, arg3 = param:find("(%d+)%s*(%w*)%s*(%l*)")
+	
+	if find == nil then
+		worldedit.player_notify(name, "invalid use: " .. param)
+		return
+	end
+	
+	if worldedit.pos1[name] == nil or worldedit.pos2[name] == nil then
+		worldedit.player_notify(name, 
+		"Undefined region. Region must be defined beforehand.")
+		return
+	end
+	
+	local tmp = tonumber(arg2)
+	local axis, dir
+	local reverseamount = 0
+	
+	axis,dir = worldedit.player_axis(name)
+	
+	if arg2 ~= "" then
+		if tmp == nil then
+			axis, dir = worldedit.translate_direction(name, arg2)
+		else
+			reverseamount = tmp
+		end
+	end
+	
+	if arg3 ~= "" then
+		axis, dir = worldedit.translate_direction(name, arg3)
+	end
+	
+	worldedit.cuboid_linealexpand(name, axis, dir, -amount)
+	worldedit.cuboid_linealexpand(name, axis, -dir, -reverseamount)
+	worldedit.marker_update(name)
       end,
   }
 )
