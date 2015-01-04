@@ -1119,4 +1119,4 @@ minetest.register_chatcommand("/clearobjects", {
 	end),
 })
 
-dofile(minetest.get_modpath("worldedit_commands") .. "/area.lua")
+dofile(minetest.get_modpath("worldedit_commands") .. "/cuboid.lua")
