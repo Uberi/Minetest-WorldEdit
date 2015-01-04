@@ -65,14 +65,14 @@ worldedit.cuboid_shift = function(name, axis, amount)
 	end
 	
 	if axis == 'x' then
-		pos1.x = pos1.x + amount
-		pos2.x = pos2.x + amount
+		worldedit.pos1[name].x = pos1.x + amount
+		worldedit.pos2[name].x = pos2.x + amount
 	elseif axis == 'y' then
-		pos1.y = pos1.y + amount
-		pos2.y = pos2.y + amount
+		worldedit.pos1[name].y = pos1.y + amount
+		worldedit.pos2[name].y = pos2.y + amount
 	elseif axis == 'z' then
-		pos1.z = pos1.z + amount
-		pos2.z = pos2.z + amount
+		worldedit.pos1[name].z = pos1.z + amount
+		worldedit.pos2[name].z = pos2.z + amount
 	else
 		return false, "invalid axis"
 	end
