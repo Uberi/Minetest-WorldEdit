@@ -10,6 +10,7 @@ if minetest.place_schematic then
 	worldedit.prob_list = {}
 end
 
+dofile(minetest.get_modpath("worldedit_commands") .. "/cuboid.lua")
 dofile(minetest.get_modpath("worldedit_commands") .. "/mark.lua")
 local safe_region, check_region = dofile(minetest.get_modpath("worldedit_commands") .. "/safe.lua")
 
@@ -1182,5 +1183,3 @@ minetest.register_chatcommand("/clearobjects", {
 		worldedit.player_notify(name, count .. " objects cleared")
 	end),
 })
-
-dofile(minetest.get_modpath("worldedit_commands") .. "/cuboid.lua")
