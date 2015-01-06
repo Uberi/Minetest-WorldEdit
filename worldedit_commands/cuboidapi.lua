@@ -1,5 +1,5 @@
 -- Expands or contracts the cuboid in all axes by amount (positive or negative)
-worldedit.cuboid_volumetricexpand = function(name, amount)
+worldedit.cuboid_volumetric_expand = function(name, amount)
 	local pos1 = worldedit.pos1[name]
 	local pos2 = worldedit.pos2[name]
 	
@@ -9,14 +9,14 @@ worldedit.cuboid_volumetricexpand = function(name, amount)
 	
 	local delta1 = vector.new()
 	local delta2 = vector.new()
-	local deltadir1
-	local deltadir2
+	local delta_dir1
+	local delta_dir2
 	
 	delta1 = vector.add(delta1, amount)
 	delta2 = vector.add(delta2, amount)
-	deltadir1, deltadir2 = worldedit.get_expansion_directions(pos1, pos2)
-	delta1 = vector.multiply(delta1, deltadir1)
-	delta2 = vector.multiply(delta2, deltadir2)
+	delta_dir1, delta_dir2 = worldedit.get_expansion_directions(pos1, pos2)
+	delta1 = vector.multiply(delta1, delta_dir1)
+	delta2 = vector.multiply(delta2, delta_dir2)
 	worldedit.pos1[name] = vector.add(pos1, delta1)
 	worldedit.pos2[name] = vector.add(pos2, delta2)
 	
@@ -25,7 +25,7 @@ end
 
 
 -- Expands or contracts the cuboid in a single axis by amount (positive or negative)
-worldedit.cuboid_linealexpand = function(name, axis, direction, amount)
+worldedit.cuboid_linear_expand = function(name, axis, direction, amount)
 	local pos1 = worldedit.pos1[name]
 	local pos2 = worldedit.pos2[name]
 	

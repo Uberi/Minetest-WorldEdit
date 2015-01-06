@@ -1,3 +1,6 @@
+dofile(minetest.get_modpath("worldedit_commands") .. "/cuboidapi.lua")
+
+
 minetest.register_chatcommand("/outset", {
 	params = "<amount> [h|v]",
 	description = "outset the selection",
@@ -18,15 +21,15 @@ minetest.register_chatcommand("/outset", {
 		end
 		
 		if dir == "" then
-			assert(worldedit.cuboid_volumetricexpand(name, amount))
+			assert(worldedit.cuboid_volumetric_expand(name, amount))
 		elseif dir == "h" then
-			assert(worldedit.cuboid_linealexpand(name, 'x', 1, amount))
-			assert(worldedit.cuboid_linealexpand(name, 'x', -1, amount))
-			assert(worldedit.cuboid_linealexpand(name, 'z', 1, amount))
-			assert(worldedit.cuboid_linealexpand(name, 'z', -1, amount))
+			assert(worldedit.cuboid_linear_expand(name, 'x', 1, amount))
+			assert(worldedit.cuboid_linear_expand(name, 'x', -1, amount))
+			assert(worldedit.cuboid_linear_expand(name, 'z', 1, amount))
+			assert(worldedit.cuboid_linear_expand(name, 'z', -1, amount))
 		elseif dir == "v" then
-			assert(worldedit.cuboid_linealexpand(name, 'y', 1, amount))
-			assert(worldedit.cuboid_linealexpand(name, 'y', -1, amount))
+			assert(worldedit.cuboid_linear_expand(name, 'y', 1, amount))
+			assert(worldedit.cuboid_linear_expand(name, 'y', -1, amount))
 		else
 			return false, "Unknown error"
 		end
@@ -36,6 +39,7 @@ minetest.register_chatcommand("/outset", {
       end,
   }
 )
+
 
 minetest.register_chatcommand("/inset", {
 	params = "<amount> [h|v]",
@@ -57,15 +61,15 @@ minetest.register_chatcommand("/inset", {
 		end
 		
 		if dir == "" then
-			assert(worldedit.cuboid_volumetricexpand(name, -amount))
+			assert(worldedit.cuboid_volumetric_expand(name, -amount))
 		elseif dir == "h" then
-			assert(worldedit.cuboid_linealexpand(name, 'x', 1, -amount))
-			assert(worldedit.cuboid_linealexpand(name, 'x', -1, -amount))
-			assert(worldedit.cuboid_linealexpand(name, 'z', 1, -amount))
-			assert(worldedit.cuboid_linealexpand(name, 'z', -1, -amount))
+			assert(worldedit.cuboid_linear_expand(name, 'x', 1, -amount))
+			assert(worldedit.cuboid_linear_expand(name, 'x', -1, -amount))
+			assert(worldedit.cuboid_linear_expand(name, 'z', 1, -amount))
+			assert(worldedit.cuboid_linear_expand(name, 'z', -1, -amount))
 		elseif dir == "v" then
-			assert(worldedit.cuboid_linealexpand(name, 'y', 1, -amount))
-			assert(worldedit.cuboid_linealexpand(name, 'y', -1, -amount))
+			assert(worldedit.cuboid_linear_expand(name, 'y', 1, -amount))
+			assert(worldedit.cuboid_linear_expand(name, 'y', -1, -amount))
 		else
 			return false, "Unknown error"
 		end
@@ -93,7 +97,7 @@ minetest.register_chatcommand("/shift", {
 		
 		if pos1 == nil or pos2 == nil then
 			worldedit.player_notify(name, 
-			"Undefined region. Region must be defined beforehand.")
+				"Undefined region. Region must be defined beforehand.")
 			return
 		end
 		
@@ -102,16 +106,16 @@ minetest.register_chatcommand("/shift", {
 			axis, dir = worldedit.translate_direction(name, direction)
 		else
 			axis, dir = worldedit.player_axis(name)
-			worldedit.player_notify(name, "entered player_axis")
 		end
 		
 		assert(worldedit.cuboid_shift(name, axis, amount * dir))
 		worldedit.marker_update(name)
 		
-		return true, "region shifted by " .. amount .. " blocks"
+		return true, "region shifted by " .. amount .. " nodes"
       end,
   }
 )
+
 
 minetest.register_chatcommand("/expand", {
 	params = "<amount> [reverse-amount] [up|down|left|right|front|back]",
@@ -133,7 +137,7 @@ minetest.register_chatcommand("/expand", {
 	
 	local tmp = tonumber(arg2)
 	local axis, dir
-	local reverseamount = 0
+	local reverse_amount = 0
 	
 	axis,dir = worldedit.player_axis(name)
 	
@@ -141,7 +145,7 @@ minetest.register_chatcommand("/expand", {
 		if tmp == nil then
 			axis, dir = worldedit.translate_direction(name, arg2)
 		else
-			reverseamount = tmp
+			reverse_amount = tmp
 		end
 	end
 	
@@ -149,8 +153,8 @@ minetest.register_chatcommand("/expand", {
 		axis, dir = worldedit.translate_direction(name, arg3)
 	end
 	
-	worldedit.cuboid_linealexpand(name, axis, dir, amount)
-	worldedit.cuboid_linealexpand(name, axis, -dir, reverseamount)
+	worldedit.cuboid_linear_expand(name, axis, dir, amount)
+	worldedit.cuboid_linear_expand(name, axis, -dir, reverse_amount)
 	worldedit.marker_update(name)
       end,
   }
@@ -177,7 +181,7 @@ minetest.register_chatcommand("/contract", {
 	
 	local tmp = tonumber(arg2)
 	local axis, dir
-	local reverseamount = 0
+	local reverse_amount = 0
 	
 	axis,dir = worldedit.player_axis(name)
 	
@@ -185,7 +189,7 @@ minetest.register_chatcommand("/contract", {
 		if tmp == nil then
 			axis, dir = worldedit.translate_direction(name, arg2)
 		else
-			reverseamount = tmp
+			reverse_amount = tmp
 		end
 	end
 	
@@ -193,13 +197,9 @@ minetest.register_chatcommand("/contract", {
 		axis, dir = worldedit.translate_direction(name, arg3)
 	end
 	
-	worldedit.cuboid_linealexpand(name, axis, dir, -amount)
-	worldedit.cuboid_linealexpand(name, axis, -dir, -reverseamount)
+	worldedit.cuboid_linear_expand(name, axis, dir, -amount)
+	worldedit.cuboid_linear_expand(name, axis, -dir, -reverse_amount)
 	worldedit.marker_update(name)
       end,
   }
 )
-
-
-dofile(minetest.get_modpath("worldedit_commands") .. "/cuboidapi.lua")
-
