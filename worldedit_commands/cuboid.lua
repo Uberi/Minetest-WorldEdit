@@ -108,6 +108,10 @@ minetest.register_chatcommand("/shift", {
 			axis, dir = worldedit.player_axis(name)
 		end
 		
+		if axis == nil or dir == nil then
+			return false, "Invalid if looking up or down"
+		end
+		
 		assert(worldedit.cuboid_shift(name, axis, amount * dir))
 		worldedit.marker_update(name)
 		
