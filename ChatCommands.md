@@ -98,6 +98,12 @@ Display the volume of the current WorldEdit region.
 
     //volume
 
+### `//deleteblocks`
+
+Delete the mapblocks (16x16x16 units) that contain the selected region. This means that mapgen will be invoked for that area. As only whole mapblocks get removed, the deleted area is usually larger than the selected one.
+
+    //deleteblocks
+
 ### `//set <node>`
 
 Set the current WorldEdit region to `<node>`.
