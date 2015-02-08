@@ -98,6 +98,12 @@ Display the volume of the current WorldEdit region.
 
     //volume
 
+### `//deleteblocks`
+
+Delete the MapBlocks (16x16x16 units) that contain the selected region. This means that mapgen will be invoked for that area. As only whole MapBlocks get removed, the deleted area is usually larger than the selected one. Also, mapgen can trigger mechanisms like mud reflow or cavegen, which affects nodes (up to 112 nodes away) outside the MapBlock, so dont use this near buildings.
+
+    //deleteblocks
+
 ### `//set <node>`
 
 Set the current WorldEdit region to `<node>`.
