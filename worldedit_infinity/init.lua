@@ -1,4 +1,4 @@
-worldedit = worldedit or {}
+worldedit = rawget(_G, "worldedit") or {}
 local minetest = minetest --local copy of global
 
 local get_pointed = function(pos, nearest, distance)
