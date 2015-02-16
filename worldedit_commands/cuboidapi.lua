@@ -215,13 +215,23 @@ worldedit.translate_direction = function(name, direction)
 	end
 	
 	if direction == "front" then
-		resaxis = axis
-		resdir = dir
+		if axis == "y" then
+			resaxis = nil
+			resdir = nil
+		else
+			resaxis = axis
+			resdir = dir
+		end
 	end
 	
 	if direction == "back" then
-		resaxis = axis
-		resdir = -dir
+		if axis == "y" then
+			resaxis = nil
+			resdir = nil
+		else
+			resaxis = axis
+			resdir = -dir
+		end
 	end
 	
 	if direction == "left" then

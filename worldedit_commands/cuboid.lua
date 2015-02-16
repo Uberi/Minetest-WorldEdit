@@ -109,7 +109,7 @@ minetest.register_chatcommand("/shift", {
 		end
 		
 		if axis == nil or dir == nil then
-			return false, "Invalid"
+			return false, "Invalid if looking straight up or down"
 		end
 		
 		assert(worldedit.cuboid_shift(name, axis, amount * dir))
