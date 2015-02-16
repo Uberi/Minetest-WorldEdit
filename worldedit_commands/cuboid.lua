@@ -122,11 +122,12 @@ minetest.register_chatcommand("/shift", {
 
 
 minetest.register_chatcommand("/expand", {
-	params = "<amount> [reverse-amount] [up|down|left|right|front|back]",
+	params = "[+|-]<x|y|z|?|up|down|left|right|front|back> <amount> [reverse-amount]",
 	description = "expand the selection in one or two directions at once",
 	privs = {worldedit=true},
 	func = function(name, param)
-	local find, _, amount, arg2, arg3 = param:find("(%d+)%s*(%w*)%s*(%l*)")
+	local find, _, sign, direction, amount, 
+			rev_amount = param:find("([+-]?)([%?%l]+)%s*(%d+)%s*(%d*)")
 	
 	if find == nil then
 		worldedit.player_notify(name, "invalid use: " .. param)
@@ -139,26 +140,34 @@ minetest.register_chatcommand("/expand", {
 		return
 	end
 	
-	local tmp = tonumber(arg2)
-	local axis, dir
-	local reverse_amount = 0
+	local absolute = direction:find("[xyz?]")
+	local dir, axis
 	
-	axis,dir = worldedit.player_axis(name)
+	if rev_amount == "" then
+		rev_amount = 0
+	end
 	
-	if arg2 ~= "" then
-		if tmp == nil then
-			axis, dir = worldedit.translate_direction(name, arg2)
+	if absolute == nil then
+		axis, dir = worldedit.translate_direction(name, direction)
+		
+		if axis == nil or dir == nil then
+			return false, "Invalid if looking straight up or down"
+		end
+	else
+		if direction == "?" then
+			axis, dir = worldedit.player_axis(name)
 		else
-			reverse_amount = tmp
+			axis = direction
+			dir = 1
 		end
 	end
 	
-	if arg3 ~= "" then
-		axis, dir = worldedit.translate_direction(name, arg3)
+	if sign == "-" then
+		dir = -dir
 	end
 	
 	worldedit.cuboid_linear_expand(name, axis, dir, amount)
-	worldedit.cuboid_linear_expand(name, axis, -dir, reverse_amount)
+	worldedit.cuboid_linear_expand(name, axis, -dir, rev_amount)
 	worldedit.marker_update(name)
       end,
   }
@@ -166,11 +175,12 @@ minetest.register_chatcommand("/expand", {
 
 
 minetest.register_chatcommand("/contract", {
-	params = "<amount> [reverse-amount] [up|down|left|right|front|back]",
+	params = "[+|-]<x|y|z|?|up|down|left|right|front|back> <amount> [reverse-amount]",
 	description = "contract the selection in one or two directions at once",
 	privs = {worldedit=true},
 	func = function(name, param)
-	local find, _, amount, arg2, arg3 = param:find("(%d+)%s*(%w*)%s*(%l*)")
+	local find, _, sign, direction, amount, 
+			rev_amount = param:find("([+-]?)([%?%l]+)%s*(%d+)%s*(%d*)")
 	
 	if find == nil then
 		worldedit.player_notify(name, "invalid use: " .. param)
@@ -183,26 +193,34 @@ minetest.register_chatcommand("/contract", {
 		return
 	end
 	
-	local tmp = tonumber(arg2)
-	local axis, dir
-	local reverse_amount = 0
+	local absolute = direction:find("[xyz?]")
+	local dir, axis
 	
-	axis,dir = worldedit.player_axis(name)
+	if rev_amount == "" then
+		rev_amount = 0
+	end
 	
-	if arg2 ~= "" then
-		if tmp == nil then
-			axis, dir = worldedit.translate_direction(name, arg2)
+	if absolute == nil then
+		axis, dir = worldedit.translate_direction(name, direction)
+		
+		if axis == nil or dir == nil then
+			return false, "Invalid if looking straight up or down"
+		end
+	else
+		if direction == "?" then
+			axis, dir = worldedit.player_axis(name)
 		else
-			reverse_amount = tmp
+			axis = direction
+			dir = 1
 		end
 	end
 	
-	if arg3 ~= "" then
-		axis, dir = worldedit.translate_direction(name, arg3)
+	if sign == "-" then
+		dir = -dir
 	end
 	
 	worldedit.cuboid_linear_expand(name, axis, dir, -amount)
-	worldedit.cuboid_linear_expand(name, axis, -dir, -reverse_amount)
+	worldedit.cuboid_linear_expand(name, axis, -dir, -rev_amount)
 	worldedit.marker_update(name)
       end,
   }
