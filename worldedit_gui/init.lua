@@ -102,7 +102,10 @@ if unified_inventory then --unified inventory installed
 	end
 elseif inventory_plus then --inventory++ installed
 	minetest.register_on_joinplayer(function(player)
-		inventory_plus.register_button(player, "worldedit_gui", "WorldEdit")
+		local can_worldedit = minetest.check_player_privs(player:get_player_name(), {worldedit=true})
+		if can_worldedit then
+			inventory_plus.register_button(player, "worldedit_gui", "WorldEdit")
+		end
 	end)
 
 	--show the form when the button is pressed and hide it when done
