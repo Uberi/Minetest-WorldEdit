@@ -82,18 +82,22 @@ minetest.register_chatcommand("/inset", {
 
 
 minetest.register_chatcommand("/shift", {
-	params = "<amount> [up|down|left|right|front|back]",
+-- 	params = "<amount> [up|down|left|right|front|back]",
+	params = "[x|y|z|?|up|down|left|right|front|back] [+|-]<amount>",
 	description = "Moves the selection region. Does not move contents.",
 	privs = {worldedit=true},
 	func = function(name, param)
 		local pos1 = worldedit.pos1[name]
 		local pos2 = worldedit.pos2[name]
-		local find, _, amount, direction = param:find("(%d+)%s*(%l*)")
+-- 		local find, _, amount, direction = param:find("(%d+)%s*(%l*)")
+		local find, _, direction, amount = param:find("([%?%l]+)%s*([+-]?%d+)")
 		
 		if find == nil then
 			worldedit.player_notify(name, "invalid usage: " .. param)
 			return
 		end
+		
+		worldedit.player_notify(name, "direction = " .. direction .. " amount = " .. amount)
 		
 		if pos1 == nil or pos2 == nil then
 			worldedit.player_notify(name, 
@@ -102,14 +106,14 @@ minetest.register_chatcommand("/shift", {
 		end
 		
 		local axis, dir
-		if direction ~= "" then
+		if direction ~= "?" then
 			axis, dir = worldedit.translate_direction(name, direction)
 		else
 			axis, dir = worldedit.player_axis(name)
 		end
 		
 		if axis == nil or dir == nil then
-			return false, "Invalid if looking up or down"
+			return false, "Invalid"
 		end
 		
 		assert(worldedit.cuboid_shift(name, axis, amount * dir))

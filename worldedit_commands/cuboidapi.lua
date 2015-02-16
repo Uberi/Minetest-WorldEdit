@@ -205,7 +205,7 @@ end
 worldedit.translate_direction = function(name, direction)
 	local axis, dir = worldedit.player_axis(name)
 	local resaxis, resdir
-
+	
 	if direction == "up" then
 		return 'y', 1
 	end
