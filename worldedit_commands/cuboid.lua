@@ -2,11 +2,11 @@ dofile(minetest.get_modpath("worldedit_commands") .. "/cuboidapi.lua")
 
 
 minetest.register_chatcommand("/outset", {
-	params = "<amount> [h|v]",
+	params = "[h|v] <amount>",
 	description = "outset the selection",
 	privs = {worldedit=true},
 	func = function(name, param)
-		local find, _, amount, dir = param:find("^(%d+)[%s+]?([hv]?)$")
+		local find, _, dir, amount = param:find("([hv]?)%s*([+-]?%d+)")
 		
 		if find == nil then
 			return false, "invalid usage: " .. param
@@ -42,11 +42,11 @@ minetest.register_chatcommand("/outset", {
 
 
 minetest.register_chatcommand("/inset", {
-	params = "<amount> [h|v]",
+	params = "[h|v] <amount>",
 	description = "inset the selection",
 	privs = {worldedit=true},
 	func = function(name, param)
-		local find, _, amount, dir = param:find("^(%d+)[%s+]?([hv]?)$")
+		local find, _, dir, amount = param:find("([hv]?)%s*([+-]?%d+)")
 		
 		if find == nil then
 			return false, "invalid usage: " .. param
