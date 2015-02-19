@@ -389,35 +389,35 @@ Clears all objects within the WorldEdit region.
     
 ### `//shift x/y/z/?/up/down/left/right/front/back [+|-]<amount>`
 
-Shifts the selection area by [+|-]<amount> without touching its contents. The shifting axis can be absolute (x/y/z) or 
-relative (up/down/left/right/front/back). 
+Shifts the selection area by `[+|-]<amount>` without touching its contents. The shifting axis can be absolute (`x/y/z`) or 
+relative (`up/down/left/right/front/back`). 
 
 		//shift left 5
 
 ### `//expand [+|-]x/y/z/?/up/down/left/right/front/back <amount> [reverse-amount]`
 
-Expands the selection by <amount> in the selected absolute or relative axis. If specified, the selection can be expanded in the
-opposite direction iver the same axis by [reverse-amount]
+Expands the selection by `<amount>` in the selected absolute or relative axis. If specified, the selection can be expanded in the
+opposite direction over the same axis by `[reverse-amount]`.
 
 		//expand right 7 5
 		
 ### `//contract [+|-]x/y/z/?/up/down/left/right/front/back <amount> [reverse-amount]`
 
-Contracts the selection by <amount> in the selected absolute or relative axis. If specified, the selection can be contracted in the
-opposite direction iver the same axis by [reverse-amount]
+Contracts the selection by `<amount>` in the selected absolute or relative axis. If specified, the selection can be contracted in the
+opposite direction over the same axis by `[reverse-amount]`.
 
 		//expand right 7 5
 		
 ### `//outset [h|v] <amount>`
 
-Expands the selection in all directions by <amount>. If specified, the selection can be expanded horizontally in the x and z axes [h]
-or vertically in the y axis [v].
+Expands the selection in all directions by `<amount>`. If specified, the selection can be expanded horizontally in the x and z axes `[h]`
+or vertically in the y axis `[v]`.
 
 		//outset v 5
 		
 ### `//inset [h|v] <amount>`
 
-Contracts the selection in all directions by <amount>. If specified, the selection can be contracted horizontally in the x and z axes [h]
-or vertically in the y axis [v].
+Contracts the selection in all directions by `<amount>`. If specified, the selection can be contracted horizontally in the x and z axes `[h]`
+or vertically in the y axis `[v]`.
 
 		//outset v 5
