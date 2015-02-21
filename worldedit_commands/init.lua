@@ -277,6 +277,21 @@ minetest.register_chatcommand("/volume", {
 	end,
 })
 
+minetest.register_chatcommand("/deleteblocks", {
+	params = "",
+	description = "remove all MapBlocks (16x16x16) containing the selected area from the map",
+	privs = {worldedit=true},
+	func = safe_region(function(name, param)
+		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
+		local success = minetest.delete_area(pos1, pos2)
+		if success then
+			worldedit.player_notify(name, "Area deleted.")
+		else
+			worldedit.player_notify(name, "There was an error during deletion of the area.")
+		end
+	end),
+})
+
 minetest.register_chatcommand("/set", {
 	params = "<node>",
 	description = "Set the current WorldEdit region to <node>",
