@@ -408,14 +408,14 @@ opposite direction over the same axis by `[reverse-amount]`.
 
 		//expand right 7 5
 		
-### `//outset [h|v] <amount>`
+### `//outset [hv] <amount>`
 
 Expands the selection in all directions by `<amount>`. If specified, the selection can be expanded horizontally in the x and z axes `[h]`
 or vertically in the y axis `[v]`.
 
 		//outset v 5
 		
-### `//inset [h|v] <amount>`
+### `//inset [hv] <amount>`
 
 Contracts the selection in all directions by `<amount>`. If specified, the selection can be contracted horizontally in the x and z axes `[h]`
 or vertically in the y axis `[v]`.

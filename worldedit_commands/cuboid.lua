@@ -6,7 +6,7 @@ minetest.register_chatcommand("/outset", {
 	description = "outset the selection",
 	privs = {worldedit=true},
 	func = function(name, param)
-		local find, _, dir, amount = param:find("([hv]?)%s*([+-]?%d+)")
+		local find, _, dir, amount = param:find("(%a*)%s*([+-]?%d+)")
 		
 		if find == nil then
 			return false, "invalid usage: " .. param
@@ -20,7 +20,13 @@ minetest.register_chatcommand("/outset", {
 				"Undefined region. Region must be defined beforehand."
 		end
 		
-		if dir == "" then
+		local hv_test = dir:find("[^hv]+")
+		
+		if hv_test ~= nil then
+			return false, "Invalid direction."
+		end
+		
+		if dir == "" or dir == "hv" or dir == "vh" then
 			assert(worldedit.cuboid_volumetric_expand(name, amount))
 		elseif dir == "h" then
 			assert(worldedit.cuboid_linear_expand(name, 'x', 1, amount))
@@ -31,7 +37,7 @@ minetest.register_chatcommand("/outset", {
 			assert(worldedit.cuboid_linear_expand(name, 'y', 1, amount))
 			assert(worldedit.cuboid_linear_expand(name, 'y', -1, amount))
 		else
-			return false, "Unknown error"
+			return false, "Invalid number of arguments"
 		end
 		
 		worldedit.marker_update(name)
@@ -46,7 +52,7 @@ minetest.register_chatcommand("/inset", {
 	description = "inset the selection",
 	privs = {worldedit=true},
 	func = function(name, param)
-		local find, _, dir, amount = param:find("([hv]?)%s*([+-]?%d+)")
+		local find, _, dir, amount = param:find("(%a*)%s*([+-]?%d+)")
 		
 		if find == nil then
 			return false, "invalid usage: " .. param
@@ -60,7 +66,13 @@ minetest.register_chatcommand("/inset", {
 				"Undefined region. Region must be defined beforehand."
 		end
 		
-		if dir == "" then
+		local hv_test = dir:find("[^hv]+")
+		
+		if hv_test ~= nil then
+			return false, "Invalid direction."
+		end
+		
+		if dir == "" or dir == "vh" or dir == "hv" then
 			assert(worldedit.cuboid_volumetric_expand(name, -amount))
 		elseif dir == "h" then
 			assert(worldedit.cuboid_linear_expand(name, 'x', 1, -amount))
@@ -71,7 +83,7 @@ minetest.register_chatcommand("/inset", {
 			assert(worldedit.cuboid_linear_expand(name, 'y', 1, -amount))
 			assert(worldedit.cuboid_linear_expand(name, 'y', -1, -amount))
 		else
-			return false, "Unknown error"
+			return false, "Invalid number of arguments"
 		end
 		
 		worldedit.marker_update(name)
