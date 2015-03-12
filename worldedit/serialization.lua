@@ -159,20 +159,20 @@ local function load_schematic(value)
 		else
 			-- XXX: This is a filthy hack that works surprisingly well - in LuaJIT, `minetest.deserialize` will fail due to the register limit
 			nodes = {}
-			value = value:gsub("return%s*{", "", 1):gsub("}%s*$", "", 1) -- remove the starting and ending values to leave only the node data
-			local escaped = value:gsub("\\\\", "@@"):gsub("\\\"", "@@"):gsub("(\"[^\"]*\")", function(s) return string.rep("@", #s) end)
+			content = content:gsub("return%s*{", "", 1):gsub("}%s*$", "", 1) -- remove the starting and ending values to leave only the node data
+			local escaped = content:gsub("\\\\", "@@"):gsub("\\\"", "@@"):gsub("(\"[^\"]*\")", function(s) return string.rep("@", #s) end)
 			local startpos, startpos1, endpos = 1, 1
 			while true do -- go through each individual node entry (except the last)
 				startpos, endpos = escaped:find("},%s*{", startpos)
 				if not startpos then
 					break
 				end
-				local current = value:sub(startpos1, startpos)
+				local current = content:sub(startpos1, startpos)
 				local entry = minetest.deserialize("return " .. current)
 				table.insert(nodes, entry)
 				startpos, startpos1 = endpos, endpos
 			end
-			local entry = minetest.deserialize("return " .. value:sub(startpos1)) -- process the last entry
+			local entry = minetest.deserialize("return " .. content:sub(startpos1)) -- process the last entry
 			table.insert(nodes, entry)
 		end
 	else
