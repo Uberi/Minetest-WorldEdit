@@ -503,8 +503,8 @@ function worldedit.orient(pos1, pos2, angle)
 	worldedit.keep_loaded(pos1, pos2)
 
 	local count = 0
-	local get_node, get_meta, swap_node = minetest.get_node,
-			minetest.get_meta, minetest.swap_node
+	local set_node, get_node, get_meta, swap_node = minetest.set_node,
+			minetest.get_node, minetest.get_meta, minetest.swap_node
 	local pos = {x=pos1.x, y=0, z=0}
 	while pos.x <= pos2.x do
 		pos.y = pos1.y
