@@ -1,7 +1,7 @@
 local safe_region_callback = {}
 local safe_region_param = {}
 
-check_region = function(name, param)
+local function check_region(name, param)
 	local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name] --obtain positions
 	if pos1 == nil or pos2 == nil then
 		worldedit.player_notify(name, "no region selected")
@@ -12,7 +12,7 @@ end
 
 --`callback` is a callback to run when the user confirms
 --`nodes_needed` is a function accepting `param`, `pos1`, and `pos2` to calculate the number of nodes needed
-safe_region = function(callback, nodes_needed)
+local function safe_region(callback, nodes_needed)
 	--default node volume calculation
 	nodes_needed = nodes_needed or check_region
 
@@ -63,3 +63,6 @@ minetest.register_chatcommand("/n", {
 		safe_region_callback[name], safe_region_param[name] = nil, nil
 	end,
 })
+
+return safe_region, check_region
+

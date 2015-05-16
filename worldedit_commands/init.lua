@@ -11,8 +11,7 @@ if minetest.place_schematic then
 end
 
 dofile(minetest.get_modpath("worldedit_commands") .. "/mark.lua")
-dofile(minetest.get_modpath("worldedit_commands") .. "/safe.lua")
-safe_region = rawget(_G, "safe_region") or function(callback) return callback end
+local safe_region, check_region = dofile(minetest.get_modpath("worldedit_commands") .. "/safe.lua")
 
 local function get_position(name) --position 1 retrieval function for when not using `safe_region`
 	local pos1 = worldedit.pos1[name]
