@@ -23,7 +23,7 @@ end
 local path = minetest.get_modpath(minetest.get_current_modname())
 
 local function load_module(path)
-	local file = io.open(path)
+	local file = io.open(path, "r")
 	if not file then return end
 	file:close()
 	return dofile(path)
