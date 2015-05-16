@@ -11,9 +11,10 @@ if minetest.place_schematic then
 end
 
 dofile(minetest.get_modpath("worldedit_commands") .. "/mark.lua")
-dofile(minetest.get_modpath("worldedit_commands") .. "/safe.lua"); safe_region = safe_region or function(callback) return callback end
+dofile(minetest.get_modpath("worldedit_commands") .. "/safe.lua")
+safe_region = rawget(_G, "safe_region") or function(callback) return callback end
 
-local get_position = function(name) --position 1 retrieval function for when not using `safe_region`
+local function get_position(name) --position 1 retrieval function for when not using `safe_region`
 	local pos1 = worldedit.pos1[name]
 	if pos1 == nil then
 		worldedit.player_notify(name, "no position 1 selected")
@@ -21,7 +22,7 @@ local get_position = function(name) --position 1 retrieval function for when not
 	return pos1
 end
 
-local get_node = function(name, nodename)
+local function get_node(name, nodename)
 	local node = worldedit.normalize_nodename(nodename)
 	if not node then
 		worldedit.player_notify(name, "invalid node name: " .. nodename)
@@ -30,7 +31,7 @@ local get_node = function(name, nodename)
 	return node
 end
 
-worldedit.player_notify = function(name, message)
+function worldedit.player_notify(name, message)
 	minetest.chat_send_player(name, "WorldEdit -!- " .. message, false)
 end
 
@@ -56,8 +57,8 @@ worldedit.normalize_nodename = function(nodename)
 	return nil
 end
 
---determines the axis in which a player is facing, returning an axis ("x", "y", or "z") and the sign (1 or -1)
-worldedit.player_axis = function(name)
+-- Determines the axis in which a player is facing, returning an axis ("x", "y", or "z") and the sign (1 or -1)
+function worldedit.player_axis(name)
 	local dir = minetest.get_player_by_name(name):get_look_dir()
 	local x, y, z = math.abs(dir.x), math.abs(dir.y), math.abs(dir.z)
 	if x > y then
@@ -69,6 +70,15 @@ worldedit.player_axis = function(name)
 	end
 	return "z", dir.z > 0 and 1 or -1
 end
+
+function worldedit.mkdir(path)
+	if minetest.mkdir then
+		minetest.mkdir(path)
+	else
+		os.execute('mkdir "' .. path .. '"')
+	end
+end
+
 
 minetest.register_chatcommand("/about", {
 	params = "",
@@ -876,20 +886,22 @@ minetest.register_chatcommand("/save", {
 			worldedit.player_notify(name, "invalid usage: " .. param)
 			return
 		end
-		if not string.find(param, "^[%w \t.,+-_=!@#$%%^&*()%[%]{};'\"]+$") then
-			worldedit.player_notify(name, "invalid file name: " .. param)
+		if not param:find("^[a-zA-Z0-9_%-.]+$") then
+			worldedit.player_notify(name, "Disallowed file name: " .. param)
 			return
 		end
 
-		local result, count = worldedit.serialize(worldedit.pos1[name], worldedit.pos2[name])
+		local result, count = worldedit.serialize(worldedit.pos1[name],
+				worldedit.pos2[name])
 
 		local path = minetest.get_worldpath() .. "/schems"
+		-- Create directory if it does not already exist
+		worldedit.mkdir(path)
+
 		local filename = path .. "/" .. param .. ".we"
-		filename = filename:gsub("\"", "\\\""):gsub("\\", "\\\\") --escape any nasty characters
-		os.execute("mkdir \"" .. path .. "\"") --create directory if it does not already exist
 		local file, err = io.open(filename, "wb")
 		if err ~= nil then
-			worldedit.player_notify(name, "could not save file to \"" .. filename .. "\"")
+			worldedit.player_notify(name, "Could not save file to \"" .. filename .. "\"")
 			return
 		end
 		file:write(result)
@@ -1037,24 +1049,31 @@ minetest.register_chatcommand("/luatransform", {
 
 minetest.register_chatcommand("/mtschemcreate", {
 	params = "<file>",
-	description = "Save the current WorldEdit region using the Minetest Schematic format to \"(world folder)/schems/<filename>.mts\"",
+	description = "Save the current WorldEdit region using the Minetest "..
+		"Schematic format to \"(world folder)/schems/<filename>.mts\"",
 	privs = {worldedit=true},
 	func = safe_region(function(name, param)
 		if param == nil then
 			worldedit.player_notify(name, "No filename specified")
 			return
 		end
+		if not param:find("^[a-zA-Z0-9_%-.]+$") then
+			worldedit.player_notify(name, "Disallowed file name: " .. param)
+			return
+		end
 
 		local path = minetest.get_worldpath() .. "/schems"
-		local filename = path .. "/" .. param .. ".mts"
-		filename = filename:gsub("\"", "\\\""):gsub("\\", "\\\\") --escape any nasty characters
-		os.execute("mkdir \"" .. path .. "\"") --create directory if it does not already exist
+		-- Create directory if it does not already exist
+		worldedit.mkdir(path)
 
-		local ret = minetest.create_schematic(worldedit.pos1[name], worldedit.pos2[name], worldedit.prob_list[name], filename)
+		local filename = path .. "/" .. param .. ".mts"
+		local ret = minetest.create_schematic(worldedit.pos1[name],
+				worldedit.pos2[name], worldedit.prob_list[name],
+				filename)
 		if ret == nil then
-			worldedit.player_notify(name, "failed to create Minetest schematic", false)
+			worldedit.player_notify(name, "Failed to create Minetest schematic", false)
 		else
-			worldedit.player_notify(name, "saved Minetest schematic to " .. param, false)
+			worldedit.player_notify(name, "Saved Minetest schematic to " .. param, false)
 		end
 		worldedit.prob_list[name] = {}
 	end),
