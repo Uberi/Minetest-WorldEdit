@@ -70,7 +70,7 @@ function worldedit.player_axis(name)
 	return "z", dir.z > 0 and 1 or -1
 end
 
-function worldedit.mkdir(path)
+local function mkdir(path)
 	if minetest.mkdir then
 		minetest.mkdir(path)
 	else
@@ -895,7 +895,7 @@ minetest.register_chatcommand("/save", {
 
 		local path = minetest.get_worldpath() .. "/schems"
 		-- Create directory if it does not already exist
-		worldedit.mkdir(path)
+		mkdir(path)
 
 		local filename = path .. "/" .. param .. ".we"
 		local file, err = io.open(filename, "wb")
@@ -1063,7 +1063,7 @@ minetest.register_chatcommand("/mtschemcreate", {
 
 		local path = minetest.get_worldpath() .. "/schems"
 		-- Create directory if it does not already exist
-		worldedit.mkdir(path)
+		mkdir(path)
 
 		local filename = path .. "/" .. param .. ".mts"
 		local ret = minetest.create_schematic(worldedit.pos1[name],
