@@ -488,7 +488,7 @@ worldedit.register_gui_function("worldedit_gui_orient", {
 	get_formspec = function(name)
 		local angle = gui_angle[name]
 		return "size[5,3]" .. worldedit.get_formspec_header("worldedit_gui_orient") ..
-			string.format("dropdown[0,1;2.5;worldedit_gui_rotate_angle;90 degrees,180 degrees,270 degrees;%s]", angle) ..
+			string.format("dropdown[0,1;2.5;worldedit_gui_orient_angle;90 degrees,180 degrees,270 degrees;%s]", angle) ..
 			"button_exit[0,2.5;3,0.8;worldedit_gui_orient_submit;Orient]"
 	end,
 })
