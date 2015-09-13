@@ -67,7 +67,7 @@ local get_formspec = function(name, identifier)
 end
 
 --implement worldedit.show_page(name, page) in different ways depending on the available APIs
-if unified_inventory then --unified inventory installed
+if rawget(_G, "unified_inventory") then --unified inventory installed
 	local old_func = worldedit.register_gui_function
 	worldedit.register_gui_function = function(identifier, options)
 		old_func(identifier, options)
@@ -100,7 +100,7 @@ if unified_inventory then --unified inventory installed
 			player:set_inventory_formspec(get_formspec(name, page))
 		end
 	end
-elseif inventory_plus then --inventory++ installed
+elseif rawget(_G, "inventory_plus") then --inventory++ installed
 	minetest.register_on_joinplayer(function(player)
 		local can_worldedit = minetest.check_player_privs(player:get_player_name(), {worldedit=true})
 		if can_worldedit then
