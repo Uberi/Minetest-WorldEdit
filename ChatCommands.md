@@ -22,6 +22,9 @@ Many commands also have shorter names that can be typed faster. For example, if 
 | `//hdo`    | `//hollowdome`     |
 | `//do`     | `//dome`           |
 | `//hcyl`   | `//hollowcylinder` |
+| `//cyl`    | `//cylinder`       |
+| `//hpyr`   | `//hollowpyramid`  |
+| `//pyr`    | `//pyramid`        |
 
 ### `//about`
 
@@ -190,6 +193,15 @@ Add cylinder at WorldEdit position 1 along the x/y/z/? axis with length `<length
     //cylinder z -12 3 mesecons:wire_00000000_off
     //cylinder ? 2 4 default:stone
     
+### `//hollowpyramid x/y/z? <height> <node>`
+
+Add hollow pyramid centered at WorldEdit position 1 along the x/y/z/? axis with height `<height>`, composed of `<node>`.
+
+    //hollowpyramid x 8 Diamond Block
+    //hollowpyramid y -5 glass
+    //hollowpyramid z 2 mesecons:wire_00000000_off
+    //hollowpyramid ? 12 mesecons:wire_00000000_off
+
 ### `//pyramid x/y/z? <height> <node>`
 
 Add pyramid centered at WorldEdit position 1 along the x/y/z/? axis with height `<height>`, composed of `<node>`.

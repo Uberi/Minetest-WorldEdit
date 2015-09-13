@@ -150,8 +150,9 @@ end
 -- @param axis Axis ("x", "y", or "z")
 -- @param height Pyramid height.
 -- @param node_name Name of node to make pyramid of.
+-- @param hollow Whether the pyramid should be hollow.
 -- @return The number of nodes added.
-function worldedit.pyramid(pos, axis, height, node_name)
+function worldedit.pyramid(pos, axis, height, node_name, hollow)
 	local other1, other2 = worldedit.get_axis_others(axis)
 
 	-- Set up voxel manipulator
@@ -187,10 +188,12 @@ function worldedit.pyramid(pos, axis, height, node_name)
 			local new_index2 = new_index1 + (index2 + offset[other1]) * stride[other1]
 			for index3 = -size, size do
 				local i = new_index2 + (index3 + offset[other2]) * stride[other2]
-				data[i] = node_id
+				if (not hollow or size - math.abs(index2) < 2 or size - math.abs(index3) < 2) then
+				       data[i] = node_id
+				       count = count + 1
+				end
 			end
 		end
-		count = count + (size * 2 + 1) ^ 2
 		size = size - 1
 	end
 

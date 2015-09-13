@@ -516,6 +516,39 @@ minetest.register_chatcommand("/cylinder", {
 	end, check_cylinder),
 })
 
+local check_pyramid = function(name, param)
+	if worldedit.pos1[name] == nil then
+		worldedit.player_notify(name, "no position 1 selected")
+		return nil
+	end
+	local found, _, axis, height, nodename = param:find("^([xyz%?])%s+([+-]?%d+)%s+(.+)$")
+	if found == nil then
+		worldedit.player_notify(name, "invalid usage: " .. param)
+		return nil
+	end
+	local node = get_node(name, nodename)
+	if not node then return nil end
+	height = tonumber(height)
+	return math.ceil(((height * 2 + 1) ^ 2) * height / 3)
+end
+     
+minetest.register_chatcommand("/hollowpyramid", {
+	params = "x/y/z/? <height> <node>",
+	description = "Add hollow pyramid centered at WorldEdit position 1 along the x/y/z/? axis with height <height>, composed of <node>",
+	privs = {worldedit=true},
+	func = safe_region(function(name, param)
+		local found, _, axis, height, nodename = param:find("^([xyz%?])%s+([+-]?%d+)%s+(.+)$")
+		height = tonumber(height)
+		if axis == "?" then
+			axis, sign = worldedit.player_axis(name)
+			height = height * sign
+		end
+		local node = get_node(name, nodename)
+		local count = worldedit.pyramid(worldedit.pos1[name], axis, height, node, true)
+		worldedit.player_notify(name, count .. " nodes added")
+	end, check_pyramid),
+})
+
 minetest.register_chatcommand("/pyramid", {
 	params = "x/y/z/? <height> <node>",
 	description = "Add pyramid centered at WorldEdit position 1 along the x/y/z/? axis with height <height>, composed of <node>",
@@ -530,22 +563,7 @@ minetest.register_chatcommand("/pyramid", {
 		local node = get_node(name, nodename)
 		local count = worldedit.pyramid(worldedit.pos1[name], axis, height, node)
 		worldedit.player_notify(name, count .. " nodes added")
-	end,
-	function(name, param)
-		if worldedit.pos1[name] == nil then
-			worldedit.player_notify(name, "no position 1 selected")
-			return nil
-		end
-		local found, _, axis, height, nodename = param:find("^([xyz%?])%s+([+-]?%d+)%s+(.+)$")
-		if found == nil then
-			worldedit.player_notify(name, "invalid usage: " .. param)
-			return nil
-		end
-		local node = get_node(name, nodename)
-		if not node then return nil end
-		height = tonumber(height)
-		return math.ceil(((height * 2 + 1) ^ 2) * height / 3)
-	end),
+	end, check_pyramid),
 })
 
 minetest.register_chatcommand("/spiral", {
