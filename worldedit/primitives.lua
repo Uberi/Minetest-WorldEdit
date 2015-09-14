@@ -177,7 +177,7 @@ function worldedit.pyramid(pos, axis, height, node_name)
 		y = pos.y - area.MinEdge.y,
 		z = pos.z - area.MinEdge.z,
 	}
-	local size = height * step
+	local size = math.abs(height * step)
 	local count = 0
 	-- For each level of the pyramid
 	for index1 = 0, height, step do
