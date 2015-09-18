@@ -909,7 +909,12 @@ minetest.register_chatcommand("/save", {
 		file:write(result)
 		file:flush()
 		file:close()
-
+        	local filename = path .. "/" .. param .. ".mts"
+        	local model_serialized = minetest.create_schematic(worldedit.pos1[name],
+                                                           	   worldedit.pos2[name],
+                                                           	   probability_list,
+                                                           	   filename, 
+                                                           	   slice_prob_list)
 		worldedit.player_notify(name, count .. " nodes saved")
 	end),
 })
