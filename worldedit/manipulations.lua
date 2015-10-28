@@ -450,7 +450,7 @@ end
 
 --- Flips a region along `axis`. Flips only nodes, no change on nodes orientations
 -- @return The number of nodes flipped.
-function worldedit.flipnodes(pos1, pos2, axis)
+function worldedit.flip_nodes(pos1, pos2, axis)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 
 	worldedit.keep_loaded(pos1, pos2)
@@ -489,11 +489,11 @@ end
 --- Change orientation of all oriented nodes in a region.
 -- @param pos1
 -- @param pos2
--- @param operation Kind of operation : flip or rotate.
--- @param axis Orientation axis : x, y or z
+-- @param operation Kind of operation: flip or rotate.
+-- @param axis Orientation axis: x, y or z
 -- @param angle Angle in degrees (90 degree increments only).
 -- @return The number of nodes oriented.
---- TODO : When flipping, try to manage diametral symetric nodes (should be rotated instead of flipped)
+--- TODO: When flipping, try to manage diametral symetric nodes (should be rotated instead of flipped)
 function worldedit.orient(pos1, pos2, operation, axis, angle)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 	local registered_nodes = minetest.registered_nodes
@@ -576,13 +576,13 @@ function worldedit.rotate(pos1, pos2, axis, angle)
 
 	local count
 	if angle == 90 then
-		worldedit.flipnodes(pos1, pos2, other1)
+		worldedit.flip_nodes(pos1, pos2, other1)
 		count, pos1, pos2 = worldedit.transpose(pos1, pos2, other1, other2)
 	elseif angle == 180 then
-		worldedit.flipnodes(pos1, pos2, other1)
-		count = worldedit.flipnodes(pos1, pos2, other2)
+		worldedit.flip_nodes(pos1, pos2, other1)
+		count = worldedit.flip_nodes(pos1, pos2, other2)
 	elseif angle == 270 then
-		worldedit.flipnodes(pos1, pos2, other2)
+		worldedit.flip_nodes(pos1, pos2, other2)
 		count, pos1, pos2 = worldedit.transpose(pos1, pos2, other1, other2)
 	else
 		error("Only 90 degree increments are supported!")
@@ -598,7 +598,7 @@ end
 -- @return The number of nodes flipped.
 function worldedit.flip(pos1, pos2, axis)
 	local count
-	count = worldedit.flipnodes(pos1, pos2, axis)
+	count = worldedit.flip_nodes(pos1, pos2, axis)
 	worldedit.orient(pos1, pos2, "flip", axis, 0)
 	return count
 end
