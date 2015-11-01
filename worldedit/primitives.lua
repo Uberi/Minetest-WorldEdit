@@ -157,7 +157,7 @@ function worldedit.pyramid(pos, axis, height, node_name)
 	-- Set up voxel manipulator
 	local manip, area = mh.init_axis_radius(pos, axis,
 			height >= 0 and height or -height)
-	local data = mh.get_empty_data()
+	local data = mh.get_empty_data(area)
 
 	-- Handle inverted pyramids
 	local start_axis, end_axis, step
