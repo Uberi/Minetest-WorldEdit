@@ -1,14 +1,21 @@
 --- Generic node manipulations.
 -- @module worldedit.manipulations
 
-local mh = worldedit.manip_helpers
+-- List of diagonal symetric nodes. Node name as key
+worldedit.diagonal_nodes = {}
 
+local mh = worldedit.manip_helpers
 
 local facedir_substitutions = {
 	['flip'] = {
-		['x'] = {[0]=0, 3, 2, 1, 4, 5, 6, 7, 8, 11, 10, 9, 16, 19, 18, 17, 12, 15, 14, 13, 20, 23, 22, 21},
+		['x'] = {[0]=0, 3, 2, 1, 4, 7, 6, 5, 8, 11, 10, 9, 16, 19, 18, 17, 12, 15, 14, 13, 20, 23, 22, 21},
 		['y'] = {[0]=20, 23, 22, 21, 6, 5, 4, 7, 10, 9, 8, 11, 12, 15, 14, 13, 16, 19, 18, 17, 0, 3, 2, 1},
-		['z'] = {[0]=2, 1, 0, 3, 10, 9, 8, 11, 6, 5, 4, 7, 14, 13, 12, 15, 18, 17, 16, 19, 22, 21, 20, 23}
+		['z'] = {[0]=2, 1, 0, 3, 10, 9, 8, 11, 6, 5, 4, 7, 14, 13, 12, 15, 18, 17, 16, 19, 22, 21, 20, 23},
+		['diag'] = {
+			['x'] = {[0]=1, 0, 3, 2, 5, 4, 7, 6, 9, 8, 11, 10, 17, 16, 19, 18, 13, 12, 15, 14, 21, 20, 23, 22},
+			['y'] = {[0]=21, 20, 23, 22, 7, 6, 5, 4, 11, 10, 9, 8, 13, 12, 15, 14, 17, 16, 19, 18, 1, 0, 3, 2},
+			['z'] = {[0]=3, 2, 1, 0, 11, 10, 9, 8, 7, 6, 5, 4, 15, 14, 13, 12, 19, 18, 17, 16, 23, 22, 21, 20},
+		}
 	},
 	['rotate'] = {
 		['x'] = {
@@ -544,7 +551,11 @@ function worldedit.orient(pos1, pos2, operation, axis, angle)
 						get_meta(pos):from_table(meta)
 						count = count + 1
 					elseif def.paramtype2 == "facedir" then
-						node.param2 = facedir_substitution[node.param2]
+						if operation == 'flip' and worldedit.diagonal_nodes[node.name] then
+							node.param2 = facedir_substitutions[operation]['diag'][axis][node.param2]
+						else
+							node.param2 = facedir_substitution[node.param2]
+						end
 						local meta = get_meta(pos):to_table()
 						set_node(pos, node)
 						get_meta(pos):from_table(meta)
@@ -660,3 +671,72 @@ function worldedit.clear_objects(pos1, pos2)
 	return count
 end
 
+function worldedit.load_diag_nodes_inventory ()
+
+	-- Moreblocks / Circular saw nodes
+	local circular_saw_diag_names = { 
+		'micro_%s_1', 'micro_%s_2', 'micro_%s_4', 'micro_%s', 'micro_%s_12', 'micro_%s_14', 'micro_%s_15',  
+		'stair_%s_outer', 'stair_%s_inner', 
+		'slope_%s_outer', 'slope_%s_outer_half', 'slope_%s_outer_half_raised', 
+		'slope_%s_inner', 'slope_%s_inner_half', 'slope_%s_inner_half_raised', 
+		'slope_%s_inner_cut', 'slope_%s_inner_cut_half', 'slope_%s_inner_cut_half_raised', 
+		'slope_%s_outer_cut', 'slope_%s_outer_cut_half', 'slope_%s_outer_cut_half_raised', 
+		'slope_%s_cut'} 
+
+	if circular_saw then
+		for _, name_parts  in ipairs(circular_saw.known_nodes) do
+			for _, name_format in ipairs(circular_saw_diag_names) do
+				local modname  = name_parts[1] or ""
+				local material = name_parts[2] or ""
+				local name = modname..":"..string.format(name_format, material)
+				worldedit.diagonal_nodes[name] = name
+			end
+		end
+	end
+
+	-- Homedecor roof blocks
+	if minetest.get_modpath("homedecor") then
+		local homedecor_nodes = {
+			"shingle_outer_corner_wood", "shingle_outer_corner_asphalt",
+			"shingle_outer_corner_terracotta", "shingle_inner_corner_wood",
+			"shingle_inner_corner_asphalt", "shingle_inner_corner_terracotta"
+			}
+		for _, name in ipairs(homedecor_nodes) do
+			worldedit.diagonal_nodes["homedecor:"..name] = "homedecor"..name
+		end
+	end
+
+	-- Trunks roof blocks
+	if minetest.get_modpath("trunks") then
+		worldedit.diagonal_nodes["trunks:twigs_roof_corner"] = "trunks:twigs_roof_corner"
+		worldedit.diagonal_nodes["trunks:twigs_roof_corner_2"] = "trunks:twigs_roof_corner_2"
+	end
+
+	-- Dryplants roof blocks
+	if minetest.get_modpath("dryplants") then
+		worldedit.diagonal_nodes["dryplants:reed_roof_corner"] = "dryplants:reed_roof_corner"
+		worldedit.diagonal_nodes["dryplants:reed_roof_corner_2"] = "dryplants:reed_roof_corner_2"
+		worldedit.diagonal_nodes["dryplants:wetreed_roof_corner"] = "dryplants:wetreed_roof_corner"
+		worldedit.diagonal_nodes["dryplants:wetreed_roof_corner_2"] = "dryplants:wetreed_roof_corner_2"
+	end
+
+	-- Technics CNC nodes
+	if minetest.get_modpath("technic") then
+		local cnc_materials = {
+			"default:dirt", "default:wood", "default:stone", "default:cobble", 
+			"default:brick", "default:sandstone", "default:leaves", "default:tree",
+			"default:steelblock", "default:bronzeblock", 
+			"technic:stainless_steel_block", "technic:marble", "technic:granite"}
+
+		local cnc_suffixes = {
+			"_technic_cnc_slope_inner_edge", "_technic_cnc_slope_inner_edge_upsdown",
+			"_technic_cnc_slope_edge_upsdown", "_technic_cnc_twocurvededge",
+			"_technic_cnc_element_edge_double", "_technic_cnc_element_edge"}
+		
+		for _, material in ipairs(cnc_materials) do
+			for _, suffix in ipairs(cnc_suffixes) do
+				worldedit.diagonal_nodes[material..suffix] = material..suffix
+			end
+		end
+	end
+end
