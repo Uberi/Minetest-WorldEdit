@@ -674,14 +674,14 @@ end
 function worldedit.load_diag_nodes_inventory ()
 
 	-- Moreblocks / Circular saw nodes
-	local circular_saw_diag_names = { 
-		'micro_%s_1', 'micro_%s_2', 'micro_%s_4', 'micro_%s', 'micro_%s_12', 'micro_%s_14', 'micro_%s_15',  
-		'stair_%s_outer', 'stair_%s_inner', 
-		'slope_%s_outer', 'slope_%s_outer_half', 'slope_%s_outer_half_raised', 
-		'slope_%s_inner', 'slope_%s_inner_half', 'slope_%s_inner_half_raised', 
-		'slope_%s_inner_cut', 'slope_%s_inner_cut_half', 'slope_%s_inner_cut_half_raised', 
-		'slope_%s_outer_cut', 'slope_%s_outer_cut_half', 'slope_%s_outer_cut_half_raised', 
-		'slope_%s_cut'} 
+	local circular_saw_diag_names = {
+		'micro_%s_1', 'micro_%s_2', 'micro_%s_4', 'micro_%s', 'micro_%s_12', 'micro_%s_14', 'micro_%s_15',
+		'stair_%s_outer', 'stair_%s_inner',
+		'slope_%s_outer', 'slope_%s_outer_half', 'slope_%s_outer_half_raised',
+		'slope_%s_inner', 'slope_%s_inner_half', 'slope_%s_inner_half_raised',
+		'slope_%s_inner_cut', 'slope_%s_inner_cut_half', 'slope_%s_inner_cut_half_raised',
+		'slope_%s_outer_cut', 'slope_%s_outer_cut_half', 'slope_%s_outer_cut_half_raised',
+		'slope_%s_cut'}
 
 	if circular_saw then
 		for _, name_parts  in ipairs(circular_saw.known_nodes) do
