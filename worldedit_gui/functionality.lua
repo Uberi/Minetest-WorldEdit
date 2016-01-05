@@ -588,9 +588,9 @@ worldedit.register_gui_function("worldedit_gui_save_load", {
 	end,
 })
 
-worldedit.register_gui_handler("worldedit_gui_save", function(name, fields)
-	if fields.worldedit_gui_save_load_submit_save or worldedit_gui_save_load_submit_allocate or worldedit_gui_save_load_submit_load then
-		gui_filename[name] = tostring(fields.worldedit_gui_save_axis)
+worldedit.register_gui_handler("worldedit_gui_save_load", function(name, fields)
+	if fields.worldedit_gui_save_load_submit_save or fields.worldedit_gui_save_load_submit_allocate or fields.worldedit_gui_save_load_submit_load then
+		gui_filename[name] = tostring(fields.worldedit_gui_save_filename)
 		worldedit.show_page(name, "worldedit_gui_save_load")
 		if fields.worldedit_gui_save_load_submit_save then
 			minetest.chatcommands["/save"].func(name, gui_filename[name])
