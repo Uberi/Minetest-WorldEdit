@@ -280,6 +280,11 @@ worldedit.register_gui_handler("worldedit_gui_cylinder", function(name, fields)
 		end
 		return true
 	end
+	if fields.worldedit_gui_cylinder_axis then
+		gui_axis1[name] = axis_indices[fields.worldedit_gui_cylinder_axis]
+		worldedit.show_page(name, "worldedit_gui_cylinder")
+		return true
+	end
 	return false
 end)
 
@@ -308,6 +313,11 @@ worldedit.register_gui_handler("worldedit_gui_pyramid", function(name, fields)
 		if fields.worldedit_gui_pyramid_submit then
 			minetest.chatcommands["/pyramid"].func(name, string.format("%s %s %s", axis_values[gui_axis1[name]], gui_distance1[name], gui_nodename1[name]))
 		end
+		return true
+	end
+	if fields.worldedit_gui_pyramid_axis then
+		gui_axis1[name] = axis_indices[fields.worldedit_gui_pyramid_axis]
+		worldedit.show_page(name, "worldedit_gui_pyramid")
 		return true
 	end
 	return false
@@ -370,6 +380,11 @@ worldedit.register_gui_handler("worldedit_gui_copy_move", function(name, fields)
 		end
 		return true
 	end
+	if fields.worldedit_gui_copy_move_axis then
+		gui_axis1[name] = axis_indices[fields.worldedit_gui_copy_move_axis] or 4
+		worldedit.show_page(name, "worldedit_gui_copy_move")
+		return true
+	end
 	return false
 end)
 
@@ -390,6 +405,11 @@ worldedit.register_gui_handler("worldedit_gui_stack", function(name, fields)
 		gui_count1[name] = tostring(fields.worldedit_gui_stack_count)
 		worldedit.show_page(name, "worldedit_gui_stack")
 		minetest.chatcommands["/stack"].func(name, string.format("%s %s", axis_values[gui_axis1[name]], gui_count1[name]))
+		return true
+	end
+	if fields.worldedit_gui_stack_axis then
+		gui_axis1[name] = axis_indices[fields.worldedit_gui_stack_axis]
+		worldedit.show_page(name, "worldedit_gui_stack")
 		return true
 	end
 	return false
@@ -438,13 +458,23 @@ worldedit.register_gui_handler("worldedit_gui_transpose", function(name, fields)
 		minetest.chatcommands["/transpose"].func(name, string.format("%s %s", axis_values[gui_axis1[name]], axis_values[gui_axis2[name]]))
 		return true
 	end
+	if fields.worldedit_gui_transpose_axis1 then
+		gui_axis1[name] = axis_indices[fields.worldedit_gui_transpose_axis1]
+		worldedit.show_page(name, "worldedit_gui_transpose")
+		return true
+	end
+	if fields.worldedit_gui_transpose_axis2 then
+		gui_axis2[name] = axis_indices[fields.worldedit_gui_transpose_axis2]
+		worldedit.show_page(name, "worldedit_gui_transpose")
+		return true
+	end
 	return false
 end)
 
 worldedit.register_gui_function("worldedit_gui_flip", {
 	name = "Flip", privs = minetest.chatcommands["/flip"].privs,
 	get_formspec = function(name)
-		local axis = gui_axis2[name]
+		local axis = gui_axis1[name]
 		return "size[5,3]" .. worldedit.get_formspec_header("worldedit_gui_flip") ..
 			string.format("dropdown[0,1;2.5;worldedit_gui_flip_axis;X axis,Y axis,Z axis,Look direction;%d]", axis) ..
 			"button_exit[0,2.5;3,0.8;worldedit_gui_flip_submit;Flip]"
@@ -453,9 +483,14 @@ worldedit.register_gui_function("worldedit_gui_flip", {
 
 worldedit.register_gui_handler("worldedit_gui_flip", function(name, fields)
 	if fields.worldedit_gui_flip_submit then
-		gui_axis2[name] = axis_indices[fields.worldedit_gui_flip_axis]
+		gui_axis1[name] = axis_indices[fields.worldedit_gui_flip_axis]
 		worldedit.show_page(name, "worldedit_gui_flip")
-		minetest.chatcommands["/flip"].func(name, axis_values[gui_axis2[name]])
+		minetest.chatcommands["/flip"].func(name, axis_values[gui_axis1[name]])
+		return true
+	end
+	if fields.worldedit_gui_flip_axis then
+		gui_axis1[name] = axis_indices[fields.worldedit_gui_flip_axis]
+		worldedit.show_page(name, "worldedit_gui_flip")
 		return true
 	end
 	return false
@@ -480,6 +515,16 @@ worldedit.register_gui_handler("worldedit_gui_rotate", function(name, fields)
 		minetest.chatcommands["/rotate"].func(name, string.format("%s %s", axis_values[gui_axis1[name]], angle_values[gui_angle[name]]))
 		return true
 	end
+	if fields.worldedit_gui_rotate_axis then
+		gui_axis1[name] = axis_indices[fields.worldedit_gui_rotate_axis]
+		worldedit.show_page(name, "worldedit_gui_rotate")
+		return true
+	end
+	if fields.worldedit_gui_rotate_angle then
+		gui_angle[name] = angle_indices[fields.worldedit_gui_rotate_angle]
+		worldedit.show_page(name, "worldedit_gui_rotate")
+		return true
+	end
 	return false
 end)
 
@@ -498,6 +543,11 @@ worldedit.register_gui_handler("worldedit_gui_orient", function(name, fields)
 		gui_angle[name] = angle_indices[fields.worldedit_gui_orient_angle]
 		worldedit.show_page(name, "worldedit_gui_orient")
 		minetest.chatcommands["/orient"].func(name, tostring(angle_values[gui_angle[name]]))
+		return true
+	end
+	if fields.worldedit_gui_orient_angle then
+		gui_angle[name] = angle_indices[fields.worldedit_gui_orient_angle]
+		worldedit.show_page(name, "worldedit_gui_orient")
 		return true
 	end
 	return false
