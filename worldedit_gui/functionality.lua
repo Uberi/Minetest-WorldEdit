@@ -497,7 +497,7 @@ worldedit.register_gui_handler("worldedit_gui_orient", function(name, fields)
 	if fields.worldedit_gui_orient_submit then
 		gui_angle[name] = angle_indices[fields.worldedit_gui_orient_angle]
 		worldedit.show_page(name, "worldedit_gui_orient")
-		minetest.chatcommands["/orient"].func(name, angle_values[gui_angle[name]])
+		minetest.chatcommands["/orient"].func(name, tostring(angle_values[gui_angle[name]]))
 		return true
 	end
 	return false
