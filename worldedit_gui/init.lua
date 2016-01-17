@@ -143,8 +143,19 @@ else --fallback button
 		if not player then --this is in case the player signs off while the media is loading
 			return
 		end
-		if (minetest.check_player_privs(name, {creative=true}) or minetest.setting_getbool("creative_mode")) and creative_inventory then --creative_inventory is active, add button to modified formspec
-			formspec = player:get_inventory_formspec() .. "image_button[6,0;1,1;inventory_plus_worldedit_gui.png;worldedit_gui;]"
+		if (minetest.check_player_privs(name, {creative=true}) or
+				minetest.setting_getbool("creative_mode")) and
+				creative_inventory then --creative_inventory is active, add button to modified formspec
+			local creative_formspec = player:get_inventory_formspec()
+			local tab_id = tonumber(creative_formspec:match("tabheader%[.*;(%d)%;.*%]"))
+
+			if tab_id == 1 then
+				formspec = creative_formspec ..
+					"image_button[0,1;1,1;inventory_plus_worldedit_gui.png;worldedit_gui;]"
+			elseif not tab_id then
+				formspec = creative_formspec ..
+					"image_button[6,0;1,1;inventory_plus_worldedit_gui.png;worldedit_gui;]"
+			end
 		else
 			formspec = formspec .. "image_button[0,0;1,1;inventory_plus_worldedit_gui.png;worldedit_gui;]"
 		end
