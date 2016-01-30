@@ -144,9 +144,9 @@ local function load_schematic(value)
 				"([^%s]+)%s+(%d+)%s+(%d+)[^\r\n]*[\r\n]*") do
 			param1, param2 = tonumber(param1), tonumber(param2)
 			table.insert(nodes, {
-				x = originx + tonumber(x),
-				y = originy + tonumber(y),
-				z = originz + tonumber(z),
+				x = tonumber(x),
+				y = tonumber(y),
+				z = tonumber(z),
 				name = name,
 				param1 = param1 ~= 0 and param1 or nil,
 				param2 = param2 ~= 0 and param2 or nil,

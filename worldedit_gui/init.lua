@@ -67,7 +67,7 @@ local get_formspec = function(name, identifier)
 end
 
 --implement worldedit.show_page(name, page) in different ways depending on the available APIs
-if unified_inventory then --unified inventory installed
+if rawget(_G, "unified_inventory") then --unified inventory installed
 	local old_func = worldedit.register_gui_function
 	worldedit.register_gui_function = function(identifier, options)
 		old_func(identifier, options)
@@ -100,7 +100,7 @@ if unified_inventory then --unified inventory installed
 			player:set_inventory_formspec(get_formspec(name, page))
 		end
 	end
-elseif inventory_plus then --inventory++ installed
+elseif rawget(_G, "inventory_plus") then --inventory++ installed
 	minetest.register_on_joinplayer(function(player)
 		local can_worldedit = minetest.check_player_privs(player:get_player_name(), {worldedit=true})
 		if can_worldedit then
@@ -143,8 +143,19 @@ else --fallback button
 		if not player then --this is in case the player signs off while the media is loading
 			return
 		end
-		if (minetest.check_player_privs(name, {creative=true}) or minetest.setting_getbool("creative_mode")) and creative_inventory then --creative_inventory is active, add button to modified formspec
-			formspec = player:get_inventory_formspec() .. "image_button[6,0;1,1;inventory_plus_worldedit_gui.png;worldedit_gui;]"
+		if (minetest.check_player_privs(name, {creative=true}) or
+				minetest.setting_getbool("creative_mode")) and
+				creative_inventory then --creative_inventory is active, add button to modified formspec
+			local creative_formspec = player:get_inventory_formspec()
+			local tab_id = tonumber(creative_formspec:match("tabheader%[.*;(%d)%;.*%]"))
+
+			if tab_id == 1 then
+				formspec = creative_formspec ..
+					"image_button[0,1;1,1;inventory_plus_worldedit_gui.png;worldedit_gui;]"
+			elseif not tab_id then
+				formspec = creative_formspec ..
+					"image_button[6,0;1,1;inventory_plus_worldedit_gui.png;worldedit_gui;]"
+			end
 		else
 			formspec = formspec .. "image_button[0,0;1,1;inventory_plus_worldedit_gui.png;worldedit_gui;]"
 		end

@@ -157,7 +157,7 @@ function worldedit.pyramid(pos, axis, height, node_name)
 	-- Set up voxel manipulator
 	local manip, area = mh.init_axis_radius(pos, axis,
 			height >= 0 and height or -height)
-	local data = mh.get_empty_data()
+	local data = mh.get_empty_data(area)
 
 	-- Handle inverted pyramids
 	local start_axis, end_axis, step
@@ -177,7 +177,7 @@ function worldedit.pyramid(pos, axis, height, node_name)
 		y = pos.y - area.MinEdge.y,
 		z = pos.z - area.MinEdge.z,
 	}
-	local size = height * step
+	local size = math.abs(height * step)
 	local count = 0
 	-- For each level of the pyramid
 	for index1 = 0, height, step do
