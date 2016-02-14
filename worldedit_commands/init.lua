@@ -30,6 +30,18 @@ local function get_node(name, nodename)
 	return node
 end
 
+-- Gets the individual parameters from a command from the command's parameter string.
+local function process_params(paramStr)
+   local count = 0
+   local paramList = {}
+   for param in paramStr:gmatch("%S+") do
+  	  count = count + 1
+	  paramList[count] = param
+   end
+
+   return paramList, count
+end
+
 function worldedit.player_notify(name, message)
 	minetest.chat_send_player(name, "WorldEdit -!- " .. message, false)
 end
@@ -68,6 +80,30 @@ function worldedit.player_axis(name)
 		return "y", dir.y > 0 and 1 or -1
 	end
 	return "z", dir.z > 0 and 1 or -1
+end
+
+-- Gets the axis letter, and sign (either +1 or -1) from an argument (such as '+x', '-y', etc.).
+-- This function can be used for manually specifying an axis and direction as an argument
+function worldedit.arg_axis(param)
+   if 2 == string.len(param) then
+	  local sign = string.sub(param, 1, 1)
+	  local axis = string.sub(param, 2, 2)
+	  if '+' == sign then
+		 sign = 1
+	  elseif '-' == sign then
+		 sign = -1
+	  else
+		 return nil
+	  end
+
+	  if not ("x" == axis or "y" == axis or "z" == axis) then
+		 return nil
+	  end
+	  
+	  return axis, sign
+   else
+	  return nil
+   end
 end
 
 local function mkdir(path)
@@ -1137,6 +1173,78 @@ minetest.register_chatcommand("/mtschemprob", {
 		end
 	end,
 })
+
+-- Expands or contracts the region for user <name.
+-- <param> contains the parameters passed to the //expand or //contract command.
+-- If invert is true, contract instead.
+local function expand_region(name, param, invert)
+    local params, paramCount = process_params(param)
+    local count = nil
+    local axis = nil
+    local sign = nil
+
+	if nil == worldedit.pos1[name] or nil == worldedit.pos2[name] then
+	    worldedit.player_notify(name, "no region selected")
+	    return
+    end 
+	   
+    if 0 < paramCount then
+	    count = tonumber(params[1])
+    else
+	    worldedit.player_notify(name, "not enough arguments")
+	    return
+    end
+    
+    if nil == count then
+	    worldedit.player_notify(name, "not a valid integer: " .. params[1])
+	    return
+    end
+
+    if 1 < paramCount then
+	    axis, sign = worldedit.arg_axis(params[2])
+	    if nil == axis then
+		    worldedit.player_notify(name, "not a valid axis: " .. params[2])
+		    return
+	    end
+    else
+	    axis, sign = worldedit.player_axis(name)
+    end
+
+	if sign < 0 then
+	    count = 0 - count
+	end
+
+	if invert then
+	    sign = 0 - sign
+	end
+
+    if (worldedit.pos1[name][axis] > worldedit.pos2[name][axis]) == (0 < sign) then
+	    worldedit.pos1[name][axis] = worldedit.pos1[name][axis] + count
+	    worldedit.mark_pos1(name)
+    else
+	    worldedit.pos2[name][axis] = worldedit.pos2[name][axis] + count
+	    worldedit.mark_pos2(name)
+    end
+end
+
+minetest.register_chatcommand("/expand", {
+	params = "<count> <+/-><x/y/z>",
+	description = "Expands the worldedit selection by the specified amount in the direction the player is facing or the one specified.",,
+	privs = {worldedit=true},
+	func = function(name, param)
+	   return expand_region(name, param, false)
+	end,
+})
+
+minetest.register_chatcommand("/contract", {
+	params = "<count> <+/-><x/y/z>",
+	description = "Contracts the worldedit selection by the specified amount in the direction the player is facing or the one specified.",
+	privs = {worldedit=true},
+	func = function(name, param)
+	   return expand_region(name, param, true)
+	end,
+})
+
 
 minetest.register_on_player_receive_fields(
 	function(player, formname, fields)
