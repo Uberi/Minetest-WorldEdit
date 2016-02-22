@@ -155,6 +155,8 @@ else --fallback button
 			elseif not tab_id then
 				formspec = creative_formspec ..
 					"image_button[6,0;1,1;inventory_plus_worldedit_gui.png;worldedit_gui;]"
+			else
+				return
 			end
 		else
 			formspec = formspec .. "image_button[0,0;1,1;inventory_plus_worldedit_gui.png;worldedit_gui;]"
