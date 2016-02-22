@@ -145,9 +145,9 @@ else --fallback button
 		end
 		if (minetest.check_player_privs(name, {creative=true}) or
 				minetest.setting_getbool("creative_mode")) and
-				creative_inventory then --creative_inventory is active, add button to modified formspec
+				creative then --creative is active, add button to modified formspec
 			local creative_formspec = player:get_inventory_formspec()
-			local tab_id = tonumber(creative_formspec:match("tabheader%[.*;(%d)%;.*%]"))
+			local tab_id = tonumber(creative_formspec:match("tabheader%[.-;(%d+)%;"))
 
 			if tab_id == 1 then
 				formspec = creative_formspec ..
