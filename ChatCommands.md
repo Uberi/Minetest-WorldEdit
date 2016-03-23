@@ -291,6 +291,12 @@ Fixes the lighting in the current WorldEdit region.
 
     //fixlight
 
+### `//drain`
+
+Removes any fluid node within the current WorldEdit region.
+
+    //drain
+
 ### `//hide`
 
 Hide all nodes in the current WorldEdit region non-destructively.
