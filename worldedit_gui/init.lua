@@ -118,7 +118,7 @@ elseif rawget(_G, "inventory_plus") then --inventory++ installed
 			return true
 		elseif fields.worldedit_gui_exit then --return to original page
 			if gui_player_formspecs[name] then
-				inventory_plus.set_inventory_formspec(player, gui_player_formspecs[name])
+				inventory_plus.set_inventory_formspec(player, inventory_plus.get_formspec(player, "main"))
 			end
 			return true
 		end
