@@ -1,6 +1,3 @@
-dofile(minetest.get_modpath("worldedit_commands") .. "/cuboidapi.lua")
-
-
 minetest.register_chatcommand("/outset", {
 	params = "[h|v] <amount>",
 	description = "outset the selection",
