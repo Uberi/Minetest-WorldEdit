@@ -114,10 +114,12 @@ minetest.register_chatcommand("/shift", {
 		end
 		
 		local axis, dir
-		if direction ~= "?" then
-			axis, dir = worldedit.translate_direction(name, direction)
-		else
+		if direction == "x" or direction == "y" or direction == "z" then
+			axis, dir = direction, 1
+		elseif direction == "?" then
 			axis, dir = worldedit.player_axis(name)
+		else
+			axis, dir = worldedit.translate_direction(name, direction)
 		end
 		
 		if axis == nil or dir == nil then
