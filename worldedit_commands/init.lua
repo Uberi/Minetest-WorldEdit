@@ -1152,8 +1152,8 @@ minetest.register_chatcommand("/mtschemprob", {
 				return
 			end
 			for k,v in pairs(problist) do
-				local prob = math.floor(((v["prob"] / 256) * 100) * 100 + 0.5) / 100
-				text = text .. minetest.pos_to_string(v["pos"]) .. ": " .. prob .. "% | "
+				local prob = math.floor(((v.prob / 256) * 100) * 100 + 0.5) / 100
+				text = text .. minetest.pos_to_string(v.pos) .. ": " .. prob .. "% | "
 			end
 			worldedit.player_notify(name, "currently set node probabilities:")
 			worldedit.player_notify(name, text)
@@ -1163,16 +1163,14 @@ minetest.register_chatcommand("/mtschemprob", {
 	end,
 })
 
-minetest.register_on_player_receive_fields(
-	function(player, formname, fields)
-		if (formname == "prob_val_enter") and (fields.text ~= "") then
-			local name = player:get_player_name()
-			local prob_entry = {pos=worldedit.prob_pos[name], prob=tonumber(fields.text)}
-			local index = table.getn(worldedit.prob_list[name]) + 1
-			worldedit.prob_list[name][index] = prob_entry
-		end
+minetest.register_on_player_receive_fields(function(player, formname, fields)
+	if formname == "prob_val_enter" and not (fields.text == "" or fields.text == nil) then
+		local name = player:get_player_name()
+		local prob_entry = {pos=worldedit.prob_pos[name], prob=tonumber(fields.text)}
+		local index = table.getn(worldedit.prob_list[name]) + 1
+		worldedit.prob_list[name][index] = prob_entry
 	end
-)
+end)
 
 minetest.register_chatcommand("/clearobjects", {
 	params = "",
