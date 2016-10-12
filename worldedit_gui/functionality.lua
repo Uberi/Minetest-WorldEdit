@@ -667,7 +667,7 @@ worldedit.register_gui_function("worldedit_gui_lua", {
 
 worldedit.register_gui_handler("worldedit_gui_lua", function(name, fields)
 	if fields.worldedit_gui_lua_run or fields.worldedit_gui_lua_transform then
-		gui_code[name] = fields.worldedit_gui_lua_value
+		gui_code[name] = fields.worldedit_gui_lua_code
 		worldedit.show_page(name, "worldedit_gui_lua")
 		if fields.worldedit_gui_lua_run then
 			minetest.chatcommands["/lua"].func(name, gui_code[name])
