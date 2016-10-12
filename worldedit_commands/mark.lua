@@ -153,7 +153,11 @@ minetest.register_entity(":worldedit:region_cube", {
 		end
 	end,
 	on_punch = function(self, hitter)
-		for _, entity in ipairs(worldedit.marker_region[self.player_name]) do
+		local markers = worldedit.marker_region[self.player_name]
+		if not markers then
+			return
+		end
+		for _, entity in ipairs(markers) do
 			entity:remove()
 		end
 		worldedit.marker_region[self.player_name] = nil
