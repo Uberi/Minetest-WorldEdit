@@ -571,7 +571,7 @@ minetest.register_chatcommand("/spiral", {
 		end
 		local node = get_node(name, nodename)
 		if not node then return nil end
-		return check_region(name, param)
+		return 1 -- TODO: return an useful value
 	end),
 })
 
