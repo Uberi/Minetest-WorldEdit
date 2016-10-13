@@ -300,18 +300,21 @@ worldedit.register_gui_function("worldedit_gui_pyramid", {
 				or "image[5.5,1.1;1,1;unknown_node.png]") ..
 			string.format("field[0.5,2.5;4,0.8;worldedit_gui_pyramid_length;Length;%s]", minetest.formspec_escape(length)) ..
 			string.format("dropdown[4,2.18;2.5;worldedit_gui_pyramid_axis;X axis,Y axis,Z axis,Look direction;%d]", axis) ..
-			"button_exit[0,3.5;3,0.8;worldedit_gui_pyramid_submit;Pyramid]"
+			"button_exit[0,3.5;3,0.8;worldedit_gui_pyramid_submit_hollow;Hollow Pyramid]" ..
+			"button_exit[3.5,3.5;3,0.8;worldedit_gui_pyramid_submit_solid;Solid Pyramid]"
 	end,
 })
 
 worldedit.register_gui_handler("worldedit_gui_pyramid", function(name, fields)
-	if fields.worldedit_gui_pyramid_search or fields.worldedit_gui_pyramid_submit then
+	if fields.worldedit_gui_pyramid_search or fields.worldedit_gui_pyramid_submit_solid or fields.worldedit_gui_pyramid_submit_hollow or fields.worldedit_gui_pyramid_axis then
 		gui_nodename1[name] = tostring(fields.worldedit_gui_pyramid_node)
 		gui_axis1[name] = axis_indices[fields.worldedit_gui_pyramid_axis]
 		gui_distance1[name] = tostring(fields.worldedit_gui_pyramid_length)
 		worldedit.show_page(name, "worldedit_gui_pyramid")
-		if fields.worldedit_gui_pyramid_submit then
+		if fields.worldedit_gui_pyramid_submit_solid then
 			minetest.chatcommands["/pyramid"].func(name, string.format("%s %s %s", axis_values[gui_axis1[name]], gui_distance1[name], gui_nodename1[name]))
+		elseif fields.worldedit_gui_pyramid_submit_hollow then
+			minetest.chatcommands["/hollowpyramid"].func(name, string.format("%s %s %s", axis_values[gui_axis1[name]], gui_distance1[name], gui_nodename1[name]))
 		end
 		return true
 	end
