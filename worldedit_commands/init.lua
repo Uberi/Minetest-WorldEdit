@@ -12,6 +12,7 @@ end
 
 dofile(minetest.get_modpath("worldedit_commands") .. "/cuboid.lua")
 dofile(minetest.get_modpath("worldedit_commands") .. "/mark.lua")
+dofile(minetest.get_modpath("worldedit_commands") .. "/wand.lua")
 local safe_region, check_region = dofile(minetest.get_modpath("worldedit_commands") .. "/safe.lua")
 
 local function get_position(name) --position 1 retrieval function for when not using `safe_region`

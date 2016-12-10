@@ -36,7 +36,6 @@ load_module(path .. "/visualization.lua")
 load_module(path .. "/serialization.lua")
 load_module(path .. "/code.lua")
 load_module(path .. "/compatibility.lua")
-load_module(path .. "/wand.lua")
 load_module(path .. "/cuboid.lua")
 
 

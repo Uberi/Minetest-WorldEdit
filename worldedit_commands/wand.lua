@@ -1,4 +1,4 @@
-minetest.register_tool("worldedit:wand", {
+minetest.register_tool(":worldedit:wand", {
 	description = "WorldEdit Wand tool, Left-click to set 1st position, right-click to set 2nd",
 	inventory_image = "worldedit_wand.png",
 	stack_max = 1, -- there is no need to have more than one
