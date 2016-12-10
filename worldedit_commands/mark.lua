@@ -58,8 +58,19 @@ worldedit.mark_region = function(name)
 		end
 		worldedit.marker_region[name] = nil
 	end
+
 	if pos1 ~= nil and pos2 ~= nil then
 		local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
+
+		local vec = vector.subtract(pos2, pos1)
+		local maxside = math.max(vec.x, math.max(vec.y, vec.z))
+		local limit = tonumber(minetest.setting_get("active_object_send_range_blocks")) * 16
+		if maxside > limit * 1.5 then
+			-- The client likely won't be able to see the plane markers as intended anyway,
+			-- thus don't place them and also don't load the area into memory
+			return
+		end
+
 		local thickness = 0.2
 		local sizex, sizey, sizez = (1 + pos2.x - pos1.x) / 2, (1 + pos2.y - pos1.y) / 2, (1 + pos2.z - pos1.z) / 2
 
