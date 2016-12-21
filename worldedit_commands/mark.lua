@@ -83,24 +83,28 @@ worldedit.mark_region = function(name)
 		--XY plane markers
 		for _, z in ipairs({pos1.z - 0.5, pos2.z + 0.5}) do
 			local marker = minetest.add_entity({x=pos1.x + sizex - 0.5, y=pos1.y + sizey - 0.5, z=z}, "worldedit:region_cube")
-			marker:set_properties({
-				visual_size={x=sizex * 2, y=sizey * 2},
-				collisionbox = {-sizex, -sizey, -thickness, sizex, sizey, thickness},
-			})
-			marker:get_luaentity().player_name = name
-			table.insert(markers, marker)
+			if marker ~= nil then
+				marker:set_properties({
+					visual_size={x=sizex * 2, y=sizey * 2},
+					collisionbox = {-sizex, -sizey, -thickness, sizex, sizey, thickness},
+				})
+				marker:get_luaentity().player_name = name
+				table.insert(markers, marker)
+			end
 		end
 
 		--YZ plane markers
 		for _, x in ipairs({pos1.x - 0.5, pos2.x + 0.5}) do
 			local marker = minetest.add_entity({x=x, y=pos1.y + sizey - 0.5, z=pos1.z + sizez - 0.5}, "worldedit:region_cube")
-			marker:set_properties({
-				visual_size={x=sizez * 2, y=sizey * 2},
-				collisionbox = {-thickness, -sizey, -sizez, thickness, sizey, sizez},
-			})
-			marker:setyaw(math.pi / 2)
-			marker:get_luaentity().player_name = name
-			table.insert(markers, marker)
+			if marker ~= nil then
+				marker:set_properties({
+					visual_size={x=sizez * 2, y=sizey * 2},
+					collisionbox = {-thickness, -sizey, -sizez, thickness, sizey, sizez},
+				})
+				marker:setyaw(math.pi / 2)
+				marker:get_luaentity().player_name = name
+				table.insert(markers, marker)
+			end
 		end
 
 		worldedit.marker_region[name] = markers
