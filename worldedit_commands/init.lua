@@ -93,6 +93,56 @@ minetest.register_chatcommand("/about", {
 	end,
 })
 
+-- mostly copied from builtin/chatcommands.lua with minor modifications
+minetest.register_chatcommand("/help", {
+	privs = {},
+	params = "[all/<cmd>]",
+	description = "Get help for WorldEdit commands",
+	func = function(name, param)
+		local function is_we_command(cmd)
+			return cmd:sub(0, 1) == "/"
+		end
+		local function format_help_line(cmd, def)
+			local msg = minetest.colorize("#00ffff", "/"..cmd)
+			if def.params and def.params ~= "" then
+				msg = msg .. " " .. def.params
+			end
+			if def.description and def.description ~= "" then
+				msg = msg .. ": " .. def.description
+			end
+			return msg
+		end
+
+		if not minetest.check_player_privs(name, "worldedit") then
+			return false, "You are not allowed to use any WorldEdit commands."
+		end
+		if param == "" then
+			local msg = ""
+			local cmds = {}
+			for cmd, def in pairs(minetest.chatcommands) do
+				if is_we_command(cmd) and minetest.check_player_privs(name, def.privs) then
+					cmds[#cmds + 1] = cmd:sub(2) -- strip the /
+				end
+			end
+			table.sort(cmds)
+			return true, "Available commands: " .. table.concat(cmds, " ") .. "\n"
+					.. "Use '//help <cmd>' to get more information,"
+					.. " or '//help all' to list everything."
+		elseif param == "all" then
+			local cmds = {}
+			for cmd, def in pairs(minetest.chatcommands) do
+				if is_we_command(cmd) and minetest.check_player_privs(name, def.privs) then
+					cmds[#cmds + 1] = format_help_line(cmd, def)
+				end
+			end
+			table.sort(cmds)
+			return true, "Available commands:\n"..table.concat(cmds, "\n")
+		else
+			return minetest.chatcommands["help"].func(name, "/" .. param)
+		end
+	end,
+})
+
 minetest.register_chatcommand("/inspect", {
 	params = "on/off/1/0/true/false/yes/no/enable/disable/<blank>",
 	description = "Enable or disable node inspection",
