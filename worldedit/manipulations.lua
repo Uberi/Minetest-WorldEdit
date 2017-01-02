@@ -575,14 +575,11 @@ end
 function worldedit.fixlight(pos1, pos2)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 
-	worldedit.keep_loaded(pos1, pos2)
+	local vmanip = minetest.get_voxel_manip(pos1, pos2)
+	vmanip:write_to_map()
+	vmanip:update_map() -- this updates the lighting
 
-	local nodes = minetest.find_nodes_in_area(pos1, pos2, "air")
-	local dig_node = minetest.dig_node
-	for _, pos in ipairs(nodes) do
-		dig_node(pos)
-	end
-	return #nodes
+	return worldedit.volume(pos1, pos2)
 end
 
 
