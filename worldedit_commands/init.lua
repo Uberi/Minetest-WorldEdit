@@ -13,7 +13,7 @@ end
 dofile(minetest.get_modpath("worldedit_commands") .. "/cuboid.lua")
 dofile(minetest.get_modpath("worldedit_commands") .. "/mark.lua")
 dofile(minetest.get_modpath("worldedit_commands") .. "/wand.lua")
-local safe_region, check_region = dofile(minetest.get_modpath("worldedit_commands") .. "/safe.lua")
+local safe_region, check_region, reset_pending = dofile(minetest.get_modpath("worldedit_commands") .. "/safe.lua")
 
 local function get_position(name) --position 1 retrieval function for when not using `safe_region`
 	local pos1 = worldedit.pos1[name]
@@ -198,6 +198,8 @@ minetest.register_chatcommand("/reset", {
 		worldedit.mark_pos1(name)
 		worldedit.mark_pos2(name)
 		worldedit.set_pos[name] = nil
+		--make sure the user does not try to confirm an operation after resetting pos:
+		reset_pending(name)
 		worldedit.player_notify(name, "region reset")
 	end,
 })

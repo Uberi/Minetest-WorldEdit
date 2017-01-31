@@ -30,6 +30,10 @@ local function safe_region(callback, nodes_needed)
 	end
 end
 
+local function reset_pending(name)
+	safe_region_callback[name], safe_region_param[name] = nil, nil
+end
+
 minetest.register_chatcommand("/y", {
 	params = "",
 	description = "Confirm a pending operation",
@@ -40,15 +44,8 @@ minetest.register_chatcommand("/y", {
 			return
 		end
 
-		--obtain positions
-		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
-		if pos1 == nil or pos2 == nil then
-			worldedit.player_notify(name, "no region selected")
-			return
-		end
-
 		safe_region_callback[name], safe_region_param[name] = nil, nil --reset pending operation
-		callback(name, param, pos1, pos2)
+		callback(name, param)
 	end,
 })
 
@@ -64,5 +61,5 @@ minetest.register_chatcommand("/n", {
 	end,
 })
 
-return safe_region, check_region
 
+return safe_region, check_region, reset_pending
