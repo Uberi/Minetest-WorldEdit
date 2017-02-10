@@ -8,9 +8,9 @@ minetest.register_tool(":worldedit:wand", {
 		full_punch_interval = 1.0,
 		max_drop_level = 0,
 		groupcaps={
-			fleshy={times={[2]=0.80, [3]=0.40}, maxwear=0.05, maxlevel=1},
-			snappy={times={[2]=0.80, [3]=0.40}, maxwear=0.05, maxlevel=1},
-			choppy={times={[3]=0.90}, maxwear=0.05, maxlevel=0}
+			fleshy={times={[2]=0.80, [3]=0.40}, uses=1/0.05, maxlevel=1},
+			snappy={times={[2]=0.80, [3]=0.40}, uses=1/0.05, maxlevel=1},
+			choppy={times={[3]=0.90}, uses=1/0.05, maxlevel=0}
 		}
 	},
 
