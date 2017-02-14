@@ -10,10 +10,10 @@ local gui_count1 = {} --mapping of player names to a quantity (arbitrary strings
 local gui_count2 = {} --mapping of player names to a quantity (arbitrary strings may also appear as values)
 local gui_count3 = {} --mapping of player names to a quantity (arbitrary strings may also appear as values)
 local gui_angle = {} --mapping of player names to an angle (one of 90, 180, 270, representing the angle in degrees clockwise)
+local gui_operation = {} -- mapping of player names to operations (flip or rotate, see orient command)
 local gui_filename = {} --mapping of player names to file names (arbitrary strings may also appear as values)
 local gui_formspec = {} --mapping of player names to formspecs
 local gui_code = {} --mapping of player names to formspecs
-
 --set default values
 setmetatable(gui_nodename1, {__index = function() return "Cobblestone" end})
 setmetatable(gui_nodename2, {__index = function() return "Stone" end})
@@ -26,6 +26,7 @@ setmetatable(gui_count1,     {__index = function() return "3" end})
 setmetatable(gui_count2,     {__index = function() return "6" end})
 setmetatable(gui_count3,     {__index = function() return "4" end})
 setmetatable(gui_angle,     {__index = function() return 90 end})
+setmetatable(gui_operation, {__index = function() return 1 end})
 setmetatable(gui_filename,  {__index = function() return "building" end})
 setmetatable(gui_formspec,  {__index = function() return "size[5,5]\nlabel[0,0;Hello, world!]" end})
 setmetatable(gui_code,  {__index = function() return "minetest.chat_send_player(\"singleplayer\", \"Hello, world!\")" end})
@@ -39,6 +40,11 @@ local angle_indices = {["90 degrees"]=1, ["180 degrees"]=2, ["270 degrees"]=3}
 local angle_values = {90, 180, 270}
 setmetatable(angle_indices, {__index = function () return 1 end})
 setmetatable(angle_values, {__index = function () return 90 end})
+
+local operation_indices = {["Rotate"]=1, ["Flip"]=2}
+local operation_values = {"rotate", "flip"}
+setmetatable(operation_indices, {__index = function () return 1 end})
+setmetatable(operation_values, {__index = function () return "rotate" end})
 
 --given multiple sets of privileges, produces a single set of privs that would have the same effect as requiring all of them at the same time
 local combine_privs = function(...)
@@ -534,18 +540,32 @@ end)
 worldedit.register_gui_function("worldedit_gui_orient", {
 	name = "Orient", privs = minetest.chatcommands["/orient"].privs,
 	get_formspec = function(name)
-		local angle = gui_angle[name]
-		return "size[5,3]" .. worldedit.get_formspec_header("worldedit_gui_orient") ..
-			string.format("dropdown[0,1;2.5;worldedit_gui_orient_angle;90 degrees,180 degrees,270 degrees;%s]", angle) ..
+		local operation, axis, angle = gui_operation[name], gui_axis1[name], gui_angle[name]
+		return "size[8.5,3]" .. worldedit.get_formspec_header("worldedit_gui_orient") ..
+			string.format("dropdown[0,1;2.5;worldedit_gui_orient_operation;Rotate,Flip;%d]", operation) ..
+			string.format("dropdown[3,1;2.5;worldedit_gui_orient_axis;X axis,Y axis,Z axis,Look direction;%d]", axis) ..
+			string.format("dropdown[6,1;2.5;worldedit_gui_orient_angle;90 degrees,180 degrees,270 degrees;%s]", angle) ..
 			"button_exit[0,2.5;3,0.8;worldedit_gui_orient_submit;Orient]"
 	end,
 })
 
 worldedit.register_gui_handler("worldedit_gui_orient", function(name, fields)
 	if fields.worldedit_gui_orient_submit then
+		gui_operation[name] = operation_indices[fields.worldedit_gui_orient_operation]
+		gui_axis1[name] = axis_indices[fields.worldedit_gui_orient_axis]
 		gui_angle[name] = angle_indices[fields.worldedit_gui_orient_angle]
 		worldedit.show_page(name, "worldedit_gui_orient")
-		minetest.chatcommands["/orient"].func(name, tostring(angle_values[gui_angle[name]]))
+		minetest.chatcommands["/orient"].func(name, string.format("%s %s %s", operation_values[gui_operation[name]], axis_values[gui_axis1[name]], angle_values[gui_angle[name]]))
+		return true
+	end
+	if fields.worldedit_gui_orient_operation then
+		gui_operation[name] = axis_indices[fields.worldedit_gui_orient_operation]
+		worldedit.show_page(name, "worldedit_gui_orient")
+		return true
+	end
+	if fields.worldedit_gui_orient_axis then
+		gui_axis1[name] = axis_indices[fields.worldedit_gui_orient_axis]
+		worldedit.show_page(name, "worldedit_gui_orient")
 		return true
 	end
 	if fields.worldedit_gui_orient_angle then

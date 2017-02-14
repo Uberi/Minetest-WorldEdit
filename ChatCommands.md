@@ -288,14 +288,13 @@ Rotate the current WorldEdit positions and region along the x/y/z/? axis by angl
     //rotate z 270
     //rotate ? -90
 
-### `//orient <angle>`
+### `//orient <operation> <axis> <angle>`
 
-Rotate oriented nodes in the current WorldEdit region around the Y axis by angle `<angle>` (90 degree increment)
+Change orientation of all oriented nodes in the current WorldEdit region performing <operation> (rotate or flip) around the <axis> axis by angle <angle> (90 degree increment, unused for flip operation).
 
-    //orient 90
-    //orient 180
-    //orient 270
-    //orient -90
+	//orient rotate x 90
+	//orient rotate y -90
+	//orient flip x 0
 
 ### `//fixlight`
 

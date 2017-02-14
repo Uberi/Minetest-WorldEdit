@@ -1,8 +1,65 @@
 --- Generic node manipulations.
 -- @module worldedit.manipulations
 
+-- List of diagonal symetric nodes. Node name as key
+worldedit.diagonal_nodes = {}
+
 local mh = worldedit.manip_helpers
 
+local facedir_substitutions = {
+	['flip'] = {
+		['x'] = {[0]=0, 3, 2, 1, 4, 7, 6, 5, 8, 11, 10, 9, 16, 19, 18, 17, 12, 15, 14, 13, 20, 23, 22, 21},
+		['y'] = {[0]=20, 23, 22, 21, 6, 5, 4, 7, 10, 9, 8, 11, 12, 15, 14, 13, 16, 19, 18, 17, 0, 3, 2, 1},
+		['z'] = {[0]=2, 1, 0, 3, 10, 9, 8, 11, 6, 5, 4, 7, 14, 13, 12, 15, 18, 17, 16, 19, 22, 21, 20, 23},
+		['diag'] = {
+			['x'] = {[0]=1, 0, 3, 2, 5, 4, 7, 6, 9, 8, 11, 10, 17, 16, 19, 18, 13, 12, 15, 14, 21, 20, 23, 22},
+			['y'] = {[0]=21, 20, 23, 22, 7, 6, 5, 4, 11, 10, 9, 8, 13, 12, 15, 14, 17, 16, 19, 18, 1, 0, 3, 2},
+			['z'] = {[0]=3, 2, 1, 0, 11, 10, 9, 8, 7, 6, 5, 4, 15, 14, 13, 12, 19, 18, 17, 16, 23, 22, 21, 20},
+		}
+	},
+	['rotate'] = {
+		['x'] = {
+			[90] = {[0]=8, 9, 10, 11, 0, 1, 2, 3, 22, 23, 20, 21, 15, 12, 13, 14, 17, 18, 19, 16, 6, 7, 4, 5},
+			[180] = {[0]=22, 23, 20, 21, 8, 9, 10, 11, 4, 5, 6, 7, 14, 15, 12, 13, 18, 19, 16, 17, 2, 3, 0, 1},
+			[270] = {[0]=4, 5, 6, 7, 22, 23, 20, 21, 0, 1, 2, 3, 13, 14, 15, 12, 19, 16, 17, 18, 10, 11, 8, 9}
+		},
+		['y'] = {
+			[90] = {[0]=1, 2, 3, 0, 13, 14, 15, 12, 17, 18, 19, 16, 9, 10, 11, 8, 5, 6, 7, 4, 23, 20, 21, 22},
+			[180] = {[0]=2, 3, 0, 1, 10, 11, 8, 9, 6, 7, 4, 5, 18, 19, 16, 17, 14, 15, 12, 13, 22, 23, 20, 21},
+			[270] = {[0]=3, 0, 1, 2, 19, 16, 17, 18, 15, 12, 13, 14, 7, 4, 5, 6, 11, 8, 9, 10, 21, 22, 23, 20}
+		},
+		['z'] = {
+			[90] = {[0]=12, 13, 14, 15, 7, 4, 5, 6, 9, 10, 11, 8, 20, 21, 22, 23, 0, 1, 2, 3, 16, 17, 18, 19},
+			[180] = {[0]=20, 21, 22, 23, 6, 7, 4, 5, 10, 11, 8, 9, 16, 17, 18, 19, 12, 13, 14, 15, 0, 1, 2, 3},
+			[270] = {[0]=16, 17, 18, 19, 5, 6, 7, 4, 11, 8, 9, 10, 0, 1, 2, 3, 20, 21, 22, 23, 12, 13, 14, 15}
+		}
+	}
+}
+
+local wallmounted_substitutions = {
+	['flip'] = {
+		['x'] = {[0]=1, 0, 3, 2, 4, 5},
+		['y'] = {[0]=0, 1, 2, 3, 4, 5},
+		['z'] = {[0]=0, 1, 2, 3, 5, 4}
+	},
+	['rotate'] = {
+		['x'] = {
+			[90] = {[0]=5, 4, 2, 3, 0, 1},
+			[180] = {[0]=1, 0, 2, 3, 5, 4},
+			[270] = {[0]=4, 5, 2, 3, 1, 0}
+		},
+		['y'] = {
+			[90] = {[0]=0, 1, 5, 4, 2, 3},
+			[180] = {[0]=0, 1, 3, 2, 5, 4},
+			[270] = {[0]=0, 1, 4, 5, 3, 2}
+		},
+		['z'] = {
+			[90] = {[0]=2, 3, 1, 0, 4, 5},
+			[180] = {[0]=1, 0, 3, 2, 4, 5},
+			[270] = {[0]=3, 2, 0, 1, 4, 5}
+		}
+	}
+}
 
 --- Sets a region to `node_names`.
 -- @param pos1
@@ -368,7 +425,6 @@ function worldedit.stretch(pos1, pos2, stretch_x, stretch_y, stretch_z)
 	return worldedit.volume(pos1, pos2) * stretch_x * stretch_y * stretch_z, pos1, new_pos2
 end
 
-
 --- Transposes a region between two axes.
 -- @return The number of nodes transposed.
 -- @return The new transposed position 1.
@@ -431,9 +487,9 @@ function worldedit.transpose(pos1, pos2, axis1, axis2)
 end
 
 
---- Flips a region along `axis`.
+--- Flips a region along `axis`. Flips only nodes, no change on nodes orientations
 -- @return The number of nodes flipped.
-function worldedit.flip(pos1, pos2, axis)
+function worldedit.flip_nodes(pos1, pos2, axis)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 
 	worldedit.keep_loaded(pos1, pos2)
@@ -469,68 +525,42 @@ function worldedit.flip(pos1, pos2, axis)
 	return worldedit.volume(pos1, pos2)
 end
 
-
---- Rotates a region clockwise around an axis.
+--- Change orientation of all oriented nodes in a region.
 -- @param pos1
 -- @param pos2
--- @param axis Axis ("x", "y", or "z").
--- @param angle Angle in degrees (90 degree increments only).
--- @return The number of nodes rotated.
--- @return The new first position.
--- @return The new second position.
-function worldedit.rotate(pos1, pos2, axis, angle)
-	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
-
-	local other1, other2 = worldedit.get_axis_others(axis)
-	angle = angle % 360
-
-	local count
-	if angle == 90 then
-		worldedit.flip(pos1, pos2, other1)
-		count, pos1, pos2 = worldedit.transpose(pos1, pos2, other1, other2)
-	elseif angle == 180 then
-		worldedit.flip(pos1, pos2, other1)
-		count = worldedit.flip(pos1, pos2, other2)
-	elseif angle == 270 then
-		worldedit.flip(pos1, pos2, other2)
-		count, pos1, pos2 = worldedit.transpose(pos1, pos2, other1, other2)
-	else
-		error("Only 90 degree increments are supported!")
-	end
-	return count, pos1, pos2
-end
-
-
---- Rotates all oriented nodes in a region clockwise around the Y axis.
--- @param pos1
--- @param pos2
+-- @param operation Kind of operation: flip or rotate.
+-- @param axis Orientation axis: x, y or z
 -- @param angle Angle in degrees (90 degree increments only).
 -- @return The number of nodes oriented.
--- TODO: Support 6D facedir rotation along arbitrary axis.
-function worldedit.orient(pos1, pos2, angle)
+--- TODO: When flipping, try to manage diametral symetric nodes (should be rotated instead of flipped)
+function worldedit.orient(pos1, pos2, operation, axis, angle)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 	local registered_nodes = minetest.registered_nodes
 
-	local wallmounted = {
-		[90]  = {[0]=0, 1, 5, 4, 2, 3},
-		[180] = {[0]=0, 1, 3, 2, 5, 4},
-		[270] = {[0]=0, 1, 4, 5, 3, 2}
-	}
-	local facedir = {
-		[90]  = {[0]=1, 2, 3, 0},
-		[180] = {[0]=2, 3, 0, 1},
-		[270] = {[0]=3, 0, 1, 2}
-	}
+	if axis ~= 'x' and axis ~= 'y' and axis ~= 'z' then
+		error("Axis should be 'x', 'y' or 'z'!")
+	end
 
-	angle = angle % 360
-	if angle == 0 then
-		return 0
+	local facedir_substitution
+	local wallmounted_substitution
+
+	if operation == "rotate" then	
+		angle = angle % 360
+		if angle == 0 then
+			return
+		else
+			if angle % 90 ~= 0 then
+				error("Only 90 degree increments are supported!")
+			end
+			facedir_substitution = facedir_substitutions[operation][axis][angle]
+			wallmounted_substitution = wallmounted_substitutions[operation][axis][angle]
+		end
+  	elseif operation == "flip" then
+		facedir_substitution = facedir_substitutions[operation][axis]
+		wallmounted_substitution = wallmounted_substitutions[operation][axis]
+	else
+		error("Operation should be 'rotate' or 'flip'!")
 	end
-	if angle % 90 ~= 0 then
-		error("Only 90 degree increments are supported!")
-	end
-	local wallmounted_substitution = wallmounted[angle]
-	local facedir_substitution = facedir[angle]
 
 	worldedit.keep_loaded(pos1, pos2)
 
@@ -553,7 +583,11 @@ function worldedit.orient(pos1, pos2, angle)
 						get_meta(pos):from_table(meta)
 						count = count + 1
 					elseif def.paramtype2 == "facedir" then
-						node.param2 = facedir_substitution[node.param2]
+						if operation == 'flip' and worldedit.diagonal_nodes[node.name] then
+							node.param2 = facedir_substitutions[operation]['diag'][axis][node.param2]
+						else
+							node.param2 = facedir_substitution[node.param2]
+						end
 						local meta = get_meta(pos):to_table()
 						set_node(pos, node)
 						get_meta(pos):from_table(meta)
@@ -569,6 +603,48 @@ function worldedit.orient(pos1, pos2, angle)
 	return count
 end
 
+--- Rotates a region clockwise around an axis. Oriented nodes are rotated accordingly.
+-- @param pos1
+-- @param pos2
+-- @param axis Axis ("x", "y", or "z").
+-- @param angle Angle in degrees (90 degree increments only).
+-- @return The number of nodes rotated.
+-- @return The new first position.
+-- @return The new second position.
+function worldedit.rotate(pos1, pos2, axis, angle)
+	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
+
+	local other1, other2 = worldedit.get_axis_others(axis)
+	angle = angle % 360
+
+	local count
+	if angle == 90 then
+		worldedit.flip_nodes(pos1, pos2, other1)
+		count, pos1, pos2 = worldedit.transpose(pos1, pos2, other1, other2)
+	elseif angle == 180 then
+		worldedit.flip_nodes(pos1, pos2, other1)
+		count = worldedit.flip_nodes(pos1, pos2, other2)
+	elseif angle == 270 then
+		worldedit.flip_nodes(pos1, pos2, other2)
+		count, pos1, pos2 = worldedit.transpose(pos1, pos2, other1, other2)
+	else
+		error("Only 90 degree increments are supported!")
+	end
+	worldedit.orient(pos1, pos2, "rotate", axis, angle)
+	return count, pos1, pos2
+end
+
+--- Flips a region along `axis`. Oriented nodes are flipped accordingly.
+-- @param pos1
+-- @param pos2
+-- @param axis Axis ("x", "y", or "z").
+-- @return The number of nodes flipped.
+function worldedit.flip(pos1, pos2, axis)
+	local count
+	count = worldedit.flip_nodes(pos1, pos2, axis)
+	worldedit.orient(pos1, pos2, "flip", axis, 0)
+	return count
+end
 
 --- Attempts to fix the lighting in a region.
 -- @return The number of nodes updated.
@@ -624,3 +700,72 @@ function worldedit.clear_objects(pos1, pos2)
 	return count
 end
 
+function worldedit.load_diag_nodes_inventory ()
+
+	-- Moreblocks / Circular saw nodes
+	local circular_saw_diag_names = {
+		'micro_%s_1', 'micro_%s_2', 'micro_%s_4', 'micro_%s', 'micro_%s_12', 'micro_%s_14', 'micro_%s_15',
+		'stair_%s_outer', 'stair_%s_inner',
+		'slope_%s_outer', 'slope_%s_outer_half', 'slope_%s_outer_half_raised',
+		'slope_%s_inner', 'slope_%s_inner_half', 'slope_%s_inner_half_raised',
+		'slope_%s_inner_cut', 'slope_%s_inner_cut_half', 'slope_%s_inner_cut_half_raised',
+		'slope_%s_outer_cut', 'slope_%s_outer_cut_half', 'slope_%s_outer_cut_half_raised',
+		'slope_%s_cut'}
+
+	if circular_saw then
+		for _, name_parts  in ipairs(circular_saw.known_nodes) do
+			for _, name_format in ipairs(circular_saw_diag_names) do
+				local modname  = name_parts[1] or ""
+				local material = name_parts[2] or ""
+				local name = modname..":"..string.format(name_format, material)
+				worldedit.diagonal_nodes[name] = name
+			end
+		end
+	end
+
+	-- Homedecor roof blocks
+	if minetest.get_modpath("homedecor") then
+		local homedecor_nodes = {
+			"shingle_outer_corner_wood", "shingle_outer_corner_asphalt",
+			"shingle_outer_corner_terracotta", "shingle_inner_corner_wood",
+			"shingle_inner_corner_asphalt", "shingle_inner_corner_terracotta"
+			}
+		for _, name in ipairs(homedecor_nodes) do
+			worldedit.diagonal_nodes["homedecor:"..name] = "homedecor"..name
+		end
+	end
+
+	-- Trunks roof blocks
+	if minetest.get_modpath("trunks") then
+		worldedit.diagonal_nodes["trunks:twigs_roof_corner"] = "trunks:twigs_roof_corner"
+		worldedit.diagonal_nodes["trunks:twigs_roof_corner_2"] = "trunks:twigs_roof_corner_2"
+	end
+
+	-- Dryplants roof blocks
+	if minetest.get_modpath("dryplants") then
+		worldedit.diagonal_nodes["dryplants:reed_roof_corner"] = "dryplants:reed_roof_corner"
+		worldedit.diagonal_nodes["dryplants:reed_roof_corner_2"] = "dryplants:reed_roof_corner_2"
+		worldedit.diagonal_nodes["dryplants:wetreed_roof_corner"] = "dryplants:wetreed_roof_corner"
+		worldedit.diagonal_nodes["dryplants:wetreed_roof_corner_2"] = "dryplants:wetreed_roof_corner_2"
+	end
+
+	-- Technics CNC nodes
+	if minetest.get_modpath("technic") then
+		local cnc_materials = {
+			"default:dirt", "default:wood", "default:stone", "default:cobble", 
+			"default:brick", "default:sandstone", "default:leaves", "default:tree",
+			"default:steelblock", "default:bronzeblock", 
+			"technic:stainless_steel_block", "technic:marble", "technic:granite"}
+
+		local cnc_suffixes = {
+			"_technic_cnc_slope_inner_edge", "_technic_cnc_slope_inner_edge_upsdown",
+			"_technic_cnc_slope_edge_upsdown", "_technic_cnc_twocurvededge",
+			"_technic_cnc_element_edge_double", "_technic_cnc_element_edge"}
+		
+		for _, material in ipairs(cnc_materials) do
+			for _, suffix in ipairs(cnc_suffixes) do
+				worldedit.diagonal_nodes[material..suffix] = material..suffix
+			end
+		end
+	end
+end

@@ -890,20 +890,26 @@ minetest.register_chatcommand("/rotate", {
 })
 
 minetest.register_chatcommand("/orient", {
-	params = "<angle>",
-	description = "Rotate oriented nodes in the current WorldEdit region around the Y axis by angle <angle> (90 degree increment)",
+	params = "<operation> <axis> <angle>",
+	description = "Change orientation of all oriented nodes in the current WorldEdit region performing <operation> (rotate or flip) around the <axis> axis by angle <angle> (90 degree increment, unused for flip operation)",
 	privs = {worldedit=true},
 	func = safe_region(function(name, param)
-		local found, _, angle = param:find("^([+-]?%d+)$")
-		local count = worldedit.orient(worldedit.pos1[name], worldedit.pos2[name], angle)
+		local found, _, operation, axis, angle = param:find("^(.+)%s+([xyz%?])%s+([+-]?%d+)$")
+		if axis == "?" then axis = worldedit.player_axis(name) end
+		local count = worldedit.orient(worldedit.pos1[name], worldedit.pos2[name], operation, axis, angle)
 		worldedit.player_notify(name, count .. " nodes oriented")
 	end,
 	function(name, param)
-		local found, _, angle = param:find("^([+-]?%d+)$")
+		local found, _, operation, axis, angle = param:find("^(.+)%s+([xyz%?])%s+([+-]?%d+)$")
 		if found == nil then
 			worldedit.player_notify(name, "invalid usage: " .. param)
 			return nil
 		end
+		if operation ~= 'flip' and operation ~= 'rotate' then
+			worldedit.player_notify(name, "invalid usage: operation must be flip or rotate")
+			return nil
+		end
+
 		if angle % 90 ~= 0 then
 			worldedit.player_notify(name, "invalid usage: angle must be multiple of 90")
 			return nil

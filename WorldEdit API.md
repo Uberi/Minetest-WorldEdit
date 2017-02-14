@@ -93,9 +93,9 @@ Rotates a region defined by the positions `pos1` and `pos2` by `angle` degrees c
 
 Returns the number of nodes rotated, the new position 1, and the new position 2.
 
-### count = worldedit.orient(pos1, pos2, angle)
+### count = worldedit.orient(pos1, pos2, operation, axis, angle)
 
-Rotates all oriented nodes in a region defined by the positions `pos1` and `pos2` by `angle` degrees clockwise (90 degree increment) around the Y axis.
+Change orientation of all oriented nodes in a region defined by the positions `pos1` and `pos2` performing `operation` (rotate or flip) around the `axis` axis by angle `angle` (90 degree increment, unused for flip operation)
 
 Returns the number of nodes oriented.
 
