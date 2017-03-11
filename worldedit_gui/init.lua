@@ -131,7 +131,37 @@ elseif rawget(_G, "inventory_plus") then --inventory++ installed
 			inventory_plus.set_inventory_formspec(player, get_formspec(name, page))
 		end
 	end
+elseif rawget(_G, "sfinv") then --sfinv installed (part of minetest_game since 0.4.15)
+	assert(sfinv.enabled)
+	local orig_get = sfinv.pages["sfinv:crafting"].get
+	sfinv.override_page("sfinv:crafting", {
+		get = function(self, player, context)
+			local can_worldedit = minetest.check_player_privs(player, {worldedit=true})
+			local fs = orig_get(self, player, context)
+			return fs .. (can_worldedit and "image_button[0,0;1,1;inventory_plus_worldedit_gui.png;worldedit_gui;]" or "")
+		end
+	})
+
+	--show the form when the button is pressed and hide it when done
+	minetest.register_on_player_receive_fields(function(player, formname, fields)
+		if fields.worldedit_gui then --main page
+			worldedit.show_page(player:get_player_name(), "worldedit_gui")
+			return true
+		elseif fields.worldedit_gui_exit then --return to original page
+			sfinv.set_page(player, "sfinv:crafting")
+			return true
+		end
+		return false
+	end)
+
+	worldedit.show_page = function(name, page)
+		local player = minetest.get_player_by_name(name)
+		if player then
+			player:set_inventory_formspec(get_formspec(name, page))
+		end
+	end
 else --fallback button
+	-- FIXME: this is a huge clusterfuck and the back button is broken
 	local player_formspecs = {}
 
 	local update_main_formspec = function(name)
