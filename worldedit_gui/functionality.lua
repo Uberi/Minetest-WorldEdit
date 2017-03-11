@@ -166,7 +166,10 @@ worldedit.register_gui_handler("worldedit_gui_set", function(name, fields)
 		gui_nodename1[name] = tostring(fields.worldedit_gui_set_node)
 		worldedit.show_page(name, "worldedit_gui_set")
 		if fields.worldedit_gui_set_submit then
-			minetest.chatcommands["/set"].func(name, gui_nodename1[name])
+			local n = worldedit.normalize_nodename(gui_nodename1[name])
+			if n then
+				minetest.chatcommands["/set"].func(name, n)
+			end
 		end
 		return true
 	end
@@ -198,10 +201,19 @@ worldedit.register_gui_handler("worldedit_gui_replace", function(name, fields)
 		gui_nodename1[name] = tostring(fields.worldedit_gui_replace_search)
 		gui_nodename2[name] = tostring(fields.worldedit_gui_replace_replace)
 		worldedit.show_page(name, "worldedit_gui_replace")
+
+		local submit = nil
 		if fields.worldedit_gui_replace_submit then
-			minetest.chatcommands["/replace"].func(name, string.format("%s %s", gui_nodename1[name], gui_nodename2[name]))
+			submit = "replace"
 		elseif fields.worldedit_gui_replace_submit_inverse then
-			minetest.chatcommands["/replaceinverse"].func(name, string.format("%s %s", gui_nodename1[name], gui_nodename2[name]))
+			submit = "replaceinverse"
+		end
+		if submit then
+			local n1 = worldedit.normalize_nodename(gui_nodename1[name])
+			local n2 = worldedit.normalize_nodename(gui_nodename2[name])
+			if n1 and n2 then
+				minetest.chatcommands["/"..submit].func(name, string.format("%s %s", n1, n2))
+			end
 		end
 		return true
 	end
@@ -233,14 +245,22 @@ worldedit.register_gui_handler("worldedit_gui_sphere_dome", function(name, field
 		gui_nodename1[name] = tostring(fields.worldedit_gui_sphere_dome_node)
 		gui_distance2[name] = tostring(fields.worldedit_gui_sphere_dome_radius)
 		worldedit.show_page(name, "worldedit_gui_sphere_dome")
+
+		local submit = nil
 		if fields.worldedit_gui_sphere_dome_submit_hollow then
-			minetest.chatcommands["/hollowsphere"].func(name, string.format("%s %s", gui_distance2[name], gui_nodename1[name]))
+			submit = "hollowsphere"
 		elseif fields.worldedit_gui_sphere_dome_submit_solid then
-			minetest.chatcommands["/sphere"].func(name, string.format("%s %s", gui_distance2[name], gui_nodename1[name]))
+			submit = "sphere"
 		elseif fields.worldedit_gui_sphere_dome_submit_hollow_dome then
-			minetest.chatcommands["/hollowdome"].func(name, string.format("%s %s", gui_distance2[name], gui_nodename1[name]))
+			submit = "hollowdome"
 		elseif fields.worldedit_gui_sphere_dome_submit_solid_dome then
-			minetest.chatcommands["/dome"].func(name, string.format("%s %s", gui_distance2[name], gui_nodename1[name]))
+			submit = "dome"
+		end
+		if submit then
+			local n = worldedit.normalize_nodename(gui_nodename1[name])
+			if n then
+				minetest.chatcommands["/"..submit].func(name, string.format("%s %s", gui_distance2[name], n))
+			end
 		end
 		return true
 	end
@@ -273,10 +293,18 @@ worldedit.register_gui_handler("worldedit_gui_cylinder", function(name, fields)
 		gui_distance1[name] = tostring(fields.worldedit_gui_cylinder_length)
 		gui_distance2[name] = tostring(fields.worldedit_gui_cylinder_radius)
 		worldedit.show_page(name, "worldedit_gui_cylinder")
+
+		local submit = nil
 		if fields.worldedit_gui_cylinder_submit_hollow then
-			minetest.chatcommands["/hollowcylinder"].func(name, string.format("%s %s %s %s", axis_values[gui_axis1[name]], gui_distance1[name], gui_distance2[name], gui_nodename1[name]))
+			submit = "hollowcylinder"
 		elseif fields.worldedit_gui_cylinder_submit_solid then
-			minetest.chatcommands["/cylinder"].func(name, string.format("%s %s %s %s", axis_values[gui_axis1[name]], gui_distance1[name], gui_distance2[name], gui_nodename1[name]))
+			submit = "cylinder"
+		end
+		if submit then
+			local n = worldedit.normalize_nodename(gui_nodename1[name])
+			if n then
+				minetest.chatcommands["/"..submit].func(name, string.format("%s %s %s %s", axis_values[gui_axis1[name]], gui_distance1[name], gui_distance2[name], n))
+			end
 		end
 		return true
 	end
@@ -311,10 +339,18 @@ worldedit.register_gui_handler("worldedit_gui_pyramid", function(name, fields)
 		gui_axis1[name] = axis_indices[fields.worldedit_gui_pyramid_axis]
 		gui_distance1[name] = tostring(fields.worldedit_gui_pyramid_length)
 		worldedit.show_page(name, "worldedit_gui_pyramid")
+
+		local submit = nil
 		if fields.worldedit_gui_pyramid_submit_solid then
-			minetest.chatcommands["/pyramid"].func(name, string.format("%s %s %s", axis_values[gui_axis1[name]], gui_distance1[name], gui_nodename1[name]))
+			submit = "pyramid"
 		elseif fields.worldedit_gui_pyramid_submit_hollow then
-			minetest.chatcommands["/hollowpyramid"].func(name, string.format("%s %s %s", axis_values[gui_axis1[name]], gui_distance1[name], gui_nodename1[name]))
+			submit = "hollowpyramid"
+		end
+		if submit then
+			local n = worldedit.normalize_nodename(gui_nodename1[name])
+			if n then
+				minetest.chatcommands["/"..submit].func(name, string.format("%s %s %s", axis_values[gui_axis1[name]], gui_distance1[name], n))
+			end
 		end
 		return true
 	end
@@ -351,7 +387,10 @@ worldedit.register_gui_handler("worldedit_gui_spiral", function(name, fields)
 		gui_distance3[name] = tostring(fields.worldedit_gui_spiral_space)
 		worldedit.show_page(name, "worldedit_gui_spiral")
 		if fields.worldedit_gui_spiral_submit then
-			minetest.chatcommands["/spiral"].func(name, string.format("%s %s %s %s", gui_distance1[name], gui_distance2[name], gui_distance3[name], gui_nodename1[name]))
+			local n = worldedit.normalize_nodename(gui_nodename1[name])
+			if n then
+				minetest.chatcommands["/spiral"].func(name, string.format("%s %s %s %s", gui_distance1[name], gui_distance2[name], gui_distance3[name], n))
+			end
 		end
 		return true
 	end
@@ -456,7 +495,6 @@ worldedit.register_gui_function("worldedit_gui_transpose", {
 worldedit.register_gui_handler("worldedit_gui_transpose", function(name, fields)
 	if fields.worldedit_gui_transpose_submit then
 		gui_axis1[name] = axis_indices[fields.worldedit_gui_transpose_axis1]
-		gui_axis2[name] = axis_indices[fields.worldedit_gui_transpose_axis2]
 		worldedit.show_page(name, "worldedit_gui_transpose")
 		minetest.chatcommands["/transpose"].func(name, string.format("%s %s", axis_values[gui_axis1[name]], axis_values[gui_axis2[name]]))
 		return true
@@ -589,7 +627,10 @@ worldedit.register_gui_handler("worldedit_gui_suppress", function(name, fields)
 		gui_nodename1[name] = tostring(fields.worldedit_gui_suppress_node)
 		worldedit.show_page(name, "worldedit_gui_suppress")
 		if fields.worldedit_gui_suppress_submit then
-			minetest.chatcommands["/suppress"].func(name, gui_nodename1[name])
+			local n = worldedit.normalize_nodename(gui_nodename1[name])
+			if n then
+				minetest.chatcommands["/suppress"].func(name, n)
+			end
 		end
 		return true
 	end
@@ -615,7 +656,10 @@ worldedit.register_gui_handler("worldedit_gui_highlight", function(name, fields)
 		gui_nodename1[name] = tostring(fields.worldedit_gui_highlight_node)
 		worldedit.show_page(name, "worldedit_gui_highlight")
 		if fields.worldedit_gui_highlight_submit then
-			minetest.chatcommands["/highlight"].func(name, gui_nodename1[name])
+			local n = worldedit.normalize_nodename(gui_nodename1[name])
+			if n then
+				minetest.chatcommands["/highlight"].func(name, n)
+			end
 		end
 		return true
 	end
