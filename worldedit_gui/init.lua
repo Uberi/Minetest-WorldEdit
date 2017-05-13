@@ -243,6 +243,7 @@ end
 
 worldedit.register_gui_function("worldedit_gui", {
 	name = "WorldEdit GUI",
+	privs = {interact=true},
 	get_formspec = function(name)
 		--create a form with all the buttons arranged in a grid
 		local buttons, x, y, index = {}, 0, 1, 0
