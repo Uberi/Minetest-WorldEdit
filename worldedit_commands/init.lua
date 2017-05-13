@@ -1123,11 +1123,6 @@ minetest.register_chatcommand("/lua", {
 	description = "Executes <code> as a Lua chunk in the global namespace",
 	privs = {worldedit=true, server=true},
 	func = function(name, param)
-		local admin = minetest.setting_get("name")
-		if not admin or not name == admin then
-			worldedit.player_notify(name, "this command can only be run by the server administrator")
-			return
-		end
 		local err = worldedit.lua(param)
 		if err then
 			worldedit.player_notify(name, "code error: " .. err)
@@ -1142,12 +1137,6 @@ minetest.register_chatcommand("/luatransform", {
 	description = "Executes <code> as a Lua chunk in the global namespace with the variable pos available, for each node in the current WorldEdit region",
 	privs = {worldedit=true, server=true},
 	func = safe_region(function(name, param)
-		local admin = minetest.setting_get("name")
-		if not admin or not name == admin then
-			worldedit.player_notify(name, "this command can only be run by the server administrator")
-			return
-		end
-
 		local err = worldedit.luatransform(worldedit.pos1[name], worldedit.pos2[name], param)
 		if err then
 			worldedit.player_notify(name, "code error: " .. err, false)
