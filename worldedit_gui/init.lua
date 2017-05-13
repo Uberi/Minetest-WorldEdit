@@ -14,7 +14,7 @@ Use `nil` for the `options` parameter to unregister the function associated with
 
 Use `nil` for the `get_formspec` field to denote that the function does not have its own screen.
 
-Use `nil` for the `privs` field to denote that no special privileges are required to use the function.
+The `privs` field may not be `nil`.
 
 If the identifier is already registered to another function, it will be replaced by the new one.
 
@@ -24,6 +24,9 @@ The `on_select` function must not call `worldedit.show_page`
 worldedit.pages = {} --mapping of identifiers to options
 local identifiers = {} --ordered list of identifiers
 worldedit.register_gui_function = function(identifier, options)
+	if options.privs == nil or next(options.privs) == nil then
+		error("privs unset")
+	end
 	worldedit.pages[identifier] = options
 	table.insert(identifiers, identifier)
 end
@@ -46,7 +49,7 @@ worldedit.register_gui_handler = function(identifier, handler)
 
 		--ensure the player has permission to perform the action
 		local entry = worldedit.pages[identifier]
-		if entry and minetest.check_player_privs(name, entry.privs or {}) then
+		if entry and minetest.check_player_privs(name, entry.privs) then
 			return handler(name, fields)
 		end
 		return false
@@ -272,7 +275,7 @@ worldedit.register_gui_handler("worldedit_gui", function(name, fields)
 	for identifier, entry in pairs(worldedit.pages) do --check for WorldEdit GUI main formspec button selection
 		if fields[identifier] and identifier ~= "worldedit_gui" then
 			--ensure player has permission to perform action
-			local has_privs, missing_privs = minetest.check_player_privs(name, entry.privs or {})
+			local has_privs, missing_privs = minetest.check_player_privs(name, entry.privs)
 			if not has_privs then
 				worldedit.player_notify(name, "you are not allowed to use this function (missing privileges: " .. table.concat(missing_privs, ", ") .. ")")
 				return false
