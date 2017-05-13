@@ -1124,7 +1124,7 @@ minetest.register_chatcommand("/lua", {
 	privs = {worldedit=true, server=true},
 	func = function(name, param)
 		local admin = minetest.setting_get("name")
-		if not admin or not name == admin then
+		if not admin or not (name == admin) then
 			worldedit.player_notify(name, "this command can only be run by the server administrator")
 			return
 		end
