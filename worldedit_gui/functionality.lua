@@ -765,24 +765,3 @@ worldedit.register_gui_function("worldedit_gui_clearobjects", {
 		minetest.chatcommands["/clearobjects"].func(name, "")
 	end,
 })
-
-worldedit.register_gui_function("worldedit_gui_formspec_tester", {
-	name = "Formspec Tester",
-	privs = {whatever=true},
-	get_formspec = function(name)
-		local value = gui_formspec[name]
-		return "size[8,6.5]" .. worldedit.get_formspec_header("worldedit_gui_formspec_tester") ..
-			string.format("textarea[0.5,1;7.5,5.5;worldedit_gui_formspec_tester_value;Formspec Code;%s]", minetest.formspec_escape(value)) ..
-			"button_exit[0,6;3,0.8;worldedit_gui_formspec_tester_show;Show Formspec]"
-	end,
-})
-
-worldedit.register_gui_handler("worldedit_gui_formspec_tester", function(name, fields)
-	if fields.worldedit_gui_formspec_tester_show then
-		gui_formspec[name] = fields.worldedit_gui_formspec_tester_value or ""
-		worldedit.show_page(name, "worldedit_gui_formspec_tester")
-		minetest.show_formspec(name, "worldedit:formspec_tester", gui_formspec[name])
-		return true
-	end
-	return false
-end)
