@@ -1,6 +1,12 @@
 worldedit.marker1 = {}
 worldedit.marker2 = {}
 worldedit.marker_region = {}
+worldedit.cubesize = tonumber(minetest.setting_get("worldedit.cubesize") ) or 128
+
+local function regioncube_sizecheck(pos1, pos2)
+	-- Check that the hypothenuse implies that no side exceeds the max size
+	return vector.distance(pos1, pos2) < math.ceil( worldedit.cubesize * math.sqrt(2) )
+end
 
 --marks worldedit region position 1
 worldedit.mark_pos1 = function(name)
@@ -59,7 +65,7 @@ worldedit.mark_region = function(name)
 		worldedit.marker_region[name] = nil
 	end
 
-	if pos1 ~= nil and pos2 ~= nil then
+	if pos1 ~= nil and pos2 ~= nil and regioncube_sizecheck(pos1, pos2) then
 		local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 
 		local vec = vector.subtract(pos2, pos1)
