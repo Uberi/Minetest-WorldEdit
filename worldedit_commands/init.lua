@@ -409,13 +409,6 @@ minetest.register_chatcommand("/mix", {
 })
 
 local check_replace = function(name, param)
-	if nil ~= area_protection.areas and not minetest.check_player_privs(name, {areas = true}) then
-		worldedit.player_notify(
-			name,
-			"check_replace not yet supported with area protection"
-		)
-		return nil
-	end
 	local found, _, searchnode, replacenode = param:find("^([^%s]+)%s+(.+)$")
 	if found == nil then
 		worldedit.player_notify(name, "invalid usage: " .. param)
@@ -463,17 +456,34 @@ minetest.register_chatcommand("/replaceinverse", {
 })
 
 local check_sphere = function(name, param)
-	if nil ~= area_protection.areas and not minetest.check_player_privs(name, {areas = true}) then
-		worldedit.player_notify(
-			name,
-			"check_sphere not yet supported with area protection"
-		)
-		return nil
-	end
 	local found, _, radius, nodename = param:find("^(%d+)%s+(.+)$")
 	if found == nil then
 		worldedit.player_notify(name, "invalid usage: " .. param)
 		return nil
+	end
+	if nil ~= area_protection.areas then
+		local pos1 = worldedit.pos1[name]
+		local allowed, conflicting = area_protection.areas:canInteractInArea(
+			{
+				x = pos1.x - radius,
+				y = pos1.y - radius,
+				z = pos1.z - radius,
+			},
+			{
+				x = pos1.x + radius,
+				y = pos1.y + radius,
+				z = pos1.z + radius,
+			},
+			name,
+			false
+		)
+		if false == allowed then
+			worldedit.player_notify(
+				name,
+				"sphere may conflict with non-owned region " .. conflicting
+			)
+			return nil
+		end
 	end
 	local node = get_node(name, nodename)
 	if not node then return nil end
