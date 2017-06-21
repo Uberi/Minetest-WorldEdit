@@ -1,3 +1,11 @@
+local area_protection = {}
+
+if minetest.get_modpath(
+    "areas"
+) then
+    area_protection.areas = areas
+end
+
 local safe_region_callback = {}
 local safe_region_param = {}
 
@@ -6,6 +14,21 @@ local function check_region(name, param)
 	if pos1 == nil or pos2 == nil then
 		worldedit.player_notify(name, "no region selected")
 		return nil
+	end
+	if nil ~= area_protection.areas then
+		local allowed, conflicting = area_protection.areas:canInteractInArea(
+			pos1,
+			pos2,
+			name,
+			false
+		)
+		if false == allowed then
+			worldedit.player_notify(
+				name,
+				"region conflicts with non-owned region " .. conflicting
+			)
+			return nil
+		end
 	end
 	return worldedit.volume(pos1, pos2)
 end
@@ -62,4 +85,4 @@ minetest.register_chatcommand("/n", {
 })
 
 
-return safe_region, check_region, reset_pending
+return safe_region, check_region, reset_pending, area_protection
