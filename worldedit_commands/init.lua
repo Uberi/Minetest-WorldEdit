@@ -409,7 +409,7 @@ minetest.register_chatcommand("/mix", {
 })
 
 local check_replace = function(name, param)
-	if nil ~= area_protection.areas then
+	if nil ~= area_protection.areas and not minetest.check_player_privs(name, {areas = true}) then
 		worldedit.player_notify(
 			name,
 			"check_replace not yet supported with area protection"
@@ -463,7 +463,7 @@ minetest.register_chatcommand("/replaceinverse", {
 })
 
 local check_sphere = function(name, param)
-	if nil ~= area_protection.areas then
+	if nil ~= area_protection.areas and not minetest.check_player_privs(name, {areas = true}) then
 		worldedit.player_notify(
 			name,
 			"check_sphere not yet supported with area protection"
@@ -505,7 +505,7 @@ minetest.register_chatcommand("/sphere", {
 })
 
 local check_dome = function(name, param)
-	if nil ~= area_protection.areas then
+	if nil ~= area_protection.areas and not minetest.check_player_privs(name, {areas = true}) then
 		worldedit.player_notify(
 			name,
 			"check_dome not yet supported with area protection"
@@ -551,7 +551,7 @@ minetest.register_chatcommand("/dome", {
 })
 
 local check_cylinder = function(name, param)
-	if nil ~= area_protection.areas then
+	if nil ~= area_protection.areas and not minetest.check_player_privs(name, {areas = true}) then
 		worldedit.player_notify(
 			name,
 			"check_cylinder not yet supported with area protection"
@@ -607,7 +607,7 @@ minetest.register_chatcommand("/cylinder", {
 })
 
 local check_pyramid = function(name, param)
-	if nil ~= area_protection.areas then
+	if nil ~= area_protection.areas and not minetest.check_player_privs(name, {areas = true}) then
 		worldedit.player_notify(
 			name,
 			"check_pyramid not yet supported with area protection"
@@ -674,7 +674,7 @@ minetest.register_chatcommand("/spiral", {
 		worldedit.player_notify(name, count .. " nodes added")
 	end,
 	function(name, param)
-		if nil ~= area_protection.areas then
+		if nil ~= area_protection.areas and not minetest.check_player_privs(name, {areas = true}) then
 			worldedit.player_notify(
 				name,
 				"/spiral not yet supported with area protection"
@@ -804,7 +804,7 @@ minetest.register_chatcommand("/stack2", {
 			worldedit.stack2(pos1, pos2, {x=x, y=y, z=z}, repetitions,
 				function() worldedit.player_notify(name, count .. " nodes stacked") end)
 		end, function()
-			if nil ~= area_protection.areas then
+			if nil ~= area_protection.areas and not minetest.check_player_privs(name, {areas = true}) then
 				worldedit.player_notify(
 					name,
 					"/stack2 not yet supported with area protection"
@@ -836,7 +836,7 @@ minetest.register_chatcommand("/stretch", {
 		worldedit.player_notify(name, count .. " nodes stretched")
 	end,
 	function(name, param)
-		if nil ~= area_protection.areas then
+		if nil ~= area_protection.areas and not minetest.check_player_privs(name, {areas = true}) then
 			worldedit.player_notify(
 				name,
 				"/stretch not yet supported with area protection"
@@ -1123,7 +1123,7 @@ minetest.register_chatcommand("/load", {
 	description = "Load nodes from \"(world folder)/schems/<file>[.we[m]]\" with position 1 of the current WorldEdit region as the origin",
 	privs = {worldedit=true},
 	func = function(name, param)
-		if nil ~= area_protection.areas then
+		if nil ~= area_protection.areas and not minetest.check_player_privs(name, {areas = true}) then
 			worldedit.player_notify(
 				name,
 				"/load not yet supported with area protection"
@@ -1246,7 +1246,7 @@ minetest.register_chatcommand("/mtschemplace", {
 	description = "Load nodes from \"(world folder)/schems/<file>.mts\" with position 1 of the current WorldEdit region as the origin",
 	privs = {worldedit=true},
 	func = function(name, param)
-		if nil ~= area_protection.areas then
+		if nil ~= area_protection.areas and not minetest.check_player_privs(name, {areas = true}) then
 			worldedit.player_notify(
 				name,
 				"/mtschemplace not yet supported with area protection"
