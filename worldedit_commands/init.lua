@@ -1,5 +1,7 @@
 minetest.register_privilege("worldedit", "Can use WorldEdit commands")
 
+minetest.register_privilege("worldedit_huge", "Can confirm WorldEdit commands on huge regions")
+
 worldedit.set_pos = {}
 worldedit.inspect = {}
 

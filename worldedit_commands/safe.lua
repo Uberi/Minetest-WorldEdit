@@ -37,6 +37,7 @@ end
 minetest.register_chatcommand("/y", {
 	params = "",
 	description = "Confirm a pending operation",
+	privs = {worldedit_huge=true},
 	func = function(name)
 		local callback, param = safe_region_callback[name], safe_region_param[name]
 		if not callback then
