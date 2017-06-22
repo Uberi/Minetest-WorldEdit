@@ -515,13 +515,6 @@ minetest.register_chatcommand("/sphere", {
 })
 
 local check_dome = function(name, param)
-	if nil ~= area_protection.areas and not minetest.check_player_privs(name, {areas = true}) then
-		worldedit.player_notify(
-			name,
-			"check_dome not yet supported with area protection"
-		)
-		return nil
-	end
 	if worldedit.pos1[name] == nil then
 		worldedit.player_notify(name, "no position 1 selected")
 		return nil
@@ -530,6 +523,30 @@ local check_dome = function(name, param)
 	if found == nil then
 		worldedit.player_notify(name, "invalid usage: " .. param)
 		return nil
+	end
+	if nil ~= area_protection.areas then
+		local pos1 = worldedit.pos1[name]
+		local allowed, conflicting = area_protection.areas:canInteractInArea(
+			{
+				x = pos1.x - radius,
+				y = pos1.y,
+				z = pos1.z - radius,
+			},
+			{
+				x = pos1.x + radius,
+				y = pos1.y + radius,
+				z = pos1.z + radius,
+			},
+			name,
+			false
+		)
+		if false == allowed then
+			worldedit.player_notify(
+				name,
+				"dome may conflict with non-owned region " .. conflicting
+			)
+			return nil
+		end
 	end
 	local node = get_node(name, nodename)
 	if not node then return nil end
