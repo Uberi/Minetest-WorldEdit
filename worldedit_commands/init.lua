@@ -592,6 +592,7 @@ local check_cylinder = function(name, param)
 		return nil
 	end
 	if nil ~= area_protection.areas then
+		length = tonumber(length)
 		if axis == "?" then
 			local sign
 			axis, sign = worldedit.player_axis(name)
