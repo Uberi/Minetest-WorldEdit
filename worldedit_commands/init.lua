@@ -456,6 +456,10 @@ minetest.register_chatcommand("/replaceinverse", {
 })
 
 local check_sphere = function(name, param)
+	if worldedit.pos1[name] == nil then
+		worldedit.player_notify(name, "no position 1 selected")
+		return nil
+	end
 	local found, _, radius, nodename = param:find("^(%d+)%s+(.+)$")
 	if found == nil then
 		worldedit.player_notify(name, "invalid usage: " .. param)
