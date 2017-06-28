@@ -578,13 +578,6 @@ minetest.register_chatcommand("/dome", {
 })
 
 local check_cylinder = function(name, param)
-	if nil ~= area_protection.areas and not minetest.check_player_privs(name, {areas = true}) then
-		worldedit.player_notify(
-			name,
-			"check_cylinder not yet supported with area protection"
-		)
-		return nil
-	end
 	if worldedit.pos1[name] == nil then
 		worldedit.player_notify(name, "no position 1 selected")
 		return nil
@@ -593,6 +586,48 @@ local check_cylinder = function(name, param)
 	if found == nil then
 		worldedit.player_notify(name, "invalid usage: " .. param)
 		return nil
+	end
+	if nil ~= area_protection.areas then
+		if axis == "?" then
+			local sign
+			axis, sign = worldedit.player_axis(name)
+			length = length * sign
+		end
+		local pos1 = worldedit.pos1[name]
+		local current_pos = {x=pos1.x, y=pos1.y, z=pos1.z}
+		if length < 0 then
+			length = -length
+			current_pos[axis] = current_pos[axis] - length
+		end
+		local other1, other2 = worldedit.get_axis_others(axis)
+		local interact_pos1 = {
+			x = current_pos.x,
+			y = current_pos.y,
+			z = current_pos.z,
+		}
+		local interact_pos2 = {
+			x = current_pos.x,
+			y = current_pos.y,
+			z = current_pos.z,
+		}
+		interact_pos1[other1] = interact_pos1[other1] - radius
+		interact_pos1[other2] = interact_pos1[other2] - radius
+		interact_pos2[other1] = interact_pos2[other1] + radius
+		interact_pos2[other2] = interact_pos2[other2] + radius
+		interact_pos2[axis] = interact_pos2[axis] + length
+		local allowed, conflicting = area_protection.areas:canInteractInArea(
+			interact_pos1,
+			interact_pos2,
+			name,
+			false
+		)
+		if false == allowed then
+			worldedit.player_notify(
+				name,
+				"cylinder may conflict with non-owned region " .. conflicting
+			)
+			return nil
+		end
 	end
 	local node = get_node(name, nodename)
 	if not node then return nil end
