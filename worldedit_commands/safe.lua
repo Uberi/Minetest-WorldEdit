@@ -1,8 +1,6 @@
 local area_protection = {}
 
-if minetest.get_modpath(
-    "areas"
-) then
+if minetest.get_modpath("areas") then
     area_protection.areas = areas
 end
 
