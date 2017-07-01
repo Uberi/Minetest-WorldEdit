@@ -4,6 +4,19 @@ if minetest.get_modpath("areas") then
     area_protection.areas = areas
 end
 
+local area_protection.interaction_restrictions = function(
+	area_protection,
+	player_name
+)
+	if area_protection.areas then
+		if minetest.check_player_privs(name, {areas = true}) then
+			return false
+		end
+		return true
+	end
+	return false
+end
+
 local area_protection.interaction_allowed = function(
 	area_protection,
 	description,
