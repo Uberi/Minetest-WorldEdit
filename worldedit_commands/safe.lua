@@ -4,6 +4,31 @@ if minetest.get_modpath("areas") then
     area_protection.areas = areas
 end
 
+local area_protection.interaction_allowed = function(
+	area_protection,
+	description,
+	pos1,
+	pos2,
+	player_name
+)
+	if area_protection.areas then
+		local allowed, conflicting = area_protection.areas:canInteractInArea(
+			pos1,
+			pos2,
+			player_name,
+			false
+		)
+		if not allowed then
+			worldedit.player_notify(
+				player_name,
+				description .. " conflicts with non-owned region " .. conflicting
+			)
+		end
+		return allowed
+	end
+	return true
+end
+
 local safe_region_callback = {}
 local safe_region_param = {}
 
@@ -13,20 +38,14 @@ local function check_region(name, param)
 		worldedit.player_notify(name, "no region selected")
 		return nil
 	end
-	if nil ~= area_protection.areas then
-		local allowed, conflicting = area_protection.areas:canInteractInArea(
-			pos1,
-			pos2,
-			name,
-			false
-		)
-		if false == allowed then
-			worldedit.player_notify(
-				name,
-				"region conflicts with non-owned region " .. conflicting
-			)
-			return nil
-		end
+	local allowed = area_protection:interaction_allowed(
+		"region",
+		pos1,
+		pos2,
+		name
+	)
+	if not allowed then
+		return nil
 	end
 	return worldedit.volume(pos1, pos2)
 end
