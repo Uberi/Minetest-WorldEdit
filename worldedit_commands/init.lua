@@ -656,13 +656,6 @@ minetest.register_chatcommand("/cylinder", {
 })
 
 local check_pyramid = function(name, param)
-	if area_protection:interaction_restrictions(name) then
-		worldedit.player_notify(
-			name,
-			"check_pyramid not yet supported with area protection"
-		)
-		return nil
-	end
 	if worldedit.pos1[name] == nil then
 		worldedit.player_notify(name, "no position 1 selected")
 		return nil
@@ -670,6 +663,38 @@ local check_pyramid = function(name, param)
 	local found, _, axis, height, nodename = param:find("^([xyz%?])%s+([+-]?%d+)%s+(.+)$")
 	if found == nil then
 		worldedit.player_notify(name, "invalid usage: " .. param)
+		return nil
+	end
+	height = tonumber(height)
+	if axis == "?" then
+		local sign
+		axis, sign = worldedit.player_axis(name)
+		height = height * sign
+	end
+	local pos1 = worldedit.pos1[name]
+	local other1, other2 = worldedit.get_axis_others(axis)
+	local interact_pos1 = {
+		x = pos1.x,
+		y = pos1.y,
+		z = pos1.z,
+	}
+	local interact_pos2 = {
+		x = pos1.x,
+		y = pos1.y,
+		z = pos1.z,
+	}
+	interact_pos1[other1] = interact_pos1[other1] - height
+	interact_pos1[other2] = interact_pos1[other2] - height
+	interact_pos2[other1] = interact_pos2[other1] + height
+	interact_pos2[other2] = interact_pos2[other2] + height
+	interact_pos2[axis] = interact_pos2[axis] + height
+	local allowed = area_protection:interaction_allowed(
+		"pyramid",
+		interact_pos1,
+		interact_pos2,
+		name
+	)
+	if not allowed then
 		return nil
 	end
 	local node = get_node(name, nodename)
