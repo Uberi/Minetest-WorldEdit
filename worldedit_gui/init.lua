@@ -145,13 +145,21 @@ elseif rawget(_G, "sfinv") then --sfinv installed (part of minetest_game since 0
 		end
 	})
 
+	--compatibility with pre-0.4.16 sfinv
+	local set_page = sfinv.set_page or function(player, name)
+		--assumptions: src pg has no leave callback, dst pg has no enter callback
+		local ctx = {page=name}
+		sfinv.contexts[player:get_player_name()] = ctx
+		sfinv.set_player_inventory_formspec(player, ctx)
+	end
+
 	--show the form when the button is pressed and hide it when done
 	minetest.register_on_player_receive_fields(function(player, formname, fields)
 		if fields.worldedit_gui then --main page
 			worldedit.show_page(player:get_player_name(), "worldedit_gui")
 			return true
 		elseif fields.worldedit_gui_exit then --return to original page
-			sfinv.set_page(player, "sfinv:crafting")
+			set_page(player, "sfinv:crafting")
 			return true
 		end
 		return false
