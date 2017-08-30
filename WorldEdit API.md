@@ -27,6 +27,12 @@ Sets a region defined by positions `pos1` and `pos2` to `node_name`. To clear a 
 
 Returns the number of nodes set.
 
+### `count = worldedit.set_param2(pos1, pos2, param2)`
+
+Sets the param2 values of all nodes in a region defined by positions `pos1` and `pos2` to `param2`.
+
+Returns the number of nodes set.
+
 ### count = worldedit.replace(pos1, pos2, searchnode, replacenode)
 
 Replaces all instances of `searchnode` with `replacenode` in a region defined by positions `pos1` and `pos2`.
