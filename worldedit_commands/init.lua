@@ -23,6 +23,7 @@ local function get_position(name) --position 1 retrieval function for when not u
 	return pos1
 end
 
+-- normalize_nodename wrapper for convenience purposes
 local function get_node(name, nodename)
 	local node = worldedit.normalize_nodename(nodename)
 	if not node then
@@ -36,26 +37,46 @@ function worldedit.player_notify(name, message)
 	minetest.chat_send_player(name, "WorldEdit -!- " .. message, false)
 end
 
---determines whether `nodename` is a valid node name, returning a boolean
+local function string_endswith(full, part)
+	return full:find(part, 1, true) == #full - #part + 1
+end
+
+-- normalizes node "description" `nodename`, returning a string (or nil)
 worldedit.normalize_nodename = function(nodename)
-	nodename = nodename:gsub("^%s*(.-)%s*$", "%1")
+	nodename = nodename:gsub("^%s*(.-)%s*$", "%1") -- strip spaces
 	if nodename == "" then return nil end
-	local fullname = ItemStack({name=nodename}):get_name() --resolve aliases of node names to full names
-	if minetest.registered_nodes[fullname] or fullname == "air" then --directly found node name or alias of nodename
+
+	local fullname = ItemStack({name=nodename}):get_name() -- resolve aliases
+	if minetest.registered_nodes[fullname] or fullname == "air" then -- full name
 		return fullname
 	end
 	for key, value in pairs(minetest.registered_nodes) do
-		if key:find(":" .. nodename, 1, true) then --found in mod
+		if string_endswith(key, ":" .. nodename) then -- matches name (w/o mod part)
 			return key
 		end
 	end
-	nodename = nodename:lower() --lowercase both for case insensitive comparison
+	nodename = nodename:lower() -- lowercase both for case insensitive comparison
 	for key, value in pairs(minetest.registered_nodes) do
-		if value.description:lower() == nodename then --found in description
+		local desc = value.description:lower()
+		if desc == nodename then -- matches description
+			return key
+		end
+		if string_endswith(desc, " block") and desc == nodename.." block" then
+			-- fuzzy description match (e.g. "Steel" == "Steel Block")
 			return key
 		end
 	end
-	return nil
+
+	local match = nil
+	for key, value in pairs(minetest.registered_nodes) do
+		if value.description:lower():find(nodename, 1, true) ~= nil then
+			if match ~= nil then
+				return nil
+			end
+			match = key -- substring description match (only if no ambiguities)
+		end
+	end
+	return match
 end
 
 -- Determines the axis in which a player is facing, returning an axis ("x", "y", or "z") and the sign (1 or -1)
