@@ -17,6 +17,7 @@ Many commands also have shorter names that can be typed faster. For example, if 
 | `//s`      | `//set`            |
 | `//r`      | `//replace`        |
 | `//ri`     | `//replaceinverse` |
+| `//hcube`  | `//hollowcube`     |
 | `//hspr`   | `//hollowsphere`   |
 | `//spr`    | `//sphere`         |
 | `//hdo`    | `//hollowdome`     |
@@ -142,6 +143,19 @@ Replace all nodes other than `<search node>` with `<replace node>` in the curren
     //replaceinverse flowers:flower_waterlily glass
     //replaceinverse dirt Bronze Block
     //replaceinverse mesecons:wire_00000000_off flowers:flower_tulip
+
+### `//hollowcube <width> <height> <length> <node>`
+
+Adds a hollow cube with its ground level centered at WorldEdit position 1 with dimensions `<width>` x `<height>` x `<length>`, composed of `<node>`.
+
+    //hollowcube 6 5 6 Diamond Block
+
+### `//cube <width> <height> <length> <node>`
+
+Adds a cube with its ground level centered at WorldEdit position 1 with dimensions `<width>` x `<height>` x `<length>`, composed of `<node>`.
+
+    //cube 6 5 6 Diamond Block
+    //cube 7 2 1 default:cobble
 
 ### `//hollowsphere <radius> <node>`
 

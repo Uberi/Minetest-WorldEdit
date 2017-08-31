@@ -115,6 +115,12 @@ Primitives
 ----------
 Contained in primitives.lua, this module allows the creation of several geometric primitives.
 
+### count = worldedit.cube(pos, width, height, length, node_name, hollow)
+
+Adds a cube with its ground level centered at `pos`, the dimensions `width` x `height` x `length`, composed of `node_name`.
+
+Returns the number of nodes added.
+
 ### count = worldedit.sphere(pos, radius, node_name, hollow)
 
 Adds a sphere centered at `pos` with radius `radius`, composed of `node_name`.

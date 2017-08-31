@@ -4,6 +4,47 @@
 local mh = worldedit.manip_helpers
 
 
+--- Adds a cube
+-- @param pos Position of ground level center of cube
+-- @param width Cube width. (x)
+-- @param height Cube height. (y)
+-- @param length Cube length. (z)
+-- @param node_name Name of node to make cube of.
+-- @param hollow Whether the cube should be hollow.
+-- @return The number of nodes added.
+function worldedit.cube(pos, width, height, length, node_name, hollow)
+	-- Set up voxel manipulator
+	local basepos = vector.subtract(pos, {x=math.floor(width/2), y=0, z=math.floor(length/2)})
+	local manip, area = mh.init(basepos, vector.add(basepos, {x=width, y=height, z=length}))
+	local data = mh.get_empty_data(area)
+
+	-- Add cube
+	local node_id = minetest.get_content_id(node_name)
+	local stride = {x=1, y=area.ystride, z=area.zstride}
+	local offset = vector.subtract(basepos, area.MinEdge)
+	local count = 0
+
+	for z = 0, length-1 do
+		local index_z = (offset.z + z) * stride.z + 1 -- +1 for 1-based indexing
+		for y = 0, height-1 do
+			local index_y = index_z + (offset.y + y) * stride.y
+			for x = 0, width-1 do
+				local is_wall = z == 0 or z == length-1
+					or y == 0 or y == height-1
+					or x == 0 or x == width-1
+				if not hollow or is_wall then
+					local i = index_y + (offset.x + x)
+					data[i] = node_id
+					count = count + 1
+				end
+			end
+		end
+	end
+
+	mh.finish(manip, data)
+	return count
+end
+
 --- Adds a sphere of `node_name` centered at `pos`.
 -- @param pos Position to center sphere at.
 -- @param radius Sphere radius.

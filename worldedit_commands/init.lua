@@ -455,6 +455,45 @@ minetest.register_chatcommand("/replaceinverse", {
 	end, check_replace),
 })
 
+local check_cube = function(name, param)
+	if worldedit.pos1[name] == nil then
+		worldedit.player_notify(name, "no position 1 selected")
+		return nil
+	end
+	local found, _, w, h, l, nodename = param:find("^(%d+)%s+(%d+)%s+(%d+)%s+(.+)$")
+	if found == nil then
+		worldedit.player_notify(name, "invalid usage: " .. param)
+		return nil
+	end
+	local node = get_node(name, nodename)
+	if not node then return nil end
+	return tonumber(w) * tonumber(h) * tonumber(l)
+end
+
+minetest.register_chatcommand("/hollowcube", {
+	params = "<width> <height> <length> <node>",
+	description = "Add a hollow cube with its ground level centered at WorldEdit position 1 with dimensions <width> x <height> x <length>, composed of <node>.",
+	privs = {worldedit=true},
+	func = safe_region(function(name, param)
+		local found, _, w, h, l, nodename = param:find("^(%d+)%s+(%d+)%s+(%d+)%s+(.+)$")
+		local node = get_node(name, nodename)
+		local count = worldedit.cube(worldedit.pos1[name], tonumber(w), tonumber(h), tonumber(l), node, true)
+		worldedit.player_notify(name, count .. " nodes added")
+	end, check_cube),
+})
+
+minetest.register_chatcommand("/cube", {
+	params = "<width> <height> <length> <node>",
+	description = "Add a cube with its ground level centered at WorldEdit position 1 with dimensions <width> x <height> x <length>, composed of <node>.",
+	privs = {worldedit=true},
+	func = safe_region(function(name, param)
+		local found, _, w, h, l, nodename = param:find("^(%d+)%s+(%d+)%s+(%d+)%s+(.+)$")
+		local node = get_node(name, nodename)
+		local count = worldedit.cube(worldedit.pos1[name], tonumber(w), tonumber(h), tonumber(l), node)
+		worldedit.player_notify(name, count .. " nodes added")
+	end, check_cube),
+})
+
 local check_sphere = function(name, param)
 	if worldedit.pos1[name] == nil then
 		worldedit.player_notify(name, "no position 1 selected")
