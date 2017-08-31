@@ -292,17 +292,21 @@ worldedit.register_gui_function("worldedit_gui_cylinder", {
 	name = "Cylinder",
 	privs = combine_we_privs({"hollowcylinder", "cylinder"}),
 	get_formspec = function(name)
-		local node, axis, length, radius = gui_nodename1[name], gui_axis1[name], gui_distance1[name], gui_distance2[name]
+		local node, axis, length = gui_nodename1[name], gui_axis1[name], gui_distance1[name]
+		local radius1, radius2 = gui_distance2[name], gui_distance3[name]
 		local nodename = worldedit.normalize_nodename(node)
-		return "size[6.5,5]" .. worldedit.get_formspec_header("worldedit_gui_cylinder") ..
+		return "size[6.5,6]" .. worldedit.get_formspec_header("worldedit_gui_cylinder") ..
 			string.format("field[0.5,1.5;4,0.8;worldedit_gui_cylinder_node;Name;%s]", minetest.formspec_escape(node)) ..
 			"button[4,1.18;1.5,0.8;worldedit_gui_cylinder_search;Search]" ..
 			formspec_node("5.5,1.1", nodename) ..
 			string.format("field[0.5,2.5;4,0.8;worldedit_gui_cylinder_length;Length;%s]", minetest.formspec_escape(length)) ..
 			string.format("dropdown[4,2.18;2.5;worldedit_gui_cylinder_axis;X axis,Y axis,Z axis,Look direction;%d]", axis) ..
-			string.format("field[0.5,3.5;4,0.8;worldedit_gui_cylinder_radius;Radius;%s]", minetest.formspec_escape(radius)) ..
-			"button_exit[0,4.5;3,0.8;worldedit_gui_cylinder_submit_hollow;Hollow Cylinder]" ..
-			"button_exit[3.5,4.5;3,0.8;worldedit_gui_cylinder_submit_solid;Solid Cylinder]"
+			string.format("field[0.5,3.5;2,0.8;worldedit_gui_cylinder_radius1;Base Radius;%s]", minetest.formspec_escape(radius1)) ..
+			string.format("field[2.5,3.5;2,0.8;worldedit_gui_cylinder_radius2;Top Radius;%s]", minetest.formspec_escape(radius2)) ..
+			"label[0.25,4;Equal base and top radius creates a cylinder,\n"..
+				"zero top radius creates a cone.\nConsult documentation for more information.]"..
+			"button_exit[0,5.5;3,0.8;worldedit_gui_cylinder_submit_hollow;Hollow Cylinder]" ..
+			"button_exit[3.5,5.5;3,0.8;worldedit_gui_cylinder_submit_solid;Solid Cylinder]"
 	end,
 })
 
@@ -312,7 +316,8 @@ worldedit.register_gui_handler("worldedit_gui_cylinder", function(name, fields)
 		gui_nodename1[name] = tostring(fields.worldedit_gui_cylinder_node)
 		gui_axis1[name] = axis_indices[fields.worldedit_gui_cylinder_axis]
 		gui_distance1[name] = tostring(fields.worldedit_gui_cylinder_length)
-		gui_distance2[name] = tostring(fields.worldedit_gui_cylinder_radius)
+		gui_distance2[name] = tostring(fields.worldedit_gui_cylinder_radius1)
+		gui_distance3[name] = tostring(fields.worldedit_gui_cylinder_radius2)
 		worldedit.show_page(name, "worldedit_gui_cylinder")
 
 		local submit = nil
@@ -324,7 +329,8 @@ worldedit.register_gui_handler("worldedit_gui_cylinder", function(name, fields)
 		if submit then
 			local n = worldedit.normalize_nodename(gui_nodename1[name])
 			if n then
-				minetest.chatcommands["/"..submit].func(name, string.format("%s %s %s %s", axis_values[gui_axis1[name]], gui_distance1[name], gui_distance2[name], n))
+				local args = string.format("%s %s %s %s %s", axis_values[gui_axis1[name]], gui_distance1[name], gui_distance2[name], gui_distance3[name], n)
+				minetest.chatcommands["/"..submit].func(name, args)
 			end
 		end
 		return true
