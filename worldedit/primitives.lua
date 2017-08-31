@@ -171,7 +171,7 @@ function worldedit.cylinder(pos, axis, length, radius1, radius2, node_name, holl
 	local count = 0
 	for i = 0, length - 1 do
 		-- Calulate radius for this "height" in the cylinder
-		local radius = radius1 + (radius2 - radius1) * (i - 1) / (length - 1)
+		local radius = radius1 + (radius2 - radius1) * i / (length - 1)
 		radius = math.floor(radius + 0.5) -- round
 		local min_radius, max_radius = radius * (radius - 1), radius * (radius + 1)
 
