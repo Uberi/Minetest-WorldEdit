@@ -47,7 +47,7 @@ function worldedit.set_param2(pos1, pos2, param2)
 	pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 
 	local manip, area = mh.init(pos1, pos2)
-	local param2_data = {}
+	local param2_data = manip:get_param2_data()
 
 	-- Set param2 for every node
 	for i in area:iterp(pos1, pos2) do
