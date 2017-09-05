@@ -117,6 +117,10 @@ Set the current WorldEdit region to `<node>`.
     //set Blue Lightstone
     //set dirt with grass
 
+### `//param2 <param2>`
+
+Set the param2 value of all nodes in the current WorldEdit region to `<param2>`.
+
 ### `//mix <node1> ...`
 
 Fill the current WorldEdit region with a random mix of `<node1>`, `...`.

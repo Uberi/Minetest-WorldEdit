@@ -408,6 +408,25 @@ minetest.register_chatcommand("/set", {
 	end, check_region),
 })
 
+minetest.register_chatcommand("/param2", {
+	params = "<param2>",
+	description = "Set param2 of all nodes in the current WorldEdit region to <param2>",
+	privs = {worldedit=true},
+	func = safe_region(function(name, param)
+		local param2 = tonumber(param)
+		if not param2 then
+			worldedit.player_notify(name, "Invalid or missing param2 argument")
+			return
+		elseif param2 < 0 or param2 > 255 then
+			worldedit.player_notify(name, "Param2 is out of range (must be between 0 and 255 inclusive)!")
+			return
+		end
+
+		local count = worldedit.set_param2(worldedit.pos1[name], worldedit.pos2[name], param2)
+		worldedit.player_notify(name, count .. " nodes altered")
+	end, check_region),
+})
+
 minetest.register_chatcommand("/mix", {
 	params = "<node1> ...",
 	description = "Fill the current WorldEdit region with a random mix of <node1>, ...",
