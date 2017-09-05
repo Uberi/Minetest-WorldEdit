@@ -402,7 +402,7 @@ minetest.register_chatcommand("/param2", {
 		end
 
 		local count = worldedit.set_param2(worldedit.pos1[name], worldedit.pos2[name], param2)
-		worldedit.player_notify(name, count .. " nodes set")
+		worldedit.player_notify(name, count .. " nodes altered")
 	end, check_region),
 })
 
