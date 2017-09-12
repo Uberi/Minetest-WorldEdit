@@ -1,6 +1,6 @@
 --saved state for each player
-local gui_nodename1 = {} --mapping of player names to node names (arbitrary strings may also appear as values)
-local gui_nodename2 = {} --mapping of player names to node names (arbitrary strings may also appear as values)
+local gui_nodename1 = {} --mapping of player names to node names
+local gui_nodename2 = {} --mapping of player names to node names
 local gui_axis1 = {} --mapping of player names to axes (one of 1, 2, 3, or 4, representing the axes in the `axis_indices` table below)
 local gui_axis2 = {} --mapping of player names to axes (one of 1, 2, 3, or 4, representing the axes in the `axis_indices` table below)
 local gui_distance1 = {} --mapping of player names to a distance (arbitrary strings may also appear as values)
@@ -10,9 +10,7 @@ local gui_count1 = {} --mapping of player names to a quantity (arbitrary strings
 local gui_count2 = {} --mapping of player names to a quantity (arbitrary strings may also appear as values)
 local gui_count3 = {} --mapping of player names to a quantity (arbitrary strings may also appear as values)
 local gui_angle = {} --mapping of player names to an angle (one of 90, 180, 270, representing the angle in degrees clockwise)
-local gui_filename = {} --mapping of player names to file names (arbitrary strings may also appear as values)
-local gui_formspec = {} --mapping of player names to formspecs
-local gui_code = {} --mapping of player names to formspecs
+local gui_filename = {} --mapping of player names to file names
 
 --set default values
 setmetatable(gui_nodename1, {__index = function() return "Cobblestone" end})
@@ -27,8 +25,6 @@ setmetatable(gui_count2,     {__index = function() return "6" end})
 setmetatable(gui_count3,     {__index = function() return "4" end})
 setmetatable(gui_angle,     {__index = function() return 90 end})
 setmetatable(gui_filename,  {__index = function() return "building" end})
-setmetatable(gui_formspec,  {__index = function() return "size[5,5]\nlabel[0,0;Hello, world!]" end})
-setmetatable(gui_code,  {__index = function() return "minetest.chat_send_player(\"singleplayer\", \"Hello, world!\")" end})
 
 local axis_indices = {["X axis"]=1, ["Y axis"]=2, ["Z axis"]=3, ["Look direction"]=4}
 local axis_values = {"x", "y", "z", "?"}
@@ -733,32 +729,6 @@ worldedit.register_gui_handler("worldedit_gui_save_load", function(name, fields)
 			minetest.chatcommands["/allocate"].func(name, gui_filename[name])
 		else --fields.worldedit_gui_save_load_submit_load
 			minetest.chatcommands["/load"].func(name, gui_filename[name])
-		end
-		return true
-	end
-	return false
-end)
-
-worldedit.register_gui_function("worldedit_gui_lua", {
-	name = "Run Lua",
-	privs = we_privs("lua"),
-	get_formspec = function(name)
-		local code = gui_code[name]
-		return "size[8,6.5]" .. worldedit.get_formspec_header("worldedit_gui_lua") ..
-			string.format("textarea[0.5,1;7.5,5.5;worldedit_gui_lua_code;Lua Code;%s]", minetest.formspec_escape(code)) ..
-			"button_exit[0,6;3,0.8;worldedit_gui_lua_run;Run Lua]" ..
-			"button_exit[5,6;3,0.8;worldedit_gui_lua_transform;Lua Transform]"
-	end,
-})
-
-worldedit.register_gui_handler("worldedit_gui_lua", function(name, fields)
-	if fields.worldedit_gui_lua_run or fields.worldedit_gui_lua_transform then
-		gui_code[name] = fields.worldedit_gui_lua_code
-		worldedit.show_page(name, "worldedit_gui_lua")
-		if fields.worldedit_gui_lua_run then
-			minetest.chatcommands["/lua"].func(name, gui_code[name])
-		else --fields.worldedit_gui_lua_transform
-			minetest.chatcommands["/luatransform"].func(name, gui_code[name])
 		end
 		return true
 	end
