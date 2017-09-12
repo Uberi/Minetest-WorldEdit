@@ -398,10 +398,7 @@ minetest.register_chatcommand("/set", {
 	privs = {worldedit=true},
 	func = safe_region(function(name, param)
 		local node = get_node(name, param)
-		if not node then
-			worldedit.player_notify(name, "Could not identify node \"" .. param .. "\"")
-			return
-		end
+		if not node then return end
 
 		local count = worldedit.set(worldedit.pos1[name], worldedit.pos2[name], node)
 		worldedit.player_notify(name, count .. " nodes set")
@@ -435,10 +432,7 @@ minetest.register_chatcommand("/mix", {
 		local nodes = {}
 		for nodename in param:gmatch("[^%s]+") do
 			local node = get_node(name, nodename)
-			if not node then
-				worldedit.player_notify(name, "Could not identify node \"" .. name .. "\"")
-				return
-			end
+			if not node then return end
 			nodes[#nodes + 1] = node
 		end
 
