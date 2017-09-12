@@ -788,6 +788,7 @@ minetest.register_chatcommand("/move", {
 		end
 		amount = tonumber(amount)
 		if axis == "?" then
+			local sign
 			axis, sign = worldedit.player_axis(name)
 			amount = amount * sign
 		end
