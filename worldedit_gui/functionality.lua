@@ -735,6 +735,52 @@ worldedit.register_gui_handler("worldedit_gui_save_load", function(name, fields)
 	return false
 end)
 
+worldedit.register_gui_function("worldedit_gui_cube", {
+	name = "Cuboid", -- technically the command is misnamed, I know...
+	privs = combine_we_privs({"hollowcube", "cube"}),
+	get_formspec = function(name)
+		local width, height, length = gui_distance1[name], gui_distance2[name], gui_distance3[name]
+		local node = gui_nodename1[name]
+		local nodename = worldedit.normalize_nodename(node)
+		return "size[6.5,4]" .. worldedit.get_formspec_header("worldedit_gui_cube") ..
+			string.format("field[0.5,1.5;4,0.8;worldedit_gui_cube_node;Name;%s]", minetest.formspec_escape(node)) ..
+			"button[4,1.18;1.5,0.8;worldedit_gui_cube_search;Search]" ..
+			formspec_node("5.5,1.1", nodename) ..
+			string.format("field[0.5,2.5;1,0.8;worldedit_gui_cube_width;Width;%s]", minetest.formspec_escape(width)) ..
+			string.format("field[1.5,2.5;1,0.8;worldedit_gui_cube_height;Height;%s]", minetest.formspec_escape(height)) ..
+			string.format("field[2.5,2.5;1,0.8;worldedit_gui_cube_length;Length;%s]", minetest.formspec_escape(length)) ..
+			"button_exit[0,3.5;3,0.8;worldedit_gui_cube_submit_hollow;Hollow Cuboid]" ..
+			"button_exit[3.5,3.5;3,0.8;worldedit_gui_cube_submit_solid;Solid Cuboid]"
+	end,
+})
+
+worldedit.register_gui_handler("worldedit_gui_cube", function(name, fields)
+	if fields.worldedit_gui_cube_search
+	or fields.worldedit_gui_cube_submit_hollow or fields.worldedit_gui_cube_submit_solid then
+		gui_nodename1[name] = tostring(fields.worldedit_gui_cube_node)
+		gui_distance1[name] = tostring(fields.worldedit_gui_cube_width)
+		gui_distance2[name] = tostring(fields.worldedit_gui_cube_height)
+		gui_distance3[name] = tostring(fields.worldedit_gui_cube_length)
+		worldedit.show_page(name, "worldedit_gui_cube")
+
+		local submit = nil
+		if fields.worldedit_gui_cube_submit_hollow then
+			submit = "hollowcube"
+		elseif fields.worldedit_gui_cube_submit_solid then
+			submit = "cube"
+		end
+		if submit then
+			local n = worldedit.normalize_nodename(gui_nodename1[name])
+			if n then
+				local args = string.format("%s %s %s %s", gui_distance1[name], gui_distance2[name], gui_distance3[name], n)
+				minetest.chatcommands["/"..submit].func(name, args)
+			end
+		end
+		return true
+	end
+	return false
+end)
+
 worldedit.register_gui_function("worldedit_gui_clearobjects", {
 	name = "Clear Objects",
 	privs = we_privs("clearobjects"),
