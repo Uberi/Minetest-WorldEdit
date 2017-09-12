@@ -1,6 +1,6 @@
 --- Worldedit.
 -- @module worldedit
--- @release 1.1
+-- @release 1.2
 -- @copyright 2013 sfan5, Anthony Zhang (Uberi/Temperest), and Brett O'Donnell (cornernote).
 -- @license GNU Affero General Public License version 3 (AGPLv3)
 -- @author sfan5
@@ -8,9 +8,12 @@
 -- @author Bret O'Donnel (cornernote)
 -- @author ShadowNinja
 
+
 worldedit = {}
-worldedit.version = {1, 1, major=1, minor=1}
-worldedit.version_string = table.concat(worldedit.version, ".")
+
+local ver = {major=1, minor=2}
+worldedit.version = ver
+worldedit.version_string = string.format("%d.%d", ver.major, ver.minor)
 
 if not minetest.get_voxel_manip then
 	local err_msg = "This version of WorldEdit requires Minetest 0.4.8 or later!  You have an old version."
