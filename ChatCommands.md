@@ -463,3 +463,14 @@ Contracts the selection in all directions by `<amount>`. If specified, the selec
 or vertically in the y axis `[v]`.
 
 		//outset v 5
+
+### `//brush none/<command> [parameters]`
+
+Assigns the given `<command>` to the currently held brush item, it will be ran with the first pointed solid node (as determined via raycast) as
+WorldEdit position 1 when using that specific brush item.
+Passing `none` instead clears the command assigned to the currently held brush item.
+Note that this functionality requires the `worldedit_brush` mod enabled.
+
+		//brush cube 8 8 8 Cobblestone
+		//brush spr 12 glass
+		//brush none
