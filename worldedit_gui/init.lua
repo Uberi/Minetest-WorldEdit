@@ -217,7 +217,6 @@ elseif rawget(_G, "sfinv") then --sfinv installed (part of minetest_game since 0
 			player:set_inventory_formspec(get_formspec(name, page))
 		end
 	end
-
 else
 	error(
 		"worldedit_gui requires a supported \"gui management\" mod to be installed\n"..
