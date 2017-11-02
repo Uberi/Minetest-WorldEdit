@@ -134,6 +134,55 @@ elseif rawget(_G, "inventory_plus") then --inventory++ installed
 			inventory_plus.set_inventory_formspec(player, get_formspec(name, page))
 		end
 	end
+elseif rawget(_G, "smart_inventory") then -- smart_inventory installed
+	-- redefinition: Update the code element on inventory page to show the we-page
+	function worldedit.show_page(name, page)
+		local state = smart_inventory.get_page_state("worldedit_gui", name)
+		if state then
+			state:get("code"):set_we_formspec(page)
+			state.location.rootState:show() -- update inventory page
+		end
+	end
+
+	-- smart_inventory page callback. Contains just a "custom code" element
+	local function smart_worldedit_gui_callback(state)
+		local codebox = state:element("code", { name = "code", code = "" })
+		function codebox:set_we_formspec(we_page)
+			local new_formspec = get_formspec(state.location.rootState.location.player, we_page)
+			new_formspec = new_formspec:gsub('button_exit','button') --no inventory closing
+			self.data.code = "container[1,1]".. new_formspec .. "container_end[]"
+		end
+		codebox:set_we_formspec("worldedit_gui")
+
+		-- process input (the back button)
+		state:onInput(function(state, fields, player)
+			if fields.worldedit_gui then --main page
+				state:get("code"):set_we_formspec("worldedit_gui")
+			elseif fields.worldedit_gui_exit then --return to original page
+				state:get("code"):set_we_formspec("worldedit_gui")
+				state.location.parentState:get("crafting_button"):submit() -- switch to the crafting tab
+			end
+		end)
+	end
+
+	-- all handler should return false to force inventory UI update
+	local orig_register_gui_handler = worldedit.register_gui_handler
+	worldedit.register_gui_handler = function(identifier, handler)
+		local wrapper = function(...)
+			handler(...)
+			return false
+		end
+		orig_register_gui_handler(identifier, wrapper)
+	end
+
+	-- register the inventory button
+	smart_inventory.register_page({
+		name = "worldedit_gui",
+		tooltip = "Edit your World!",
+		icon = "inventory_plus_worldedit_gui.png",
+		smartfs_callback = smart_worldedit_gui_callback,
+		sequence = 99
+	})
 elseif rawget(_G, "sfinv") then --sfinv installed (part of minetest_game since 0.4.15)
 	assert(sfinv.enabled)
 	local orig_get = sfinv.pages["sfinv:crafting"].get
