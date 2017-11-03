@@ -1,5 +1,6 @@
 minetest.register_tool(":worldedit:wand", {
 	description = "WorldEdit Wand tool, Left-click to set 1st position, right-click to set 2nd",
+	range = 100,
 	inventory_image = "worldedit_wand.png",
 	stack_max = 1, -- there is no need to have more than one
 	liquids_pointable = true, -- ground with only water on can be selected as well
