@@ -301,7 +301,7 @@ function worldedit.stack(pos1, pos2, axis, count)
 	local amount = 0
 	local copy = worldedit.copy
 	local i = 1
-	function next_one()
+	local function next_one()
 		if i <= count then
 			i = i + 1
 			amount = amount + length
