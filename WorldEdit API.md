@@ -193,7 +193,7 @@ Returns the number of nodes restored.
 
 Serialization
 -------------
-Contained in serialization.lua, this module allows regions of nodes to be serialized and deserialized to formats suitable for use outside MineTest.
+Contained in serialization.lua, this module allows regions of nodes to be serialized and deserialized to formats suitable for use outside Minetest.
 
 ### version, extra_fields, content = worldedit.read_header(value)
 
