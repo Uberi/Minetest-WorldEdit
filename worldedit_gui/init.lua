@@ -134,8 +134,7 @@ elseif rawget(_G, "inventory_plus") then --inventory++ installed
 			inventory_plus.set_inventory_formspec(player, get_formspec(name, page))
 		end
 	end
-elseif rawget(_G, "sfinv") then --sfinv installed (part of minetest_game since 0.4.15)
-	assert(sfinv.enabled)
+elseif rawget(_G, "sfinv") and sfinv.enabled then --sfinv installed (part of minetest_game since 0.4.15) and not disabled
 	local orig_get = sfinv.pages["sfinv:crafting"].get
 	sfinv.override_page("sfinv:crafting", {
 		get = function(self, player, context)
