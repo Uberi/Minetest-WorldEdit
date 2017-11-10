@@ -158,6 +158,9 @@ elseif rawget(_G, "smart_inventory") then -- smart_inventory installed
 		state:onInput(function(state, fields, player)
 			if fields.worldedit_gui then --main page
 				state:get("code"):set_we_formspec("worldedit_gui")
+			elseif fields.worldedit_gui_exit then --return to original page
+				state:get("code"):set_we_formspec("worldedit_gui")
+				state.location.parentState:get("crafting_button"):submit() -- switch to the crafting tab
 			end
 		end)
 	end
