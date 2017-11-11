@@ -9,7 +9,12 @@ area_protection.interaction_restrictions = function(
 	player_name
 )
 	if area_protection.areas then
-		if minetest.check_player_privs(name, {areas = true}) then
+		if minetest.check_player_privs(
+			player_name,
+			{
+				areas = true
+			}
+		) then
 			return false
 		end
 		return true
