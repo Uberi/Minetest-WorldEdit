@@ -585,23 +585,14 @@ local check_cylinder = function(name, param)
 		axis, sign = worldedit.player_axis(name)
 		length = length * sign
 	end
-	local pos1 = worldedit.pos1[name]
-	local current_pos = {x=pos1.x, y=pos1.y, z=pos1.z}
+	local current_pos = vector.new(worldedit.pos1[name])
 	if length < 0 then
 		length = -length
 		current_pos[axis] = current_pos[axis] - length
 	end
 	local other1, other2 = worldedit.get_axis_others(axis)
-	local interact_pos1 = {
-		x = current_pos.x,
-		y = current_pos.y,
-		z = current_pos.z,
-	}
-	local interact_pos2 = {
-		x = current_pos.x,
-		y = current_pos.y,
-		z = current_pos.z,
-	}
+	local interact_pos1 = vector.new(current_pos)
+	local interact_pos2 = vector.new(current_pos)
 	interact_pos1[other1] = interact_pos1[other1] - radius
 	interact_pos1[other2] = interact_pos1[other2] - radius
 	interact_pos2[other1] = interact_pos2[other1] + radius
@@ -673,16 +664,8 @@ local check_pyramid = function(name, param)
 	end
 	local pos1 = worldedit.pos1[name]
 	local other1, other2 = worldedit.get_axis_others(axis)
-	local interact_pos1 = {
-		x = pos1.x,
-		y = pos1.y,
-		z = pos1.z,
-	}
-	local interact_pos2 = {
-		x = pos1.x,
-		y = pos1.y,
-		z = pos1.z,
-	}
+	local interact_pos1 = vector.new(pos1)
+	local interact_pos2 = vector.new(pos1)
 	interact_pos1[other1] = interact_pos1[other1] - height
 	interact_pos1[other2] = interact_pos1[other2] - height
 	interact_pos2[other1] = interact_pos2[other1] + height
