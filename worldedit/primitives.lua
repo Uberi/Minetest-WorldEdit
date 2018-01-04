@@ -208,12 +208,13 @@ function worldedit.pyramid(pos, axis, height, node_name, hollow)
 	local other1, other2 = worldedit.get_axis_others(axis)
 
 	-- Set up voxel manipulator
-	local manip, area = mh.init_axis_radius(pos, axis,
-			height >= 0 and height or -height)
+	-- FIXME: passing negative <radius> causes mis-sorted pos to be passed
+	-- into mh.init() which is technically not allowed but works
+	local manip, area = mh.init_axis_radius(pos, axis, height)
 	local data = mh.get_empty_data(area)
 
 	-- Handle inverted pyramids
-	local start_axis, end_axis, step
+	local step
 	if height > 0 then
 		height = height - 1
 		step = 1
