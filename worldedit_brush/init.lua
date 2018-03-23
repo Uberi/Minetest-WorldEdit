@@ -1,10 +1,14 @@
 if minetest.raycast == nil then
+	print('[MOD] worldedit_brush is not compatible with your game, so it won\'t be loaded!')
+	return
+	--[[ 
 	error(
 		"================================\n"..
 		"This mod requires a suitable version of 0.4.16-dev/0.5.0-dev\n"..
 		"that includes support for minetest.raycast() [since 7th July 2017]\n"..
 		"================================\n"
 	)
+	]]
 end
 
 local BRUSH_MAX_DIST = 150
