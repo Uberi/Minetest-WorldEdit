@@ -5,14 +5,27 @@ worldedit.brush = {
 
 local brush = worldedit.brush
 
+-- check compatibility
 if minetest.raycast == nil then
 	brush.enabled = false
 	brush.error = brush.modname .. " is not compatible with current game version"
-	minetest.log("error", "[MOD] " .. brush.error .. ", so it won't be loaded!")
-	minetest.log("verbose",
-		"[MOD] " .. brush.modname .. " requires a suitable version of 0.4.16-dev or higher, " ..
-		"that includes support for minetest.raycast() [since 7th July 2017]"
-	)
+
+	function log_unavailable_error()
+		minetest.log("error", "[MOD] " .. brush.error .. ", so it has been disabled!")
+		minetest.log("verbose",
+			"[MOD] " .. brush.modname .. " requires a suitable version of 0.4.16-dev or higher, " ..
+			"that includes support for minetest.raycast() [since 7th July 2017]"
+		)
+	end
+
+	if minetest.is_singleplayer() then
+		-- delay message until player is connected
+		minetest.register_on_joinplayer(log_unavailable_error)
+	else
+		log_unavailable_error()
+	end
+
+	-- exit here / do not load this mod
 	return
 end
 
