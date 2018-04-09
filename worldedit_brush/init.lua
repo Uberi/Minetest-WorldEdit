@@ -1,19 +1,14 @@
-worldedit.brush = {
-	enabled = true,
-	modname = minetest.get_current_modname(),
-}
-
-local brush = worldedit.brush
+local modname = minetest.get_current_modname()
 
 -- check compatibility
 if minetest.raycast == nil then
-	brush.enabled = false
-	brush.error = brush.modname .. " is not compatible with current game version"
-
 	function log_unavailable_error()
-		minetest.log("error", "[MOD] " .. brush.error .. ", so it has been disabled!")
+		minetest.log("error",
+			"[MOD] " .. modname .. " is not compatible with current game version, " ..
+			"you can disable it in the game settings!"
+		)
 		minetest.log("verbose",
-			"[MOD] " .. brush.modname .. " requires a suitable version of 0.4.16-dev or higher, " ..
+			"[MOD] " .. modname .. " requires a suitable version of 0.4.16-dev or higher, " ..
 			"that includes support for minetest.raycast() [since 7th July 2017]"
 		)
 	end
