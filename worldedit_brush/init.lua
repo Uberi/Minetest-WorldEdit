@@ -1,14 +1,19 @@
+worldedit.brush = {
+	enabled = true,
+	modname = minetest.get_current_modname(),
+}
+
+local brush = worldedit.brush
+
 if minetest.raycast == nil then
-	print('[MOD] worldedit_brush is not compatible with your game, so it won\'t be loaded!')
-	return
-	--[[ 
-	error(
-		"================================\n"..
-		"This mod requires a suitable version of 0.4.16-dev/0.5.0-dev\n"..
-		"that includes support for minetest.raycast() [since 7th July 2017]\n"..
-		"================================\n"
+	brush.enabled = false
+	brush.error = brush.modname .. " is not compatible with current game version"
+	minetest.log("error", "[MOD] " .. brush.error .. ", so it won't be loaded!")
+	minetest.log("verbose",
+		"[MOD] " .. brush.modname .. " requires a suitable version of 0.4.16-dev or higher, " ..
+		"that includes support for minetest.raycast() [since 7th July 2017]"
 	)
-	]]
+	return
 end
 
 local BRUSH_MAX_DIST = 150
