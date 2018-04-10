@@ -1,10 +1,27 @@
+local modname = minetest.get_current_modname()
+
+-- check compatibility
 if minetest.raycast == nil then
-	error(
-		"================================\n"..
-		"This mod requires a suitable version of 0.4.16-dev/0.5.0-dev\n"..
-		"that includes support for minetest.raycast() [since 7th July 2017]\n"..
-		"================================\n"
-	)
+	function log_unavailable_error()
+		minetest.log("error",
+			"[MOD] " .. modname .. " is not compatible with current game version, " ..
+			"you can disable it in the game settings!"
+		)
+		minetest.log("verbose",
+			"[MOD] " .. modname .. " requires a suitable version of 0.4.16-dev or higher, " ..
+			"that includes support for minetest.raycast() [since 7th July 2017]"
+		)
+	end
+
+	if minetest.is_singleplayer() then
+		-- delay message until player is connected
+		minetest.register_on_joinplayer(log_unavailable_error)
+	else
+		log_unavailable_error()
+	end
+
+	-- exit here / do not load this mod
+	return
 end
 
 local BRUSH_MAX_DIST = 150
