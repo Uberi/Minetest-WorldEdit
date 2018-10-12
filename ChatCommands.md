@@ -121,14 +121,16 @@ Set the current WorldEdit region to `<node>`.
 
 Set the param2 value of all nodes in the current WorldEdit region to `<param2>`.
 
-### `//mix <node1> ...`
+### `//mix <node1> [<count1>] <node2> [<count2>]...`
 
-Fill the current WorldEdit region with a random mix of `<node1>`, `...`.
+Fill the current WorldEdit region with a random mix of `<node1>`, `<node2>`, `...`. Weightings can be optionally specified via a number after a node name.
 
     //mix air
     //mix cactus stone glass sandstone
     //mix Bronze
     //mix default:cobble air
+    //mix stone 3 dirt 2
+    //mix cobblestone 8 stoneblock 2 stonebrick
 
 ### `//replace <search node> <replace node>`
 

@@ -425,15 +425,22 @@ minetest.register_chatcommand("/param2", {
 })
 
 minetest.register_chatcommand("/mix", {
-	params = "<node1> ...",
+	params = "<node1> [<weighting1>] [<node2> [<weighting2>]] ...",
 	description = "Fill the current WorldEdit region with a random mix of <node1>, ...",
 	privs = {worldedit=true},
 	func = safe_region(function(name, param)
 		local nodes = {}
 		for nodename in param:gmatch("[^%s]+") do
-			local node = get_node(name, nodename)
-			if not node then return end
-			nodes[#nodes + 1] = node
+			if tonumber(nodename) ~= nil and #nodes > 0 then
+				local last_node = nodes[#nodes]
+				for i = 1, tonumber(nodename) do
+					nodes[#nodes + 1] = last_node
+				end
+			else
+				local node = get_node(name, nodename)
+				if not node then return end
+				nodes[#nodes + 1] = node
+			end
 		end
 
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
