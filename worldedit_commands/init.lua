@@ -431,9 +431,19 @@ minetest.register_chatcommand("/mix", {
 	func = safe_region(function(name, param)
 		local nodes = {}
 		for nodename in param:gmatch("[^%s]+") do
-			local node = get_node(name, nodename)
-			if not node then return end
-			nodes[#nodes + 1] = node
+			if tonumber(nodename) ~= nil then
+				local last_node = nodes[#nodes]
+				local node_count = tonumber(nodename)
+				minetest.log("action", "last node: " .. last_node .. ", count: " .. node_count)
+				
+				for i=1,node_count do
+					nodes[#nodes + 1] = last_node
+				end
+			else
+				local node = get_node(name, nodename)
+				if not node then return end
+				nodes[#nodes + 1] = node
+			end
 		end
 
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
