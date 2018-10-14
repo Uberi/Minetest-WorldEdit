@@ -453,19 +453,33 @@ minetest.register_chatcommand("/mix", {
 })
 
 local check_replace = function(name, param)
-	local found, _, searchnode, replacenode = param:find("^([^%s]+)%s+(.+)$")
-	if found == nil then
-		worldedit.player_notify(name, "invalid usage: " .. param)
-		return nil
+	local search_node = nil
+	local replace_nodes = {}
+	for nodename in param:gmatch("[^%s]+") do
+		if search_node == nil then
+			search_node = get_node(name, nodename)
+		else
+			if tonumber(nodename) ~= nil then
+				local last_node = replace_nodes[#replace_nodes]
+				local node_count = tonumber(nodename)
+				minetest.log("action", "last node: " .. last_node .. ", count: " .. node_count)
+				
+				for i=1,node_count do
+					replace_nodes[#replace_nodes + 1] = last_node
+				end
+			else
+				local node = get_node(name, nodename)
+				if not node then
+					worldedit.player_notify(name, "invalid replace node name: " .. searchnode)
+					return nil
+				end
+				replace_nodes[#replace_nodes + 1] = node
+			end
+		end
 	end
-	local newsearchnode = worldedit.normalize_nodename(searchnode)
-	if not newsearchnode then
+	
+	if not search_node then
 		worldedit.player_notify(name, "invalid search node name: " .. searchnode)
-		return nil
-	end
-	local newreplacenode = worldedit.normalize_nodename(replacenode)
-	if not newreplacenode then
-		worldedit.player_notify(name, "invalid replace node name: " .. replacenode)
 		return nil
 	end
 	return check_region(name, param)
@@ -476,11 +490,41 @@ minetest.register_chatcommand("/replace", {
 	description = "Replace all instances of <search node> with <replace node> in the current WorldEdit region",
 	privs = {worldedit=true},
 	func = safe_region(function(name, param)
-		local found, _, search_node, replace_node = param:find("^([^%s]+)%s+(.+)$")
-		local norm_search_node = worldedit.normalize_nodename(search_node)
-		local norm_replace_node = worldedit.normalize_nodename(replace_node)
-		local count = worldedit.replace(worldedit.pos1[name], worldedit.pos2[name],
-				norm_search_node, norm_replace_node)
+		local search_node = nil
+		local replace_nodes = {}
+		for nodename in param:gmatch("[^%s]+") do
+			worldedit.player_notify(name, "Processing "..nodename)
+			if search_node == nil then
+				search_node = get_node(name, nodename)
+			else
+				if tonumber(nodename) ~= nil then
+					local last_node = replace_nodes[#replace_nodes]
+					local node_count = tonumber(nodename)
+					minetest.log("action", "last node: " .. last_node .. ", count: " .. node_count)
+					
+					for i=1,node_count do
+						replace_nodes[#replace_nodes + 1] = last_node
+					end
+				else
+					local node = get_node(name, nodename)
+					if not node then return end
+					replace_nodes[#replace_nodes + 1] = node
+				end
+			end
+		end
+		
+		local count
+		if #replace_nodes == 1 then
+			count = worldedit.replace(
+				worldedit.pos1[name], worldedit.pos2[name],
+				search_node, replace_nodes[1]
+			)
+		else
+			count = worldedit.replace(
+				worldedit.pos1[name], worldedit.pos2[name],
+				search_node, replace_nodes
+			)
+		end
 		worldedit.player_notify(name, count .. " nodes replaced")
 	end, check_replace),
 })
@@ -490,11 +534,42 @@ minetest.register_chatcommand("/replaceinverse", {
 	description = "Replace all nodes other than <search node> with <replace node> in the current WorldEdit region",
 	privs = {worldedit=true},
 	func = safe_region(function(name, param)
-		local found, _, search_node, replace_node = param:find("^([^%s]+)%s+(.+)$")
-		local norm_search_node = worldedit.normalize_nodename(search_node)
-		local norm_replace_node = worldedit.normalize_nodename(replace_node)
-		local count = worldedit.replace(worldedit.pos1[name], worldedit.pos2[name],
-				norm_search_node, norm_replace_node, true)
+		local search_node = nil
+		local replace_nodes = {}
+		for nodename in param:gmatch("[^%s]+") do
+			if search_node == nil then
+				search_node = get_node(name, nodename)
+			else
+				if tonumber(nodename) ~= nil then
+					local last_node = replace_nodes[#replace_nodes]
+					local node_count = tonumber(nodename)
+					minetest.log("action", "last node: " .. last_node .. ", count: " .. node_count)
+					
+					for i=1,node_count do
+						replace_nodes[#replace_nodes + 1] = last_node
+					end
+				else
+					local node = get_node(name, nodename)
+					if not node then return end
+					replace_nodes[#replace_nodes + 1] = node
+				end
+			end
+		end
+		
+		local count
+		if #replace_nodes == 1 then
+			count = worldedit.replace(
+				worldedit.pos1[name], worldedit.pos2[name],
+				search_node, replace_nodes[1],
+				true
+			)
+		else
+			count = worldedit.replace(
+				worldedit.pos1[name], worldedit.pos2[name],
+				search_node, replace_nodes,
+				true
+			)
+		end
 		worldedit.player_notify(name, count .. " nodes replaced")
 	end, check_replace),
 })

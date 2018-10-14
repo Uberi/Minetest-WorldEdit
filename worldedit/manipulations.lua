@@ -72,24 +72,45 @@ function worldedit.replace(pos1, pos2, search_node, replace_node, inverse)
 	local data = manip:get_data()
 
 	local search_id = minetest.get_content_id(search_node)
-	local replace_id = minetest.get_content_id(replace_node)
-
+	
+	local replace_multiple = not (type(replace_node) == "string")
+	local replace_id = nil, id_count, rand
+	
+	if not replace_multiple then
+		replace_id = minetest.get_content_id(replace_node)
+	else
+		id_count, rand = #replace_node, math.random
+		replace_id = {}
+		for i, node_name in ipairs(replace_node) do
+			replace_id[i] = minetest.get_content_id(node_name)
+		end
+	end
+	
+	
 	local count = 0
 
 	--- TODO: This could be shortened by checking `inverse` in the loop,
-	-- but that would have a speed penalty.  Is the penalty big enough
+	-- but that would have a speed penalty. Is the penalty big enough
 	-- to matter?
 	if not inverse then
 		for i in area:iterp(pos1, pos2) do
 			if data[i] == search_id then
-				data[i] = replace_id
+				if not replace_multiple then
+					data[i] = replace_id
+				else
+					data[i] = replace_id[rand(id_count)]
+				end
 				count = count + 1
 			end
 		end
 	else
 		for i in area:iterp(pos1, pos2) do
 			if data[i] ~= search_id then
-				data[i] = replace_id
+				if not replace_multiple then
+					data[i] = replace_id
+				else
+					data[i] = replace_id[rand(id_count)]
+				end
 				count = count + 1
 			end
 		end
@@ -646,4 +667,3 @@ function worldedit.clear_objects(pos1, pos2)
 	end
 	return count
 end
-

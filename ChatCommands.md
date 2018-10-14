@@ -134,21 +134,25 @@ Fill the current WorldEdit region with a random mix of `<node1>`, `<node2>`, `..
 
 ### `//replace <search node> <replace node>`
 
-Replace all instances of `<search node>` with `<replace node>` in the current WorldEdit region.
+Replace all instances of `<search node>` with `<replace node>` in the current WorldEdit region. `<replace_node>` can be in the same format as `//mix`.
 
     //replace Cobblestone air
     //replace lightstone_blue glass
     //replace dirt Bronze Block
     //replace mesecons:wire_00000000_off flowers:flower_tulip
+    //replace dirt snowblock 5 ice 2
+    //replace dirt_with_grass sand 10 silver_sand 3 desert_sand
 
 ### `//replaceinverse <search node> <replace node>`
 
-Replace all nodes other than `<search node>` with `<replace node>` in the current WorldEdit region.
+Replace all nodes other than `<search node>` with `<replace node>` in the current WorldEdit region. `<replace_node>` can be in the same format as `//mix`.
 
     //replaceinverse Cobblestone air
     //replaceinverse flowers:flower_waterlily glass
     //replaceinverse dirt Bronze Block
     //replaceinverse mesecons:wire_00000000_off flowers:flower_tulip
+    //replaceinverse dirt snowblock 5 ice 2
+    //replaceinverse dirt_with_grass sand 10 silver_sand 3 desert_sand
 
 ### `//hollowcube <width> <height> <length> <node>`
 
