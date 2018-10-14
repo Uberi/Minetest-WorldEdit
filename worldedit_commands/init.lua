@@ -425,7 +425,7 @@ minetest.register_chatcommand("/param2", {
 })
 
 minetest.register_chatcommand("/mix", {
-	params = "<node1> ...",
+	params = "<node1> [<weighting1>] [<node2> [<weighting2>]] ...",
 	description = "Fill the current WorldEdit region with a random mix of <node1>, ...",
 	privs = {worldedit=true},
 	func = safe_region(function(name, param)
@@ -486,7 +486,7 @@ local check_replace = function(name, param)
 end
 
 minetest.register_chatcommand("/replace", {
-	params = "<search node> <replace node>",
+	params = "<search node> <replace node 1> [<weighting 1>] [<replace node 2> [<weighting 2>]]",
 	description = "Replace all instances of <search node> with <replace node> in the current WorldEdit region",
 	privs = {worldedit=true},
 	func = safe_region(function(name, param)
@@ -530,7 +530,7 @@ minetest.register_chatcommand("/replace", {
 })
 
 minetest.register_chatcommand("/replaceinverse", {
-	params = "<search node> <replace node>",
+	params = "<search node> <replace node 1> [<weighting 1>] [<replace node 2> [<weighting 2>]]",
 	description = "Replace all nodes other than <search node> with <replace node> in the current WorldEdit region",
 	privs = {worldedit=true},
 	func = safe_region(function(name, param)
