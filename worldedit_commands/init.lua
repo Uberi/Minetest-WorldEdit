@@ -431,11 +431,9 @@ minetest.register_chatcommand("/mix", {
 	func = safe_region(function(name, param)
 		local nodes = {}
 		for nodename in param:gmatch("[^%s]+") do
-			if tonumber(nodename) ~= nil then
+			if tonumber(nodename) ~= nil and #nodes > 0 then
 				local last_node = nodes[#nodes]
 				local node_count = tonumber(nodename)
-				minetest.log("action", "last node: " .. last_node .. ", count: " .. node_count)
-				
 				for i=1,node_count do
 					nodes[#nodes + 1] = last_node
 				end
