@@ -289,9 +289,9 @@ Stack the current WorldEdit region `<count>` times by offset `<x>`, `<y>`, `<z>`
 
 Scale the current WorldEdit positions and region by a factor of `<stretchx>`, `<stretchy>`, `<stretchz>` along the X, Y, and Z axes, repectively, with position 1 as the origin.
 
-    //scale 2 2 2
-    //scale 1 2 1
-    //scale 10 20 1
+    //stretch 2 2 2
+    //stretch 1 2 1
+    //stretch 10 20 1
 
 ### `//transpose x/y/z/? x/y/z/?`
 

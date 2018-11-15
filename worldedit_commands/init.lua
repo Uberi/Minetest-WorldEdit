@@ -905,9 +905,12 @@ minetest.register_chatcommand("/stretch", {
 		stretchx, stretchy, stretchz = tonumber(stretchx), tonumber(stretchy), tonumber(stretchz)
 		if stretchx == 0 or stretchy == 0 or stretchz == 0 then
 			worldedit.player_notify(name, "invalid scaling factors: " .. param)
+			return nil
 		end
 		local count = check_region(name, param)
-		if count then return tonumber(stretchx) * tonumber(stretchy) * tonumber(stretchz) * count end
+		if count then
+			return stretchx * stretchy * stretchz * count
+		end
 		return nil
 	end),
 })
