@@ -108,7 +108,7 @@ end
 
 minetest.register_chatcommand("/about", {
 	params = "",
-	description = "Get information about the mod",
+	description = "Get information about the WorldEdit mod",
 	func = function(name, param)
 		worldedit.player_notify(name, "WorldEdit " .. worldedit.version_string .. " is available on this server. Type /help to get a list of commands, or get more information at https://github.com/Uberi/Minetest-WorldEdit/")
 	end,
