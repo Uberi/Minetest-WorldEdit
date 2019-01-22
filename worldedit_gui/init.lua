@@ -134,6 +134,55 @@ elseif rawget(_G, "inventory_plus") then --inventory++ installed
 			inventory_plus.set_inventory_formspec(player, get_formspec(name, page))
 		end
 	end
+elseif rawget(_G, "smart_inventory") then -- smart_inventory installed
+	-- redefinition: Update the code element on inventory page to show the we-page
+	function worldedit.show_page(name, page)
+		local state = smart_inventory.get_page_state("worldedit_gui", name)
+		if state then
+			state:get("code"):set_we_formspec(page)
+			state.location.rootState:show() -- update inventory page
+		end
+	end
+
+	-- smart_inventory page callback. Contains just a "custom code" element
+	local function smart_worldedit_gui_callback(state)
+		local codebox = state:element("code", { name = "code", code = "" })
+		function codebox:set_we_formspec(we_page)
+			local new_formspec = get_formspec(state.location.rootState.location.player, we_page)
+			new_formspec = new_formspec:gsub('button_exit','button') --no inventory closing
+			self.data.code = "container[1,1]".. new_formspec .. "container_end[]"
+		end
+		codebox:set_we_formspec("worldedit_gui")
+
+		-- process input (the back button)
+		state:onInput(function(state, fields, player)
+			if fields.worldedit_gui then --main page
+				state:get("code"):set_we_formspec("worldedit_gui")
+			elseif fields.worldedit_gui_exit then --return to original page
+				state:get("code"):set_we_formspec("worldedit_gui")
+				state.location.parentState:get("crafting_button"):submit() -- switch to the crafting tab
+			end
+		end)
+	end
+
+	-- all handler should return false to force inventory UI update
+	local orig_register_gui_handler = worldedit.register_gui_handler
+	worldedit.register_gui_handler = function(identifier, handler)
+		local wrapper = function(...)
+			handler(...)
+			return false
+		end
+		orig_register_gui_handler(identifier, wrapper)
+	end
+
+	-- register the inventory button
+	smart_inventory.register_page({
+		name = "worldedit_gui",
+		tooltip = "Edit your World!",
+		icon = "inventory_plus_worldedit_gui.png",
+		smartfs_callback = smart_worldedit_gui_callback,
+		sequence = 99
+	})
 elseif rawget(_G, "sfinv") then --sfinv installed (part of minetest_game since 0.4.15)
 	assert(sfinv.enabled)
 	local orig_get = sfinv.pages["sfinv:crafting"].get
@@ -145,13 +194,21 @@ elseif rawget(_G, "sfinv") then --sfinv installed (part of minetest_game since 0
 		end
 	})
 
+	--compatibility with pre-0.4.16 sfinv
+	local set_page = sfinv.set_page or function(player, name)
+		--assumptions: src pg has no leave callback, dst pg has no enter callback
+		local ctx = {page=name}
+		sfinv.contexts[player:get_player_name()] = ctx
+		sfinv.set_player_inventory_formspec(player, ctx)
+	end
+
 	--show the form when the button is pressed and hide it when done
 	minetest.register_on_player_receive_fields(function(player, formname, fields)
 		if fields.worldedit_gui then --main page
 			worldedit.show_page(player:get_player_name(), "worldedit_gui")
 			return true
 		elseif fields.worldedit_gui_exit then --return to original page
-			sfinv.set_page(player, "sfinv:crafting")
+			set_page(player, "sfinv:crafting")
 			return true
 		end
 		return false
@@ -163,82 +220,14 @@ elseif rawget(_G, "sfinv") then --sfinv installed (part of minetest_game since 0
 			player:set_inventory_formspec(get_formspec(name, page))
 		end
 	end
-else --fallback button
-	-- FIXME: this is a huge clusterfuck and the back button is broken
-	local player_formspecs = {}
-
-	local update_main_formspec = function(name)
-		local formspec = player_formspecs[name]
-		if not formspec then
-			return
-		end
-		local player = minetest.get_player_by_name(name)
-		if not player then --this is in case the player signs off while the media is loading
-			return
-		end
-		if (minetest.check_player_privs(name, {creative=true}) or
-				minetest.setting_getbool("creative_mode")) and
-				creative then --creative is active, add button to modified formspec
-			local creative_formspec = player:get_inventory_formspec()
-			local tab_id = tonumber(creative_formspec:match("tabheader%[.-;(%d+)%;"))
-
-			if tab_id == 1 then
-				formspec = creative_formspec ..
-					"image_button[0,1;1,1;inventory_plus_worldedit_gui.png;worldedit_gui;]"
-			elseif not tab_id then
-				formspec = creative_formspec ..
-					"image_button[6,0;1,1;inventory_plus_worldedit_gui.png;worldedit_gui;]"
-			else
-				return
-			end
-		else
-			formspec = formspec .. "image_button[0,0;1,1;inventory_plus_worldedit_gui.png;worldedit_gui;]"
-		end
-		player:set_inventory_formspec(formspec)
-	end
-
-	minetest.register_on_joinplayer(function(player)
-		local name = player:get_player_name()
-		minetest.after(1, function()
-			if minetest.get_player_by_name(name) then --ensure the player is still signed in
-				player_formspecs[name] = player:get_inventory_formspec()
-				minetest.after(0.01, function()
-					update_main_formspec(name)
-				end)
-			end
-		end)
-	end)
-
-	minetest.register_on_leaveplayer(function(player)
-		player_formspecs[player:get_player_name()] = nil
-	end)
-
-	local gui_player_formspecs = {}
-	minetest.register_on_player_receive_fields(function(player, formname, fields)
-		local name = player:get_player_name()
-		if fields.worldedit_gui then --main page
-			gui_player_formspecs[name] = player:get_inventory_formspec()
-			worldedit.show_page(name, "worldedit_gui")
-			return true
-		elseif fields.worldedit_gui_exit then --return to original page
-			if gui_player_formspecs[name] then
-				player:set_inventory_formspec(gui_player_formspecs[name])
-			end
-			return true
-		else --deal with creative_inventory setting the formspec on every single message
-			minetest.after(0.01,function()
-				update_main_formspec(name)
-			end)
-			return false --continue processing in creative inventory
-		end
-	end)
-
-	worldedit.show_page = function(name, page)
-		local player = minetest.get_player_by_name(name)
-		if player then
-			player:set_inventory_formspec(get_formspec(name, page))
-		end
-	end
+else
+	error(
+		"worldedit_gui requires a supported \"gui management\" mod to be installed\n"..
+		"To use the GUI you need to either\n"..
+		"* Use minetest_game (at least 0.4.15) or a subgame with compatible sfinv\n"..
+		"* Install Unified Inventory or Inventory++\n"..
+		"If you do not want to use worldedit_gui, disable it by editing world.mt or from the Main Menu"
+	)
 end
 
 worldedit.register_gui_function("worldedit_gui", {

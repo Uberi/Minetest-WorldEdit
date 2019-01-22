@@ -17,6 +17,7 @@ Many commands also have shorter names that can be typed faster. For example, if 
 | `//s`      | `//set`            |
 | `//r`      | `//replace`        |
 | `//ri`     | `//replaceinverse` |
+| `//hcube`  | `//hollowcube`     |
 | `//hspr`   | `//hollowsphere`   |
 | `//spr`    | `//sphere`         |
 | `//hdo`    | `//hollowdome`     |
@@ -116,14 +117,20 @@ Set the current WorldEdit region to `<node>`.
     //set Blue Lightstone
     //set dirt with grass
 
-### `//mix <node1> ...`
+### `//param2 <param2>`
 
-Fill the current WorldEdit region with a random mix of `<node1>`, `...`.
+Set the param2 value of all nodes in the current WorldEdit region to `<param2>`.
+
+### `//mix <node1> [<count1>] <node2> [<count2>]...`
+
+Fill the current WorldEdit region with a random mix of `<node1>`, `<node2>`, `...`. Weightings can be optionally specified via a number after a node name.
 
     //mix air
     //mix cactus stone glass sandstone
     //mix Bronze
     //mix default:cobble air
+    //mix stone 3 dirt 2
+    //mix cobblestone 8 stoneblock 2 stonebrick
 
 ### `//replace <search node> <replace node>`
 
@@ -142,6 +149,19 @@ Replace all nodes other than `<search node>` with `<replace node>` in the curren
     //replaceinverse flowers:flower_waterlily glass
     //replaceinverse dirt Bronze Block
     //replaceinverse mesecons:wire_00000000_off flowers:flower_tulip
+
+### `//hollowcube <width> <height> <length> <node>`
+
+Adds a hollow cube with its ground level centered at WorldEdit position 1 with dimensions `<width>` x `<height>` x `<length>`, composed of `<node>`.
+
+    //hollowcube 6 5 6 Diamond Block
+
+### `//cube <width> <height> <length> <node>`
+
+Adds a cube with its ground level centered at WorldEdit position 1 with dimensions `<width>` x `<height>` x `<length>`, composed of `<node>`.
+
+    //cube 6 5 6 Diamond Block
+    //cube 7 2 1 default:cobble
 
 ### `//hollowsphere <radius> <node>`
 
@@ -175,23 +195,35 @@ Add dome centered at WorldEdit position 1 with radius `<radius>`, composed of `<
     //dome -12 glass
     //dome 17 mesecons:wire_00000000_off
 
-### `//hollowcylinder x/y/z/? <length> <radius> <node>`
+### `//hollowcylinder x/y/z/? <length> <radius1> [radius2] <node>`
 
-Add hollow cylinder at WorldEdit position 1 along the x/y/z/? axis with length `<length>` and radius `<radius>`, composed of `<node>`.
+Add hollow cylinder at WorldEdit position 1 along the x/y/z/? axis with length `<length>`, base radius `<radius1>` (and top radius `[radius2]`), composed of `<node>`.
+
+Despite its name this command allows you to create cones (`radius2` = 0) as well as any shapes inbetween (0 < `radius2` < `radius1`).
+Swapping `radius1` and `radius2` will create the same object but upside-down.
 
     //hollowcylinder x +5 8 Bronze Block
     //hollowcylinder y 28 10 glass
     //hollowcylinder z -12 3 mesecons:wire_00000000_off
     //hollowcylinder ? 2 4 default:stone
 
-### `//cylinder x/y/z/? <length> <radius> <node>`
+    //hollowcylinder y 10 10 0 walls:cobble
+    //hollowcylinder x 6 0 5 Dirt
+    //hollowcylinder z 20 10 20 default:desert_stone
 
-Add cylinder at WorldEdit position 1 along the x/y/z/? axis with length `<length>` and radius `<radius>`, composed of `<node>`.
+### `//cylinder x/y/z/? <length> <radius1> [radius2] <node>`
+
+Add cylinder at WorldEdit position 1 along the x/y/z/? axis with length `<length>`, base radius `<radius1>` (and top radius `[radius2]`), composed of `<node>`.
+Can also create shapes other than cylinders, e.g. cones (see documentation above).
 
     //cylinder x +5 8 Bronze Block
     //cylinder y 28 10 glass
     //cylinder z -12 3 mesecons:wire_00000000_off
     //cylinder ? 2 4 default:stone
+
+    //cylinder y 10 10 0 walls:cobble
+    //cylinder x 6 0 5 Dirt
+    //cylinder z 20 10 20 default:desert_stone
     
 ### `//hollowpyramid x/y/z? <height> <node>`
 
@@ -253,13 +285,13 @@ Stack the current WorldEdit region `<count>` times by offset `<x>`, `<y>`, `<z>`
     //stack2 5 3 8 2
     //stack2 1 -1 -1 -1
 
-### `//scale <factor>`
+### `//stretch <stretchx> <stretchy> <stretchz>`
 
-Scale the current WorldEdit positions and region by a factor of positive integer `<factor>` with position 1 as the origin.
+Scale the current WorldEdit positions and region by a factor of `<stretchx>`, `<stretchy>`, `<stretchz>` along the X, Y, and Z axes, repectively, with position 1 as the origin.
 
-    //scale 2
-    //scale 1
-    //scale 10
+    //stretch 2 2 2
+    //stretch 1 2 1
+    //stretch 10 20 1
 
 ### `//transpose x/y/z/? x/y/z/?`
 
@@ -433,3 +465,14 @@ Contracts the selection in all directions by `<amount>`. If specified, the selec
 or vertically in the y axis `[v]`.
 
 		//outset v 5
+
+### `//brush none/<command> [parameters]`
+
+Assigns the given `<command>` to the currently held brush item, it will be ran with the first pointed solid node (as determined via raycast) as
+WorldEdit position 1 when using that specific brush item.
+Passing `none` instead clears the command assigned to the currently held brush item.
+Note that this functionality requires the `worldedit_brush` mod enabled.
+
+		//brush cube 8 8 8 Cobblestone
+		//brush spr 12 glass
+		//brush none

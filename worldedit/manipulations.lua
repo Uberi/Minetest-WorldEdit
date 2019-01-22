@@ -38,6 +38,29 @@ function worldedit.set(pos1, pos2, node_names)
 	return worldedit.volume(pos1, pos2)
 end
 
+--- Sets param2 of a region.
+-- @param pos1
+-- @param pos2
+-- @param param2 Value of param2 to set
+-- @return The number of nodes set.
+function worldedit.set_param2(pos1, pos2, param2)
+	pos1, pos2 = worldedit.sort_pos(pos1, pos2)
+
+	local manip, area = mh.init(pos1, pos2)
+	local param2_data = manip:get_param2_data()
+
+	-- Set param2 for every node
+	for i in area:iterp(pos1, pos2) do
+		param2_data[i] = param2
+	end
+
+	-- Update map
+	manip:set_param2_data(param2_data)
+	manip:write_to_map()
+	manip:update_map()
+
+	return worldedit.volume(pos1, pos2)
+end
 
 --- Replaces all instances of `search_node` with `replace_node` in a region.
 -- When `inverse` is `true`, replaces all instances that are NOT `search_node`.
@@ -278,7 +301,7 @@ function worldedit.stack(pos1, pos2, axis, count)
 	local amount = 0
 	local copy = worldedit.copy
 	local i = 1
-	function next_one()
+	local function next_one()
 		if i <= count then
 			i = i + 1
 			amount = amount + length

@@ -23,6 +23,7 @@ local function get_position(name) --position 1 retrieval function for when not u
 	return pos1
 end
 
+-- normalize_nodename wrapper for convenience purposes
 local function get_node(name, nodename)
 	local node = worldedit.normalize_nodename(nodename)
 	if not node then
@@ -36,26 +37,46 @@ function worldedit.player_notify(name, message)
 	minetest.chat_send_player(name, "WorldEdit -!- " .. message, false)
 end
 
---determines whether `nodename` is a valid node name, returning a boolean
+local function string_endswith(full, part)
+	return full:find(part, 1, true) == #full - #part + 1
+end
+
+-- normalizes node "description" `nodename`, returning a string (or nil)
 worldedit.normalize_nodename = function(nodename)
-	nodename = nodename:gsub("^%s*(.-)%s*$", "%1")
+	nodename = nodename:gsub("^%s*(.-)%s*$", "%1") -- strip spaces
 	if nodename == "" then return nil end
-	local fullname = ItemStack({name=nodename}):get_name() --resolve aliases of node names to full names
-	if minetest.registered_nodes[fullname] or fullname == "air" then --directly found node name or alias of nodename
+
+	local fullname = ItemStack({name=nodename}):get_name() -- resolve aliases
+	if minetest.registered_nodes[fullname] or fullname == "air" then -- full name
 		return fullname
 	end
 	for key, value in pairs(minetest.registered_nodes) do
-		if key:find(":" .. nodename, 1, true) then --found in mod
+		if string_endswith(key, ":" .. nodename) then -- matches name (w/o mod part)
 			return key
 		end
 	end
-	nodename = nodename:lower() --lowercase both for case insensitive comparison
+	nodename = nodename:lower() -- lowercase both for case insensitive comparison
 	for key, value in pairs(minetest.registered_nodes) do
-		if value.description:lower() == nodename then --found in description
+		local desc = value.description:lower()
+		if desc == nodename then -- matches description
+			return key
+		end
+		if string_endswith(desc, " block") and desc == nodename.." block" then
+			-- fuzzy description match (e.g. "Steel" == "Steel Block")
 			return key
 		end
 	end
-	return nil
+
+	local match = nil
+	for key, value in pairs(minetest.registered_nodes) do
+		if value.description:lower():find(nodename, 1, true) ~= nil then
+			if match ~= nil then
+				return nil
+			end
+			match = key -- substring description match (only if no ambiguities)
+		end
+	end
+	return match
 end
 
 -- Determines the axis in which a player is facing, returning an axis ("x", "y", or "z") and the sign (1 or -1)
@@ -87,9 +108,9 @@ end
 
 minetest.register_chatcommand("/about", {
 	params = "",
-	description = "Get information about the mod",
+	description = "Get information about the WorldEdit mod",
 	func = function(name, param)
-		worldedit.player_notify(name, "WorldEdit " .. worldedit.version_string .. " is available on this server. Type /help to get a list of commands, or get more information at https://github.com/Uberi/MineTest-WorldEdit/")
+		worldedit.player_notify(name, "WorldEdit " .. worldedit.version_string .. " is available on this server. Type /help to get a list of commands, or get more information at https://github.com/Uberi/Minetest-WorldEdit/")
 	end,
 })
 
@@ -182,7 +203,7 @@ minetest.register_on_punchnode(function(pos, node, puncher)
 	local name = puncher:get_player_name()
 	if worldedit.inspect[name] then
 		local axis, sign = worldedit.player_axis(name)
-		message = string.format("inspector: %s at %s (param1=%d, param2=%d, received light=%d) punched facing the %s axis",
+		local message = string.format("inspector: %s at %s (param1=%d, param2=%d, received light=%d) punched facing the %s axis",
 			node.name, minetest.pos_to_string(pos), node.param1, node.param2, get_node_rlight(pos), axis .. (sign > 0 and "+" or "-"))
 		worldedit.player_notify(name, message)
 	end
@@ -377,29 +398,49 @@ minetest.register_chatcommand("/set", {
 	privs = {worldedit=true},
 	func = safe_region(function(name, param)
 		local node = get_node(name, param)
-		if not node then
-			worldedit.player_notify(name, "Could not identify node \"" .. param .. "\"")
-			return
-		end
+		if not node then return end
 
 		local count = worldedit.set(worldedit.pos1[name], worldedit.pos2[name], node)
 		worldedit.player_notify(name, count .. " nodes set")
 	end, check_region),
 })
 
+minetest.register_chatcommand("/param2", {
+	params = "<param2>",
+	description = "Set param2 of all nodes in the current WorldEdit region to <param2>",
+	privs = {worldedit=true},
+	func = safe_region(function(name, param)
+		local param2 = tonumber(param)
+		if not param2 then
+			worldedit.player_notify(name, "Invalid or missing param2 argument")
+			return
+		elseif param2 < 0 or param2 > 255 then
+			worldedit.player_notify(name, "Param2 is out of range (must be between 0 and 255 inclusive)!")
+			return
+		end
+
+		local count = worldedit.set_param2(worldedit.pos1[name], worldedit.pos2[name], param2)
+		worldedit.player_notify(name, count .. " nodes altered")
+	end, check_region),
+})
+
 minetest.register_chatcommand("/mix", {
-	params = "<node1> ...",
+	params = "<node1> [<weighting1>] [<node2> [<weighting2>]] ...",
 	description = "Fill the current WorldEdit region with a random mix of <node1>, ...",
 	privs = {worldedit=true},
 	func = safe_region(function(name, param)
 		local nodes = {}
 		for nodename in param:gmatch("[^%s]+") do
-			local node = get_node(name, nodename)
-			if not node then
-				worldedit.player_notify(name, "Could not identify node \"" .. name .. "\"")
-				return
+			if tonumber(nodename) ~= nil and #nodes > 0 then
+				local last_node = nodes[#nodes]
+				for i = 1, tonumber(nodename) do
+					nodes[#nodes + 1] = last_node
+				end
+			else
+				local node = get_node(name, nodename)
+				if not node then return end
+				nodes[#nodes + 1] = node
 			end
-			nodes[#nodes + 1] = node
 		end
 
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
@@ -453,6 +494,45 @@ minetest.register_chatcommand("/replaceinverse", {
 				norm_search_node, norm_replace_node, true)
 		worldedit.player_notify(name, count .. " nodes replaced")
 	end, check_replace),
+})
+
+local check_cube = function(name, param)
+	if worldedit.pos1[name] == nil then
+		worldedit.player_notify(name, "no position 1 selected")
+		return nil
+	end
+	local found, _, w, h, l, nodename = param:find("^(%d+)%s+(%d+)%s+(%d+)%s+(.+)$")
+	if found == nil then
+		worldedit.player_notify(name, "invalid usage: " .. param)
+		return nil
+	end
+	local node = get_node(name, nodename)
+	if not node then return nil end
+	return tonumber(w) * tonumber(h) * tonumber(l)
+end
+
+minetest.register_chatcommand("/hollowcube", {
+	params = "<width> <height> <length> <node>",
+	description = "Add a hollow cube with its ground level centered at WorldEdit position 1 with dimensions <width> x <height> x <length>, composed of <node>.",
+	privs = {worldedit=true},
+	func = safe_region(function(name, param)
+		local found, _, w, h, l, nodename = param:find("^(%d+)%s+(%d+)%s+(%d+)%s+(.+)$")
+		local node = get_node(name, nodename)
+		local count = worldedit.cube(worldedit.pos1[name], tonumber(w), tonumber(h), tonumber(l), node, true)
+		worldedit.player_notify(name, count .. " nodes added")
+	end, check_cube),
+})
+
+minetest.register_chatcommand("/cube", {
+	params = "<width> <height> <length> <node>",
+	description = "Add a cube with its ground level centered at WorldEdit position 1 with dimensions <width> x <height> x <length>, composed of <node>.",
+	privs = {worldedit=true},
+	func = safe_region(function(name, param)
+		local found, _, w, h, l, nodename = param:find("^(%d+)%s+(%d+)%s+(%d+)%s+(.+)$")
+		local node = get_node(name, nodename)
+		local count = worldedit.cube(worldedit.pos1[name], tonumber(w), tonumber(h), tonumber(l), node)
+		worldedit.player_notify(name, count .. " nodes added")
+	end, check_cube),
 })
 
 local check_sphere = function(name, param)
@@ -574,7 +654,13 @@ local check_cylinder = function(name, param)
 		worldedit.player_notify(name, "no position 1 selected")
 		return nil
 	end
-	local found, _, axis, length, radius, nodename = param:find("^([xyz%?])%s+([+-]?%d+)%s+(%d+)%s+(.+)$")
+	-- two radii
+	local found, _, axis, length, radius1, radius2, nodename = param:find("^([xyz%?])%s+([+-]?%d+)%s+(%d+)%s+(%d+)%s+(.+)$")
+	if found == nil then
+		-- single radius
+		found, _, axis, length, radius1, nodename = param:find("^([xyz%?])%s+([+-]?%d+)%s+(%d+)%s+(.+)$")
+		radius2 = radius1
+	end
 	if found == nil then
 		worldedit.player_notify(name, "invalid usage: " .. param)
 		return nil
@@ -609,39 +695,54 @@ local check_cylinder = function(name, param)
 	end
 	local node = get_node(name, nodename)
 	if not node then return nil end
-	return math.ceil(math.pi * (tonumber(radius) ^ 2) * tonumber(length))
+	local radius = math.max(tonumber(radius1), tonumber(radius2))
+	return math.ceil(math.pi * (radius ^ 2) * tonumber(length))
 end
 
 minetest.register_chatcommand("/hollowcylinder", {
-	params = "x/y/z/? <length> <radius> <node>",
-	description = "Add hollow cylinder at WorldEdit position 1 along the x/y/z/? axis with length <length> and radius <radius>, composed of <node>",
+	params = "x/y/z/? <length> <radius1> [radius2] <node>",
+	description = "Add hollow cylinder at WorldEdit position 1 along the x/y/z/? axis with length <length>, base radius <radius1> (and top radius [radius2]), composed of <node>",
 	privs = {worldedit=true},
 	func = safe_region(function(name, param)
-		local found, _, axis, length, radius, nodename = param:find("^([xyz%?])%s+([+-]?%d+)%s+(%d+)%s+(.+)$")
+		-- two radii
+		local found, _, axis, length, radius1, radius2, nodename = param:find("^([xyz%?])%s+([+-]?%d+)%s+(%d+)%s+(%d+)%s+(.+)$")
+		if found == nil then
+			-- single radius
+			found, _, axis, length, radius1, nodename = param:find("^([xyz%?])%s+([+-]?%d+)%s+(%d+)%s+(.+)$")
+			radius2 = radius1
+		end
 		length = tonumber(length)
 		if axis == "?" then
+			local sign
 			axis, sign = worldedit.player_axis(name)
 			length = length * sign
 		end
 		local node = get_node(name, nodename)
-		local count = worldedit.cylinder(worldedit.pos1[name], axis, length, tonumber(radius), node, true)
+		local count = worldedit.cylinder(worldedit.pos1[name], axis, length, tonumber(radius1), tonumber(radius2), node, true)
 		worldedit.player_notify(name, count .. " nodes added")
 	end, check_cylinder),
 })
 
 minetest.register_chatcommand("/cylinder", {
-	params = "x/y/z/? <length> <radius> <node>",
-	description = "Add cylinder at WorldEdit position 1 along the x/y/z/? axis with length <length> and radius <radius>, composed of <node>",
+	params = "x/y/z/? <length> <radius1> [radius2] <node>",
+	description = "Add cylinder at WorldEdit position 1 along the x/y/z/? axis with length <length>, base radius <radius1> (and top radius [radius2]), composed of <node>",
 	privs = {worldedit=true},
 	func = safe_region(function(name, param)
-		local found, _, axis, length, radius, nodename = param:find("^([xyz%?])%s+([+-]?%d+)%s+(%d+)%s+(.+)$")
+		-- two radii
+		local found, _, axis, length, radius1, radius2, nodename = param:find("^([xyz%?])%s+([+-]?%d+)%s+(%d+)%s+(%d+)%s+(.+)$")
+		if found == nil then
+			-- single radius
+			found, _, axis, length, radius1, nodename = param:find("^([xyz%?])%s+([+-]?%d+)%s+(%d+)%s+(.+)$")
+			radius2 = radius1
+		end
 		length = tonumber(length)
 		if axis == "?" then
+			local sign
 			axis, sign = worldedit.player_axis(name)
 			length = length * sign
 		end
 		local node = get_node(name, nodename)
-		local count = worldedit.cylinder(worldedit.pos1[name], axis, length, tonumber(radius), node)
+		local count = worldedit.cylinder(worldedit.pos1[name], axis, length, tonumber(radius1), tonumber(radius2), node)
 		worldedit.player_notify(name, count .. " nodes added")
 	end, check_cylinder),
 })
@@ -694,6 +795,7 @@ minetest.register_chatcommand("/hollowpyramid", {
 		local found, _, axis, height, nodename = param:find("^([xyz%?])%s+([+-]?%d+)%s+(.+)$")
 		height = tonumber(height)
 		if axis == "?" then
+			local sign
 			axis, sign = worldedit.player_axis(name)
 			height = height * sign
 		end
@@ -711,6 +813,7 @@ minetest.register_chatcommand("/pyramid", {
 		local found, _, axis, height, nodename = param:find("^([xyz%?])%s+([+-]?%d+)%s+(.+)$")
 		height = tonumber(height)
 		if axis == "?" then
+			local sign
 			axis, sign = worldedit.player_axis(name)
 			height = height * sign
 		end
@@ -765,6 +868,7 @@ minetest.register_chatcommand("/copy", {
 		end
 		amount = tonumber(amount)
 		if axis == "?" then
+			local sign
 			axis, sign = worldedit.player_axis(name)
 			amount = amount * sign
 		end
@@ -791,6 +895,7 @@ minetest.register_chatcommand("/move", {
 		end
 		amount = tonumber(amount)
 		if axis == "?" then
+			local sign
 			axis, sign = worldedit.player_axis(name)
 			amount = amount * sign
 		end
@@ -813,6 +918,7 @@ minetest.register_chatcommand("/stack", {
 		local found, _, axis, repetitions = param:find("^([xyz%?])%s+([+-]?%d+)$")
 		repetitions = tonumber(repetitions)
 		if axis == "?" then
+			local sign
 			axis, sign = worldedit.player_axis(name)
 			repetitions = repetitions * sign
 		end
@@ -908,9 +1014,12 @@ minetest.register_chatcommand("/stretch", {
 		stretchx, stretchy, stretchz = tonumber(stretchx), tonumber(stretchy), tonumber(stretchz)
 		if stretchx == 0 or stretchy == 0 or stretchz == 0 then
 			worldedit.player_notify(name, "invalid scaling factors: " .. param)
+			return nil
 		end
 		local count = check_region(name, param)
-		if count then return tonumber(stretchx) * tonumber(stretchy) * tonumber(stretchz) * count end
+		if count then
+			return stretchx * stretchy * stretchz * count
+		end
 		return nil
 	end),
 })
