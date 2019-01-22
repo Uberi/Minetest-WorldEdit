@@ -1,5 +1,5 @@
-WorldEdit v1.1 for Minetest 0.4.8+
-==================================
+WorldEdit v1.2
+==============
 The ultimate in-game world editing tool for [Minetest](http://minetest.net/)! Tons of functionality to help with building, fixing, and more.
 
 For more information, see the [forum topic](https://forum.minetest.net/viewtopic.php?id=572) at the Minetest forums.
@@ -33,7 +33,7 @@ WorldEdit works primarily through the WorldEdit GUI and chat commands. Depending
 
 WorldEdit has a huge potential for abuse by untrusted players. Therefore, users will not be able to use WorldEdit unless they have the `worldedit` privelege. This is available by default in single player, but in multiplayer the permission must be explicitly given by someone with the right credentials, using the follwoing chat command: `/grant <player name> worldedit`. This privelege can later be removed using the following chat command: `/revoke <player name> worldedit`.
 
-Certain functions/commands such as WorldEdit GUI's "Run Lua" function (equivalent to the `//lua` and `//luatransform` chat command) additionally require the `server` privilege. This is because it is extremely dangerous to give access to these commands to untrusted players, since they essentially are able to control the computer the server is running on. Give this privilege only to people you trust with your computer.
+Certain functions/commands such as WorldEdit `//lua` and `//luatransform` chat commands additionally require the `server` privilege. This is because it is extremely dangerous to give access to these commands to untrusted players, since they essentially are able to control the computer the server is running on. Give this privilege only to people you trust with your computer.
 
 For in-game information about these commands, type `/help <command name>` in the chat. For example, to learn more about the `//copy` command, simply type `/help /copy` to display information relevant to copying a region.
 
@@ -51,21 +51,19 @@ This mod supports Minetest versions 0.4.8 and newer. Older versions of WorldEdit
 
 WorldEdit works quite well with other mods, and does not have any known mod conflicts.
 
-WorldEdit GUI works with [Unified Inventory](https://forum.minetest.net/viewtopic.php?id=3933) and [Inventory++](https://forum.minetest.net/viewtopic.php?id=6204), but these are not required to use the mod.
+WorldEdit GUI requires one of [sfinv](https://github.com/minetest/minetest_game/tree/master/mods/sfinv) (included in minetest_game since 0.4.15), [Unified Inventory](https://forum.minetest.net/viewtopic.php?id=3933) or [Inventory++](https://forum.minetest.net/viewtopic.php?id=6204).
 
 If you use any other inventory manager mods, note that they may conflict with the WorldEdit GUI. If this is the case, it may be necessary to disable them.
 
 WorldEdit API
 -------------
-WorldEdit exposes all significant functionality in a simple Lua interface. Adding WorldEdit to the file "depends.txt" in your mod gives you access to all of the `worldedit` functions. The API is useful for tasks such as high-performance node manipulation, alternative interfaces, and map creation.
+WorldEdit exposes all significant functionality in a simple Lua interface.
 
-If you don't add WorldEdit to your "depends.txt" file, each file in the WorldEdit mod is also independent. For example, one may import the WorldEdit primitives API using the following code:
-
-    dofile(minetest.get_modpath("worldedit").."/primitives.lua")
+Adding WorldEdit to the file "depends.txt" in your mod gives you access to all of the `worldedit` functions. The API is useful for tasks such as high-performance node manipulation, alternative interfaces, and map creation.
 
 AGPLv3 compatible mods may further include WorldEdit files in their own mods. This may be useful if a modder wishes to completely avoid any dependencies on WorldEdit. Note that it is required to give credit to the authors.
 
-This API is documented in the [WorldEdit API Reference](WorldEdit API.md).
+This API is documented in the [WorldEdit API Reference](WorldEdit%20API.md).
 
 Axes
 ----
@@ -141,9 +139,13 @@ WorldEdit would not be possible without the contributions of many developers and
     cheapie
     cornernote
     cyisfor
+    danierukun
     electricface
+    est31
     kaeza
     khonkhortisan
+    pickardjoe
+    Sebastien Ponce
     sfan5
     ShadowNinja
     spillz
@@ -156,5 +158,4 @@ Copyright 2013 sfan5, Anthony Zhang (Uberi/Temperest), and Brett O'Donnell (corn
 This mod is licensed under the [GNU Affero General Public License](http://www.gnu.org/licenses/agpl-3.0.html).
 
 Basically, this means everyone is free to use, modify, and distribute the files, as long as these modifications are also licensed the same way.
-
 Most importantly, the Affero variant of the GPL requires you to publish your modifications in source form, even if the mod is run only on the server, and not distributed.

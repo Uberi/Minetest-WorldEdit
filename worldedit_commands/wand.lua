@@ -1,3 +1,11 @@
+local function above_or_under(placer, pointed_thing)
+	if placer:get_player_control().sneak then
+		return pointed_thing.above
+	else
+		return pointed_thing.under
+	end
+end
+
 minetest.register_tool(":worldedit:wand", {
 	description = "WorldEdit Wand tool, Left-click to set 1st position, right-click to set 2nd",
 	inventory_image = "worldedit_wand.png",
@@ -7,7 +15,7 @@ minetest.register_tool(":worldedit:wand", {
 	on_use = function(itemstack, placer, pointed_thing)
 		if placer ~= nil and pointed_thing ~= nil and pointed_thing.type == "node" then
 			local name = placer:get_player_name()
-			worldedit.pos1[name] = pointed_thing.under
+			worldedit.pos1[name] = above_or_under(placer, pointed_thing)
 			worldedit.mark_pos1(name)
 		end
 		return itemstack -- nothing consumed, nothing changed
@@ -16,7 +24,7 @@ minetest.register_tool(":worldedit:wand", {
 	on_place = function(itemstack, placer, pointed_thing) -- Left Click
 		if placer ~= nil and pointed_thing ~= nil and pointed_thing.type == "node" then
 			local name = placer:get_player_name()
-			worldedit.pos2[name] = pointed_thing.under
+			worldedit.pos2[name] = above_or_under(placer, pointed_thing)
 			worldedit.mark_pos2(name)
 		end
 		return itemstack -- nothing consumed, nothing changed
