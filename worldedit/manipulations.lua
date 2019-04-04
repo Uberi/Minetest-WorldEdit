@@ -529,20 +529,22 @@ end
 -- @param pos2
 -- @param angle Angle in degrees (90 degree increments only).
 -- @return The number of nodes oriented.
--- TODO: Support 6D facedir rotation along arbitrary axis.
 function worldedit.orient(pos1, pos2, angle)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 	local registered_nodes = minetest.registered_nodes
 
 	local wallmounted = {
-		[90]  = {[0]=0, 1, 5, 4, 2, 3},
-		[180] = {[0]=0, 1, 3, 2, 5, 4},
-		[270] = {[0]=0, 1, 4, 5, 3, 2}
+		[90]  = {0, 1, 5, 4, 2, 3, 0, 0},
+		[180] = {0, 1, 3, 2, 5, 4, 0, 0},
+		[270] = {0, 1, 4, 5, 3, 2, 0, 0}
 	}
 	local facedir = {
-		[90]  = {[0]=1, 2, 3, 0},
-		[180] = {[0]=2, 3, 0, 1},
-		[270] = {[0]=3, 0, 1, 2}
+		[90]  = { 1,  2,  3,  0, 13, 14, 15, 12, 17, 18, 19, 16,
+				  9, 10, 11,  8,  5,  6,  7,  4, 23, 20, 21, 22},
+		[180] = { 2,  3,  0,  1, 10, 11,  8,  9,  6,  7,  4,  5,
+				 18, 19, 16, 17, 14, 15, 12, 13, 22, 23, 20, 21},
+		[270] = { 3,  0,  1,  2, 19, 16, 17, 18, 15, 12, 13, 14,
+				  7,  4,  5,  6, 11,  8,  9, 10, 21, 22, 23, 20}
 	}
 
 	angle = angle % 360
@@ -558,8 +560,7 @@ function worldedit.orient(pos1, pos2, angle)
 	worldedit.keep_loaded(pos1, pos2)
 
 	local count = 0
-	local set_node, get_node, get_meta, swap_node = minetest.set_node,
-			minetest.get_node, minetest.get_meta, minetest.swap_node
+	local get_node, swap_node = minetest.get_node, minetest.swap_node
 	local pos = {x=pos1.x, y=0, z=0}
 	while pos.x <= pos2.x do
 		pos.y = pos1.y
@@ -569,17 +570,20 @@ function worldedit.orient(pos1, pos2, angle)
 				local node = get_node(pos)
 				local def = registered_nodes[node.name]
 				if def then
-					if def.paramtype2 == "wallmounted" then
-						node.param2 = wallmounted_substitution[node.param2]
-						local meta = get_meta(pos):to_table()
-						set_node(pos, node)
-						get_meta(pos):from_table(meta)
+					local paramtype2 = def.paramtype2
+					if paramtype2 == "wallmounted" or
+							paramtype2 == "colorwallmounted" then
+						local orient = node.param2 % 8
+						node.param2 = node.param2 - orient +
+								wallmounted_substitution[orient + 1]
+						swap_node(pos, node)
 						count = count + 1
-					elseif def.paramtype2 == "facedir" then
-						node.param2 = facedir_substitution[node.param2]
-						local meta = get_meta(pos):to_table()
-						set_node(pos, node)
-						get_meta(pos):from_table(meta)
+					elseif paramtype2 == "facedir" or
+							paramtype2 == "colorfacedir" then
+						local orient = node.param2 % 32
+						node.param2 = node.param2 - orient +
+								facedir_substitution[orient + 1]
+						swap_node(pos, node)
 						count = count + 1
 					end
 				end
