@@ -6,6 +6,7 @@ minetest.register_node("worldedit:placeholder", {
 	paramtype = "light",
 	sunlight_propagates = true,
 	diggable = false,
+	pointable = false,
 	walkable = false,
 	groups = {not_in_creative_inventory=1},
 })
