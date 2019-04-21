@@ -56,6 +56,13 @@ function worldedit.serialize(pos1, pos2)
 
 	worldedit.keep_loaded(pos1, pos2)
 
+	-- Find the positions which have metadata
+	local has_meta = {}
+	local meta_positions = minetest.find_nodes_with_meta(pos1, pos2)
+	for i = 1, #meta_positions do
+		has_meta[minetest.hash_node_position(meta_positions[i])] = true
+	end
+
 	local pos = {x=pos1.x, y=0, z=0}
 	local count = 0
 	local result = {}
@@ -68,20 +75,19 @@ function worldedit.serialize(pos1, pos2)
 				local node = get_node(pos)
 				if node.name ~= "air" and node.name ~= "ignore" then
 					count = count + 1
-					local meta = get_meta(pos):to_table()
 
-					local meta_empty = true
-					-- Convert metadata item stacks to item strings
-					for name, inventory in pairs(meta.inventory) do
-						for index, stack in ipairs(inventory) do
-							meta_empty = false
-							inventory[index] = stack.to_string and stack:to_string() or stack
-						end
-					end
-					for k in pairs(meta) do
-						if k ~= "inventory" then
-							meta_empty = false
-							break
+					local meta
+					if has_meta[minetest.hash_node_position(pos)] then
+						meta = get_meta(pos):to_table()
+
+						-- Convert metadata item stacks to item strings
+						for _, invlist in pairs(meta.inventory) do
+							for index = 1, #invlist do
+								local itemstack = invlist[index]
+								if itemstack.to_string then
+									invlist[index] = itemstack:to_string()
+								end
+							end
 						end
 					end
 
@@ -92,7 +98,7 @@ function worldedit.serialize(pos1, pos2)
 						name = node.name,
 						param1 = node.param1 ~= 0 and node.param1 or nil,
 						param2 = node.param2 ~= 0 and node.param2 or nil,
-						meta = not meta_empty and meta or nil,
+						meta = meta,
 					}
 				end
 				pos.z = pos.z + 1
