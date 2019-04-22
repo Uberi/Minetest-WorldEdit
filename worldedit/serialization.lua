@@ -56,17 +56,19 @@ function worldedit.serialize(pos1, pos2)
 
 	worldedit.keep_loaded(pos1, pos2)
 
+	local get_node, get_meta, hash_node_position =
+		minetest.get_node, minetest.get_meta, minetest.hash_node_position
+
 	-- Find the positions which have metadata
 	local has_meta = {}
 	local meta_positions = minetest.find_nodes_with_meta(pos1, pos2)
 	for i = 1, #meta_positions do
-		has_meta[minetest.hash_node_position(meta_positions[i])] = true
+		has_meta[hash_node_position(meta_positions[i])] = true
 	end
 
 	local pos = {x=pos1.x, y=0, z=0}
 	local count = 0
 	local result = {}
-	local get_node, get_meta = minetest.get_node, minetest.get_meta
 	while pos.x <= pos2.x do
 		pos.y = pos1.y
 		while pos.y <= pos2.y do
@@ -77,7 +79,7 @@ function worldedit.serialize(pos1, pos2)
 					count = count + 1
 
 					local meta
-					if has_meta[minetest.hash_node_position(pos)] then
+					if has_meta[hash_node_position(pos)] then
 						meta = get_meta(pos):to_table()
 
 						-- Convert metadata item stacks to item strings
