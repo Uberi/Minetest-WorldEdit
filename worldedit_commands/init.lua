@@ -1165,7 +1165,11 @@ minetest.register_chatcommand("/allocate", {
 			worldedit.player_notify(name, "File was created with newer version of WorldEdit!")
 		end
 		local nodepos1, nodepos2, count = worldedit.allocate(pos, value)
-
+		if not nodepos1 or not nodepos2 or not count then
+			worldedit.player_notify(name, "0 nodes allocated")
+			return
+		end
+		
 		worldedit.pos1[name] = nodepos1
 		worldedit.mark_pos1(name)
 		worldedit.pos2[name] = nodepos2
