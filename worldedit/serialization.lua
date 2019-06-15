@@ -227,6 +227,7 @@ end
 function worldedit.deserialize(origin_pos, value)
 	local nodes = load_schematic(value)
 	if not nodes then return nil end
+	if #nodes == 0 then return #nodes end
 
 	local pos1, pos2 = worldedit.allocate_with_nodes(origin_pos, nodes)
 	worldedit.keep_loaded(pos1, pos2)
