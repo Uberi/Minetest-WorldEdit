@@ -638,7 +638,7 @@ function worldedit.clear_objects(pos1, pos2)
 		-- Avoid players and WorldEdit entities
 		if not obj:is_player() and (not entity or
 				not entity.name:find("^worldedit:")) then
-			local pos = obj:getpos()
+			local pos = obj:get_pos()
 			if pos.x >= pos1x and pos.x <= pos2x and
 					pos.y >= pos1y and pos.y <= pos2y and
 					pos.z >= pos1z and pos.z <= pos2z then
