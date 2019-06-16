@@ -13,7 +13,7 @@ end
 dofile(minetest.get_modpath("worldedit_commands") .. "/cuboid.lua")
 dofile(minetest.get_modpath("worldedit_commands") .. "/mark.lua")
 dofile(minetest.get_modpath("worldedit_commands") .. "/wand.lua")
-local safe_region, check_region, reset_pending = dofile(minetest.get_modpath("worldedit_commands") .. "/safe.lua")
+local safe_region, check_region, reset_pending, area_protection = dofile(minetest.get_modpath("worldedit_commands") .. "/safe.lua")
 
 local function get_position(name) --position 1 retrieval function for when not using `safe_region`
 	local pos1 = worldedit.pos1[name]
@@ -545,6 +545,24 @@ local check_sphere = function(name, param)
 		worldedit.player_notify(name, "invalid usage: " .. param)
 		return nil
 	end
+	local pos1 = worldedit.pos1[name]
+	local allowed = area_protection:interaction_allowed(
+		"sphere",
+		{
+			x = pos1.x - radius,
+			y = pos1.y - radius,
+			z = pos1.z - radius,
+		},
+		{
+			x = pos1.x + radius,
+			y = pos1.y + radius,
+			z = pos1.z + radius,
+		},
+		name
+	)
+	if not allowed then
+		return nil
+	end
 	local node = get_node(name, nodename)
 	if not node then return nil end
 	return math.ceil((4 * math.pi * (tonumber(radius) ^ 3)) / 3) --volume of sphere
@@ -582,6 +600,24 @@ local check_dome = function(name, param)
 	local found, _, radius, nodename = param:find("^(%d+)%s+(.+)$")
 	if found == nil then
 		worldedit.player_notify(name, "invalid usage: " .. param)
+		return nil
+	end
+	local pos1 = worldedit.pos1[name]
+	local allowed = area_protection:interaction_allowed(
+		"dome",
+		{
+			x = pos1.x - radius,
+			y = pos1.y,
+			z = pos1.z - radius,
+		},
+		{
+			x = pos1.x + radius,
+			y = pos1.y + radius,
+			z = pos1.z + radius,
+		},
+		name
+	)
+	if not allowed then
 		return nil
 	end
 	local node = get_node(name, nodename)
@@ -627,6 +663,34 @@ local check_cylinder = function(name, param)
 	end
 	if found == nil then
 		worldedit.player_notify(name, "invalid usage: " .. param)
+		return nil
+	end
+	length = tonumber(length)
+	if axis == "?" then
+		local sign
+		axis, sign = worldedit.player_axis(name)
+		length = length * sign
+	end
+	local current_pos = vector.new(worldedit.pos1[name])
+	if length < 0 then
+		length = -length
+		current_pos[axis] = current_pos[axis] - length
+	end
+	local other1, other2 = worldedit.get_axis_others(axis)
+	local interact_pos1 = vector.new(current_pos)
+	local interact_pos2 = vector.new(current_pos)
+	interact_pos1[other1] = interact_pos1[other1] - radius
+	interact_pos1[other2] = interact_pos1[other2] - radius
+	interact_pos2[other1] = interact_pos2[other1] + radius
+	interact_pos2[other2] = interact_pos2[other2] + radius
+	interact_pos2[axis] = interact_pos2[axis] + length
+	local allowed = area_protection:interaction_allowed(
+		"cylinder",
+		interact_pos1,
+		interact_pos2,
+		name
+	)
+	if not allowed then
 		return nil
 	end
 	local node = get_node(name, nodename)
@@ -693,6 +757,30 @@ local check_pyramid = function(name, param)
 		worldedit.player_notify(name, "invalid usage: " .. param)
 		return nil
 	end
+	height = tonumber(height)
+	if axis == "?" then
+		local sign
+		axis, sign = worldedit.player_axis(name)
+		height = height * sign
+	end
+	local pos1 = worldedit.pos1[name]
+	local other1, other2 = worldedit.get_axis_others(axis)
+	local interact_pos1 = vector.new(pos1)
+	local interact_pos2 = vector.new(pos1)
+	interact_pos1[other1] = interact_pos1[other1] - height
+	interact_pos1[other2] = interact_pos1[other2] - height
+	interact_pos2[other1] = interact_pos2[other1] + height
+	interact_pos2[other2] = interact_pos2[other2] + height
+	interact_pos2[axis] = interact_pos2[axis] + height
+	local allowed = area_protection:interaction_allowed(
+		"pyramid",
+		interact_pos1,
+		interact_pos2,
+		name
+	)
+	if not allowed then
+		return nil
+	end
 	local node = get_node(name, nodename)
 	if not node then return nil end
 	height = tonumber(height)
@@ -746,6 +834,13 @@ minetest.register_chatcommand("/spiral", {
 		worldedit.player_notify(name, count .. " nodes added")
 	end,
 	function(name, param)
+		if area_protection:interaction_restrictions(name) then
+			worldedit.player_notify(
+				name,
+				"/spiral not yet supported with area protection"
+			)
+			return nil
+		end
 		if worldedit.pos1[name] == nil then
 			worldedit.player_notify(name, "no position 1 selected")
 			return nil
@@ -872,6 +967,13 @@ minetest.register_chatcommand("/stack2", {
 			worldedit.stack2(pos1, pos2, {x=x, y=y, z=z}, repetitions,
 				function() worldedit.player_notify(name, count .. " nodes stacked") end)
 		end, function()
+			if area_protection:interaction_restrictions(name) then
+				worldedit.player_notify(
+					name,
+					"/stack2 not yet supported with area protection"
+				)
+				return nil
+			end
 			return count
 		end)(name,param) -- more hax --wip: clean this up a little bit
 	end
@@ -897,6 +999,13 @@ minetest.register_chatcommand("/stretch", {
 		worldedit.player_notify(name, count .. " nodes stretched")
 	end,
 	function(name, param)
+		if area_protection:interaction_restrictions(name) then
+			worldedit.player_notify(
+				name,
+				"/stretch not yet supported with area protection"
+			)
+			return nil
+		end
 		local found, _, stretchx, stretchy, stretchz = param:find("^(%d+)%s+(%d+)%s+(%d+)$")
 		if found == nil then
 			worldedit.player_notify(name, "invalid usage: " .. param)
@@ -1180,6 +1289,13 @@ minetest.register_chatcommand("/load", {
 	description = "Load nodes from \"(world folder)/schems/<file>[.we[m]]\" with position 1 of the current WorldEdit region as the origin",
 	privs = {worldedit=true},
 	func = function(name, param)
+		if area_protection:interaction_restrictions(name) then
+			worldedit.player_notify(
+				name,
+				"/load not yet supported with area protection"
+			)
+			return
+		end
 		local pos = get_position(name)
 		if pos == nil then return end
 
@@ -1296,6 +1412,13 @@ minetest.register_chatcommand("/mtschemplace", {
 	description = "Load nodes from \"(world folder)/schems/<file>.mts\" with position 1 of the current WorldEdit region as the origin",
 	privs = {worldedit=true},
 	func = function(name, param)
+		if area_protection:interaction_restrictions(name) then
+			worldedit.player_notify(
+				name,
+				"/mtschemplace not yet supported with area protection"
+			)
+			return
+		end
 		if param == "" then
 			worldedit.player_notify(name, "no filename specified")
 			return
