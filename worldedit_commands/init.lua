@@ -1163,8 +1163,14 @@ minetest.register_chatcommand("/allocate", {
 			return
 		elseif version > worldedit.LATEST_SERIALIZATION_VERSION then
 			worldedit.player_notify(name, "File was created with newer version of WorldEdit!")
+			return
 		end
 		local nodepos1, nodepos2, count = worldedit.allocate(pos, value)
+
+		if not nodepos1 then
+			worldedit.player_notify(name, "Schematic empty, nothing allocated")
+			return
+		end
 
 		worldedit.pos1[name] = nodepos1
 		worldedit.mark_pos1(name)

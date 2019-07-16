@@ -196,7 +196,7 @@ end
 -- @return The number of nodes.
 function worldedit.allocate(origin_pos, value)
 	local nodes = load_schematic(value)
-	if not nodes then return nil end
+	if not nodes or #nodes == 0 then return nil end
 	return worldedit.allocate_with_nodes(origin_pos, nodes)
 end
 
