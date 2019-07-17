@@ -47,11 +47,11 @@ The chat interface adds many chat commands that perform various WorldEdit powere
 
 Compatibility
 -------------
-This mod supports Minetest versions 0.4.8 and newer. Older versions of WorldEdit may work with older versions of Minetest, but are not recommended or supported.
+This mod supports Minetest versions 5.0 and newer. Older versions of WorldEdit may work with older versions of Minetest, but are not recommended or supported.
 
 WorldEdit works quite well with other mods, and does not have any known mod conflicts.
 
-WorldEdit GUI requires one of [sfinv](https://github.com/minetest/minetest_game/tree/master/mods/sfinv) (included in minetest_game since 0.4.15), [Unified Inventory](https://forum.minetest.net/viewtopic.php?id=3933) or [Inventory++](https://forum.minetest.net/viewtopic.php?id=6204).
+WorldEdit GUI requires one of [sfinv](https://github.com/minetest/minetest_game/tree/master/mods/sfinv) (included in minetest_game), [Unified Inventory](https://forum.minetest.net/viewtopic.php?t=12767) or [Inventory++](https://forum.minetest.net/viewtopic.php?id=6204) or [Smart Inventory](https://forum.minetest.net/viewtopic.php?t=16597).
 
 If you use any other inventory manager mods, note that they may conflict with the WorldEdit GUI. If this is the case, it may be necessary to disable them.
 
@@ -59,9 +59,9 @@ WorldEdit API
 -------------
 WorldEdit exposes all significant functionality in a simple Lua interface.
 
-Adding WorldEdit to the file "depends.txt" in your mod gives you access to all of the `worldedit` functions. The API is useful for tasks such as high-performance node manipulation, alternative interfaces, and map creation.
+Adding WorldEdit as a dependency to your mod gives you access to all of the `worldedit` functions. The API is useful for tasks such as high-performance node manipulation, alternative interfaces, and map creation.
 
-AGPLv3 compatible mods may further include WorldEdit files in their own mods. This may be useful if a modder wishes to completely avoid any dependencies on WorldEdit. Note that it is required to give credit to the authors.
+AGPLv3 compatible mods may further include WorldEdit files in their own mods. This can be useful if a modder wishes to completely avoid any dependency on WorldEdit. Note that it is required to give credit to the authors in this case.
 
 This API is documented in the [WorldEdit API Reference](WorldEdit%20API.md).
 
@@ -136,20 +136,38 @@ Authors
 -------
 WorldEdit would not be possible without the contributions of many developers and designers. Below, they are listed alphabetically:
 
-    cheapie
+    Alexander Weber
+    beyondlimits
+    Carter Kolwey
     cornernote
-    cyisfor
-    danierukun
+    Cy
+    Daniel Sosa
     electricface
     est31
+    Eugen Wesseloh
+    HybridDog
+    Isidor Zeuner
+    Jean-Patrick Guerrero
+    Joseph Pickard
     kaeza
-    khonkhortisan
-    pickardjoe
+    kilbith
+    KodexKy
+    Kyle
+    MT-Modder
+    Niwla23
+    Panquesito7
+    Pedro Gimeno
+    Rui
     Sebastien Ponce
     sfan5
     ShadowNinja
+    shivajiva101
     spillz
+    Starbeamrainbowlabs
+    TalkLounge
+    tenplus1
     Uberi/Temperest
+    Wuzzy
 
 License
 -------
