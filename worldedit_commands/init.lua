@@ -982,7 +982,7 @@ minetest.register_chatcommand("/rotate", {
 			worldedit.player_notify(name, "invalid usage: " .. param)
 			return nil
 		end
-		if angle % 90 ~= 0 then
+		if angle % 90 ~= 0 or angle % 360 == 0 then
 			worldedit.player_notify(name, "invalid usage: angle must be multiple of 90")
 			return nil
 		end
