@@ -1,2 +1,0 @@
-worldedit
-worldedit_commands
