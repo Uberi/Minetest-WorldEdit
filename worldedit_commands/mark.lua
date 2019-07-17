@@ -64,7 +64,7 @@ worldedit.mark_region = function(name)
 
 		local vec = vector.subtract(pos2, pos1)
 		local maxside = math.max(vec.x, math.max(vec.y, vec.z))
-		local limit = tonumber(minetest.setting_get("active_object_send_range_blocks")) * 16
+		local limit = tonumber(minetest.settings:get("active_object_send_range_blocks")) * 16
 		if maxside > limit * 1.5 then
 			-- The client likely won't be able to see the plane markers as intended anyway,
 			-- thus don't place them and also don't load the area into memory
@@ -101,7 +101,7 @@ worldedit.mark_region = function(name)
 					visual_size={x=sizez * 2, y=sizey * 2},
 					collisionbox = {-thickness, -sizey, -sizez, thickness, sizey, sizez},
 				})
-				marker:setyaw(math.pi / 2)
+				marker:set_yaw(math.pi / 2)
 				marker:get_luaentity().player_name = name
 				table.insert(markers, marker)
 			end
