@@ -1150,7 +1150,7 @@ minetest.register_chatcommand("/allocate", {
 		file:close()
 
 		local version = worldedit.read_header(value)
-		if version == 0 then
+		if version == nil or version == 0 then
 			worldedit.player_notify(name, "File is invalid!")
 			return
 		elseif version > worldedit.LATEST_SERIALIZATION_VERSION then
@@ -1211,7 +1211,7 @@ minetest.register_chatcommand("/load", {
 		file:close()
 
 		local version = worldedit.read_header(value)
-		if version == 0 then
+		if version == nil or version == 0 then
 			worldedit.player_notify(name, "File is invalid!")
 			return
 		elseif version > worldedit.LATEST_SERIALIZATION_VERSION then
