@@ -24,6 +24,7 @@ Contained in manipulations.lua, this module allows several node operations to be
 ### count = worldedit.set(pos1, pos2, node_name)
 
 Sets a region defined by positions `pos1` and `pos2` to `node_name`. To clear a region, use "air" as the value of `node_name`.
+If `node_name` is a list of nodes, each set node is randomly picked from it.
 
 Returns the number of nodes set.
 
@@ -54,6 +55,7 @@ Returns the number of nodes copied.
 ### count = worldedit.copy2(pos1, pos2, off)
 
 Copies the region defined by positions `pos1` and `pos2` by the offset vector `off`.
+Note that the offset needs to be big enough that there is no overlap.
 
 Returns the number of nodes copied.
 
