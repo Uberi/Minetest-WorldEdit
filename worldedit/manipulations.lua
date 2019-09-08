@@ -257,16 +257,32 @@ end
 function worldedit.move(pos1, pos2, axis, amount)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 
+	local dim = vector.add(vector.subtract(pos2, pos1), 1)
+	if math.abs(amount) < dim[axis] then
+		-- Source and destination region are overlapping
+		-- FIXME: I can't be bothered, so just defer to the legacy code for now.
+		return worldedit.legacy_move(pos1, pos2, axis, amount)
+	end
+
+	-- Copy stuff to new location
+	local off = {x=0, y=0, z=0}
+	off[axis] = amount
+	worldedit.copy2(pos1, pos2, off)
+	-- Nuke old area
+	worldedit.set(pos1, pos2, "air")
+
+	return worldedit.volume(pos1, pos2)
+end
+
+-- This function is not offical part of the API and may be removed at any time.
+function worldedit.legacy_move(pos1, pos2, axis, amount)
+	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
+
 	worldedit.keep_loaded(pos1, pos2)
 
-	--- TODO: Move slice by slice using schematic method in the move axis
-	-- and transfer metadata in separate loop (and if the amount is
-	-- greater than the length in the axis, copy whole thing at a time and
-	-- erase original after, using schematic method).
 	local get_node, get_meta, set_node, remove_node = minetest.get_node,
 			minetest.get_meta, minetest.set_node, minetest.remove_node
 	-- Copy things backwards when negative to avoid corruption.
-	--- FIXME: Lots of code duplication here.
 	if amount < 0 then
 		local pos = {}
 		pos.x = pos1.x
