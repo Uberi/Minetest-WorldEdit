@@ -76,9 +76,6 @@ function worldedit.replace(pos1, pos2, search_node, replace_node, inverse)
 
 	local count = 0
 
-	--- TODO: This could be shortened by checking `inverse` in the loop,
-	-- but that would have a speed penalty.  Is the penalty big enough
-	-- to matter?
 	if not inverse then
 		for i in area:iterp(pos1, pos2) do
 			if data[i] == search_id then
@@ -135,54 +132,47 @@ end
 function worldedit.copy(pos1, pos2, axis, amount)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 
+	local dim = vector.add(vector.subtract(pos2, pos1), 1)
+	if amount > 0 and amount < dim[axis] then
+		-- Source and destination region are overlapping and moving needs to
+		-- happen in reverse.
+		-- FIXME: I can't be bothered, so just defer to the legacy code for now.
+		return worldedit.legacy_copy(pos1, pos2, axis, amount)
+	end
+
+	local off = {x=0, y=0, z=0}
+	off[axis] = amount
+	return worldedit.copy2(pos1, pos2, off)
+end
+
+-- This function is not offical part of the API and may be removed at any time.
+function worldedit.legacy_copy(pos1, pos2, axis, amount)
+	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
+
 	worldedit.keep_loaded(pos1, pos2)
 
 	local get_node, get_meta, set_node = minetest.get_node,
 			minetest.get_meta, minetest.set_node
-	-- Copy things backwards when negative to avoid corruption.
-	-- FIXME: Lots of code duplication here.
-	if amount < 0 then
-		local pos = {}
-		pos.x = pos1.x
-		while pos.x <= pos2.x do
-			pos.y = pos1.y
-			while pos.y <= pos2.y do
-				pos.z = pos1.z
-				while pos.z <= pos2.z do
-					local node = get_node(pos) -- Obtain current node
-					local meta = get_meta(pos):to_table() -- Get meta of current node
-					local value = pos[axis] -- Store current position
-					pos[axis] = value + amount -- Move along axis
-					set_node(pos, node) -- Copy node to new position
-					get_meta(pos):from_table(meta) -- Set metadata of new node
-					pos[axis] = value -- Restore old position
-					pos.z = pos.z + 1
-				end
-				pos.y = pos.y + 1
+	-- Copy things backwards
+	local pos = {}
+	pos.x = pos2.x
+	while pos.x >= pos1.x do
+		pos.y = pos2.y
+		while pos.y >= pos1.y do
+			pos.z = pos2.z
+			while pos.z >= pos1.z do
+				local node = get_node(pos) -- Obtain current node
+				local meta = get_meta(pos):to_table() -- Get meta of current node
+				local value = pos[axis] -- Store current position
+				pos[axis] = value + amount -- Move along axis
+				set_node(pos, node) -- Copy node to new position
+				get_meta(pos):from_table(meta) -- Set metadata of new node
+				pos[axis] = value -- Restore old position
+				pos.z = pos.z - 1
 			end
-			pos.x = pos.x + 1
+			pos.y = pos.y - 1
 		end
-	else
-		local pos = {}
-		pos.x = pos2.x
-		while pos.x >= pos1.x do
-			pos.y = pos2.y
-			while pos.y >= pos1.y do
-				pos.z = pos2.z
-				while pos.z >= pos1.z do
-					local node = get_node(pos) -- Obtain current node
-					local meta = get_meta(pos):to_table() -- Get meta of current node
-					local value = pos[axis] -- Store current position
-					pos[axis] = value + amount -- Move along axis
-					set_node(pos, node) -- Copy node to new position
-					get_meta(pos):from_table(meta) -- Set metadata of new node
-					pos[axis] = value -- Restore old position
-					pos.z = pos.z - 1
-				end
-				pos.y = pos.y - 1
-			end
-			pos.x = pos.x - 1
-		end
+		pos.x = pos.x - 1
 	end
 	return worldedit.volume(pos1, pos2)
 end
@@ -195,28 +185,70 @@ end
 function worldedit.copy2(pos1, pos2, off)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 
-	worldedit.keep_loaded(pos1, pos2)
+	local src_manip, src_area = mh.init(pos1, pos2)
+	local src_stride = {x=1, y=src_area.ystride, z=src_area.zstride}
+	local src_offset = vector.subtract(pos1, src_area.MinEdge)
 
-	local get_node, get_meta, set_node = minetest.get_node,
-			minetest.get_meta, minetest.set_node
-	local pos = {}
-	pos.x = pos2.x
-	while pos.x >= pos1.x do
-		pos.y = pos2.y
-		while pos.y >= pos1.y do
-			pos.z = pos2.z
-			while pos.z >= pos1.z do
-				local node = get_node(pos) -- Obtain current node
-				local meta = get_meta(pos):to_table() -- Get meta of current node
-				local newpos = vector.add(pos, off) -- Calculate new position
-				set_node(newpos, node) -- Copy node to new position
-				get_meta(newpos):from_table(meta) -- Set metadata of new node
-				pos.z = pos.z - 1
+	local dpos1 = vector.add(pos1, off)
+	local dpos2 = vector.add(pos2, off)
+	local dim = vector.add(vector.subtract(pos2, pos1), 1)
+
+	local dst_manip, dst_area = mh.init(dpos1, dpos2)
+	local dst_stride = {x=1, y=dst_area.ystride, z=dst_area.zstride}
+	local dst_offset = vector.subtract(dpos1, dst_area.MinEdge)
+
+	local function do_copy(src_data, dst_data)
+		for z = 0, dim.z-1 do
+			local src_index_z = (src_offset.z + z) * src_stride.z + 1 -- +1 for 1-based indexing
+			local dst_index_z = (dst_offset.z + z) * dst_stride.z + 1
+			for y = 0, dim.y-1 do
+				local src_index_y = src_index_z + (src_offset.y + y) * src_stride.y
+				local dst_index_y = dst_index_z + (dst_offset.y + y) * dst_stride.y
+				-- Copy entire row at once
+				local src_index_x = src_index_y + src_offset.x
+				local dst_index_x = dst_index_y + dst_offset.x
+				for x = 0, dim.x-1 do
+					dst_data[dst_index_x + x] = src_data[src_index_x + x]
+				end
 			end
-			pos.y = pos.y - 1
 		end
-		pos.x = pos.x - 1
 	end
+
+	-- Copy node data
+	local src_data = src_manip:get_data()
+	local dst_data = dst_manip:get_data()
+	do_copy(src_data, dst_data)
+	dst_manip:set_data(dst_data)
+
+	-- Copy param1
+	src_manip:get_light_data(src_data)
+	dst_manip:get_light_data(dst_data)
+	do_copy(src_data, dst_data)
+	dst_manip:set_light_data(dst_data)
+
+	-- Copy param2
+	src_manip:get_param2_data(src_data)
+	dst_manip:get_param2_data(dst_data)
+	do_copy(src_data, dst_data)
+	dst_manip:set_param2_data(dst_data)
+
+	mh.finish(dst_manip)
+	src_data = nil
+	dst_data = nil
+
+	-- Copy metadata
+	local get_meta = minetest.get_meta
+	for z = 0, dim.z-1 do
+		for y = 0, dim.y-1 do
+			for x = 0, dim.x-1 do
+				local pos = {x=pos1.x+x, y=pos1.y+y, z=pos1.z+z}
+				local meta = get_meta(pos):to_table()
+				pos = vector.add(pos, off)
+				get_meta(pos):from_table(meta)
+			end
+		end
+	end
+
 	return worldedit.volume(pos1, pos2)
 end
 

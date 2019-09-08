@@ -107,7 +107,9 @@ end
 
 function mh.finish(manip, data)
 	-- Update map
-	manip:set_data(data)
+	if data ~= nil then
+		manip:set_data(data)
+	end
 	manip:write_to_map()
 	manip:update_map()
 end
