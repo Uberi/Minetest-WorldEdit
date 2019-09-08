@@ -98,27 +98,47 @@ function worldedit.replace(pos1, pos2, search_node, replace_node, inverse)
 end
 
 
+local function deferred_execution(next_one, finished)
+	-- Allocate 100% of server step for execution (might lag a little)
+	local allocated_usecs =
+		tonumber(minetest.settings:get("dedicated_server_step")) * 1000000
+	local function f()
+		local deadline = minetest.get_us_time() + allocated_usecs
+		repeat
+			local is_done = next_one()
+			if is_done then
+				if finished then
+					finished()
+				end
+				return
+			end
+		until minetest.get_us_time() >= deadline
+		minetest.after(0, f)
+	end
+	f()
+end
+
 --- Duplicates a region `amount` times with offset vector `direction`.
--- Stacking is spread across server steps, one copy per step.
+-- Stacking is spread across server steps.
 -- @return The number of nodes stacked.
 function worldedit.stack2(pos1, pos2, direction, amount, finished)
+	-- Protect arguments from external changes during execution
+	pos1 = table.copy(pos1)
+	pos2 = table.copy(pos2)
+	direction = table.copy(direction)
+
 	local i = 0
 	local translated = {x=0, y=0, z=0}
-	local function next_one()
-		if i < amount then
-			i = i + 1
-			translated.x = translated.x + direction.x
-			translated.y = translated.y + direction.y
-			translated.z = translated.z + direction.z
-			worldedit.copy2(pos1, pos2, translated)
-			minetest.after(0, next_one)
-		else
-			if finished then
-				finished()
-			end
-		end
+	local function step()
+		translated.x = translated.x + direction.x
+		translated.y = translated.y + direction.y
+		translated.z = translated.z + direction.z
+		worldedit.copy2(pos1, pos2, translated)
+		i = i + 1
+		return i >= amount
 	end
-	next_one()
+	deferred_execution(step, finished)
+
 	return worldedit.volume(pos1, pos2) * amount
 end
 
@@ -333,31 +353,29 @@ end
 
 
 --- Duplicates a region along `axis` `amount` times.
--- Stacking is spread across server steps, one copy per step.
+-- Stacking is spread across server steps.
 -- @param pos1
 -- @param pos2
 -- @param axis Axis direction, "x", "y", or "z".
 -- @param count
 -- @return The number of nodes stacked.
-function worldedit.stack(pos1, pos2, axis, count)
+function worldedit.stack(pos1, pos2, axis, count, finished)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 	local length = pos2[axis] - pos1[axis] + 1
 	if count < 0 then
 		count = -count
 		length = -length
 	end
-	local amount = 0
-	local copy = worldedit.copy
-	local i = 1
-	local function next_one()
-		if i <= count then
-			i = i + 1
-			amount = amount + length
-			copy(pos1, pos2, axis, amount)
-			minetest.after(0, next_one)
-		end
+
+	local i, distance = 0, 0
+	local function step()
+		distance = distance + length
+		worldedit.copy(pos1, pos2, axis, distance)
+		i = i + 1
+		return i >= count
 	end
-	next_one()
+	deferred_execution(step, finished)
+
 	return worldedit.volume(pos1, pos2) * count
 end
 
