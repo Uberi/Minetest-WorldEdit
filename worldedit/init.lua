@@ -15,14 +15,6 @@ local ver = {major=1, minor=2}
 worldedit.version = ver
 worldedit.version_string = string.format("%d.%d", ver.major, ver.minor)
 
-if not minetest.get_voxel_manip then
-	local err_msg = "This version of WorldEdit requires Minetest 0.4.8 or later!  You have an old version."
-	minetest.log("error", string.rep("#", 128))
-	minetest.log("error", err_msg)
-	minetest.log("error", string.rep("#", 128))
-	error(err_msg)
-end
-
 local path = minetest.get_modpath(minetest.get_current_modname())
 
 local function load_module(path)
