@@ -819,8 +819,12 @@ minetest.register_chatcommand("/stack", {
 			axis, sign = worldedit.player_axis(name)
 			repetitions = repetitions * sign
 		end
-		local count = worldedit.stack(worldedit.pos1[name], worldedit.pos2[name], axis, repetitions)
-		worldedit.player_notify(name, count .. " nodes stacked")
+
+		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
+		local count = worldedit.volume(pos1, pos2) * math.abs(repetitions)
+		worldedit.stack(pos1, pos2, axis, repetitions, function()
+			worldedit.player_notify(name, count .. " nodes stacked")
+		end)
 	end,
 	function(name, param)
 		local found, _, axis, repetitions = param:find("^([xyz%?])%s+([+-]?%d+)$")
@@ -828,8 +832,9 @@ minetest.register_chatcommand("/stack", {
 			worldedit.player_notify(name, "invalid usage: " .. param)
 			return
 		end
+
 		local count = check_region(name, param)
-		if count then return (tonumber(repetitions) + 1) * count end
+		if count then return tonumber(repetitions) * count end
 		return nil
 	end),
 })
@@ -838,15 +843,9 @@ minetest.register_chatcommand("/stack2", {
 	params = "<count> <x> <y> <z>",
 	description = "Stack the current WorldEdit region <count> times by offset <x>, <y>, <z>",
 	privs = {worldedit=true},
-	func = function(name, param)
-		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
-		if pos1 == nil or pos2 == nil then
-			worldedit.player_notify(name, "Select a position first!")
-			return
-		end
+	func = safe_region(function(name, param)
 		local repetitions, incs = param:match("(%d+)%s*(.+)")
 		if repetitions == nil then
-			worldedit.player_notify(name, "invalid count: " .. param)
 			return
 		end
 		repetitions = tonumber(repetitions)
@@ -858,15 +857,24 @@ minetest.register_chatcommand("/stack2", {
 		end
 		x, y, z = tonumber(x), tonumber(y), tonumber(z)
 
+		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
 		local count = worldedit.volume(pos1, pos2) * repetitions
+		worldedit.stack2(pos1, pos2, {x=x, y=y, z=z}, repetitions, function()
+			worldedit.player_notify(name, count .. " nodes stacked")
+		end)
+	end,
+	function(name, param)
+		local repetitions, incs = param:match("(%d+)%s*(.+)")
+		if repetitions == nil then
+			worldedit.player_notify(name, "invalid count: " .. param)
+			return
+		end
+		repetitions = tonumber(repetitions)
 
-		return safe_region(function()
-			worldedit.stack2(pos1, pos2, {x=x, y=y, z=z}, repetitions,
-				function() worldedit.player_notify(name, count .. " nodes stacked") end)
-		end, function()
-			return count
-		end)(name,param) -- more hax --wip: clean this up a little bit
-	end
+		local count = check_region(name, param)
+		if count then return repetitions * count end
+		return nil
+	end),
 })
 
 
