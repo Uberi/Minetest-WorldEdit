@@ -123,7 +123,7 @@ function worldedit.serialize(pos1, pos2)
 	local function is_emptyish(t)
 		-- returns true if <t> contains only one element and that one element is == 0
 		local seen = false
-		for _, value in ipairs(t) do
+		for _, value in pairs(t) do
 			if not seen then
 				if value ~= 0 then
 					return false
@@ -164,6 +164,22 @@ function worldedit.serialize(pos1, pos2)
 
 				local node = get_node(pos)
 				if node.name ~= "air" and node.name ~= "ignore" then
+
+					local meta
+					if has_meta[hash_node_position(pos)] then
+						meta = get_meta(pos):to_table()
+
+						-- Convert metadata item stacks to item strings
+						for _, invlist in pairs(meta.inventory) do
+							for index = 1, #invlist do
+								local itemstack = invlist[index]
+								if itemstack.to_string then
+									invlist[index] = itemstack:to_string()
+								end
+							end
+						end
+					end
+
 					if cur == nil then -- Start a new row
 						cur = cur_new(pos, pos1, axis, other1, other2)
 
@@ -173,6 +189,8 @@ function worldedit.serialize(pos1, pos2)
 						prev_data = cur.data[1]
 						prev_param1 = cur.param1[1]
 						prev_param2 = cur.param2[1]
+
+						cur.meta[1] = meta
 					else -- Append to existing row
 						local next_c = cur.c + 1
 						cur.c = next_c
@@ -198,6 +216,8 @@ function worldedit.serialize(pos1, pos2)
 							prev_param2 = match_push(cache_param2, m, value)
 							cur.param2[next_c] = prev_param2
 						end
+
+						cur.meta[next_c] = meta
 					end
 					count = count + 1
 				else
