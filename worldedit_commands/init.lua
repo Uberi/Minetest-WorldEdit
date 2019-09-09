@@ -1343,23 +1343,6 @@ worldedit.register_command("restore", {
 	end,
 })
 
-local function detect_misaligned_schematic(name, pos1, pos2)
-	pos1, pos2 = worldedit.sort_pos(pos1, pos2)
-	-- Check that allocate/save can position the schematic correctly
-	-- The expected behaviour is that the (0,0,0) corner of the schematic stays
-	-- sat pos1, this only works when the minimum position is actually present
-	-- in the schematic.
-	local node = minetest.get_node(pos1)
-	local have_node_at_origin = node.name ~= "air" and node.name ~= "ignore"
-	if not have_node_at_origin then
-		worldedit.player_notify(name,
-			"Warning: The schematic contains excessive free space and WILL be "..
-			"misaligned when allocated or loaded. To avoid this, shrink your "..
-			"area to cover exactly the nodes to be saved."
-		)
-	end
-end
-
 worldedit.register_command("save", {
 	params = "<file>",
 	description = "Save the current WorldEdit region to \"(world folder)/schems/<file>.we\"",
@@ -1378,7 +1361,6 @@ worldedit.register_command("save", {
 	func = function(name, param)
 		local result, count = worldedit.serialize(worldedit.pos1[name],
 				worldedit.pos2[name])
-		detect_misaligned_schematic(name, worldedit.pos1[name], worldedit.pos2[name])
 
 		local path = minetest.get_worldpath() .. "/schems"
 		-- Create directory if it does not already exist
