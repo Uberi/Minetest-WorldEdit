@@ -24,7 +24,7 @@ Serialization version history:
 -- @return Extra header fields as a list of strings, or nil if not supported.
 -- @return Content (data after header).
 function worldedit.read_header(value)
-	if value:find("^[0-9]+[%-:]") then
+	if value:find("^[0-9]+[,:]") then
 		local header_end = value:find(":", 1, true)
 		local header = value:sub(1, header_end - 1):split(",")
 		local version = tonumber(header[1])
