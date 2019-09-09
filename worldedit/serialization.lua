@@ -337,9 +337,9 @@ function worldedit.allocate(origin_pos, value)
 	if version == 6 then
 		local content = deserialize_workaround(content)
 		local pos2 = {
-			x = origin_pos.x + tonumber(header[1]),
-			y = origin_pos.y + tonumber(header[2]),
-			z = origin_pos.z + tonumber(header[3]),
+			x = origin_pos.x + tonumber(header[1]) - 1,
+			y = origin_pos.y + tonumber(header[2]) - 1,
+			z = origin_pos.z + tonumber(header[3]) - 1,
 		}
 		local count = 0
 		for _, row in ipairs(content) do
@@ -382,9 +382,9 @@ function worldedit.deserialize(origin_pos, value)
 	if version == 6 then
 		local content = deserialize_workaround(content)
 		local pos2 = {
-			x = origin_pos.x + tonumber(header[1]),
-			y = origin_pos.y + tonumber(header[2]),
-			z = origin_pos.z + tonumber(header[3]),
+			x = origin_pos.x + tonumber(header[1]) - 1,
+			y = origin_pos.y + tonumber(header[2]) - 1,
+			z = origin_pos.z + tonumber(header[3]) - 1,
 		}
 		worldedit.keep_loaded(origin_pos, pos2)
 
