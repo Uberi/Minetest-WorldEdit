@@ -79,7 +79,35 @@ function worldedit.serialize(pos1, pos2)
 	end
 	local other1, other2 = worldedit.get_axis_others(axis)
 
-	-- Helper functions
+	-- Helper functions (1)
+	local MATCH_DIST = 8
+	local function match_init(array, first_value)
+		array[1] = first_value
+		return {first_value}
+	end
+	local function match_try(cache, value)
+		local i = #cache
+		while i >= 1 do
+			if cache[i] == value then
+				return -(#cache - i + 1)
+			end
+			i = i - 1
+		end
+		return nil
+	end
+	local function match_push(array, cache, match, value)
+		if match ~= nil then -- don't advance cache
+			array[#array + 1] = match
+			return
+		end
+		local idx = #cache + 1
+		cache[idx] = value
+		if idx > MATCH_DIST then
+			table.remove(cache, 1)
+		end
+		array[#array + 1] = value
+	end
+	-- Helper functions (2)
 	local function cur_new(pos, pos1)
 		return {
 			a = axis,
@@ -90,18 +118,6 @@ function worldedit.serialize(pos1, pos2)
 			param2 = {},
 		}
 	end
-	local function try_match(array, value)
-		local match_dist = 8
-		local first = math.max(1, #array - match_dist + 1)
-		local i = #array
-		while i >= first do
-			if array[i] == value then
-				return -(#array - i + 1)
-			end
-			i = i - 1
-		end
-		return value
-	end
 	local function cur_finish(result, cur)
 		if #cur.param1 == 1 and cur.param1[1] == 0 then
 			cur.param1 = nil
@@ -111,12 +127,14 @@ function worldedit.serialize(pos1, pos2)
 		end
 		result[#result + 1] = cur
 	end
+	--magic number: 24
 
 	-- Serialize stuff
 	local pos = {}
 	local count = 0
 	local result = {}
 	local cur
+	local cache_data, cache_param1, cache_param2
 	pos[other1] = pos1[other1]
 	while pos[other1] <= pos2[other1] do
 		pos[other2] = pos1[other2]
@@ -128,15 +146,18 @@ function worldedit.serialize(pos1, pos2)
 				if node.name ~= "air" and node.name ~= "ignore" then
 					if cur == nil then -- Start a new row
 						cur = cur_new(pos, pos1, axis, other1, other2)
-						cur.data[1] = node.name
-						cur.param1[1] = node.param1
-						cur.param2[1] = node.param2
+						cache_data = match_init(cur.data, node.name)
+						cache_param1 = match_init(cur.param1, node.param1)
+						cache_param2 = match_init(cur.param2, node.param2)
 					else -- Push to existing row
 						local next_c = cur.c + 1
 						cur.c = next_c
-						cur.data[next_c] = try_match(cur.data, node.name)
-						cur.param1[next_c] = try_match(cur.param1, node.param1)
-						cur.param2[next_c] = try_match(cur.param2, node.param2)
+						local v = node.name
+						match_push(cur.data, cache_data, match_try(cache_data, v), v)
+						v = node.param1
+						match_push(cur.param1, cache_param1, match_try(cache_param1, v), v)
+						v = node.param2
+						match_push(cur.param2, cache_param2, match_try(cache_param2, v), v)
 					end
 					count = count + 1
 				else
