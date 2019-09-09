@@ -277,8 +277,7 @@ end
 
 --- Loads the schematic in `value` into a node list in the latest format.
 -- @return A node list in the latest format, or nil on failure.
-local function load_schematic(value)
-	local version, header, content = worldedit.read_header(value)
+local function legacy_load_schematic(version, header, content)
 	local nodes = {}
 	if version == 1 or version == 2 then -- Original flat table format
 		local tables = minetest.deserialize(content, true)
@@ -320,6 +319,8 @@ local function load_schematic(value)
 		end
 	elseif version == 4 or version == 5 then -- Nested table format
 		nodes = deserialize_workaround(content)
+	elseif version >= 6 then
+		error("legacy_load_schematic called for non-legacy schematic")
 	else
 		return nil
 	end
@@ -332,14 +333,29 @@ end
 -- @return High corner position.
 -- @return The number of nodes.
 function worldedit.allocate(origin_pos, value)
-	local nodes = load_schematic(value)
-	if not nodes or #nodes == 0 then return nil end
-	return worldedit.allocate_with_nodes(origin_pos, nodes)
+	local version, header, content = worldedit.read_header(value)
+	if version == 6 then
+		local content = deserialize_workaround(content)
+		local pos2 = {
+			x = origin_pos.x + tonumber(header[1]),
+			y = origin_pos.y + tonumber(header[2]),
+			z = origin_pos.z + tonumber(header[3]),
+		}
+		local count = 0
+		for _, row in ipairs(content) do
+			count = count + row.c
+		end
+		return origin_pos, pos2, count
+	else
+		local nodes = legacy_load_schematic(version, header, content)
+		if not nodes or #nodes == 0 then return nil end
+		return worldedit.legacy_allocate_with_nodes(origin_pos, nodes)
+	end
 end
 
 
 -- Internal
-function worldedit.allocate_with_nodes(origin_pos, nodes)
+function worldedit.legacy_allocate_with_nodes(origin_pos, nodes)
 	local huge = math.huge
 	local pos1x, pos1y, pos1z = huge, huge, huge
 	local pos2x, pos2y, pos2z = -huge, -huge, -huge
@@ -362,24 +378,110 @@ end
 --- Loads the nodes represented by string `value` at position `origin_pos`.
 -- @return The number of nodes deserialized.
 function worldedit.deserialize(origin_pos, value)
-	local nodes = load_schematic(value)
-	if not nodes then return nil end
-	if #nodes == 0 then return #nodes end
+	local version, header, content = worldedit.read_header(value)
+	if version == 6 then
+		local content = deserialize_workaround(content)
+		local pos2 = {
+			x = origin_pos.x + tonumber(header[1]),
+			y = origin_pos.y + tonumber(header[2]),
+			z = origin_pos.z + tonumber(header[3]),
+		}
+		worldedit.keep_loaded(origin_pos, pos2)
 
-	local pos1, pos2 = worldedit.allocate_with_nodes(origin_pos, nodes)
-	worldedit.keep_loaded(pos1, pos2)
+		return worldedit.deserialize_with_content(origin_pos, content)
+	else
+		local nodes = legacy_load_schematic(version, header, content)
+		if not nodes or #nodes == 0 then return nil end
 
-	local origin_x, origin_y, origin_z = origin_pos.x, origin_pos.y, origin_pos.z
-	local count = 0
-	local add_node, get_meta = minetest.add_node, minetest.get_meta
-	for i, entry in ipairs(nodes) do
-		entry.x, entry.y, entry.z = origin_x + entry.x, origin_y + entry.y, origin_z + entry.z
-		-- Entry acts as both position and node
-		add_node(entry, entry)
-		if entry.meta then
-			get_meta(entry):from_table(entry.meta)
+		local pos1, pos2 = worldedit.legacy_allocate_with_nodes(origin_pos, nodes)
+		worldedit.keep_loaded(pos1, pos2)
+
+		local origin_x, origin_y, origin_z = origin_pos.x, origin_pos.y, origin_pos.z
+		local count = 0
+		local add_node, get_meta = minetest.add_node, minetest.get_meta
+		for i, entry in ipairs(nodes) do
+			entry.x, entry.y, entry.z = origin_x + entry.x, origin_y + entry.y, origin_z + entry.z
+			-- Entry acts as both position and node
+			add_node(entry, entry)
+			if entry.meta then
+				get_meta(entry):from_table(entry.meta)
+			end
 		end
+		return #nodes
 	end
-	return #nodes
 end
 
+-- Internal
+function worldedit.deserialize_with_content(origin_pos, content)
+	-- Helper functions
+	local function resolve_refs(array)
+		-- find (and cache) highest index
+		local max_i = 1
+		for i, _ in pairs(array) do
+			if i > max_i then max_i = i end
+		end
+		array.max_i = max_i
+		-- resolve references
+		local cache = {}
+		for i = 1, max_i do
+			local v = array[i]
+			if v ~= nil then
+				if type(v) == "number" and v < 0 then -- is a reference
+					array[i] = cache[#cache + v + 1]
+				else
+					cache[#cache + 1] = v
+				end
+			end
+		end
+	end
+	local function read_in_array(array, idx)
+		if idx > array.max_i then
+			return array[array.max_i]
+		end
+		-- go backwards until we find something
+		repeat
+			local v = array[idx]
+			if v ~= nil then
+				return v
+			end
+			idx = idx - 1
+		until idx == 0
+		assert(false)
+	end
+
+	-- Actually deserialize
+	local count = 0
+	local entry = {}
+	local add_node, get_meta = minetest.add_node, minetest.get_meta
+	for _, row in ipairs(content) do
+		local axis = row.a
+		local pos = {
+			x = origin_pos.x + row.p[1],
+			y = origin_pos.y + row.p[2],
+			z = origin_pos.z + row.p[3],
+		}
+		if row.param1 == nil then row.param1 = {0} end
+		if row.param2 == nil then row.param2 = {0} end
+		if row.meta == nil then row.meta = {} end
+		resolve_refs(row.data)
+		resolve_refs(row.param1)
+		resolve_refs(row.param2)
+
+		for i = 1, row.c do
+			entry.name = read_in_array(row.data, i)
+			entry.param1 = read_in_array(row.param1, i)
+			entry.param2 = read_in_array(row.param2, i)
+			add_node(pos, entry)
+
+			local meta = row.meta[i]
+			if meta then
+				get_meta(pos):from_table(meta)
+			end
+
+			pos[axis] = pos[axis] + 1
+		end
+
+		count = count + row.c
+	end
+	return count
+end
