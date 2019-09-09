@@ -85,19 +85,20 @@ function worldedit.serialize(pos1, pos2)
 		array[1] = first_value
 		return {first_value}
 	end
-	local function match_try(array, cache, value)
+	local function match_try(cache, prev_pushed, value)
 		local i = #cache
 		while i >= 1 do
 			if cache[i] == value then
 				local ret = -(#cache - i + 1)
-				return ret, array[#array] == ret
+				local was_value = type(prev_pushed) ~= "number" or prev_pushed >= 0
+				return ret, (was_value and ret == -1) or prev_pushed == ret
 			end
 			i = i - 1
 		end
 		return nil, false
 	end
-	local function match_push(array, cache, match, value)
-		if match ~= nil then -- don't advance ringbuffer
+	local function match_push(cache, match, value)
+		if match ~= nil then -- don't advance cache
 			return match
 		end
 		local idx = #cache + 1
@@ -116,36 +117,36 @@ function worldedit.serialize(pos1, pos2)
 			data = {},
 			param1 = {},
 			param2 = {},
+			meta = {},
 		}
 	end
-	local function cur_finish(result, cur)
-		-- TODO: wouldn't be needed if param1, param2 supported omit (see below)
-		local i = #cur.param1
-		while i > 1 and cur.param1[i] == -1 do
-			cur.param1[i] = nil
-			i = i - 1
+	local function is_emptyish(t)
+		-- returns true if <t> contains only one element and that one element is == 0
+		local seen = false
+		for _, value in ipairs(t) do
+			if not seen then
+				if value ~= 0 then
+					return false
+				end
+				seen = true
+			else
+				return false
+			end
 		end
-		if i == 1 and cur.param1[1] == 0 then
+		return true
+	end
+	local function cur_finish(result, cur)
+		if is_emptyish(cur.param1) then
 			cur.param1 = nil
 		end
-
-		i = #cur.param2
-		while i > 1 and cur.param2[i] == -1 do
-			cur.param2[i] = nil
-			i = i - 1
-		end
-		if i == 1 and cur.param2[1] == 0 then
+		if is_emptyish(cur.param2) then
 			cur.param2 = nil
 		end
-		-- Drop unneeded ref from data table (FIXME?)
-		i = #cur.data
-		if cur.data[i] == -1 then
-			cur.data[i] = nil
+		if next(cur.meta) == nil then
+			cur.meta = nil
 		end
-		-- add to result table
 		result[#result + 1] = cur
 	end
-	local OMIT_MIN_LIMIT = 18
 
 	-- Serialize stuff
 	local pos = {}
@@ -153,7 +154,7 @@ function worldedit.serialize(pos1, pos2)
 	local result = {}
 	local cur
 	local cache_data, cache_param1, cache_param2
-	local is_omit -- applies to data only
+	local prev_data, prev_param1, prev_param2
 	pos[other1] = pos1[other1]
 	while pos[other1] <= pos2[other1] do
 		pos[other2] = pos1[other2]
@@ -163,65 +164,46 @@ function worldedit.serialize(pos1, pos2)
 
 				local node = get_node(pos)
 				if node.name ~= "air" and node.name ~= "ignore" then
-					local new_row = false
-					if cur == nil then
-						new_row = true
-					else -- See if we want to push to existing row
+					if cur == nil then -- Start a new row
+						cur = cur_new(pos, pos1, axis, other1, other2)
+
+						cache_data = match_init(cur.data, node.name)
+						cache_param1 = match_init(cur.param1, node.param1)
+						cache_param2 = match_init(cur.param2, node.param2)
+						prev_data = cur.data[1]
+						prev_param1 = cur.param1[1]
+						prev_param2 = cur.param2[1]
+					else -- Append to existing row
 						local next_c = cur.c + 1
 						cur.c = next_c
 						local value, m, can_omit
 
 						value = node.name
-						m, can_omit = match_try(cur.data, cache_data, node.name)
-						if is_omit and not can_omit then
-							-- we have omitted previous entries, but can't omit this one
-							if next_c - #cur.data > OMIT_MIN_LIMIT then
-								-- just starting a new row will take less space, do that
-								new_row = true
-							else
-								-- fill up omitted data and proceed as usual
-								local last = cur.data[#cur.data]
-								for i = #cur.data + 1, next_c - 1 do
-									cur.data[i] = last
-								end
-								cur.data[next_c] = match_push(cur.data, cache_data, m, value)
-								is_omit = false
-							end
-						elseif can_omit then
-							is_omit = true
-						else
-							cur.data[next_c] = match_push(cur.data, cache_data, m, value)
+						m, can_omit = match_try(cache_data, prev_data, node.name)
+						if not can_omit then
+							 prev_data = match_push(cache_data, m, value)
+							 cur.data[next_c] = prev_data
 						end
 
-						-- TODO: implement omit for param1, param2 too
-						if not new_row then
-							value = node.param1
-							m, can_omit = match_try(cur.param1, cache_param1, value)
-							cur.param1[next_c] = match_push(cur.param1, cache_param1, m, value)
-
-							value = node.param2
-							m, can_omit = match_try(cur.param2, cache_param2, value)
-							cur.param2[next_c] = match_push(cur.param2, cache_param2, m, value)
-						else -- Undo changes and finish row
-							cur.c = next_c - 1
-							cur_finish(result, cur)
-							cur = nil
-							is_omit = false
+						value = node.param1
+						m, can_omit = match_try(cache_param1, prev_param1, value)
+						if not can_omit then
+							prev_param1 = match_push(cache_param1, m, value)
+							cur.param1[next_c] = prev_param1
 						end
-					end
 
-					if new_row then -- Start a new row
-						cur = cur_new(pos, pos1, axis, other1, other2)
-						cache_data = match_init(cur.data, node.name)
-						cache_param1 = match_init(cur.param1, node.param1)
-						cache_param2 = match_init(cur.param2, node.param2)
+						value = node.param2
+						m, can_omit = match_try(cache_param2, prev_param2, value)
+						if not can_omit then
+							prev_param2 = match_push(cache_param2, m, value)
+							cur.param2[next_c] = prev_param2
+						end
 					end
 					count = count + 1
 				else
 					if cur ~= nil then -- Finish row
 						cur_finish(result, cur)
 						cur = nil
-						is_omit = false
 					end
 				end
 				pos[axis] = pos[axis] + 1
@@ -230,7 +212,6 @@ function worldedit.serialize(pos1, pos2)
 			if cur ~= nil then -- Finish leftover row
 				cur_finish(result, cur)
 				cur = nil
-				is_omit = false
 			end
 			pos[other2] = pos[other2] + 1
 		end
