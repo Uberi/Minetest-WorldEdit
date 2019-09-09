@@ -1,9 +1,7 @@
 --- Schematic serialization and deserialiation.
 -- @module worldedit.serialization
 
-worldedit.LATEST_SERIALIZATION_VERSION = 5
-local LATEST_SERIALIZATION_HEADER = worldedit.LATEST_SERIALIZATION_VERSION .. ":"
-
+worldedit.LATEST_SERIALIZATION_VERSION = 6
 
 --[[
 Serialization version history:
@@ -15,6 +13,7 @@ Serialization version history:
       `name`, `param1`, `param2`, and `meta` fields.
   5: Added header and made `param1`, `param2`, and `meta` fields optional.
       Header format: <Version>,<ExtraHeaderField1>,...:<Content>
+  6: Much more complicated but also better format
 --]]
 
 
@@ -66,52 +65,101 @@ function worldedit.serialize(pos1, pos2)
 		has_meta[hash_node_position(meta_positions[i])] = true
 	end
 
-	local pos = {x=pos1.x, y=0, z=0}
+	-- Decide axis of saved rows
+	local dim = vector.add(vector.subtract(pos2, pos1), 1)
+	local axis
+	if dim.x * dim.y < math.min(dim.y * dim.z, dim.x * dim.z) then
+		axis = "z"
+	elseif dim.x * dim.z < math.min(dim.x * dim.y, dim.y * dim.z) then
+		axis = "y"
+	elseif dim.y * dim.z < math.min(dim.x * dim.y, dim.x * dim.z) then
+		axis = "x"
+	else
+		axis = "x" -- X or Z are usually most efficient
+	end
+	local other1, other2 = worldedit.get_axis_others(axis)
+
+	-- Helper functions
+	local function cur_new(pos, pos1)
+		return {
+			a = axis,
+			p = {pos.x - pos1.x, pos.y - pos1.y, pos.z - pos1.z},
+			c = 1,
+			data = {},
+			param1 = {},
+			param2 = {},
+		}
+	end
+	local function try_match(array, value)
+		local match_dist = 8
+		local first = math.max(1, #array - match_dist + 1)
+		local i = #array
+		while i >= first do
+			if array[i] == value then
+				return -(#array - i + 1)
+			end
+			i = i - 1
+		end
+		return value
+	end
+	local function cur_finish(result, cur)
+		if #cur.param1 == 1 and cur.param1[1] == 0 then
+			cur.param1 = nil
+		end
+		if #cur.param2 == 1 and cur.param2[1] == 0 then
+			cur.param2 = nil
+		end
+		result[#result + 1] = cur
+	end
+
+	-- Serialize stuff
+	local pos = {}
 	local count = 0
 	local result = {}
-	while pos.x <= pos2.x do
-		pos.y = pos1.y
-		while pos.y <= pos2.y do
-			pos.z = pos1.z
-			while pos.z <= pos2.z do
+	local cur
+	pos[other1] = pos1[other1]
+	while pos[other1] <= pos2[other1] do
+		pos[other2] = pos1[other2]
+		while pos[other2] <= pos2[other2] do
+			pos[axis] = pos1[axis]
+			while pos[axis] <= pos2[axis] do
+
 				local node = get_node(pos)
 				if node.name ~= "air" and node.name ~= "ignore" then
-					count = count + 1
-
-					local meta
-					if has_meta[hash_node_position(pos)] then
-						meta = get_meta(pos):to_table()
-
-						-- Convert metadata item stacks to item strings
-						for _, invlist in pairs(meta.inventory) do
-							for index = 1, #invlist do
-								local itemstack = invlist[index]
-								if itemstack.to_string then
-									invlist[index] = itemstack:to_string()
-								end
-							end
-						end
+					if cur == nil then -- Start a new row
+						cur = cur_new(pos, pos1, axis, other1, other2)
+						cur.data[1] = node.name
+						cur.param1[1] = node.param1
+						cur.param2[1] = node.param2
+					else -- Push to existing row
+						local next_c = cur.c + 1
+						cur.c = next_c
+						cur.data[next_c] = try_match(cur.data, node.name)
+						cur.param1[next_c] = try_match(cur.param1, node.param1)
+						cur.param2[next_c] = try_match(cur.param2, node.param2)
 					end
-
-					result[count] = {
-						x = pos.x - pos1.x,
-						y = pos.y - pos1.y,
-						z = pos.z - pos1.z,
-						name = node.name,
-						param1 = node.param1 ~= 0 and node.param1 or nil,
-						param2 = node.param2 ~= 0 and node.param2 or nil,
-						meta = meta,
-					}
+					count = count + 1
+				else
+					if cur ~= nil then -- Finish row
+						cur_finish(result, cur)
+						cur = nil
+					end
 				end
-				pos.z = pos.z + 1
+				pos[axis] = pos[axis] + 1
+
 			end
-			pos.y = pos.y + 1
+			if cur ~= nil then -- Finish leftover row
+				cur_finish(result, cur)
+				cur = nil
+			end
+			pos[other2] = pos[other2] + 1
 		end
-		pos.x = pos.x + 1
+		pos[other1] = pos[other1] + 1
 	end
 	-- Serialize entries
 	result = minetest.serialize(result)
-	return LATEST_SERIALIZATION_HEADER .. result, count
+	return tonumber(worldedit.LATEST_SERIALIZATION_VERSION) .. "," ..
+		string.format("%d,%d,%d:", dim.x, dim.y, dim.z) .. result, count
 end
 
 -- Contains code based on [table.save/table.load](http://lua-users.org/wiki/SaveTableToFile)
