@@ -152,57 +152,21 @@ end
 function worldedit.copy(pos1, pos2, axis, amount)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 
-	local dim = vector.add(vector.subtract(pos2, pos1), 1)
-	if amount > 0 and amount < dim[axis] then
-		-- Source and destination region are overlapping and moving needs to
-		-- happen in reverse.
-		-- FIXME: I can't be bothered, so just defer to the legacy code for now.
-		return worldedit.legacy_copy(pos1, pos2, axis, amount)
-	end
+	-- Decide if we need to copy stuff backwards (only applies to metadata)
+	local backwards = amount > 0 and amount < (pos2[axis] - pos1[axis] + 1)
 
 	local off = {x=0, y=0, z=0}
 	off[axis] = amount
-	return worldedit.copy2(pos1, pos2, off)
-end
-
--- This function is not offical part of the API and may be removed at any time.
-function worldedit.legacy_copy(pos1, pos2, axis, amount)
-	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
-
-	worldedit.keep_loaded(pos1, pos2)
-
-	local get_node, get_meta, set_node = minetest.get_node,
-			minetest.get_meta, minetest.set_node
-	-- Copy things backwards
-	local pos = {}
-	pos.x = pos2.x
-	while pos.x >= pos1.x do
-		pos.y = pos2.y
-		while pos.y >= pos1.y do
-			pos.z = pos2.z
-			while pos.z >= pos1.z do
-				local node = get_node(pos) -- Obtain current node
-				local meta = get_meta(pos):to_table() -- Get meta of current node
-				local value = pos[axis] -- Store current position
-				pos[axis] = value + amount -- Move along axis
-				set_node(pos, node) -- Copy node to new position
-				get_meta(pos):from_table(meta) -- Set metadata of new node
-				pos[axis] = value -- Restore old position
-				pos.z = pos.z - 1
-			end
-			pos.y = pos.y - 1
-		end
-		pos.x = pos.x - 1
-	end
-	return worldedit.volume(pos1, pos2)
+	return worldedit.copy2(pos1, pos2, off, backwards)
 end
 
 --- Copies a region by offset vector `off`.
 -- @param pos1
 -- @param pos2
 -- @param off
+-- @param meta_backwards (not officially part of API)
 -- @return The number of nodes copied.
-function worldedit.copy2(pos1, pos2, off)
+function worldedit.copy2(pos1, pos2, off, meta_backwards)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 
 	local src_manip, src_area = mh.init(pos1, pos2)
@@ -258,6 +222,18 @@ function worldedit.copy2(pos1, pos2, off)
 
 	-- Copy metadata
 	local get_meta = minetest.get_meta
+	if meta_backwards then
+	for z = dim.z-1, 0, -1 do
+		for y = dim.y-1, 0, -1 do
+			for x = dim.x-1, 0, -1 do
+				local pos = {x=pos1.x+x, y=pos1.y+y, z=pos1.z+z}
+				local meta = get_meta(pos):to_table()
+				pos = vector.add(pos, off)
+				get_meta(pos):from_table(meta)
+			end
+		end
+	end
+	else
 	for z = 0, dim.z-1 do
 		for y = 0, dim.y-1 do
 			for x = 0, dim.x-1 do
@@ -267,6 +243,7 @@ function worldedit.copy2(pos1, pos2, off)
 				get_meta(pos):from_table(meta)
 			end
 		end
+	end
 	end
 
 	return worldedit.volume(pos1, pos2)
