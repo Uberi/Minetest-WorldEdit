@@ -74,6 +74,7 @@ Returns the number of nodes stacked.
 ### count = worldedit.stack2(pos1, pos2, direction, amount)
 
 Duplicates the region defined by positions `pos1` and `pos2` `amount` times with offset vector `direction`.
+Note that the offset vector needs to be big enough that there is no overlap.
 
 Returns the number of nodes stacked.
 
