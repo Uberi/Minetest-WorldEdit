@@ -271,80 +271,43 @@ function worldedit.move(pos1, pos2, axis, amount)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 
 	local dim = vector.add(vector.subtract(pos2, pos1), 1)
-	if math.abs(amount) < dim[axis] then
-		-- Source and destination region are overlapping
-		-- FIXME: I can't be bothered, so just defer to the legacy code for now.
-		return worldedit.legacy_move(pos1, pos2, axis, amount)
+	local overlap = math.abs(amount) < dim[axis]
+	-- Decide if we need to copy metadata backwards
+	local backwards = overlap and amount > 0
+
+	local function nuke_area(my_off, my_dim)
+		if my_dim.x == 0 or my_dim.y == 0 or my_dim.z == 0 then
+			return
+		end
+		local my_pos1 = vector.add(pos1, my_off)
+		local my_pos2 = vector.subtract(vector.add(my_pos1, my_dim), 1)
+		worldedit.set(my_pos1, my_pos2, "air")
+		worldedit.delete_meta(my_pos1, my_pos2)
 	end
 
 	-- Copy stuff to new location
 	local off = {x=0, y=0, z=0}
 	off[axis] = amount
-	worldedit.copy2(pos1, pos2, off)
+	worldedit.copy2(pos1, pos2, off, backwards)
 	-- Nuke old area
-	worldedit.set(pos1, pos2, "air")
-	worldedit.delete_meta(pos1, pos2)
-
-	return worldedit.volume(pos1, pos2)
-end
-
--- This function is not offical part of the API and may be removed at any time.
-function worldedit.legacy_move(pos1, pos2, axis, amount)
-	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
-
-	worldedit.keep_loaded(pos1, pos2)
-
-	local get_node, get_meta, set_node, remove_node = minetest.get_node,
-			minetest.get_meta, minetest.set_node, minetest.remove_node
-	-- Copy things backwards when negative to avoid corruption.
-	if amount < 0 then
-		local pos = {}
-		pos.x = pos1.x
-		while pos.x <= pos2.x do
-			pos.y = pos1.y
-			while pos.y <= pos2.y do
-				pos.z = pos1.z
-				while pos.z <= pos2.z do
-					local node = get_node(pos) -- Obtain current node
-					local meta = get_meta(pos):to_table() -- Get metadata of current node
-					remove_node(pos) -- Remove current node
-					local value = pos[axis] -- Store current position
-					pos[axis] = value + amount -- Move along axis
-					set_node(pos, node) -- Move node to new position
-					get_meta(pos):from_table(meta) -- Set metadata of new node
-					pos[axis] = value -- Restore old position
-					pos.z = pos.z + 1
-				end
-				pos.y = pos.y + 1
-			end
-			pos.x = pos.x + 1
-		end
+	if not overlap then
+		nuke_area({x=0, y=0, z=0}, dim)
 	else
-		local pos = {}
-		pos.x = pos2.x
-		while pos.x >= pos1.x do
-			pos.y = pos2.y
-			while pos.y >= pos1.y do
-				pos.z = pos2.z
-				while pos.z >= pos1.z do
-					local node = get_node(pos) -- Obtain current node
-					local meta = get_meta(pos):to_table() -- Get metadata of current node
-					remove_node(pos) -- Remove current node
-					local value = pos[axis] -- Store current position
-					pos[axis] = value + amount -- Move along axis
-					set_node(pos, node) -- Move node to new position
-					get_meta(pos):from_table(meta) -- Set metadata of new node
-					pos[axis] = value -- Restore old position
-					pos.z = pos.z - 1
-				end
-				pos.y = pos.y - 1
-			end
-			pos.x = pos.x - 1
+		-- Source and destination region are overlapping, which means we can't
+		-- blindly delete the [pos1, pos2] area
+		local leftover = vector.new(dim) -- size of the leftover slice
+		leftover[axis] = math.abs(amount)
+		if amount > 0 then
+			nuke_area({x=0, y=0, z=0}, leftover)
+		else
+			local top = {x=0, y=0, z=0} -- offset of the leftover slice from pos1
+			top[axis] = dim[axis] - 1
+			nuke_area(top, leftover)
 		end
 	end
+
 	return worldedit.volume(pos1, pos2)
 end
-
 
 --- Duplicates a region along `axis` `amount` times.
 -- Stacking is spread across server steps.
