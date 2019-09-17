@@ -249,6 +249,22 @@ function worldedit.copy2(pos1, pos2, off, meta_backwards)
 	return worldedit.volume(pos1, pos2)
 end
 
+--- Deletes all node metadata in the region
+-- @param pos1
+-- @param pos2
+-- @return The number of nodes that had their meta deleted.
+function worldedit.delete_meta(pos1, pos2)
+	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
+
+	local meta_positions = minetest.find_nodes_with_meta(pos1, pos2)
+	local get_meta = minetest.get_meta
+	for _, pos in ipairs(meta_positions) do
+		get_meta(pos):from_table(nil)
+	end
+
+	return #meta_positions
+end
+
 --- Moves a region along `axis` by `amount` nodes.
 -- @return The number of nodes moved.
 function worldedit.move(pos1, pos2, axis, amount)
@@ -267,6 +283,7 @@ function worldedit.move(pos1, pos2, axis, amount)
 	worldedit.copy2(pos1, pos2, off)
 	-- Nuke old area
 	worldedit.set(pos1, pos2, "air")
+	worldedit.delete_meta(pos1, pos2)
 
 	return worldedit.volume(pos1, pos2)
 end
