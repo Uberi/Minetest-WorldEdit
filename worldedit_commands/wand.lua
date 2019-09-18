@@ -28,16 +28,31 @@ minetest.register_tool(":worldedit:wand", {
 				minetest.registered_chatcommands["/reset"].func(name, "")
 			end
 			punched_air_time[name] = now
+		elseif pointed_thing.type == "object" then
+			local entity = pointed_thing.ref:get_luaentity()
+			if entity and entity.name == "worldedit:pos2" then
+				-- set pos1 = pos2
+				worldedit.pos1[name] = worldedit.pos2[name]
+				worldedit.mark_pos1(name)
+			end
 		end
 		return itemstack -- nothing consumed, nothing changed
 	end,
 
 	on_place = function(itemstack, placer, pointed_thing)
-		if placer ~= nil and pointed_thing ~= nil and pointed_thing.type == "node" then
+		if placer == nil or pointed_thing == nil then return itemstack end
+		local name = placer:get_player_name()
+		if pointed_thing.type == "node" then
 			-- set and mark pos2
-			local name = placer:get_player_name()
 			worldedit.pos2[name] = above_or_under(placer, pointed_thing)
 			worldedit.mark_pos2(name)
+		elseif pointed_thing.type == "object" then
+			local entity = pointed_thing.ref:get_luaentity()
+			if entity and entity.name == "worldedit:pos1" then
+				-- set pos2 = pos1
+				worldedit.pos2[name] = worldedit.pos1[name]
+				worldedit.mark_pos2(name)
+			end
 		end
 		return itemstack -- nothing consumed, nothing changed
 	end,
