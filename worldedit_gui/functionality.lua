@@ -52,8 +52,13 @@ end
 
 -- display node (or unknown_node image otherwise) at specified pos in formspec
 local formspec_node = function(pos, nodename)
-	return nodename and string.format("item_image[%s;1,1;%s]", pos, nodename)
-		or string.format("image[%s;1,1;worldedit_gui_unknown.png]", pos)
+	if nodename then
+		local ndef = minetest.registered_nodes[nodename] or {}
+		return string.format("item_image[%s;1,1;%s]", pos, nodename) ..
+			string.format("tooltip[%s;1,1;%s]", pos, minetest.formspec_escape(ndef.description))
+	else
+		return string.format("image[%s;1,1;worldedit_gui_unknown.png]", pos)
+	end
 end
 
 -- two further priv helpers
