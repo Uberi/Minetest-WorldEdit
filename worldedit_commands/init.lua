@@ -37,6 +37,33 @@ function worldedit.player_notify(name, message)
 	minetest.chat_send_player(name, "WorldEdit -!- " .. message, false)
 end
 
+-- https://github.com/minetest/minetest/blob/53dd7819277c53954d1298dfffa5287c306db8d0/src/util/string.cpp#L777
+local function strip_translation_escapes(input)
+	local s = function(idx) return input:sub(idx, idx) end
+	local out = ""
+	local i = 1
+	while i <= #input do
+		if s(i) == "\027" then -- escape sequence
+			i = i + 1
+			if s(i) == "(" then -- enclosed
+				i = i + 1
+				while i <= #input and s(i) ~= ")" do
+					if s(i) == "\\" then
+						i = i + 2
+					else
+						i = i + 1
+					end
+				end
+			end
+		else
+			out = out .. s(i)
+		end
+		i = i + 1
+	end
+	--print(("%q -> %q"):format(input, out))
+	return out
+end
+
 local function string_endswith(full, part)
 	return full:find(part, 1, true) == #full - #part + 1
 end
@@ -57,7 +84,7 @@ worldedit.normalize_nodename = function(nodename)
 	end
 	nodename = nodename:lower() -- lowercase both for case insensitive comparison
 	for key, value in pairs(minetest.registered_nodes) do
-		local desc = value.description:lower()
+		local desc = strip_translation_escapes(value.description):lower()
 		if desc == nodename then -- matches description
 			return key
 		end
