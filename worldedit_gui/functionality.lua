@@ -173,6 +173,7 @@ worldedit.register_gui_function("worldedit_gui_set", {
 		local nodename = worldedit.normalize_nodename(node)
 		return "size[6.5,3]" .. worldedit.get_formspec_header("worldedit_gui_set") ..
 			string.format("field[0.5,1.5;4,0.8;worldedit_gui_set_node;Name;%s]", minetest.formspec_escape(node)) ..
+			"field_close_on_enter[worldedit_gui_set_node;false]" ..
 			"button[4,1.18;1.5,0.8;worldedit_gui_set_search;Search]" ..
 			formspec_node("5.5,1.1", nodename) ..
 			"button_exit[0,2.5;3,0.8;worldedit_gui_set_submit;Set Nodes]"
@@ -180,18 +181,20 @@ worldedit.register_gui_function("worldedit_gui_set", {
 })
 
 worldedit.register_gui_handler("worldedit_gui_set", function(name, fields)
-	if fields.worldedit_gui_set_search or fields.worldedit_gui_set_submit then
+	local ret = false
+	if fields.worldedit_gui_set_search or fields.key_enter_field == "worldedit_gui_set_node" then
 		gui_nodename1[name] = tostring(fields.worldedit_gui_set_node)
 		worldedit.show_page(name, "worldedit_gui_set")
-		if fields.worldedit_gui_set_submit then
-			local n = worldedit.normalize_nodename(gui_nodename1[name])
-			if n then
-				minetest.chatcommands["/set"].func(name, n)
-			end
+		ret = true -- fallthrough
+	end
+	if fields.worldedit_gui_set_submit then
+		local n = worldedit.normalize_nodename(gui_nodename1[name])
+		if n then
+			minetest.chatcommands["/set"].func(name, n)
 		end
 		return true
 	end
-	return false
+	return ret
 end)
 
 worldedit.register_gui_function("worldedit_gui_replace", {
@@ -202,9 +205,11 @@ worldedit.register_gui_function("worldedit_gui_replace", {
 		local search_nodename, replace_nodename = worldedit.normalize_nodename(search), worldedit.normalize_nodename(replace)
 		return "size[6.5,4]" .. worldedit.get_formspec_header("worldedit_gui_replace") ..
 			string.format("field[0.5,1.5;4,0.8;worldedit_gui_replace_search;Name;%s]", minetest.formspec_escape(search)) ..
+			"field_close_on_enter[worldedit_gui_replace_search;false]" ..
 			"button[4,1.18;1.5,0.8;worldedit_gui_replace_search_search;Search]" ..
 			formspec_node("5.5,1.1", search_nodename) ..
 			string.format("field[0.5,2.5;4,0.8;worldedit_gui_replace_replace;Name;%s]", minetest.formspec_escape(replace)) ..
+			"field_close_on_enter[worldedit_gui_replace_replace;false]" ..
 			"button[4,2.18;1.5,0.8;worldedit_gui_replace_replace_search;Search]" ..
 			formspec_node("5.5,2.1", replace_nodename) ..
 			"button_exit[0,3.5;3,0.8;worldedit_gui_replace_submit;Replace Nodes]" ..
@@ -213,28 +218,28 @@ worldedit.register_gui_function("worldedit_gui_replace", {
 })
 
 worldedit.register_gui_handler("worldedit_gui_replace", function(name, fields)
+	local ret = false
 	if fields.worldedit_gui_replace_search_search or fields.worldedit_gui_replace_replace_search
-	or fields.worldedit_gui_replace_submit or fields.worldedit_gui_replace_submit_inverse then
+		or table.indexof({"worldedit_gui_replace_search", "worldedit_gui_replace_replace"}, fields.key_enter_field) ~= -1 then
 		gui_nodename1[name] = tostring(fields.worldedit_gui_replace_search)
 		gui_nodename2[name] = tostring(fields.worldedit_gui_replace_replace)
 		worldedit.show_page(name, "worldedit_gui_replace")
 
-		local submit = nil
-		if fields.worldedit_gui_replace_submit then
-			submit = "replace"
-		elseif fields.worldedit_gui_replace_submit_inverse then
+		ret = true -- fallthrough
+	end
+	if fields.worldedit_gui_replace_submit or fields.worldedit_gui_replace_submit_inverse then
+		local submit = "replace"
+		if fields.worldedit_gui_replace_submit_inverse then
 			submit = "replaceinverse"
 		end
-		if submit then
-			local n1 = worldedit.normalize_nodename(gui_nodename1[name])
-			local n2 = worldedit.normalize_nodename(gui_nodename2[name])
-			if n1 and n2 then
-				minetest.chatcommands["/"..submit].func(name, string.format("%s %s", n1, n2))
-			end
+		local n1 = worldedit.normalize_nodename(gui_nodename1[name])
+		local n2 = worldedit.normalize_nodename(gui_nodename2[name])
+		if n1 and n2 then
+			minetest.chatcommands["/"..submit].func(name, string.format("%s %s", n1, n2))
 		end
 		return true
 	end
-	return false
+	return ret
 end)
 
 worldedit.register_gui_function("worldedit_gui_sphere_dome", {
