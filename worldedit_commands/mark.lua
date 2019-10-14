@@ -156,7 +156,6 @@ minetest.register_entity(":worldedit:pos2", {
 minetest.register_entity(":worldedit:region_cube", {
 	initial_properties = {
 		visual = "upright_sprite",
-		visual_size = {x=1.1, y=1.1},
 		textures = {"worldedit_cube.png"},
 		visual_size = {x=10, y=10},
 		physical = false,
