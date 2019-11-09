@@ -15,7 +15,7 @@ minetest.register_tool(":worldedit:wand", {
 	liquids_pointable = true, -- ground with only water on can be selected as well
 
 	on_use = function(itemstack, placer, pointed_thing)
-		if placer == nil or pointed_thing == nil then return itemstack end
+		if placer == nil or pointed_thing == nil then return end
 		local name = placer:get_player_name()
 		if pointed_thing.type == "node" then
 			-- set and mark pos1
@@ -36,23 +36,29 @@ minetest.register_tool(":worldedit:wand", {
 				worldedit.mark_pos1(name)
 			end
 		end
-		return itemstack -- nothing consumed, nothing changed
 	end,
 
 	on_place = function(itemstack, placer, pointed_thing)
-		if placer == nil or pointed_thing == nil then return itemstack end
+		if placer == nil or (pointed_thing or {}).type ~= "node" then
+			return itemstack
+		end
 		local name = placer:get_player_name()
-		if pointed_thing.type == "node" then
-			-- set and mark pos2
-			worldedit.pos2[name] = above_or_under(placer, pointed_thing)
+		-- set and mark pos2
+		worldedit.pos2[name] = above_or_under(placer, pointed_thing)
+		worldedit.mark_pos2(name)
+		return itemstack -- nothing consumed, nothing changed
+	end,
+
+	on_secondary_use = function(itemstack, user, pointed_thing)
+		if user == nil or (pointed_thing or {}).type ~= "object" then
+			return itemstack
+		end
+		local name = user:get_player_name()
+		local entity = pointed_thing.ref:get_luaentity()
+		if entity and entity.name == "worldedit:pos1" then
+			-- set pos2 = pos1
+			worldedit.pos2[name] = worldedit.pos1[name]
 			worldedit.mark_pos2(name)
-		elseif pointed_thing.type == "object" then
-			local entity = pointed_thing.ref:get_luaentity()
-			if entity and entity.name == "worldedit:pos1" then
-				-- set pos2 = pos1
-				worldedit.pos2[name] = worldedit.pos1[name]
-				worldedit.mark_pos2(name)
-			end
 		end
 		return itemstack -- nothing consumed, nothing changed
 	end,
