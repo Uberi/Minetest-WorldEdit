@@ -301,7 +301,7 @@ function worldedit.move(pos1, pos2, axis, amount)
 			nuke_area({x=0, y=0, z=0}, leftover)
 		else
 			local top = {x=0, y=0, z=0} -- offset of the leftover slice from pos1
-			top[axis] = dim[axis] - 1
+			top[axis] = dim[axis] - math.abs(amount)
 			nuke_area(top, leftover)
 		end
 	end
