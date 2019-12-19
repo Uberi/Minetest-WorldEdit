@@ -5,34 +5,6 @@ if minetest.raycast == nil then
 end
 
 local BRUSH_MAX_DIST = 150
-local BRUSH_ALLOWED_COMMANDS = {
-	-- basically everything that only needs pos1
-	-- TODO: determine automatically now that `require_pos` exists
-	"cube",
-	"cylinder",
-	"dome",
-	"hollowcube",
-	"hollowcylinder",
-	"hollowdome",
-	"hollowpyramid",
-	"hollowsphere",
-	"load",
-	"pyramid",
-	"sphere",
-	"spiral",
-
-	"cyl",
-	"do",
-	"hcube",
-	"hcyl",
-	"hdo",
-	"hpyr",
-	"hspr",
-	"l",
-	"pyr",
-	"spr",
-	"spl",
-}
 local brush_on_use = function(itemstack, placer)
 	local meta = itemstack:get_meta()
 	local name = placer:get_player_name()
@@ -127,11 +99,8 @@ worldedit.register_command("brush", {
 			meta:from_table(nil)
 			worldedit.player_notify(name, "Brush assignment cleared.")
 		else
-			local cmddef
-			if table.indexof(BRUSH_ALLOWED_COMMANDS, cmd) ~= -1 then
-				cmddef = worldedit.registered_commands[cmd]
-			end
-			if cmddef == nil then
+			local cmddef = worldedit.registered_commands[cmd]
+			if cmddef == nil or cmddef.require_pos ~= 1 then
 				worldedit.player_notify(name, "Invalid command for brush use: //" .. cmd)
 				return
 			end
