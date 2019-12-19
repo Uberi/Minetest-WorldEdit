@@ -25,7 +25,7 @@ minetest.register_tool(":worldedit:wand", {
 			local now = minetest.get_us_time()
 			if now - (punched_air_time[name] or 0) < 1000 * 1000 then
 				-- reset markers
-				minetest.registered_chatcommands["/reset"].func(name, "")
+				worldedit.registered_commands["reset"].func(name)
 			end
 			punched_air_time[name] = now
 		elseif pointed_thing.type == "object" then
