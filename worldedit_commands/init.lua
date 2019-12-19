@@ -518,9 +518,9 @@ worldedit.register_command("set", {
 	privs = {worldedit=true},
 	require_pos = 2,
 	parse = function(param)
-		local node = worldedit.normalize_nodename(nodename)
+		local node = worldedit.normalize_nodename(param)
 		if not node then
-			return false, "invalid node name: " .. nodename
+			return false, "invalid node name: " .. param
 		end
 		return true, node
 	end,
@@ -636,7 +636,7 @@ local check_cube = function(param)
 	if not node then
 		return false, "invalid node name: " .. nodename
 	end
-	return true, w, h, l, node
+	return true, tonumber(w), tonumber(h), tonumber(l), node
 end
 
 worldedit.register_command("hollowcube", {
@@ -678,7 +678,7 @@ local check_sphere = function(param)
 	if not node then
 		return false, "invalid node name: " .. nodename
 	end
-	return true, radius, node
+	return true, tonumber(radius), node
 end
 
 worldedit.register_command("hollowsphere", {
@@ -688,7 +688,7 @@ worldedit.register_command("hollowsphere", {
 	require_pos = 1,
 	parse = check_sphere,
 	nodes_needed = function(name, radius, node)
-		return math.ceil((4 * math.pi * (tonumber(radius) ^ 3)) / 3) --volume of sphere
+		return math.ceil((4 * math.pi * (radius ^ 3)) / 3) --volume of sphere
 	end,
 	func = function(name, radius, node)
 		local count = worldedit.sphere(worldedit.pos1[name], radius, node, true)
@@ -703,7 +703,7 @@ worldedit.register_command("sphere", {
 	require_pos = 1,
 	parse = check_sphere,
 	nodes_needed = function(name, radius, node)
-		return math.ceil((4 * math.pi * (tonumber(radius) ^ 3)) / 3) --volume of sphere
+		return math.ceil((4 * math.pi * (radius ^ 3)) / 3) --volume of sphere
 	end,
 	func = function(name, radius, node)
 		local count = worldedit.sphere(worldedit.pos1[name], radius, node)
@@ -720,7 +720,7 @@ local check_dome = function(param)
 	if not node then
 		return false, "invalid node name: " .. nodename
 	end
-	return true, radius, node
+	return true, tonumber(radius), node
 end
 
 worldedit.register_command("hollowdome", {
@@ -730,7 +730,7 @@ worldedit.register_command("hollowdome", {
 	require_pos = 1,
 	parse = check_dome,
 	nodes_needed = function(name, radius, node)
-		return math.ceil((2 * math.pi * (tonumber(radius) ^ 3)) / 3) --volume of dome
+		return math.ceil((2 * math.pi * (radius ^ 3)) / 3) --volume of dome
 	end,
 	func = function(name, radius, node)
 		local count = worldedit.dome(worldedit.pos1[name], radius, node, true)
@@ -745,7 +745,7 @@ worldedit.register_command("dome", {
 	require_pos = 1,
 	parse = check_dome,
 	nodes_needed = function(name, radius, node)
-		return math.ceil((2 * math.pi * (tonumber(radius) ^ 3)) / 3) --volume of dome
+		return math.ceil((2 * math.pi * (radius ^ 3)) / 3) --volume of dome
 	end,
 	func = function(name, radius, node)
 		local count = worldedit.dome(worldedit.pos1[name], radius, node)
