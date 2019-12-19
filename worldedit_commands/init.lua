@@ -162,18 +162,18 @@ worldedit.normalize_nodename = function(nodename)
 	if minetest.registered_nodes[fullname] or fullname == "air" then -- full name
 		return fullname
 	end
+	nodename = nodename:lower()
 	for key, value in pairs(minetest.registered_nodes) do
 		if string_endswith(key, ":" .. nodename) then -- matches name (w/o mod part)
 			return key
 		end
 	end
-	nodename = nodename:lower() -- lowercase both for case insensitive comparison
 	for key, value in pairs(minetest.registered_nodes) do
 		local desc = strip_translation_escapes(value.description):lower()
 		if desc == nodename then -- matches description
 			return key
 		end
-		if string_endswith(desc, " block") and desc == nodename.." block" then
+		if desc == nodename .. " block" then
 			-- fuzzy description match (e.g. "Steel" == "Steel Block")
 			return key
 		end
