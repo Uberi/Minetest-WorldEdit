@@ -7,6 +7,7 @@ end
 local BRUSH_MAX_DIST = 150
 local BRUSH_ALLOWED_COMMANDS = {
 	-- basically everything that only needs pos1
+	-- TODO: determine automatically now that `require_pos` exists
 	"cube",
 	"cylinder",
 	"dome",
@@ -42,8 +43,10 @@ local brush_on_use = function(itemstack, placer)
 			"This brush is not bound, use //brush to bind a command to it.")
 		return false
 	end
-	local cmddef = minetest.registered_chatcommands["/" .. cmd]
+
+	local cmddef = worldedit.registered_commands[cmd]
 	if cmddef == nil then return false end -- shouldn't happen as //brush checks this
+
 	local has_privs, missing_privs = minetest.check_player_privs(name, cmddef.privs)
 	if not has_privs then
 		worldedit.player_notify(name,
@@ -65,19 +68,22 @@ local brush_on_use = function(itemstack, placer)
 	worldedit.pos1[name] = pointed_thing.under
 	worldedit.pos2[name] = nil
 	worldedit.mark_region(name)
-	-- is this a horrible hack? oh yes.
-	worldedit._override_safe_regions = true
+
+	-- this isn't really clean...
 	local player_notify_old = worldedit.player_notify
 	worldedit.player_notify = function(name, msg)
 		if string.match(msg, "^%d") then return end -- discard "1234 nodes added."
 		return player_notify_old(name, msg)
 	end
 
+	assert(cmddef.require_pos < 2)
+	local parsed = {cmddef.parse(meta:get_string("params"))}
+	if not table.remove(parsed, 1) then return false end -- shouldn't happen
+
 	minetest.log("action", string.format("%s uses WorldEdit brush (//%s) at %s",
 		name, cmd, minetest.pos_to_string(pointed_thing.under)))
-	cmddef.func(name, meta:get_string("params"))
+	cmddef.func(name, unpack(parsed))
 
-	worldedit._override_safe_regions = false
 	worldedit.player_notify = player_notify_old
 	return true
 end
@@ -93,21 +99,22 @@ minetest.register_tool(":worldedit:brush", {
 	end,
 })
 
-minetest.register_chatcommand("/brush", {
+worldedit.register_command("brush", {
 	privs = {worldedit=true},
 	params = "none/<cmd> [parameters]",
 	description = "Assign command to WorldEdit brush item",
-	func = function(name, param)
+	parse = function(param)
 		local found, _, cmd, params = param:find("^([^%s]+)%s+(.+)$")
 		if not found then
 			params = ""
 			found, _, cmd = param:find("^(.+)$")
 		end
 		if not found then
-			worldedit.player_notify(name, "Invalid usage.")
-			return
+			return false
 		end
-
+		return true, cmd, params
+	end,
+	func = function(name, cmd, params)
 		local itemstack = minetest.get_player_by_name(name):get_wielded_item()
 		if itemstack == nil or itemstack:get_name() ~= "worldedit:brush" then
 			worldedit.player_notify(name, "Not holding brush item.")
@@ -122,14 +129,21 @@ minetest.register_chatcommand("/brush", {
 		else
 			local cmddef
 			if table.indexof(BRUSH_ALLOWED_COMMANDS, cmd) ~= -1 then
-				cmddef = minetest.registered_chatcommands["/" .. cmd]
-			else
-				cmddef = nil
+				cmddef = worldedit.registered_commands[cmd]
 			end
 			if cmddef == nil then
 				worldedit.player_notify(name, "Invalid command for brush use: //" .. cmd)
 				return
 			end
+
+			-- Try parsing command params so we can give the user feedback
+			local ok, err = cmddef.parse(params)
+			if not ok then
+				err = err or "invalid usage"
+				worldedit.player_notify(name, "Brush command: " .. err)
+				return
+			end
+
 			meta:set_string("command", cmd)
 			meta:set_string("params", params)
 			local fullcmd = "//" .. cmd .. " " .. params
