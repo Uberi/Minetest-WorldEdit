@@ -939,6 +939,7 @@ worldedit.register_command("move", {
 			amount = amount * sign
 		end
 
+		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
 		local count = worldedit.move(pos1, pos2, axis, amount)
 
 		pos1[axis] = pos1[axis] + amount
