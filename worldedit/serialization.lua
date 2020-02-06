@@ -114,10 +114,38 @@ function worldedit.serialize(pos1, pos2)
 	return LATEST_SERIALIZATION_HEADER .. result, count
 end
 
-
---- Loads the schematic in `value` into a node list in the latest format.
 -- Contains code based on [table.save/table.load](http://lua-users.org/wiki/SaveTableToFile)
 -- by ChillCode, available under the MIT license.
+local function deserialize_workaround(content)
+	local nodes
+	if not jit then
+		nodes = minetest.deserialize(content)
+	else
+		-- XXX: This is a filthy hack that works surprisingly well
+		-- in LuaJIT, `minetest.deserialize` will fail due to the register limit
+		nodes = {}
+		content = content:gsub("^%s*return%s*{", "", 1):gsub("}%s*$", "", 1) -- remove the starting and ending values to leave only the node data
+		-- remove string contents strings while preserving their length
+		local escaped = content:gsub("\\\\", "@@"):gsub("\\\"", "@@"):gsub("(\"[^\"]*\")", function(s) return string.rep("@", #s) end)
+		local startpos, startpos1 = 1, 1
+		local endpos
+		while true do -- go through each individual node entry (except the last)
+			startpos, endpos = escaped:find("},%s*{", startpos)
+			if not startpos then
+				break
+			end
+			local current = content:sub(startpos1, startpos)
+			local entry = minetest.deserialize("return " .. current)
+			table.insert(nodes, entry)
+			startpos, startpos1 = endpos, endpos
+		end
+		local entry = minetest.deserialize("return " .. content:sub(startpos1)) -- process the last entry
+		table.insert(nodes, entry)
+	end
+	return nodes
+end
+
+--- Loads the schematic in `value` into a node list in the latest format.
 -- @return A node list in the latest format, or nil on failure.
 local function load_schematic(value)
 	local version, header, content = worldedit.read_header(value)
@@ -161,28 +189,7 @@ local function load_schematic(value)
 			})
 		end
 	elseif version == 4 or version == 5 then -- Nested table format
-		if not jit then
-			-- This is broken for larger tables in the current version of LuaJIT
-			nodes = minetest.deserialize(content)
-		else
-			-- XXX: This is a filthy hack that works surprisingly well - in LuaJIT, `minetest.deserialize` will fail due to the register limit
-			nodes = {}
-			content = content:gsub("return%s*{", "", 1):gsub("}%s*$", "", 1) -- remove the starting and ending values to leave only the node data
-			local escaped = content:gsub("\\\\", "@@"):gsub("\\\"", "@@"):gsub("(\"[^\"]*\")", function(s) return string.rep("@", #s) end)
-			local startpos, startpos1, endpos = 1, 1
-			while true do -- go through each individual node entry (except the last)
-				startpos, endpos = escaped:find("},%s*{", startpos)
-				if not startpos then
-					break
-				end
-				local current = content:sub(startpos1, startpos)
-				local entry = minetest.deserialize("return " .. current)
-				table.insert(nodes, entry)
-				startpos, startpos1 = endpos, endpos
-			end
-			local entry = minetest.deserialize("return " .. content:sub(startpos1)) -- process the last entry
-			table.insert(nodes, entry)
-		end
+		nodes = deserialize_workaround(content)
 	else
 		return nil
 	end
