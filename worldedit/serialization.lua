@@ -119,7 +119,7 @@ end
 local function deserialize_workaround(content)
 	local nodes
 	if not jit then
-		nodes = minetest.deserialize(content)
+		nodes = minetest.deserialize(content, true)
 	else
 		-- XXX: This is a filthy hack that works surprisingly well
 		-- in LuaJIT, `minetest.deserialize` will fail due to the register limit
@@ -135,11 +135,11 @@ local function deserialize_workaround(content)
 				break
 			end
 			local current = content:sub(startpos1, startpos)
-			local entry = minetest.deserialize("return " .. current)
+			local entry = minetest.deserialize("return " .. current, true)
 			table.insert(nodes, entry)
 			startpos, startpos1 = endpos, endpos
 		end
-		local entry = minetest.deserialize("return " .. content:sub(startpos1)) -- process the last entry
+		local entry = minetest.deserialize("return " .. content:sub(startpos1), true) -- process the last entry
 		table.insert(nodes, entry)
 	end
 	return nodes
@@ -151,7 +151,7 @@ local function load_schematic(value)
 	local version, header, content = worldedit.read_header(value)
 	local nodes = {}
 	if version == 1 or version == 2 then -- Original flat table format
-		local tables = minetest.deserialize(content)
+		local tables = minetest.deserialize(content, true)
 		if not tables then return nil end
 
 		-- Transform the node table into an array of nodes
