@@ -1,5 +1,9 @@
 WorldEdit v1.2
 ==============
+
+[![](https://github.com/Uberi/Minetest-WorldEdit/workflows/Check%20&%20Release/badge.svg)](https://github.com/Uberi/Minetest-WorldEdit/actions)
+[![License](https://img.shields.io/badge/license-AGPLv3.0%2B-blue.svg)](https://www.gnu.org/licenses/agpl-3.0.en.html)
+
 The ultimate in-game world editing tool for [Minetest](http://minetest.net/)! Tons of functionality to help with building, fixing, and more.
 
 For more information, see the [forum topic](https://forum.minetest.net/viewtopic.php?id=572) at the Minetest forums.
