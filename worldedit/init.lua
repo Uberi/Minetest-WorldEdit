@@ -15,14 +15,14 @@ local ver = {major=1, minor=2}
 worldedit.version = ver
 worldedit.version_string = string.format("%d.%d", ver.major, ver.minor)
 
-local path = minetest.get_modpath(minetest.get_current_modname())
-
 local function load_module(path)
 	local file = io.open(path, "r")
 	if not file then return end
 	file:close()
 	return dofile(path)
 end
+
+local path = minetest.get_modpath(minetest.get_current_modname())
 
 dofile(path .. "/common.lua")
 load_module(path .. "/manipulations.lua")

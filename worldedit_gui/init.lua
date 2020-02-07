@@ -4,11 +4,11 @@ worldedit = worldedit or {}
 Example:
 
     worldedit.register_gui_function("worldedit_gui_hollow_cylinder", {
-    	name = "Make Hollow Cylinder",
-    	privs = {worldedit=true},
-    	get_formspec = function(name) return "some formspec here" end,
-    	on_select = function(name) print(name .. " clicked the button!") end,
-    })
+		name = "Make Hollow Cylinder",
+		privs = {worldedit=true},
+		get_formspec = function(name) return "some formspec here" end,
+		on_select = function(name) print(name .. " clicked the button!") end,
+	})
 
 Use `nil` for the `options` parameter to unregister the function associated with the given identifier.
 
@@ -35,7 +35,7 @@ end
 Example:
 
     worldedit.register_gui_handler("worldedit_gui_hollow_cylinder", function(name, fields)
-    	print(minetest.serialize(fields))
+		print(minetest.serialize(fields))
     end)
 ]]
 
@@ -88,7 +88,7 @@ if minetest.global_exists("unified_inventory") then -- unified inventory install
 			worldedit.show_page(name, "worldedit_gui")
 			return true
 		elseif fields.worldedit_gui_exit then --return to original page
-			local player = minetest.get_player_by_name(name)
+			player = minetest.get_player_by_name(name)
 			if player then
 				unified_inventory.set_inventory_formspec(player, "craft")
 			end

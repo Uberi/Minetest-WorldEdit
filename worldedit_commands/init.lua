@@ -45,14 +45,14 @@ local function chatcommand_handler(cmd_name, name, param)
 	if def.nodes_needed then
 		local count = def.nodes_needed(name, unpack(parsed))
 		safe_region(name, count, function()
-			local success, msg = def.func(name, unpack(parsed))
+			local msg = def.func(name, unpack(parsed))
 			if msg then
 				minetest.chat_send_player(name, msg)
 			end
 		end)
 	else
 		-- no "safe region" check
-		local success, msg = def.func(name, unpack(parsed))
+		local msg = def.func(name, unpack(parsed))
 		if msg then
 			minetest.chat_send_player(name, msg)
 		end
@@ -64,7 +64,7 @@ end
 -- def = {
 --     privs = {}, -- Privileges needed
 --     params = "", -- Human readable parameter list (optional)
---         -- setting params = "" will automatically provide a parse() if not given 
+--         -- setting params = "" will automatically provide a parse() if not given
 --     description = "", -- Description
 --     require_pos = 0, -- Number of positions required to be set (optional)
 --     parse = function(param)
@@ -243,7 +243,6 @@ worldedit.register_command("help", {
 			return false, "You are not allowed to use any WorldEdit commands."
 		end
 		if param == "" then
-			local msg = ""
 			local cmds = {}
 			for cmd, def in pairs(worldedit.registered_commands) do
 				if minetest.check_player_privs(name, def.privs) then
@@ -824,7 +823,7 @@ local check_pyramid = function(param)
 	end
 	return true, axis, tonumber(height), node
 end
-     
+
 worldedit.register_command("hollowpyramid", {
 	params = "x/y/z/? <height> <node>",
 	description = "Add hollow pyramid centered at WorldEdit position 1 along the x/y/z/? axis with height <height>, composed of <node>",
