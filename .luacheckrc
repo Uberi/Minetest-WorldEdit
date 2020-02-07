@@ -12,10 +12,6 @@ ignore = {
     "file", "name",
 }
 
-globals = {
-	"minetest"
-}
-
 read_globals = {
     string = {fields = {"split", "trim"}},
     table = {fields = {"copy", "getn"}},
@@ -24,5 +20,5 @@ read_globals = {
     "smart_inventory", "sfinv",
 
     "VoxelArea", "inventory_plus",
-    "ItemStack",
+    "ItemStack", "minetest",
 }

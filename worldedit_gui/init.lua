@@ -88,7 +88,6 @@ if minetest.global_exists("unified_inventory") then -- unified inventory install
 			worldedit.show_page(name, "worldedit_gui")
 			return true
 		elseif fields.worldedit_gui_exit then --return to original page
-			player = minetest.get_player_by_name(name)
 			if player then
 				unified_inventory.set_inventory_formspec(player, "craft")
 			end
