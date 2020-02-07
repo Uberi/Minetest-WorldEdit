@@ -1,0 +1,11 @@
+on: [push, pull_request]
+name: Check & Release
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: lint
+        uses: Roang-zero1/factorio-mod-luacheck@master
+        with:
+          luacheckrc_url: https://raw.githubusercontent.com/Uberi/Minetest-WorldEdit/master/.luacheckrc
