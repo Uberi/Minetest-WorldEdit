@@ -4,7 +4,7 @@ worldedit.marker_region = {}
 
 --marks worldedit region position 1
 worldedit.mark_pos1 = function(name)
-	local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
+	local pos1 = worldedit.pos1[name]
 
 	if pos1 ~= nil then
 		--make area stay loaded
@@ -27,7 +27,7 @@ end
 
 --marks worldedit region position 2
 worldedit.mark_pos2 = function(name)
-	local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
+	local pos2 = worldedit.pos2[name]
 
 	if pos2 ~= nil then
 		--make area stay loaded
@@ -60,7 +60,7 @@ worldedit.mark_region = function(name)
 	end
 
 	if pos1 ~= nil and pos2 ~= nil then
-		local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
+		pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 
 		local vec = vector.subtract(pos2, pos1)
 		local maxside = math.max(vec.x, math.max(vec.y, vec.z))

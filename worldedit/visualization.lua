@@ -111,7 +111,7 @@ end
 -- by positions `pos1` and `pos2`.
 -- @return The number of nodes restored.
 function worldedit.restore(pos1, pos2)
-	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
+	pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 
 	worldedit.keep_loaded(pos1, pos2)
 

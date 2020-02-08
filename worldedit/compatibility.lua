@@ -26,8 +26,13 @@ end
 
 function worldedit.metaload(originpos, filename)
 	deprecated("load")
+
+	local file = io.open(filename, "wb")
 	filename = minetest.get_worldpath() .. "/schems/" .. file .. ".wem"
-	local file, err = io.open(filename, "wb")
+	file = io.open(filename, "wb")
+
+	local err = io.open(filename, "wb")
+
 	if err then return 0 end
 	local data = file:read("*a")
 	return worldedit.deserialize(originpos, data)

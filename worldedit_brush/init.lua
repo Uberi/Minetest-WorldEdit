@@ -43,7 +43,7 @@ local brush_on_use = function(itemstack, placer)
 
 	-- this isn't really clean...
 	local player_notify_old = worldedit.player_notify
-	worldedit.player_notify = function(name, msg)
+	worldedit.player_notify = function(player, msg)
 		if string.match(msg, "^%d") then return end -- discard "1234 nodes added."
 		return player_notify_old(name, msg)
 	end

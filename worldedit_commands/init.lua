@@ -82,7 +82,7 @@ end
 --     end,
 -- }
 function worldedit.register_command(name, def)
-	local def = table.copy(def)
+	def = table.copy(def)
 	assert(name and #name > 0)
 	assert(def.privs)
 	def.require_pos = def.require_pos or 0
@@ -1030,7 +1030,8 @@ worldedit.register_command("stretch", {
 	end,
 	func = function(name, stretchx, stretchy, stretchz)
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
-		local count, pos1, pos2 = worldedit.stretch(pos1, pos2, stretchx, stretchy, stretchz)
+		local count = worldedit.stretch(pos1, pos2, stretchx, stretchy, stretchz)
+		pos1, pos2 = worldedit.stretch(pos1, pos2, stretchx, stretchy, stretchz)
 
 		--reset markers to scaled positions
 		worldedit.pos1[name] = pos1
@@ -1061,7 +1062,9 @@ worldedit.register_command("transpose", {
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
 		if axis1 == "?" then axis1 = worldedit.player_axis(name) end
 		if axis2 == "?" then axis2 = worldedit.player_axis(name) end
-		local count, pos1, pos2 = worldedit.transpose(pos1, pos2, axis1, axis2)
+
+		local count = worldedit.transpose(pos1, pos2, axis1, axis2)
+		pos1, pos2 = worldedit.transpose(pos1, pos2, axis1, axis2)
 
 		--reset markers to transposed positions
 		worldedit.pos1[name] = pos1
@@ -1112,7 +1115,9 @@ worldedit.register_command("rotate", {
 	func = function(name, axis, angle)
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
 		if axis == "?" then axis = worldedit.player_axis(name) end
-		local count, pos1, pos2 = worldedit.rotate(pos1, pos2, axis, angle)
+
+		local count = worldedit.rotate(pos1, pos2, axis, angle)
+		pos1, pos2 = worldedit.rotate(pos1, pos2, axis, angle)
 
 		--reset markers to rotated positions
 		worldedit.pos1[name] = pos1
@@ -1248,7 +1253,7 @@ worldedit.register_command("restore", {
 })
 
 local function detect_misaligned_schematic(name, pos1, pos2)
-	pos1, pos2 = worldedit.sort_pos(pos1, pos2)
+	pos1 = worldedit.sort_pos(pos1, pos2)
 	-- Check that allocate/save can position the schematic correctly
 	-- The expected behaviour is that the (0,0,0) corner of the schematic stays
 	-- sat pos1, this only works when the minimum position is actually present

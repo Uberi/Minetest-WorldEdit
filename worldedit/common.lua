@@ -23,7 +23,7 @@ end
 --- Determines the volume of the region defined by positions `pos1` and `pos2`.
 -- @return The volume.
 function worldedit.volume(pos1, pos2)
-	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
+	pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 	return (pos2.x - pos1.x + 1) *
 		(pos2.y - pos1.y + 1) *
 		(pos2.z - pos1.z + 1)

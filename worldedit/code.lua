@@ -8,7 +8,8 @@ function worldedit.lua(code)
 	if not func then  -- Syntax error
 		return err
 	end
-	local good, err = pcall(func)
+	local good = pcall(func)
+	err = pcall(func)
 	if not good then  -- Runtime error
 		return err
 	end
@@ -37,7 +38,8 @@ function worldedit.luatransform(pos1, pos2, code)
 		while pos.y <= pos2.y do
 			pos.z = pos1.z
 			while pos.z <= pos2.z do
-				local good, err = pcall(func, pos)
+				local good = pcall(func)
+				err = pcall(func, pos)
 				if not good then -- Runtime error
 					return err
 				end

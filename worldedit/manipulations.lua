@@ -66,7 +66,7 @@ end
 -- When `inverse` is `true`, replaces all instances that are NOT `search_node`.
 -- @return The number of nodes replaced.
 function worldedit.replace(pos1, pos2, search_node, replace_node, inverse)
-	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
+	pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 
 	local manip, area = mh.init(pos1, pos2)
 	local data = manip:get_data()
@@ -150,7 +150,7 @@ end
 -- @param amount
 -- @return The number of nodes copied.
 function worldedit.copy(pos1, pos2, axis, amount)
-	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
+	pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 
 	-- Decide if we need to copy stuff backwards (only applies to metadata)
 	local backwards = amount > 0 and amount < (pos2[axis] - pos1[axis] + 1)
@@ -167,7 +167,7 @@ end
 -- @param meta_backwards (not officially part of API)
 -- @return The number of nodes copied.
 function worldedit.copy2(pos1, pos2, off, meta_backwards)
-	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
+	pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 
 	local src_manip, src_area = mh.init(pos1, pos2)
 	local src_stride = {x=1, y=src_area.ystride, z=src_area.zstride}
@@ -252,7 +252,7 @@ end
 -- @param pos2
 -- @return The number of nodes that had their meta deleted.
 function worldedit.delete_meta(pos1, pos2)
-	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
+	pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 
 	local meta_positions = minetest.find_nodes_with_meta(pos1, pos2)
 	local get_meta = minetest.get_meta
@@ -266,7 +266,7 @@ end
 --- Moves a region along `axis` by `amount` nodes.
 -- @return The number of nodes moved.
 function worldedit.move(pos1, pos2, axis, amount)
-	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
+	pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 
 	local dim = vector.add(vector.subtract(pos2, pos1), 1)
 	local overlap = math.abs(amount) < dim[axis]
@@ -315,7 +315,7 @@ end
 -- @param count
 -- @return The number of nodes stacked.
 function worldedit.stack(pos1, pos2, axis, count, finished)
-	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
+	pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 	local length = pos2[axis] - pos1[axis] + 1
 	if count < 0 then
 		count = -count
@@ -346,7 +346,7 @@ end
 -- @return The new scaled position 1.
 -- @return The new scaled position 2.
 function worldedit.stretch(pos1, pos2, stretch_x, stretch_y, stretch_z)
-	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
+	pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 
 	-- Prepare schematic of large node
 	local get_node, get_meta, place_schematic = minetest.get_node,
@@ -418,18 +418,18 @@ end
 -- @return The new transposed position 1.
 -- @return The new transposed position 2.
 function worldedit.transpose(pos1, pos2, axis1, axis2)
-	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
+	pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 
 	local compare
 	local extent1, extent2 = pos2[axis1] - pos1[axis1], pos2[axis2] - pos1[axis2]
 
 	if extent1 > extent2 then
-		compare = function(extent1, extent2)
-			return extent1 > extent2
+		compare = function(extent1_2, extent2_2)
+			return extent1_2 > extent2_2
 		end
 	else
-		compare = function(extent1, extent2)
-			return extent1 < extent2
+		compare = function(extent1_2, extent2_2)
+			return extent1_2 < extent2_2
 		end
 	end
 
@@ -451,7 +451,7 @@ function worldedit.transpose(pos1, pos2, axis1, axis2)
 		while pos.y <= pos2.y do
 			pos.z = pos1.z
 			while pos.z <= pos2.z do
-				local extent1, extent2 = pos[axis1] - pos1[axis1], pos[axis2] - pos1[axis2]
+				extent1, extent2 = pos[axis1] - pos1[axis1], pos[axis2] - pos1[axis2]
 				if compare(extent1, extent2) then -- Transpose only if below the diagonal
 					local node1 = get_node(pos)
 					local meta1 = get_meta(pos):to_table()
@@ -478,7 +478,7 @@ end
 --- Flips a region along `axis`.
 -- @return The number of nodes flipped.
 function worldedit.flip(pos1, pos2, axis)
-	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
+	pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 
 	worldedit.keep_loaded(pos1, pos2)
 
@@ -523,7 +523,7 @@ end
 -- @return The new first position.
 -- @return The new second position.
 function worldedit.rotate(pos1, pos2, axis, angle)
-	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
+	pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 
 	local other1, other2 = worldedit.get_axis_others(axis)
 	angle = angle % 360
@@ -551,7 +551,7 @@ end
 -- @param angle Angle in degrees (90 degree increments only).
 -- @return The number of nodes oriented.
 function worldedit.orient(pos1, pos2, angle)
-	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
+	pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 	local registered_nodes = minetest.registered_nodes
 
 	local wallmounted = {
@@ -621,7 +621,7 @@ end
 --- Attempts to fix the lighting in a region.
 -- @return The number of nodes updated.
 function worldedit.fixlight(pos1, pos2)
-	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
+	pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 
 	local vmanip = minetest.get_voxel_manip(pos1, pos2)
 	vmanip:write_to_map()
