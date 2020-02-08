@@ -45,14 +45,14 @@ local function chatcommand_handler(cmd_name, name, param)
 	if def.nodes_needed then
 		local count = def.nodes_needed(name, unpack(parsed))
 		safe_region(name, count, function()
-			local msg = def.func(name, unpack(parsed))
+			local _, msg = def.func(name, unpack(parsed))
 			if msg then
 				minetest.chat_send_player(name, msg)
 			end
 		end)
 	else
 		-- no "safe region" check
-		local msg = def.func(name, unpack(parsed))
+		local _, msg = def.func(name, unpack(parsed))
 		if msg then
 			minetest.chat_send_player(name, msg)
 		end

@@ -299,6 +299,7 @@ function worldedit.spiral(pos, length, height, spacer, node_name)
 		for index = 1, segment_length do
 			-- Move along the direction of the segment
 			i = i + stride_axis * sign
+			column = i
 			-- Add column
 			for y = 1, height do
 				data[column] = node_id
@@ -313,6 +314,7 @@ function worldedit.spiral(pos, length, height, spacer, node_name)
 	sign = -sign
 	for index = 1, segment_length do
 		i = i + stride_axis * sign
+		column = i
 		-- Add column
 		for y = 1, height do
 			data[column] = node_id
