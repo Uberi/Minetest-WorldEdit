@@ -122,3 +122,72 @@ function mh.finish(manip, data)
 	manip:update_map()
 end
 
+
+-- returns an iterator that returns voxelarea indices for a hollow cuboid
+function mh.iter_hollowcuboid(area, minx, miny, minz, maxx, maxy, maxz)
+	local i = area:index(minx, miny, minz) - 1
+	local xrange = maxx - minx + 1
+	local nextaction = i + 1 + xrange
+	local do_hole = false
+
+	local y = 0
+	local ydiff = maxy - miny
+	local ystride = area.ystride
+	local ymultistride = ydiff * ystride
+
+	local z = 0
+	local zdiff = maxz - minz
+	local zstride = area.zstride
+	local zcorner = true
+
+	return function()
+		-- continue i until it needs to jump ystride
+		i = i + 1
+		if i ~= nextaction then
+			return i
+		end
+
+		-- add the x offset if y (and z) are not 0 or maxy (or maxz)
+		if do_hole then
+			do_hole = false
+			i = i + xrange - 2
+			nextaction = i + 1
+			return i
+		end
+
+		-- continue y until maxy is exceeded
+		y = y+1
+		if y ~= ydiff + 1 then
+			i = i + ystride - xrange
+			if zcorner
+			or y == ydiff then
+				nextaction = i + xrange
+			else
+				nextaction = i + 1
+				do_hole = true
+			end
+			return i
+		end
+
+		-- continue z until maxz is exceeded
+		z = z+1
+		if z == zdiff + 1 then
+			-- hollowcuboid finished, return nil
+			return
+		end
+
+		-- set i to index(minx, miny, minz + z) - 1
+		i = i + zstride - (ymultistride + xrange)
+		zcorner = z == zdiff
+
+		-- y is 0, so traverse the xs
+		y = 0
+		nextaction = i + xrange
+		return i
+	end
+end
+
+function mh.iterp_hollowcuboid(area, minp, maxp)
+	return mh.iter_hollowcuboid(area, minp.x, minp.y, minp.z,
+		maxp.x, maxp.y, maxp.z)
+end
