@@ -54,10 +54,13 @@ local brush_on_use = function(itemstack, placer)
 
 	minetest.log("action", string.format("%s uses WorldEdit brush (//%s) at %s",
 		name, cmd, minetest.pos_to_string(pointed_thing.under)))
-	cmddef.func(name, unpack(parsed))
-
+	local success, msg = cmddef.func(name, unpack(parsed))
 	worldedit.player_notify = player_notify_old
-	return true
+
+	if msg then
+		worldedit.player_notify(name, msg)
+	end
+	return success ~= false
 end
 
 minetest.register_tool(":worldedit:brush", {
@@ -89,37 +92,47 @@ worldedit.register_command("brush", {
 	func = function(name, cmd, params)
 		local itemstack = minetest.get_player_by_name(name):get_wielded_item()
 		if itemstack == nil or itemstack:get_name() ~= "worldedit:brush" then
-			worldedit.player_notify(name, "Not holding brush item.")
-			return
+			return false, worldedit.notify_form:format(
+				"Not holding brush item.")
 		end
 
 		cmd = cmd:lower()
 		local meta = itemstack:get_meta()
 		if cmd == "none" then
 			meta:from_table(nil)
-			worldedit.player_notify(name, "Brush assignment cleared.")
-		else
-			local cmddef = worldedit.registered_commands[cmd]
-			if cmddef == nil or cmddef.require_pos ~= 1 then
-				worldedit.player_notify(name, "//" .. cmd .. " cannot be used with brushes")
-				return
-			end
-
-			-- Try parsing command params so we can give the user feedback
-			local ok, err = cmddef.parse(params)
-			if not ok then
-				err = err or "invalid usage"
-				worldedit.player_notify(name, "Error with brush command: " .. err)
-				return
-			end
-
-			meta:set_string("command", cmd)
-			meta:set_string("params", params)
-			local fullcmd = "//" .. cmd .. " " .. params
-			meta:set_string("description",
-				minetest.registered_tools["worldedit:brush"].description .. ": " .. fullcmd)
-			worldedit.player_notify(name, "Brush assigned to command: " .. fullcmd)
+			minetest.get_player_by_name(name):set_wielded_item(itemstack)
+			return true, worldedit.notify_form:format(
+				"Brush assignment cleared.")
 		end
+
+		local cmddef = worldedit.registered_commands[cmd]
+		if cmddef == nil or cmddef.require_pos ~= 1 then
+			return false, worldedit.notify_form:format("//" .. cmd ..
+				" cannot be used with brushes")
+		end
+
+		-- Try parsing command params so we can give the user feedback
+		local ok, err = cmddef.parse(params)
+		if not ok then
+			err = err or "invalid usage"
+			return false, worldedit.notify_form:format(
+				"Error with brush command: " .. err)
+		end
+
+		meta:set_string("command", cmd)
+		meta:set_string("params", params)
+		local fullcmd = "//" .. cmd .. " " .. params
+		meta:set_string("description",
+			minetest.registered_tools["worldedit:brush"].description .. ": " .. fullcmd)
+		worldedit.player_notify(name, "Brush assigned to command: " .. fullcmd)
+
+		meta:set_string("command", cmd)
+		meta:set_string("params", params)
+		local fullcmd = "//" .. cmd .. " " .. params
+		meta:set_string("description",
+			minetest.registered_tools["worldedit:brush"].description .. ": " .. fullcmd)
 		minetest.get_player_by_name(name):set_wielded_item(itemstack)
+		return true, worldedit.notify_form:format(
+			"Brush assigned to command: " .. fullcmd)
 	end,
 })
