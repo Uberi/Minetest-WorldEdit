@@ -130,6 +130,9 @@ minetest.register_entity(":worldedit:pos1", {
 		self.object:remove()
 		worldedit.marker1[self.player_name] = nil
 	end,
+	on_blast = function(self, damage)
+		return false, false, {} -- don't damage or knockback
+	end,
 })
 
 minetest.register_entity(":worldedit:pos2", {
@@ -150,6 +153,9 @@ minetest.register_entity(":worldedit:pos2", {
 	on_punch = function(self, hitter)
 		self.object:remove()
 		worldedit.marker2[self.player_name] = nil
+	end,
+	on_blast = function(self, damage)
+		return false, false, {} -- don't damage or knockback
 	end,
 })
 
@@ -175,6 +181,9 @@ minetest.register_entity(":worldedit:region_cube", {
 			entity:remove()
 		end
 		worldedit.marker_region[self.player_name] = nil
+	end,
+	on_blast = function(self, damage)
+		return false, false, {} -- don't damage or knockback
 	end,
 })
 
