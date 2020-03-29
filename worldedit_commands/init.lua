@@ -122,8 +122,9 @@ local function check_region(name)
 	return worldedit.volume(worldedit.pos1[name], worldedit.pos2[name])
 end
 
+-- Strips any kind of escape codes (translation, colors) from a string
 -- https://github.com/minetest/minetest/blob/53dd7819277c53954d1298dfffa5287c306db8d0/src/util/string.cpp#L777
-local function strip_translation_escapes(input)
+local function strip_escapes(input)
 	local s = function(idx) return input:sub(idx, idx) end
 	local out = ""
 	local i = 1
@@ -169,7 +170,7 @@ worldedit.normalize_nodename = function(nodename)
 		end
 	end
 	for key, value in pairs(minetest.registered_nodes) do
-		local desc = strip_translation_escapes(value.description):lower()
+		local desc = strip_escapes(value.description):gsub("\n.*", "", 1):lower()
 		if desc == nodename then -- matches description
 			return key
 		end
