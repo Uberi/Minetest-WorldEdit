@@ -333,8 +333,7 @@ worldedit.register_command("reset", {
 	func = function(name)
 		worldedit.pos1[name] = nil
 		worldedit.pos2[name] = nil
-		worldedit.mark_pos1(name)
-		worldedit.mark_pos2(name)
+		worldedit.marker_update(name)
 		worldedit.set_pos[name] = nil
 		--make sure the user does not try to confirm an operation after resetting pos:
 		reset_pending(name)
@@ -347,8 +346,7 @@ worldedit.register_command("mark", {
 	description = "Show markers at the region positions",
 	privs = {worldedit=true},
 	func = function(name)
-		worldedit.mark_pos1(name)
-		worldedit.mark_pos2(name)
+		worldedit.marker_update(name)
 		worldedit.player_notify(name, "region marked")
 	end,
 })
@@ -361,8 +359,7 @@ worldedit.register_command("unmark", {
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
 		worldedit.pos1[name] = nil
 		worldedit.pos2[name] = nil
-		worldedit.mark_pos1(name)
-		worldedit.mark_pos2(name)
+		worldedit.marker_update(name)
 		worldedit.pos1[name] = pos1
 		worldedit.pos2[name] = pos2
 		worldedit.player_notify(name, "region unmarked")
@@ -945,8 +942,7 @@ worldedit.register_command("move", {
 
 		pos1[axis] = pos1[axis] + amount
 		pos2[axis] = pos2[axis] + amount
-		worldedit.mark_pos1(name)
-		worldedit.mark_pos2(name)
+		worldedit.marker_update(name)
 		worldedit.player_notify(name, count .. " nodes moved")
 	end,
 })
@@ -1037,8 +1033,7 @@ worldedit.register_command("stretch", {
 		--reset markers to scaled positions
 		worldedit.pos1[name] = pos1
 		worldedit.pos2[name] = pos2
-		worldedit.mark_pos1(name)
-		worldedit.mark_pos2(name)
+		worldedit.marker_update(name)
 
 		worldedit.player_notify(name, count .. " nodes stretched")
 	end,
@@ -1068,8 +1063,7 @@ worldedit.register_command("transpose", {
 		--reset markers to transposed positions
 		worldedit.pos1[name] = pos1
 		worldedit.pos2[name] = pos2
-		worldedit.mark_pos1(name)
-		worldedit.mark_pos2(name)
+		worldedit.marker_update(name)
 
 		worldedit.player_notify(name, count .. " nodes transposed")
 	end,
@@ -1119,8 +1113,7 @@ worldedit.register_command("rotate", {
 		--reset markers to rotated positions
 		worldedit.pos1[name] = pos1
 		worldedit.pos2[name] = pos2
-		worldedit.mark_pos1(name)
-		worldedit.mark_pos2(name)
+		worldedit.marker_update(name)
 
 		worldedit.player_notify(name, count .. " nodes rotated")
 	end,
@@ -1346,9 +1339,8 @@ worldedit.register_command("allocate", {
 		end
 
 		worldedit.pos1[name] = nodepos1
-		worldedit.mark_pos1(name)
 		worldedit.pos2[name] = nodepos2
-		worldedit.mark_pos2(name)
+		worldedit.marker_update(name)
 
 		worldedit.player_notify(name, count .. " nodes allocated")
 	end,

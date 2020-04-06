@@ -39,7 +39,7 @@ local brush_on_use = function(itemstack, placer)
 	assert(pointed_thing.type == "node")
 	worldedit.pos1[name] = pointed_thing.under
 	worldedit.pos2[name] = nil
-	worldedit.mark_region(name)
+	worldedit.marker_update(name)
 
 	-- this isn't really clean...
 	local player_notify_old = worldedit.player_notify
