@@ -207,3 +207,49 @@ worldedit.register_command("contract", {
 		return true, "Region contracted by " .. (amount + rev_amount) .. " nodes"
 	end,
 })
+
+worldedit.register_command("cubeapply", {
+	params = "<size> <command> [parameters]",
+	description = "Select a cube with side length <size> around position 1 and run <command> on region",
+	privs = {worldedit=true},
+	require_pos = 1,
+	parse = function(param)
+		local found, _, side_length, cmd, args = param:find("^(%d+)%s+([^%s]+)%s*(.*)$")
+		if found == nil then
+			return false
+		end
+		local cmddef = worldedit.registered_commands[cmd]
+		if cmddef == nil or cmddef.require_pos ~= 2 then
+			return false, "invalid usage: //" .. cmd .. " cannot be used with cubeapply"
+		end
+		-- run parsing of target command
+		local parsed = {cmddef.parse(args)}
+		if not table.remove(parsed, 1) then
+			return false, parsed[1]
+		end
+		return true, tonumber(side_length), cmd, parsed
+	end,
+	nodes_needed = function(name, side_length, cmd, parsed)
+		-- its not possible to defer to the target command at this point
+		return side_length * side_length * side_length
+	end,
+	func = function(name, side_length, cmd, parsed)
+		local cmddef = assert(worldedit.registered_commands[cmd])
+		local success, missing_privs = minetest.check_player_privs(name, cmddef.privs)
+		if not success then
+			worldedit.player_notify(name, "Missing privileges: " ..
+				table.concat(missing_privs, ", "))
+			return
+		end
+
+		-- update region to be the cube the user wanted
+		local sizea, sizeb = math.floor(side_length / 2), math.ceil(side_length / 2)
+		local center = worldedit.pos1[name]
+		worldedit.pos1[name] = vector.subtract(center, sizea)
+		worldedit.pos2[name] = vector.add(center, sizeb)
+		worldedit.marker_update(name)
+
+		-- actually run target command
+		return cmddef.func(name, unpack(parsed))
+	end,
+})
