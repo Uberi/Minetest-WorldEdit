@@ -218,6 +218,10 @@ worldedit.register_command("cubeapply", {
 		if found == nil then
 			return false
 		end
+		side_length = tonumber(side_length)
+		if side_length < 1 then
+			return false
+		end
 		local cmddef = worldedit.registered_commands[cmd]
 		if cmddef == nil or cmddef.require_pos ~= 2 then
 			return false, "invalid usage: //" .. cmd .. " cannot be used with cubeapply"
@@ -227,7 +231,7 @@ worldedit.register_command("cubeapply", {
 		if not table.remove(parsed, 1) then
 			return false, parsed[1]
 		end
-		return true, tonumber(side_length), cmd, parsed
+		return true, side_length, cmd, parsed
 	end,
 	nodes_needed = function(name, side_length, cmd, parsed)
 		-- its not possible to defer to the target command at this point
@@ -246,7 +250,7 @@ worldedit.register_command("cubeapply", {
 		local sizea, sizeb = math.floor(side_length / 2), math.ceil(side_length / 2)
 		local center = worldedit.pos1[name]
 		worldedit.pos1[name] = vector.subtract(center, sizea)
-		worldedit.pos2[name] = vector.add(center, sizeb)
+		worldedit.pos2[name] = vector.add(center, sizeb - 1)
 		worldedit.marker_update(name)
 
 		-- actually run target command
