@@ -101,7 +101,7 @@ worldedit.register_command("brush", {
 		else
 			local cmddef = worldedit.registered_commands[cmd]
 			if cmddef == nil or cmddef.require_pos ~= 1 then
-				worldedit.player_notify(name, "Invalid command for brush use: //" .. cmd)
+				worldedit.player_notify(name, "//" .. cmd .. " cannot be used with brushes")
 				return
 			end
 
@@ -109,7 +109,7 @@ worldedit.register_command("brush", {
 			local ok, err = cmddef.parse(params)
 			if not ok then
 				err = err or "invalid usage"
-				worldedit.player_notify(name, "Brush command: " .. err)
+				worldedit.player_notify(name, "Error with brush command: " .. err)
 				return
 			end
 
