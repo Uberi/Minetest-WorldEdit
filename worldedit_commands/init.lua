@@ -1180,6 +1180,85 @@ worldedit.register_command("drain", {
 	end,
 })
 
+local clearcut_cache
+
+local function clearcut(pos1, pos2)
+	-- decide which nodes we consider plants
+	if clearcut_cache == nil then
+		clearcut_cache = {}
+		for name, def in pairs(minetest.registered_nodes) do
+			local groups = def.groups or {}
+			if (
+				-- the groups say so
+				groups.flower or groups.grass or groups.flora or groups.plant or
+				groups.leaves or groups.tree or groups.leafdecay or groups.sapling or
+				-- drawtype heuristic
+				(def.is_ground_content and def.buildable_to and
+					(def.sunlight_propagates or not def.walkable)
+					and def.drawtype == "plantlike") or
+				-- if it's flammable, it probably needs to go too
+				(def.is_ground_content and not def.walkable and groups.flammable)
+			) then
+				clearcut_cache[name] = true
+			end
+		end
+	end
+	local plants = clearcut_cache
+
+	local count = 0
+	local prev, any
+
+	for x = pos1.x, pos2.x do
+	for z = pos1.z, pos2.z do
+		prev = false
+		any = false
+		-- first pass: remove floating nodes that would be left over
+		for y = pos1.y, pos2.y do
+			local n = minetest.get_node({x=x, y=y, z=z}).name
+			if plants[n] then
+				prev = true
+				any = true
+			elseif prev then
+				local def = minetest.registered_nodes[n] or {}
+				local groups = def.groups or {}
+				if groups.attached_node or (def.buildable_to and groups.falling_node) then
+					minetest.remove_node({x=x, y=y, z=z})
+					count = count + 1
+				else
+					prev = false
+				end
+			end
+		end
+
+		-- second pass: remove plants, top-to-bottom to avoid item drops
+		if any then
+			for y = pos2.y, pos1.y, -1 do
+				local n = minetest.get_node({x=x, y=y, z=z}).name
+				if plants[n] then
+					minetest.remove_node({x=x, y=y, z=z})
+					count = count + 1
+				end
+			end
+		end
+	end
+	end
+
+	return count
+end
+
+worldedit.register_command("clearcut", {
+	params = "",
+	description = "Remove any plant, tree or foilage-like nodes in the selected region",
+	privs = {worldedit=true},
+	require_pos = 2,
+	nodes_needed = check_region,
+	func = function(name)
+		local pos1, pos2 = worldedit.sort_pos(worldedit.pos1[name], worldedit.pos2[name])
+		local count = clearcut(pos1, pos2)
+		worldedit.player_notify(name, count .. " nodes removed")
+	end,
+})
+
 worldedit.register_command("hide", {
 	params = "",
 	description = "Hide all nodes in the current WorldEdit region non-destructively",

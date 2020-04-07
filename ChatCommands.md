@@ -341,6 +341,14 @@ Removes any fluid node within the current WorldEdit region.
 
     //drain
 
+### `//clearcut`
+
+Removes any plant, tree or foilage-like nodes in the selected region.
+The idea is to remove anything that isn't part of the terrain, leaving a "natural" empty space ready for building.
+
+    //clearcut
+
+
 ### `//hide`
 
 Hide all nodes in the current WorldEdit region non-destructively.
