@@ -2,22 +2,23 @@ worldedit.marker1 = {}
 worldedit.marker2 = {}
 worldedit.marker_region = {}
 
+local init_sentinel = "new" .. tostring(math.random(99999))
+
 --marks worldedit region position 1
 worldedit.mark_pos1 = function(name, region_too)
 	local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
 
-	if pos1 ~= nil then
-		--make area stay loaded
-		local manip = minetest.get_voxel_manip()
-		manip:read_from_map(pos1, pos1)
-	end
 	if worldedit.marker1[name] ~= nil then --marker already exists
 		worldedit.marker1[name]:remove() --remove marker
 		worldedit.marker1[name] = nil
 	end
 	if pos1 ~= nil then
+		--make area stay loaded
+		local manip = minetest.get_voxel_manip()
+		manip:read_from_map(pos1, pos1)
+
 		--add marker
-		worldedit.marker1[name] = minetest.add_entity(pos1, "worldedit:pos1")
+		worldedit.marker1[name] = minetest.add_entity(pos1, "worldedit:pos1", init_sentinel)
 		if worldedit.marker1[name] ~= nil then
 			worldedit.marker1[name]:get_luaentity().player_name = name
 		end
@@ -31,18 +32,17 @@ end
 worldedit.mark_pos2 = function(name, region_too)
 	local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
 
-	if pos2 ~= nil then
-		--make area stay loaded
-		local manip = minetest.get_voxel_manip()
-		manip:read_from_map(pos2, pos2)
-	end
 	if worldedit.marker2[name] ~= nil then --marker already exists
 		worldedit.marker2[name]:remove() --remove marker
 		worldedit.marker2[name] = nil
 	end
 	if pos2 ~= nil then
+		--make area stay loaded
+		local manip = minetest.get_voxel_manip()
+		manip:read_from_map(pos2, pos2)
+
 		--add marker
-		worldedit.marker2[name] = minetest.add_entity(pos2, "worldedit:pos2")
+		worldedit.marker2[name] = minetest.add_entity(pos2, "worldedit:pos2", init_sentinel)
 		if worldedit.marker2[name] ~= nil then
 			worldedit.marker2[name]:get_luaentity().player_name = name
 		end
@@ -56,7 +56,6 @@ worldedit.mark_region = function(name)
 	local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
 
 	if worldedit.marker_region[name] ~= nil then --marker already exists
-		--wip: make the area stay loaded somehow
 		for _, entity in ipairs(worldedit.marker_region[name]) do
 			entity:remove()
 		end
@@ -86,7 +85,8 @@ worldedit.mark_region = function(name)
 
 		--XY plane markers
 		for _, z in ipairs({pos1.z - 0.5, pos2.z + 0.5}) do
-			local marker = minetest.add_entity({x=pos1.x + sizex - 0.5, y=pos1.y + sizey - 0.5, z=z}, "worldedit:region_cube")
+			local entpos = {x=pos1.x + sizex - 0.5, y=pos1.y + sizey - 0.5, z=z}
+			local marker = minetest.add_entity(entpos, "worldedit:region_cube", init_sentinel)
 			if marker ~= nil then
 				marker:set_properties({
 					visual_size={x=sizex * 2, y=sizey * 2},
@@ -99,7 +99,8 @@ worldedit.mark_region = function(name)
 
 		--YZ plane markers
 		for _, x in ipairs({pos1.x - 0.5, pos2.x + 0.5}) do
-			local marker = minetest.add_entity({x=x, y=pos1.y + sizey - 0.5, z=pos1.z + sizez - 0.5}, "worldedit:region_cube")
+			local entpos = {x=x, y=pos1.y + sizey - 0.5, z=pos1.z + sizez - 0.5}
+			local marker = minetest.add_entity(entpos, "worldedit:region_cube", init_sentinel)
 			if marker ~= nil then
 				marker:set_properties({
 					visual_size={x=sizez * 2, y=sizey * 2},
@@ -131,9 +132,11 @@ minetest.register_entity(":worldedit:pos1", {
 			"worldedit_pos1.png", "worldedit_pos1.png"},
 		collisionbox = {-0.55, -0.55, -0.55, 0.55, 0.55, 0.55},
 		physical = false,
+		static_save = false,
 	},
-	on_step = function(self, dtime)
-		if worldedit.marker1[self.player_name] == nil then
+	on_activate = function(self, staticdata, dtime_s)
+		if staticdata ~= init_sentinel then
+			-- we were loaded from before static_save = false was added
 			self.object:remove()
 		end
 	end,
@@ -155,9 +158,11 @@ minetest.register_entity(":worldedit:pos2", {
 			"worldedit_pos2.png", "worldedit_pos2.png"},
 		collisionbox = {-0.55, -0.55, -0.55, 0.55, 0.55, 0.55},
 		physical = false,
+		static_save = false,
 	},
-	on_step = function(self, dtime)
-		if worldedit.marker2[self.player_name] == nil then
+	on_activate = function(self, staticdata, dtime_s)
+		if staticdata ~= init_sentinel then
+			-- we were loaded from before static_save = false was added
 			self.object:remove()
 		end
 	end,
@@ -176,11 +181,12 @@ minetest.register_entity(":worldedit:region_cube", {
 		textures = {"worldedit_cube.png"},
 		visual_size = {x=10, y=10},
 		physical = false,
+		static_save = false,
 	},
-	on_step = function(self, dtime)
-		if worldedit.marker_region[self.player_name] == nil then
+	on_activate = function(self, staticdata, dtime_s)
+		if staticdata ~= init_sentinel then
+			-- we were loaded from before static_save = false was added
 			self.object:remove()
-			return
 		end
 	end,
 	on_punch = function(self, hitter)
