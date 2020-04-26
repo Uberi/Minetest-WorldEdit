@@ -485,11 +485,13 @@ Note that this functionality requires the `worldedit_brush` mod enabled.
 		//brush spr 12 glass
 		//brush none
 
-### `//cubeapply <size> <command> [parameters]`
+### `//cubeapply <size>/(<sizex> <sizey> <sizez>) <command> [parameters]`
 
 Selects a cube with side length of `<size>` around the WorldEdit position 1 and runs the given `<command>` on the newly selected region.
+If `<sizex>`, `<sizey>` and `<sizez>` are given, they instead specify the length of the cuboid in X, Y, Z direction.
 This is mostly useful for brushes since it allows commands such as `//replace` to be ran, but it can also be used standalone.
 
 		//cubeapply 10 replaceinverse air default:water_source
 		//brush cubeapply 15 drain
+		//brush cubeapply 12 3 12 drain
 		//brush cubeapply 1 deleteblocks

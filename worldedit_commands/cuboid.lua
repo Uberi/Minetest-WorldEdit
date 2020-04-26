@@ -209,17 +209,25 @@ worldedit.register_command("contract", {
 })
 
 worldedit.register_command("cubeapply", {
-	params = "<size> <command> [parameters]",
+	params = "<size>/(<sizex> <sizey> <sizez>) <command> [parameters]",
 	description = "Select a cube with side length <size> around position 1 and run <command> on region",
 	privs = {worldedit=true},
 	require_pos = 1,
 	parse = function(param)
-		local found, _, side_length, cmd, args = param:find("^(%d+)%s+([^%s]+)%s*(.*)$")
+		local found, _, sidex, sidey, sidez, cmd, args =
+			param:find("^(%d+)%s+(%d+)%s+(%d+)%s+([^%s]+)%s*(.*)$")
 		if found == nil then
-			return false
+			found, _, sidex, cmd, args = param:find("^(%d+)%s+([^%s]+)%s*(.*)$")
+			if found == nil then
+				return false
+			end
+			sidey = sidex
+			sidez = sidex
 		end
-		side_length = tonumber(side_length)
-		if side_length < 1 then
+		sidex = tonumber(sidex)
+		sidey = tonumber(sidey)
+		sidez = tonumber(sidez)
+		if sidex < 1 or sidey < 1 or sidez < 1 then
 			return false
 		end
 		local cmddef = worldedit.registered_commands[cmd]
@@ -231,13 +239,13 @@ worldedit.register_command("cubeapply", {
 		if not table.remove(parsed, 1) then
 			return false, parsed[1]
 		end
-		return true, side_length, cmd, parsed
+		return true, sidex, sidey, sidez, cmd, parsed
 	end,
-	nodes_needed = function(name, side_length, cmd, parsed)
+	nodes_needed = function(name, sidex, sidey, sidez, cmd, parsed)
 		-- its not possible to defer to the target command at this point
-		return side_length * side_length * side_length
+		return sidex * sidey * sidez
 	end,
-	func = function(name, side_length, cmd, parsed)
+	func = function(name, sidex, sidey, sidez, cmd, parsed)
 		local cmddef = assert(worldedit.registered_commands[cmd])
 		local success, missing_privs = minetest.check_player_privs(name, cmddef.privs)
 		if not success then
@@ -246,11 +254,12 @@ worldedit.register_command("cubeapply", {
 			return
 		end
 
-		-- update region to be the cube the user wanted
-		local sizea, sizeb = math.floor(side_length / 2), math.ceil(side_length / 2)
+		-- update region to be the cuboid the user wanted
+		local half = vector.divide(vector.new(sidex, sidey, sidez), 2)
+		local sizea, sizeb = vector.apply(half, math.floor), vector.apply(half, math.ceil)
 		local center = worldedit.pos1[name]
 		worldedit.pos1[name] = vector.subtract(center, sizea)
-		worldedit.pos2[name] = vector.add(center, sizeb - 1)
+		worldedit.pos2[name] = vector.add(center, vector.subtract(sizeb, 1))
 		worldedit.marker_update(name)
 
 		-- actually run target command
