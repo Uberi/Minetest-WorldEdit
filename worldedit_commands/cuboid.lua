@@ -1,5 +1,5 @@
 worldedit.register_command("outset", {
-	params = "[h|v] <amount>",
+	params = "[h/v] <amount>",
 	description = "Outset the selected region.",
 	privs = {worldedit=true},
 	require_pos = 2,
@@ -38,7 +38,7 @@ worldedit.register_command("outset", {
 
 
 worldedit.register_command("inset", {
-	params = "[h|v] <amount>",
+	params = "[h/v] <amount>",
 	description = "Inset the selected region.",
 	privs = {worldedit=true},
 	require_pos = 2,
@@ -47,9 +47,7 @@ worldedit.register_command("inset", {
 		if find == nil then
 			return false
 		end
-
-		local hv_test = dir:find("[^hv]+")
-		if hv_test ~= nil then
+		if dir:find("[^hv]") ~= nil then
 			return false, "Invalid direction."
 		end
 
@@ -77,8 +75,8 @@ worldedit.register_command("inset", {
 
 
 worldedit.register_command("shift", {
-	params = "[x|y|z|?|up|down|left|right|front|back] [+|-]<amount>",
-	description = "Moves the selection region. Does not move contents.",
+	params = "x/y/z/?/up/down/left/right/front/back [+/-]<amount>",
+	description = "Shifts the selection area without moving its contents",
 	privs = {worldedit=true},
 	require_pos = 2,
 	parse = function(param)
@@ -112,8 +110,8 @@ worldedit.register_command("shift", {
 
 
 worldedit.register_command("expand", {
-	params = "[+|-]<x|y|z|?|up|down|left|right|front|back> <amount> [reverse-amount]",
-	description = "expand the selection in one or two directions at once",
+	params = "[+/-]x/y/z/?/up/down/left/right/front/back <amount> [reverse amount]",
+	description = "Expands the selection in the selected absolute or relative axis",
 	privs = {worldedit=true},
 	require_pos = 2,
 	parse = function(param)
@@ -161,8 +159,8 @@ worldedit.register_command("expand", {
 
 
 worldedit.register_command("contract", {
-	params = "[+|-]<x|y|z|?|up|down|left|right|front|back> <amount> [reverse-amount]",
-	description = "contract the selection in one or two directions at once",
+	params = "[+/-]x/y/z/?/up/down/left/right/front/back <amount> [reverse amount]",
+	description = "Contracts the selection in the selected absolute or relative axis",
 	privs = {worldedit=true},
 	require_pos = 2,
 	parse = function(param)

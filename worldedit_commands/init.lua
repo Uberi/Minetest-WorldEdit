@@ -216,7 +216,10 @@ worldedit.register_command("about", {
 	params = "",
 	description = "Get information about the WorldEdit mod",
 	func = function(name)
-		worldedit.player_notify(name, "WorldEdit " .. worldedit.version_string .. " is available on this server. Type //help to get a list of commands, or get more information at https://github.com/Uberi/Minetest-WorldEdit")
+		worldedit.player_notify(name, "WorldEdit " .. worldedit.version_string..
+			" is available on this server. Type //help to get a list of "..
+			"commands, or get more information at "..
+			"https://github.com/Uberi/Minetest-WorldEdit")
 	end,
 })
 
@@ -428,7 +431,7 @@ worldedit.register_command("p", {
 })
 
 worldedit.register_command("fixedpos", {
-	params = "set1/set2 x y z",
+	params = "set1/set2 <x> <y> <z>",
 	description = "Set a WorldEdit region position to the position at (<x>, <y>, <z>)",
 	privs = {worldedit=true},
 	parse = function(param)
@@ -537,7 +540,7 @@ worldedit.register_command("param2", {
 	parse = function(param)
 		local param2 = tonumber(param)
 		if not param2 then
-			return false, "Invalid or missing param2 argument"
+			return false
 		elseif param2 < 0 or param2 > 255 then
 			return false, "Param2 is out of range (must be between 0 and 255 inclusive!)"
 		end
@@ -551,7 +554,7 @@ worldedit.register_command("param2", {
 })
 
 worldedit.register_command("mix", {
-	params = "<node1> [<weighting1>] [<node2> [<weighting2>]] ...",
+	params = "<node1> [count1] <node2> [count2] ...",
 	description = "Fill the current WorldEdit region with a random mix of <node1>, ...",
 	privs = {worldedit=true},
 	require_pos = 2,
@@ -771,7 +774,7 @@ end
 
 worldedit.register_command("hollowcylinder", {
 	params = "x/y/z/? <length> <radius1> [radius2] <node>",
-	description = "Add hollow cylinder at WorldEdit position 1 along the x/y/z/? axis with length <length>, base radius <radius1> (and top radius [radius2]), composed of <node>",
+	description = "Add hollow cylinder at WorldEdit position 1 along the given axis with length <length>, base radius <radius1> (and top radius [radius2]), composed of <node>",
 	privs = {worldedit=true},
 	require_pos = 1,
 	parse = check_cylinder,
@@ -792,7 +795,7 @@ worldedit.register_command("hollowcylinder", {
 
 worldedit.register_command("cylinder", {
 	params = "x/y/z/? <length> <radius1> [radius2] <node>",
-	description = "Add cylinder at WorldEdit position 1 along the x/y/z/? axis with length <length>, base radius <radius1> (and top radius [radius2]), composed of <node>",
+	description = "Add cylinder at WorldEdit position 1 along the given axis with length <length>, base radius <radius1> (and top radius [radius2]), composed of <node>",
 	privs = {worldedit=true},
 	require_pos = 1,
 	parse = check_cylinder,
@@ -825,7 +828,7 @@ end
      
 worldedit.register_command("hollowpyramid", {
 	params = "x/y/z/? <height> <node>",
-	description = "Add hollow pyramid centered at WorldEdit position 1 along the x/y/z/? axis with height <height>, composed of <node>",
+	description = "Add hollow pyramid centered at WorldEdit position 1 along the given axis with height <height>, composed of <node>",
 	privs = {worldedit=true},
 	require_pos = 1,
 	parse = check_pyramid,
@@ -845,7 +848,7 @@ worldedit.register_command("hollowpyramid", {
 
 worldedit.register_command("pyramid", {
 	params = "x/y/z/? <height> <node>",
-	description = "Add pyramid centered at WorldEdit position 1 along the x/y/z/? axis with height <height>, composed of <node>",
+	description = "Add pyramid centered at WorldEdit position 1 along the given axis with height <height>, composed of <node>",
 	privs = {worldedit=true},
 	require_pos = 1,
 	parse = check_pyramid,
@@ -890,7 +893,7 @@ worldedit.register_command("spiral", {
 
 worldedit.register_command("copy", {
 	params = "x/y/z/? <amount>",
-	description = "Copy the current WorldEdit region along the x/y/z/? axis by <amount> nodes",
+	description = "Copy the current WorldEdit region along the given axis by <amount> nodes",
 	privs = {worldedit=true},
 	require_pos = 2,
 	parse = function(param)
@@ -917,7 +920,7 @@ worldedit.register_command("copy", {
 
 worldedit.register_command("move", {
 	params = "x/y/z/? <amount>",
-	description = "Move the current WorldEdit region along the x/y/z/? axis by <amount> nodes",
+	description = "Move the current WorldEdit region along the given axis by <amount> nodes",
 	privs = {worldedit=true},
 	require_pos = 2,
 	parse = function(param)
@@ -949,7 +952,7 @@ worldedit.register_command("move", {
 
 worldedit.register_command("stack", {
 	params = "x/y/z/? <count>",
-	description = "Stack the current WorldEdit region along the x/y/z/? axis <count> times",
+	description = "Stack the current WorldEdit region along the given axis <count> times",
 	privs = {worldedit=true},
 	require_pos = 2,
 	parse = function(param)
@@ -1041,7 +1044,7 @@ worldedit.register_command("stretch", {
 
 worldedit.register_command("transpose", {
 	params = "x/y/z/? x/y/z/?",
-	description = "Transpose the current WorldEdit region along the x/y/z/? and x/y/z/? axes",
+	description = "Transpose the current WorldEdit region along the given axes",
 	privs = {worldedit=true},
 	require_pos = 2,
 	parse = function(param)
@@ -1071,7 +1074,7 @@ worldedit.register_command("transpose", {
 
 worldedit.register_command("flip", {
 	params = "x/y/z/?",
-	description = "Flip the current WorldEdit region along the x/y/z/? axis",
+	description = "Flip the current WorldEdit region along the given axis",
 	privs = {worldedit=true},
 	require_pos = 2,
 	parse = function(param)
@@ -1089,8 +1092,8 @@ worldedit.register_command("flip", {
 })
 
 worldedit.register_command("rotate", {
-	params = "<axis> <angle>",
-	description = "Rotate the current WorldEdit region around the axis <axis> by angle <angle> (90 degree increment)",
+	params = "x/y/z/? <angle>",
+	description = "Rotate the current WorldEdit region around the given axis by angle <angle> (90 degree increment)",
 	privs = {worldedit=true},
 	require_pos = 2,
 	parse = function(param)

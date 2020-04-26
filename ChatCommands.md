@@ -29,24 +29,26 @@ Many commands also have shorter names that can be typed faster. For example, if 
 
 ### `//about`
 
-Get information about the mod.
+Get information about the WorldEdit mod.
 
     //about
 
-### `//inspect on/off/1/0/true/false/yes/no/enable/disable/<blank>`
+### `//help [all/<cmd>]`
+
+Get help for WorldEdit commands. `all` shows all WorldEdit commands, `<cmd>`
+the help text for the given command.
+
+    //help
+    //help all
+    //help hollowpyramid
+
+
+### `//inspect [on/off/1/0/true/false/yes/no/enable/disable]`
 
 Enable or disable node inspection.
 
     //inspect on
     //inspect off
-    //inspect 1
-    //inspect 0
-    //inspect true
-    //inspect false
-    //inspect yes
-    //inspect no
-    //inspect enable
-    //inspect disable
     //inspect
 
 ### `//reset`
@@ -81,18 +83,19 @@ Set WorldEdit region position 2 to the player's location.
 
 ### `//p set/set1/set2/get`
 
-Set WorldEdit region, WorldEdit position 1, or WorldEdit position 2 by punching nodes, or display the current WorldEdit region.
+Set WorldEdit region, WorldEdit position 1, or WorldEdit position 2 by
+punching nodes, or print the current WorldEdit region.
 
     //p set
     //p set1
     //p set2
     //p get
 
-### `//fixedpos set1 x y z`
+### `//fixedpos set1/set2 <x> <y> <z>`
 
-Set a WorldEdit region position to the position at (`<x>`, `<y>`, `<z>`).
+Set the WorldEdit region position 1 or 2 to the position (`<x>`, `<y>`, `<z>`).
 
-    //fixedpos set1 0  0 0
+    //fixedpos set1 0 0 0
     //fixedpos set1 -30 5 28
     //fixedpos set2 1004 -200 432
 
@@ -121,9 +124,12 @@ Set the current WorldEdit region to `<node>`.
 
 Set the param2 value of all nodes in the current WorldEdit region to `<param2>`.
 
-### `//mix <node1> [<count1>] <node2> [<count2>]...`
+    //param2 8
 
-Fill the current WorldEdit region with a random mix of `<node1>`, `<node2>`, `...`. Weightings can be optionally specified via a number after a node name.
+### `//mix <node1> [count1] <node2> [count2] ...`
+
+Fill the current WorldEdit region with a random mix of `<node1>`, `<node2>`, `...`.
+Weightings can be optionally specified via the `[count1]`, `[count2]`, `...` parameters after a node name.
 
     //mix air
     //mix cactus stone glass sandstone
@@ -152,13 +158,15 @@ Replace all nodes other than `<search node>` with `<replace node>` in the curren
 
 ### `//hollowcube <width> <height> <length> <node>`
 
-Adds a hollow cube with its ground level centered at WorldEdit position 1 with dimensions `<width>` x `<height>` x `<length>`, composed of `<node>`.
+Adds a hollow cube with its ground level centered at WorldEdit position 1 with
+dimensions `<width>` x `<height>` x `<length>`, composed of `<node>`.
 
     //hollowcube 6 5 6 Diamond Block
 
 ### `//cube <width> <height> <length> <node>`
 
-Adds a cube with its ground level centered at WorldEdit position 1 with dimensions `<width>` x `<height>` x `<length>`, composed of `<node>`.
+Adds a cube with its ground level centered at WorldEdit position 1 with
+dimensions `<width>` x `<height>` x `<length>`, composed of `<node>`.
 
     //cube 6 5 6 Diamond Block
     //cube 7 2 1 default:cobble
@@ -197,7 +205,8 @@ Add dome centered at WorldEdit position 1 with radius `<radius>`, composed of `<
 
 ### `//hollowcylinder x/y/z/? <length> <radius1> [radius2] <node>`
 
-Add hollow cylinder at WorldEdit position 1 along the x/y/z/? axis with length `<length>`, base radius `<radius1>` (and top radius `[radius2]`), composed of `<node>`.
+Add hollow cylinder at WorldEdit position 1 along the given axis with length `<length>`,
+base radius `<radius1>` (and top radius `[radius2]`), composed of `<node>`.
 
 Despite its name this command allows you to create cones (`radius2` = 0) as well as any shapes inbetween (0 < `radius2` < `radius1`).
 Swapping `radius1` and `radius2` will create the same object but upside-down.
@@ -213,7 +222,8 @@ Swapping `radius1` and `radius2` will create the same object but upside-down.
 
 ### `//cylinder x/y/z/? <length> <radius1> [radius2] <node>`
 
-Add cylinder at WorldEdit position 1 along the x/y/z/? axis with length `<length>`, base radius `<radius1>` (and top radius `[radius2]`), composed of `<node>`.
+Add cylinder at WorldEdit position 1 along the given axis with length `<length>`,
+base radius `<radius1>` (and top radius `[radius2]`), composed of `<node>`.
 Can also create shapes other than cylinders, e.g. cones (see documentation above).
 
     //cylinder x +5 8 Bronze Block
@@ -225,18 +235,18 @@ Can also create shapes other than cylinders, e.g. cones (see documentation above
     //cylinder x 6 0 5 Dirt
     //cylinder z 20 10 20 default:desert_stone
     
-### `//hollowpyramid x/y/z? <height> <node>`
+### `//hollowpyramid x/y/z/? <height> <node>`
 
-Add hollow pyramid centered at WorldEdit position 1 along the x/y/z/? axis with height `<height>`, composed of `<node>`.
+Add hollow pyramid centered at WorldEdit position 1 along the given axis with height `<height>` composed of `<node>`.
 
     //hollowpyramid x 8 Diamond Block
     //hollowpyramid y -5 glass
     //hollowpyramid z 2 mesecons:wire_00000000_off
     //hollowpyramid ? 12 mesecons:wire_00000000_off
 
-### `//pyramid x/y/z? <height> <node>`
+### `//pyramid x/y/z/? <height> <node>`
 
-Add pyramid centered at WorldEdit position 1 along the x/y/z/? axis with height `<height>`, composed of `<node>`.
+Add pyramid centered at WorldEdit position 1 along the given axis with height `<height>` composed of `<node>`.
 
     //pyramid x 8 Diamond Block
     //pyramid y -5 glass
@@ -245,7 +255,8 @@ Add pyramid centered at WorldEdit position 1 along the x/y/z/? axis with height 
 
 ### `//spiral <length> <height> <spacer> <node>`
 
-Add spiral centered at WorldEdit position 1 with side length `<length>`, height `<height>`, space between walls `<spacer>`, composed of `<node>`.
+Add spiral centered at WorldEdit position 1 with side length `<length>`,
+height `<height>`, space between walls `<spacer>`, composed of `<node>`.
 
     //spiral 20 5 3 Diamond Block
     //spiral 5 2 1 glass
@@ -253,7 +264,7 @@ Add spiral centered at WorldEdit position 1 with side length `<length>`, height 
 
 ### `//copy x/y/z/? <amount>`
 
-Copy the current WorldEdit region along the x/y/z/? axis by `<amount>` nodes.
+Copy the current WorldEdit region along the given axis by `<amount>` nodes.
 
     //copy x 15
     //copy y -7
@@ -262,7 +273,7 @@ Copy the current WorldEdit region along the x/y/z/? axis by `<amount>` nodes.
 
 ### `//move x/y/z/? <amount>`
 
-Move the current WorldEdit positions and region along the x/y/z/? axis by `<amount>` nodes.
+Move the current WorldEdit positions and region along the given axis by `<amount>` nodes.
 
     //move x 15
     //move y -7
@@ -271,7 +282,7 @@ Move the current WorldEdit positions and region along the x/y/z/? axis by `<amou
 
 ### `//stack x/y/z/? <count>`
 
-Stack the current WorldEdit region along the x/y/z/? axis `<count>` times.
+Stack the current WorldEdit region along the given axis `<count>` times.
 
     //stack x 3
     //stack y -1
@@ -287,7 +298,9 @@ Stack the current WorldEdit region `<count>` times by offset `<x>`, `<y>`, `<z>`
 
 ### `//stretch <stretchx> <stretchy> <stretchz>`
 
-Scale the current WorldEdit positions and region by a factor of `<stretchx>`, `<stretchy>`, `<stretchz>` along the X, Y, and Z axes, repectively, with position 1 as the origin.
+Scale the current WorldEdit positions and region by a factor of
+`<stretchx>`, `<stretchy>`, `<stretchz>` along the X, Y, and Z axes,
+respectively, with position 1 as the origin.
 
     //stretch 2 2 2
     //stretch 1 2 1
@@ -295,25 +308,22 @@ Scale the current WorldEdit positions and region by a factor of `<stretchx>`, `<
 
 ### `//transpose x/y/z/? x/y/z/?`
 
-Transpose the current WorldEdit positions and region along the x/y/z/? and x/y/z/? axes.
+Transpose the current WorldEdit positions and region along given axes.
 
     //transpose x y
-    //transpose x z
     //transpose y z
     //transpose ? y
 
 ### `//flip x/y/z/?`
 
-Flip the current WorldEdit region along the x/y/z/? axis.
+Flip the current WorldEdit region along the given axis.
 
     //flip x
-    //flip y
-    //flip z
     //flip ?
 
 ### `//rotate x/y/z/? <angle>`
 
-Rotate the current WorldEdit positions and region along the x/y/z/? axis by angle `<angle>` (90 degree increment).
+Rotate the current WorldEdit positions and region along the given axis by angle `<angle>` (90 degree increment).
 
     //rotate x 90
     //rotate y 180
@@ -348,7 +358,6 @@ The idea is to remove anything that isn't part of the terrain, leaving a "natura
 
     //clearcut
 
-
 ### `//hide`
 
 Hide all nodes in the current WorldEdit region non-destructively.
@@ -357,7 +366,7 @@ Hide all nodes in the current WorldEdit region non-destructively.
 
 ### `//suppress <node>`
 
-Suppress all <node> in the current WorldEdit region non-destructively.
+Suppress all `<node>` in the current WorldEdit region non-destructively.
 
     //suppress Diamond Block
     //suppress glass
@@ -365,7 +374,7 @@ Suppress all <node> in the current WorldEdit region non-destructively.
 
 ### `//highlight <node>`
 
-Highlight <node> in the current WorldEdit region by hiding everything else non-destructively.
+Highlight `<node>` in the current WorldEdit region by hiding everything else non-destructively.
 
     //highlight Diamond Block
     //highlight glass
@@ -409,8 +418,8 @@ Executes `<code>` as a Lua chunk in the global namespace.
 
 Executes `<code>` as a Lua chunk in the global namespace with the variable pos available, for each node in the current WorldEdit region.
 
-    //luatransform minetest.add_node(pos, {name="default:stone"})
-    //luatransform if minetest.get_node(pos).name == "air" then minetest.add_node(pos, {name="default:water_source"})
+    //luatransform minetest.swap_node(pos, {name="default:stone"})
+    //luatransform if minetest.get_node(pos).name == "air" then minetest.add_node(pos, {name="default:water_source"}) end
 
 ### `//mtschemcreate <file>`
 
@@ -439,42 +448,44 @@ Clears all objects within the WorldEdit region.
 
     //clearobjects
     
-### `//shift x/y/z/?/up/down/left/right/front/back [+|-]<amount>`
+### `//shift x/y/z/?/up/down/left/right/front/back [+/-]<amount>`
 
-Shifts the selection area by `[+|-]<amount>` without touching its contents. The shifting axis can be absolute (`x/y/z`) or 
-relative (`up/down/left/right/front/back`). 
+Shifts the selection area by `[+|-]<amount>` without moving its contents.
+The shifting axis can be absolute (`x/y/z`) or relative (`up/down/left/right/front/back`). 
 
 		//shift left 5
 
-### `//expand [+|-]x/y/z/?/up/down/left/right/front/back <amount> [reverse-amount]`
+### `//expand [+/-]x/y/z/?/up/down/left/right/front/back <amount> [reverse amount]`
 
-Expands the selection by `<amount>` in the selected absolute or relative axis. If specified, the selection can be expanded in the
-opposite direction over the same axis by `[reverse-amount]`.
-
-		//expand right 7 5
-		
-### `//contract [+|-]x/y/z/?/up/down/left/right/front/back <amount> [reverse-amount]`
-
-Contracts the selection by `<amount>` in the selected absolute or relative axis. If specified, the selection can be contracted in the
-opposite direction over the same axis by `[reverse-amount]`.
+Expands the selection by `<amount>` in the selected absolute or relative axis.
+If specified, the selection can be expanded in the opposite direction over the same axis by `[reverse amount]`.
 
 		//expand right 7 5
 		
-### `//outset [hv] <amount>`
+### `//contract [+/-]x/y/z/?/up/down/left/right/front/back <amount> [reverse amount]`
 
-Expands the selection in all directions by `<amount>`. If specified, the selection can be expanded horizontally in the x and z axes `[h]`
-or vertically in the y axis `[v]`.
+Contracts the selection by `<amount>` in the selected absolute or relative axis.
+If specified, the selection can be contracted in the opposite direction over the same axis by `[reverse amount]`.
+
+		//expand right 7 5
+		
+### `//outset [h/v] <amount>`
+
+Expands the selection in all directions by `<amount>`. If specified,
+the selection can be expanded horizontally in the x and z axes using `h`
+or vertically in the y axis using `v`.
 
 		//outset v 5
 		
-### `//inset [hv] <amount>`
+### `//inset [h/v] <amount>`
 
-Contracts the selection in all directions by `<amount>`. If specified, the selection can be contracted horizontally in the x and z axes `[h]`
-or vertically in the y axis `[v]`.
+Contracts the selection in all directions by `<amount>`. If specified,
+the selection can be contracted horizontally in the x and z axes using `h`
+or vertically in the y axis using `v`.
 
-		//outset v 5
+		//inset h 5
 
-### `//brush none/<command> [parameters]`
+### `//brush none/(<command> [parameters])`
 
 Assigns the given `<command>` to the currently held brush item, it will be ran with the first pointed solid node (as determined via raycast) as
 WorldEdit position 1 when using that specific brush item.
