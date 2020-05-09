@@ -574,6 +574,9 @@ worldedit.register_command("mix", {
 				nodes[#nodes + 1] = node
 			end
 		end
+		if #nodes == 0 then
+			return false
+		end
 		return true, nodes
 	end,
 	nodes_needed = check_region,
