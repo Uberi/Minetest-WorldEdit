@@ -154,6 +154,8 @@ local function string_endswith(full, part)
 	return full:find(part, 1, true) == #full - #part + 1
 end
 
+local description_cache = nil
+
 -- normalizes node "description" `nodename`, returning a string (or nil)
 worldedit.normalize_nodename = function(nodename)
 	nodename = nodename:gsub("^%s*(.-)%s*$", "%1") -- strip spaces
@@ -164,16 +166,30 @@ worldedit.normalize_nodename = function(nodename)
 		return fullname
 	end
 	nodename = nodename:lower()
-	for key, value in pairs(minetest.registered_nodes) do
-		if string_endswith(key, ":" .. nodename) then -- matches name (w/o mod part)
+
+	for key, _ in pairs(minetest.registered_nodes) do
+		if string_endswith(key:lower(), ":" .. nodename) then -- matches name (w/o mod part)
 			return key
 		end
 	end
-	for key, value in pairs(minetest.registered_nodes) do
-		local desc = strip_escapes(value.description):gsub("\n.*", "", 1):lower()
+
+	if description_cache == nil then
+		-- cache stripped descriptions
+		description_cache = {}
+		for key, value in pairs(minetest.registered_nodes) do
+			local desc = strip_escapes(value.description):gsub("\n.*", "", 1):lower()
+			if desc ~= "" then
+				description_cache[key] = desc
+			end
+		end
+	end
+
+	for key, desc in pairs(description_cache) do
 		if desc == nodename then -- matches description
 			return key
 		end
+	end
+	for key, desc in pairs(description_cache) do
 		if desc == nodename .. " block" then
 			-- fuzzy description match (e.g. "Steel" == "Steel Block")
 			return key
@@ -181,8 +197,8 @@ worldedit.normalize_nodename = function(nodename)
 	end
 
 	local match = nil
-	for key, value in pairs(minetest.registered_nodes) do
-		if value.description:lower():find(nodename, 1, true) ~= nil then
+	for key, value in pairs(description_cache) do
+		if value:find(nodename, 1, true) ~= nil then
 			if match ~= nil then
 				return nil
 			end
