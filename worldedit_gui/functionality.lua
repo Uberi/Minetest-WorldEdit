@@ -461,8 +461,8 @@ worldedit.register_gui_handler("worldedit_gui_pyramid", function(name, fields)
 		local n = worldedit.normalize_nodename(gui_nodename1[name])
 		if n then
 			execute_worldedit_command(submit, name,
-				axis_values[gui_axis1[name]] .. " " .. gui_distance1[name] ..
-				" " .. n)
+				string.format("%s %s %s", axis_values[gui_axis1[name]],
+				gui_distance1[name], n))
 		end
 		return true
 	end
@@ -691,7 +691,7 @@ worldedit.register_gui_handler("worldedit_gui_rotate", function(name, fields)
 		worldedit.show_page(name, "worldedit_gui_rotate")
 
 		execute_worldedit_command("rotate", name,
-			axis_values[gui_axis1[name]] .. angle_values[gui_angle[name]])
+			axis_values[gui_axis1[name]] .. " " .. angle_values[gui_angle[name]])
 		return true
 	end
 	return ret
