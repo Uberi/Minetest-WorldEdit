@@ -80,6 +80,9 @@ if minetest.global_exists("unified_inventory") then -- unified inventory install
 	unified_inventory.register_button("worldedit_gui", {
 		type = "image",
 		image = "inventory_plus_worldedit_gui.png",
+		condition = function(player)
+			return minetest.check_player_privs(player:get_player_name(), {worldedit=true})
+		end,
 	})
 
 	minetest.register_on_player_receive_fields(function(player, formname, fields)
