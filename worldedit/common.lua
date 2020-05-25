@@ -46,6 +46,9 @@ end
 
 
 function worldedit.keep_loaded(pos1, pos2)
+	-- Create a vmanip and read the area from map, this
+	-- causes all MapBlocks to be loaded into memory.
+	-- This doesn't actually *keep* them loaded, unlike the name implies.
 	local manip = minetest.get_voxel_manip()
 	manip:read_from_map(pos1, pos2)
 end
