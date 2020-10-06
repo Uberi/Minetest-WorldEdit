@@ -3,7 +3,7 @@ local safe_region_callback = {}
 --`count` is the number of nodes that would possibly be modified
 --`callback` is a callback to run when the user confirms
 local function safe_region(name, count, callback)
-	if count < 10000 then
+	if count < 20000 then
 		return callback()
 	end
 
