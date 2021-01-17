@@ -64,7 +64,7 @@ end
 -- def = {
 --     privs = {}, -- Privileges needed
 --     params = "", -- Human readable parameter list (optional)
---         -- setting params = "" will automatically provide a parse() if not given 
+--         -- setting params = "" will automatically provide a parse() if not given
 --     description = "", -- Description
 --     require_pos = 0, -- Number of positions required to be set (optional)
 --     parse = function(param)
@@ -88,7 +88,7 @@ function worldedit.register_command(name, def)
 	def.require_pos = def.require_pos or 0
 	assert(def.require_pos >= 0 and def.require_pos < 3)
 	if def.params == "" and not def.parse then
-		def.parse = function(param) return true end
+		def.parse = function() return true end
 	else
 		assert(def.parse)
 	end
@@ -503,7 +503,7 @@ worldedit.register_command("fixedpos", {
 	end,
 })
 
-minetest.register_on_punchnode(function(pos, node, puncher)
+minetest.register_on_punchnode(function(pos, _, puncher)
 	local name = puncher:get_player_name()
 	if name ~= "" and worldedit.set_pos[name] ~= nil then --currently setting position
 		if worldedit.set_pos[name] == "pos1" then --setting position 1
@@ -612,7 +612,7 @@ worldedit.register_command("mix", {
 		for nodename in param:gmatch("[^%s]+") do
 			if tonumber(nodename) ~= nil and #nodes > 0 then
 				local last_node = nodes[#nodes]
-				for i = 1, tonumber(nodename) do
+				for _ = 1, tonumber(nodename) do
 					nodes[#nodes + 1] = last_node
 				end
 			else
@@ -698,7 +698,7 @@ worldedit.register_command("hollowcube", {
 	privs = {worldedit=true},
 	require_pos = 1,
 	parse = check_cube,
-	nodes_needed = function(name, w, h, l, node)
+	nodes_needed = function(_, w, h, l)
 		return w * h * l
 	end,
 	func = function(name, w, h, l, node)
@@ -713,7 +713,7 @@ worldedit.register_command("cube", {
 	privs = {worldedit=true},
 	require_pos = 1,
 	parse = check_cube,
-	nodes_needed = function(name, w, h, l, node)
+	nodes_needed = function(_, w, h, l)
 		return w * h * l
 	end,
 	func = function(name, w, h, l, node)
@@ -740,7 +740,7 @@ worldedit.register_command("hollowsphere", {
 	privs = {worldedit=true},
 	require_pos = 1,
 	parse = check_sphere,
-	nodes_needed = function(name, radius, node)
+	nodes_needed = function(_, radius)
 		return math.ceil((4 * math.pi * (radius ^ 3)) / 3) --volume of sphere
 	end,
 	func = function(name, radius, node)
@@ -755,7 +755,7 @@ worldedit.register_command("sphere", {
 	privs = {worldedit=true},
 	require_pos = 1,
 	parse = check_sphere,
-	nodes_needed = function(name, radius, node)
+	nodes_needed = function(_, radius)
 		return math.ceil((4 * math.pi * (radius ^ 3)) / 3) --volume of sphere
 	end,
 	func = function(name, radius, node)
@@ -782,7 +782,7 @@ worldedit.register_command("hollowdome", {
 	privs = {worldedit=true},
 	require_pos = 1,
 	parse = check_dome,
-	nodes_needed = function(name, radius, node)
+	nodes_needed = function(_, radius)
 		return math.ceil((2 * math.pi * (radius ^ 3)) / 3) --volume of dome
 	end,
 	func = function(name, radius, node)
@@ -797,7 +797,7 @@ worldedit.register_command("dome", {
 	privs = {worldedit=true},
 	require_pos = 1,
 	parse = check_dome,
-	nodes_needed = function(name, radius, node)
+	nodes_needed = function(_, radius)
 		return math.ceil((2 * math.pi * (radius ^ 3)) / 3) --volume of dome
 	end,
 	func = function(name, radius, node)
@@ -830,7 +830,7 @@ worldedit.register_command("hollowcylinder", {
 	privs = {worldedit=true},
 	require_pos = 1,
 	parse = check_cylinder,
-	nodes_needed = function(name, axis, length, radius1, radius2, node)
+	nodes_needed = function(_, _, length, radius1, radius2)
 		local radius = math.max(radius1, radius2)
 		return math.ceil(math.pi * (radius ^ 2) * length)
 	end,
@@ -851,7 +851,7 @@ worldedit.register_command("cylinder", {
 	privs = {worldedit=true},
 	require_pos = 1,
 	parse = check_cylinder,
-	nodes_needed = function(name, axis, length, radius1, radius2, node)
+	nodes_needed = function(_, _, length, radius1, radius2)
 		local radius = math.max(radius1, radius2)
 		return math.ceil(math.pi * (radius ^ 2) * length)
 	end,
@@ -877,14 +877,14 @@ local check_pyramid = function(param)
 	end
 	return true, axis, tonumber(height), node
 end
-     
+
 worldedit.register_command("hollowpyramid", {
 	params = "x/y/z/? <height> <node>",
 	description = "Add hollow pyramid centered at WorldEdit position 1 along the given axis with height <height>, composed of <node>",
 	privs = {worldedit=true},
 	require_pos = 1,
 	parse = check_pyramid,
-	nodes_needed = function(name, axis, height, node)
+	nodes_needed = function(_, _, height)
 		return math.ceil(((height * 2 + 1) ^ 2) * height / 3)
 	end,
 	func = function(name, axis, height, node)
@@ -904,7 +904,7 @@ worldedit.register_command("pyramid", {
 	privs = {worldedit=true},
 	require_pos = 1,
 	parse = check_pyramid,
-	nodes_needed = function(name, axis, height, node)
+	nodes_needed = function(_, _, height)
 		return math.ceil(((height * 2 + 1) ^ 2) * height / 3)
 	end,
 	func = function(name, axis, height, node)
@@ -934,7 +934,7 @@ worldedit.register_command("spiral", {
 		end
 		return true, tonumber(length), tonumber(height), tonumber(space), node
 	end,
-	nodes_needed = function(name, length, height, space, node)
+	nodes_needed = function(_, length, height, space)
 		return (length + space) * height -- TODO: this is not the upper bound
 	end,
 	func = function(name, length, height, space, node)
@@ -955,7 +955,7 @@ worldedit.register_command("copy", {
 		end
 		return true, axis, tonumber(amount)
 	end,
-	nodes_needed = function(name, axis, amount)
+	nodes_needed = function(name)
 		return check_region(name) * 2
 	end,
 	func = function(name, axis, amount)
@@ -982,7 +982,7 @@ worldedit.register_command("move", {
 		end
 		return true, axis, tonumber(amount)
 	end,
-	nodes_needed = function(name, axis, amount)
+	nodes_needed = function(name)
 		return check_region(name) * 2
 	end,
 	func = function(name, axis, amount)
@@ -1014,7 +1014,7 @@ worldedit.register_command("stack", {
 		end
 		return true, axis, tonumber(repetitions)
 	end,
-	nodes_needed = function(name, axis, repetitions)
+	nodes_needed = function(name, _, repetitions)
 		return check_region(name) * math.abs(repetitions)
 	end,
 	func = function(name, axis, repetitions)
@@ -1049,7 +1049,7 @@ worldedit.register_command("stack2", {
 
 		return true, tonumber(repetitions), vector.new(tonumber(x), tonumber(y), tonumber(z))
 	end,
-	nodes_needed = function(name, repetitions, offset)
+	nodes_needed = function(name, repetitions)
 		return check_region(name) * repetitions
 	end,
 	func = function(name, repetitions, offset)
@@ -1629,7 +1629,7 @@ worldedit.register_command("mtschemprob", {
 			if problist == nil then
 				return
 			end
-			for k,v in pairs(problist) do
+			for _,v in pairs(problist) do
 				local prob = math.floor(((v.prob / 256) * 100) * 100 + 0.5) / 100
 				text = text .. minetest.pos_to_string(v.pos) .. ": " .. prob .. "% | "
 			end
