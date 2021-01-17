@@ -242,8 +242,8 @@ function worldedit.pyramid(pos, axis, height, node_name, hollow)
 			for index3 = -size, size do
 				local i = new_index2 + (index3 + offset[other2]) * stride[other2]
 				if (not hollow or size - math.abs(index2) < 2 or size - math.abs(index3) < 2) then
-				       data[i] = node_id
-				       count = count + 1
+					data[i] = node_id
+					count = count + 1
 				end
 			end
 		end

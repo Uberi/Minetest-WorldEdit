@@ -4,10 +4,10 @@ worldedit = worldedit or {}
 Example:
 
     worldedit.register_gui_function("worldedit_gui_hollow_cylinder", {
-    	name = "Make Hollow Cylinder",
-    	privs = {worldedit=true},
-    	get_formspec = function(name) return "some formspec here" end,
-    	on_select = function(name) print(name .. " clicked the button!") end,
+		name = "Make Hollow Cylinder",
+		privs = {worldedit=true},
+		get_formspec = function(name) return "some formspec here" end,
+		on_select = function(name) print(name .. " clicked the button!") end,
     })
 
 Use `nil` for the `options` parameter to unregister the function associated with the given identifier.
@@ -35,7 +35,7 @@ end
 Example:
 
     worldedit.register_gui_handler("worldedit_gui_hollow_cylinder", function(name, fields)
-    	print(minetest.serialize(fields))
+		print(minetest.serialize(fields))
     end)
 ]]
 
