@@ -6,7 +6,7 @@ local init_sentinel = "new" .. tostring(math.random(99999))
 
 --marks worldedit region position 1
 worldedit.mark_pos1 = function(name, region_too)
-	local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
+	local pos1 = worldedit.pos1[name]
 
 	if worldedit.marker1[name] ~= nil then --marker already exists
 		worldedit.marker1[name]:remove() --remove marker
@@ -30,7 +30,7 @@ end
 
 --marks worldedit region position 2
 worldedit.mark_pos2 = function(name, region_too)
-	local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
+	local pos2 = worldedit.pos2[name]
 
 	if worldedit.marker2[name] ~= nil then --marker already exists
 		worldedit.marker2[name]:remove() --remove marker
