@@ -41,7 +41,7 @@ Example:
 
 worldedit.register_gui_handler = function(identifier, handler)
 	local enabled = true
-	minetest.register_on_player_receive_fields(function(player, formname, fields)
+	minetest.register_on_player_receive_fields(function(player, _, fields)
 		if not enabled then return false end
 		enabled = false
 		minetest.after(0.2, function() enabled = true end)
@@ -85,7 +85,7 @@ if minetest.global_exists("unified_inventory") then -- unified inventory install
 		end,
 	})
 
-	minetest.register_on_player_receive_fields(function(player, formname, fields)
+	minetest.register_on_player_receive_fields(function(player, _, fields)
 		local name = player:get_player_name()
 		if fields.worldedit_gui then --main page
 			worldedit.show_page(name, "worldedit_gui")
@@ -116,7 +116,7 @@ elseif minetest.global_exists("inventory_plus") then -- inventory++ installed
 
 	--show the form when the button is pressed and hide it when done
 	local gui_player_formspecs = {}
-	minetest.register_on_player_receive_fields(function(player, formname, fields)
+	minetest.register_on_player_receive_fields(function(player, _, fields)
 		local name = player:get_player_name()
 		if fields.worldedit_gui then --main page
 			gui_player_formspecs[name] = player:get_inventory_formspec()
@@ -158,7 +158,7 @@ elseif minetest.global_exists("smart_inventory") then -- smart_inventory install
 		codebox:set_we_formspec("worldedit_gui")
 
 		-- process input (the back button)
-		state:onInput(function(state, fields, player)
+		state:onInput(function(state, fields)
 			if fields.worldedit_gui then --main page
 				state:get("code"):set_we_formspec("worldedit_gui")
 			elseif fields.worldedit_gui_exit then --return to original page
@@ -198,7 +198,7 @@ elseif minetest.global_exists("sfinv") then -- sfinv installed
 	})
 
 	--show the form when the button is pressed and hide it when done
-	minetest.register_on_player_receive_fields(function(player, formname, fields)
+	minetest.register_on_player_receive_fields(function(player, _, fields)
 		if fields.worldedit_gui then --main page
 			worldedit.show_page(player:get_player_name(), "worldedit_gui")
 			return true
@@ -228,12 +228,12 @@ end
 worldedit.register_gui_function("worldedit_gui", {
 	name = "WorldEdit GUI",
 	privs = {interact=true},
-	get_formspec = function(name)
+	get_formspec = function()
 		--create a form with all the buttons arranged in a grid
 		local buttons, x, y, index = {}, 0, 1, 0
 		local width, height = 3, 0.8
 		local columns = 5
-		for i, identifier in pairs(identifiers) do
+		for _, identifier in pairs(identifiers) do
 			if identifier ~= "worldedit_gui" then
 				local entry = worldedit.pages[identifier]
 				table.insert(buttons, string.format((entry.get_formspec and "button" or "button_exit") ..

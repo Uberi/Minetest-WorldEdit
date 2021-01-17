@@ -134,17 +134,17 @@ minetest.register_entity(":worldedit:pos1", {
 		physical = false,
 		static_save = false,
 	},
-	on_activate = function(self, staticdata, dtime_s)
+	on_activate = function(self, staticdata)
 		if staticdata ~= init_sentinel then
 			-- we were loaded from before static_save = false was added
 			self.object:remove()
 		end
 	end,
-	on_punch = function(self, hitter)
+	on_punch = function(self)
 		self.object:remove()
 		worldedit.marker1[self.player_name] = nil
 	end,
-	on_blast = function(self, damage)
+	on_blast = function()
 		return false, false, {} -- don't damage or knockback
 	end,
 })
@@ -160,17 +160,17 @@ minetest.register_entity(":worldedit:pos2", {
 		physical = false,
 		static_save = false,
 	},
-	on_activate = function(self, staticdata, dtime_s)
+	on_activate = function(self, staticdata)
 		if staticdata ~= init_sentinel then
 			-- we were loaded from before static_save = false was added
 			self.object:remove()
 		end
 	end,
-	on_punch = function(self, hitter)
+	on_punch = function(self)
 		self.object:remove()
 		worldedit.marker2[self.player_name] = nil
 	end,
-	on_blast = function(self, damage)
+	on_blast = function()
 		return false, false, {} -- don't damage or knockback
 	end,
 })
@@ -183,13 +183,13 @@ minetest.register_entity(":worldedit:region_cube", {
 		physical = false,
 		static_save = false,
 	},
-	on_activate = function(self, staticdata, dtime_s)
+	on_activate = function(self, staticdata)
 		if staticdata ~= init_sentinel then
 			-- we were loaded from before static_save = false was added
 			self.object:remove()
 		end
 	end,
-	on_punch = function(self, hitter)
+	on_punch = function(self)
 		local markers = worldedit.marker_region[self.player_name]
 		if not markers then
 			return
@@ -199,7 +199,7 @@ minetest.register_entity(":worldedit:region_cube", {
 		end
 		worldedit.marker_region[self.player_name] = nil
 	end,
-	on_blast = function(self, damage)
+	on_blast = function()
 		return false, false, {} -- don't damage or knockback
 	end,
 })

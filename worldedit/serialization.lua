@@ -165,7 +165,7 @@ local function load_schematic(value)
 		nodes = tables[1]
 
 		if version == 1 then --original flat table format
-			for i, entry in ipairs(nodes) do
+			for _, entry in ipairs(nodes) do
 				local pos = entry[1]
 				entry.x, entry.y, entry.z = pos.x, pos.y, pos.z
 				entry[1] = nil
@@ -214,7 +214,7 @@ function worldedit.allocate_with_nodes(origin_pos, nodes)
 	local pos1x, pos1y, pos1z = huge, huge, huge
 	local pos2x, pos2y, pos2z = -huge, -huge, -huge
 	local origin_x, origin_y, origin_z = origin_pos.x, origin_pos.y, origin_pos.z
-	for i, entry in ipairs(nodes) do
+	for _, entry in ipairs(nodes) do
 		local x, y, z = origin_x + entry.x, origin_y + entry.y, origin_z + entry.z
 		if x < pos1x then pos1x = x end
 		if y < pos1y then pos1y = y end
@@ -242,7 +242,7 @@ function worldedit.deserialize(origin_pos, value)
 	local origin_x, origin_y, origin_z = origin_pos.x, origin_pos.y, origin_pos.z
 	local count = 0
 	local add_node, get_meta = minetest.add_node, minetest.get_meta
-	for i, entry in ipairs(nodes) do
+	for _, entry in ipairs(nodes) do
 		entry.x, entry.y, entry.z = origin_x + entry.x, origin_y + entry.y, origin_z + entry.z
 		-- Entry acts as both position and node
 		add_node(entry, entry)
