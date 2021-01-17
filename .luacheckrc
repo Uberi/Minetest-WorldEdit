@@ -4,5 +4,4 @@ read_globals = {"minetest", "vector", "VoxelArea", "ItemStack",
 }
 globals = {"worldedit"}
 -- Ignore these errors until someone decides to fix them
-ignore = {"211", "212", "213", "311", "411", "412", "421", "422",
-	"431", "432", "631"}
+ignore = {"212", "213", "411", "412", "421", "422", "431", "432", "631"}

@@ -160,7 +160,7 @@ end
 --- Loads the schematic in `value` into a node list in the latest format.
 -- @return A node list in the latest format, or nil on failure.
 local function load_schematic(value)
-	local version, header, content = worldedit.read_header(value)
+	local version, _, content = worldedit.read_header(value)
 	local nodes = {}
 	if version == 1 or version == 2 then -- Original flat table format
 		local tables = minetest.deserialize(content, true)
@@ -250,7 +250,6 @@ function worldedit.deserialize(origin_pos, value)
 	worldedit.keep_loaded(pos1, pos2)
 
 	local origin_x, origin_y, origin_z = origin_pos.x, origin_pos.y, origin_pos.z
-	local count = 0
 	local add_node, get_meta = minetest.add_node, minetest.get_meta
 	for i, entry in ipairs(nodes) do
 		entry.x, entry.y, entry.z = origin_x + entry.x, origin_y + entry.y, origin_z + entry.z
