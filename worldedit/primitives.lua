@@ -14,31 +14,25 @@ local mh = worldedit.manip_helpers
 -- @return The number of nodes added.
 function worldedit.cube(pos, width, height, length, node_name, hollow)
 	-- Set up voxel manipulator
-	local basepos = vector.subtract(pos, {x=math.floor(width/2), y=0, z=math.floor(length/2)})
-	local manip, area = mh.init(basepos, vector.add(basepos, {x=width, y=height, z=length}))
+	local basepos = vector.subtract(pos,
+		{x = math.floor(width / 2), y = 0, z = math.floor(length / 2)})
+	local endpos = vector.add(basepos, {x=width, y=height, z=length})
+	local manip, area = mh.init(basepos, endpos)
 	local data = mh.get_empty_data(area)
 
 	-- Add cube
 	local node_id = minetest.get_content_id(node_name)
-	local stride = {x=1, y=area.ystride, z=area.zstride}
-	local offset = vector.subtract(basepos, area.MinEdge)
 	local count = 0
+	local iterfunc
+	if hollow then
+		iterfunc = mh.iterp_hollowcuboid(area, basepos, endpos)
+	else
+		iterfunc = area:iter(basepos, endpos)
+	end
 
-	for z = 0, length-1 do
-		local index_z = (offset.z + z) * stride.z + 1 -- +1 for 1-based indexing
-		for y = 0, height-1 do
-			local index_y = index_z + (offset.y + y) * stride.y
-			for x = 0, width-1 do
-				local is_wall = z == 0 or z == length-1
-					or y == 0 or y == height-1
-					or x == 0 or x == width-1
-				if not hollow or is_wall then
-					local i = index_y + (offset.x + x)
-					data[i] = node_id
-					count = count + 1
-				end
-			end
-		end
+	for vi in iterfunc do
+		data[vi] = node_id
+		count = count+1
 	end
 
 	mh.finish(manip, data)
