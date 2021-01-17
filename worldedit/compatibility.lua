@@ -24,11 +24,14 @@ function worldedit.metasave(pos1, pos2, filename)
 	return count
 end
 
-function worldedit.metaload(originpos, filename)
+function worldedit.metaload(originpos, file_name)
 	deprecated("load")
-	filename = minetest.get_worldpath() .. "/schems/" .. file .. ".wem"
-	local file, err = io.open(filename, "wb")
-	if err then return 0 end
+	local file_path = minetest.get_worldpath() ..
+		"/schems/" .. file_name .. ".wem"
+	local file, err = io.open(file_path, "wb")
+	if err then
+		return 0
+	end
 	local data = file:read("*a")
 	return worldedit.deserialize(originpos, data)
 end
