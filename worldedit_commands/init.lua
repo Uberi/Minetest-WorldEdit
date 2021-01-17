@@ -64,7 +64,7 @@ end
 -- def = {
 --     privs = {}, -- Privileges needed
 --     params = "", -- Human readable parameter list (optional)
---         -- setting params = "" will automatically provide a parse() if not given 
+--         -- setting params = "" will automatically provide a parse() if not given
 --     description = "", -- Description
 --     require_pos = 0, -- Number of positions required to be set (optional)
 --     parse = function(param)
@@ -877,7 +877,7 @@ local check_pyramid = function(param)
 	end
 	return true, axis, tonumber(height), node
 end
-     
+
 worldedit.register_command("hollowpyramid", {
 	params = "x/y/z/? <height> <node>",
 	description = "Add hollow pyramid centered at WorldEdit position 1 along the given axis with height <height>, composed of <node>",
