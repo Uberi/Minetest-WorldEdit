@@ -1,7 +1,7 @@
---- Worldedit.
+--- WorldEdit mod for the Minetest engine
 -- @module worldedit
--- @release 1.2
--- @copyright 2013 sfan5, Anthony Zhang (Uberi/Temperest), and Brett O'Donnell (cornernote).
+-- @release 1.3
+-- @copyright 2012 sfan5, Anthony Zhang (Uberi/Temperest), and Brett O'Donnell (cornernote)
 -- @license GNU Affero General Public License version 3 (AGPLv3)
 -- @author sfan5
 -- @author Anthony Zang (Uberi/Temperest)
@@ -11,7 +11,7 @@
 
 worldedit = {}
 
-local ver = {major=1, minor=2}
+local ver = {major=1, minor=3}
 worldedit.version = ver
 worldedit.version_string = string.format("%d.%d", ver.major, ver.minor)
 

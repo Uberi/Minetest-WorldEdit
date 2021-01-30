@@ -1,13 +1,11 @@
 WorldEdit Tutorial
 ==================
-This is a step-by-step tutorial outlining the basic usage of WorldEdit. For more information, see the [README](README.md).
+This is a step-by-step tutorial outlining the basic usage of WorldEdit.
 
 Let's start with a few assumptions:
 
-* You have a compatible version of Minetest working.
-  * See the [README](README.md) for compatibility information.
+* You have a compatible version of Minetest working, that is 5.0 or later.
 * You have WorldEdit installed as a mod.
-  * If using Windows, [MODSTER](https://forum.minetest.net/viewtopic.php?pid=101463) makes installing mods totally painless.
   * Simply download the file, extract the archive, and move it to the correct mod folder for Minetest.
   * See the installation instructions in [README](README.md) if you need more details.
 * You are familiar with the basics of the game.
@@ -59,7 +57,7 @@ Look at the place between the two markers: it is now filled with MESE blocks!
 
 The `//set <node>` command fills the region with whatever node you want. It is a region-oriented command, which means it works inside the WorldEdit region only.
 
-Now, try a few different variations, such as `//set torch`, `//set cobble`, and `//set water`.
+Now, try a few different variations, such as `//set torch`, `//set cobble`, and `//set water source`.
 
 ### WorldEdit GUI
 
@@ -75,7 +73,7 @@ Look at the place between the two markers: it is now filled with MESE blocks!
 
 The "Set Nodes" function fills the region with whatever node you want. It is a region-oriented command, which means it works inside the WorldEdit region only.
 
-Now, try a few different variations on the node name, such as "torch", "cobble", and "water".
+Now, try a few different variations on the node name, such as "torch", "cobble", and "water source".
 
 Step 3: Position commands
 -------------------------
