@@ -640,10 +640,34 @@ function worldedit.clear_objects(pos1, pos2)
 
 	worldedit.keep_loaded(pos1, pos2)
 
+	local function should_delete(obj)
+		-- Avoid players and WorldEdit entities
+		if obj:is_player() then
+			return false
+		end
+		local entity = obj:get_luaentity()
+		return not entity or not entity.name:find("^worldedit:")
+	end
+
 	-- Offset positions to include full nodes (positions are in the center of nodes)
 	local pos1x, pos1y, pos1z = pos1.x - 0.5, pos1.y - 0.5, pos1.z - 0.5
 	local pos2x, pos2y, pos2z = pos2.x + 0.5, pos2.y + 0.5, pos2.z + 0.5
 
+	local count = 0
+	if minetest.get_objects_in_area then
+		local objects = minetest.get_objects_in_area({x=pos1x, y=pos1y, z=pos1z},
+			{x=pos2x, y=pos2y, z=pos2z})
+
+		for _, obj in pairs(objects) do
+			if should_delete(obj) then
+				obj:remove()
+				count = count + 1
+			end
+		end
+		return count
+	end
+
+	-- Fallback implementation via get_objects_inside_radius
 	-- Center of region
 	local center = {
 		x = pos1x + ((pos2x - pos1x) / 2),
@@ -655,12 +679,8 @@ function worldedit.clear_objects(pos1, pos2)
 			(center.x - pos1x) ^ 2 +
 			(center.y - pos1y) ^ 2 +
 			(center.z - pos1z) ^ 2)
-	local count = 0
 	for _, obj in pairs(minetest.get_objects_inside_radius(center, radius)) do
-		local entity = obj:get_luaentity()
-		-- Avoid players and WorldEdit entities
-		if not obj:is_player() and (not entity or
-				not entity.name:find("^worldedit:")) then
+		if should_delete(obj) then
 			local pos = obj:get_pos()
 			if pos.x >= pos1x and pos.x <= pos2x and
 					pos.y >= pos1y and pos.y <= pos2y and
