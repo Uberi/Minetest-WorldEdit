@@ -239,7 +239,7 @@ worldedit.register_command("cubeapply", {
 		end
 		return true, sidex, sidey, sidez, cmd, parsed
 	end,
-	nodes_needed = function(name, sidex, sidey, sidez, cmd, parsed)
+	nodes_needed = function(_, sidex, sidey, sidez)
 		-- its not possible to defer to the target command at this point
 		return sidex * sidey * sidez
 	end,

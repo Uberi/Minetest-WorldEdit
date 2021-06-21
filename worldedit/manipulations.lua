@@ -217,8 +217,6 @@ function worldedit.copy2(pos1, pos2, off, meta_backwards)
 	dst_manip:set_param2_data(dst_data)
 
 	mh.finish(dst_manip)
-	src_data = nil
-	dst_data = nil
 
 	-- Copy metadata
 	local get_meta = minetest.get_meta

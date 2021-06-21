@@ -65,7 +65,7 @@ minetest.register_tool(":worldedit:brush", {
 	inventory_image = "worldedit_brush.png",
 	stack_max = 1, -- no need to stack these (metadata prevents this anyway)
 	range = 0,
-	on_use = function(itemstack, placer, pointed_thing)
+	on_use = function(itemstack, placer)
 		brush_on_use(itemstack, placer)
 		return itemstack -- nothing consumed, nothing changed
 	end,

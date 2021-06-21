@@ -39,7 +39,7 @@ setmetatable(angle_values, {__index = function () return 90 end})
 -- given multiple sets of privileges, produces a single set of privs that would have the same effect as requiring all of them at the same time
 local combine_privs = function(...)
 	local result = {}
-	for i, privs in ipairs({...}) do
+	for _, privs in ipairs({...}) do
 		for name, value in pairs(privs) do
 			if result[name] ~= nil and result[name] ~= value then --the priv must be both true and false, which can never happen
 				return {__fake_priv_that_nobody_has__=true} --privilege table that can never be satisfied
