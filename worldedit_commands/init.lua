@@ -12,8 +12,10 @@ worldedit.prob_list = {}
 
 local safe_region, reset_pending = dofile(minetest.get_modpath("worldedit_commands") .. "/safe.lua")
 
+-- The prefix avoids chat messages being mixed up with WorldEdit messages
+worldedit.notify_form = minetest.colorize("#94ffcc", "WorldEdit -!- ") .. "%s"
 function worldedit.player_notify(name, message)
-	minetest.chat_send_player(name, "WorldEdit -!- " .. message, false)
+	minetest.chat_send_player(name, worldedit.notify_form:format(message))
 end
 
 worldedit.registered_commands = {}
@@ -22,40 +24,27 @@ local function chatcommand_handler(cmd_name, name, param)
 	local def = assert(worldedit.registered_commands[cmd_name])
 
 	if def.require_pos == 2 then
-		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
-		if pos1 == nil or pos2 == nil then
-			worldedit.player_notify(name, "no region selected")
-			return
+		if not worldedit.pos1[name] or not worldedit.pos2[name] then
+			return false, worldedit.notify_form:format("no region selected")
 		end
-	elseif def.require_pos == 1 then
-		local pos1 = worldedit.pos1[name]
-		if pos1 == nil then
-			worldedit.player_notify(name, "no position 1 selected")
-			return
-		end
+	elseif def.require_pos == 1 and not worldedit.pos1[name] then
+		return false, worldedit.notify_form:format("no position 1 selected")
 	end
 
 	local parsed = {def.parse(param)}
 	local success = table.remove(parsed, 1)
 	if not success then
-		worldedit.player_notify(name, parsed[1] or "invalid usage")
-		return
+		return false, worldedit.notify_form:format(parsed[1] or "invalid usage")
 	end
 
 	if def.nodes_needed then
 		local count = def.nodes_needed(name, unpack(parsed))
-		safe_region(name, count, function()
-			local success, msg = def.func(name, unpack(parsed))
-			if msg then
-				minetest.chat_send_player(name, msg)
-			end
+		return safe_region(name, count, function()
+			return def.func(name, unpack(parsed))
 		end)
 	else
 		-- no "safe region" check
-		local success, msg = def.func(name, unpack(parsed))
-		if msg then
-			minetest.chat_send_player(name, msg)
-		end
+		return def.func(name, unpack(parsed))
 	end
 end
 
@@ -64,7 +53,7 @@ end
 -- def = {
 --     privs = {}, -- Privileges needed
 --     params = "", -- Human readable parameter list (optional)
---         -- setting params = "" will automatically provide a parse() if not given 
+--         -- setting params = "" will automatically provide a parse() if not given
 --     description = "", -- Description
 --     require_pos = 0, -- Number of positions required to be set (optional)
 --     parse = function(param)
@@ -844,7 +833,7 @@ local check_pyramid = function(param)
 	end
 	return true, axis, tonumber(height), node
 end
-     
+
 worldedit.register_command("hollowpyramid", {
 	params = "x/y/z/? <height> <node>",
 	description = "Add hollow pyramid centered at WorldEdit position 1 along the given axis with height <height>, composed of <node>",
