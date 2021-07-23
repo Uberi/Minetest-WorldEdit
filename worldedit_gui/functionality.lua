@@ -11,6 +11,7 @@ local gui_count2 = {} --mapping of player names to a quantity (arbitrary strings
 local gui_count3 = {} --mapping of player names to a quantity (arbitrary strings may also appear as values)
 local gui_angle = {} --mapping of player names to an angle (one of 90, 180, 270, representing the angle in degrees clockwise)
 local gui_filename = {} --mapping of player names to file names
+local gui_param2 = {} --mapping of player names to param2 values
 
 --set default values
 setmetatable(gui_nodename1, {__index = function() return "Cobblestone" end})
@@ -25,6 +26,7 @@ setmetatable(gui_count2,     {__index = function() return "6" end})
 setmetatable(gui_count3,     {__index = function() return "4" end})
 setmetatable(gui_angle,     {__index = function() return 90 end})
 setmetatable(gui_filename,  {__index = function() return "building" end})
+setmetatable(gui_param2,    {__index = function() return "0" end})
 
 local axis_indices = {["X axis"]=1, ["Y axis"]=2, ["Z axis"]=3, ["Look direction"]=4}
 local axis_values = {"x", "y", "z", "?"}
@@ -904,3 +906,31 @@ worldedit.register_gui_function("worldedit_gui_clearobjects", {
 		execute_worldedit_command("clearobjects", name, "")
 	end,
 })
+
+worldedit.register_gui_function("worldedit_gui_param2", {
+	name = "Set Param2",
+	privs = we_privs("param2"),
+	get_formspec = function(name)
+		local value = gui_param2[name] or "0"
+		return "size[6.5,3]" .. worldedit.get_formspec_header("worldedit_gui_param2") ..
+			"textarea[0.5,1;5,2;;;Some values may break the node!]"..
+			string.format("field[0.5,2.5;2,0.8;worldedit_gui_param2_value;New Param2;%s]", minetest.formspec_escape(value)) ..
+			"field_close_on_enter[worldedit_gui_param2_value;false]" ..
+			"button_exit[3.5,2.5;3,0.8;worldedit_gui_param2_submit;Set Param2]"
+	end,
+})
+
+worldedit.register_gui_handler("worldedit_gui_param2", function(name, fields)
+	local cg = {
+		worldedit_gui_param2_value = gui_param2,
+	}
+	local ret = handle_changes(name, "worldedit_gui_param2", fields, cg)
+	if fields.worldedit_gui_param2_submit then
+		copy_changes(name, fields, cg)
+		worldedit.show_page(name, "worldedit_gui_param2")
+
+		execute_worldedit_command("param2", name, gui_param2[name])
+		return true
+	end
+	return ret
+end)
