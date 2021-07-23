@@ -913,10 +913,10 @@ worldedit.register_gui_function("worldedit_gui_param2", {
 	get_formspec = function(name)
 		local value = gui_param2[name] or "0"
 		return "size[6.5,3]" .. worldedit.get_formspec_header("worldedit_gui_param2") ..
-			'textarea[0.5,1;5,2;;;Some values make break the node!]'..
+			"textarea[0.5,1;5,2;;;Some values may break the node!]"..
 			string.format("field[0.5,2.5;2,0.8;worldedit_gui_param2_value;New Param2;%s]", minetest.formspec_escape(value)) ..
-			"field_close_on_enter[worldedit_gui_copy_move_amount;false]" ..
-			"button_exit[3.5,2.5;3,0.8;worldedit_gui_param2;Set Param2]"
+			"field_close_on_enter[worldedit_gui_param2_value;false]" ..
+			"button_exit[3.5,2.5;3,0.8;worldedit_gui_param2_submit;Set Param2]"
 	end,
 })
 
@@ -925,10 +925,11 @@ worldedit.register_gui_handler("worldedit_gui_param2", function(name, fields)
 		worldedit_gui_param2_value = gui_param2,
 	}
 	local ret = handle_changes(name, "worldedit_gui_param2", fields, cg)
-	if fields.worldedit_gui_param2_value then
+	if fields.worldedit_gui_param2_submit then
 		copy_changes(name, fields, cg)
 		worldedit.show_page(name, "worldedit_gui_param2")
-		execute_worldedit_command('param2', name, gui_param2[name])
+
+		execute_worldedit_command("param2", name, gui_param2[name])
 		return true
 	end
 	return ret
