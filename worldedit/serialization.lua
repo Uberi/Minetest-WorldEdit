@@ -118,7 +118,7 @@ end
 -- by ChillCode, available under the MIT license.
 local function deserialize_workaround(content)
 	local nodes
-	if not jit then
+	if not minetest.global_exists("jit") then
 		nodes = minetest.deserialize(content, true)
 	else
 		-- XXX: This is a filthy hack that works surprisingly well
