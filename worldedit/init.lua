@@ -38,3 +38,7 @@ if minetest.settings:get_bool("log_mods") then
 	print("[WorldEdit] Loaded!")
 end
 
+if minetest.settings:get_bool("worldedit_run_tests") then
+	dofile(path .. "/test.lua")
+	minetest.after(0, worldedit.run_tests)
+end
