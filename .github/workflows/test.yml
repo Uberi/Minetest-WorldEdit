@@ -8,4 +8,4 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Run tests
-      run: MINETEST_VER=latest ./util/run_tests.sh
+      run: MINETEST_VER=latest ./.util/run_tests.sh
