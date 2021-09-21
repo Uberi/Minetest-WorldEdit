@@ -216,7 +216,7 @@ elseif minetest.global_exists("sfinv") then -- sfinv installed
 		end
 	end
 else
-	error(
+	return minetest.log("error",
 		"worldedit_gui requires a supported gui management mod to be installed.\n"..
 		"To use the it you need to either:\n"..
 		"* use minetest_game or another sfinv-compatible subgame\n"..
