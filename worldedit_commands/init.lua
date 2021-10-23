@@ -689,6 +689,20 @@ worldedit.register_command("cube", {
 	end,
 })
 
+local check_torus = function(param)
+	local found, _, radius, tr, nodename = param:find("^(%d+)%s+(%d+)%s+(.+)$")
+	if found == nil then
+		return false
+	end
+	local node = worldedit.normalize_nodename(nodename)
+	if not node then
+		return false, "invalid node name: " .. nodename
+	end
+	return true, tonumber(radius), tonumber(tr), node
+end
+
+
+
 local check_sphere = function(param)
 	local found, _, radius, nodename = param:find("^(%d+)%s+(.+)$")
 	if found == nil then
@@ -715,6 +729,22 @@ worldedit.register_command("hollowsphere", {
 		worldedit.player_notify(name, count .. " nodes added")
 	end,
 })
+
+worldedit.register_command("torus", {
+	params = "<radius> <tr> <node>",
+	description = "Add torus centered at WorldEdit position 1 with radius <radius>, tube radius <tr>, composed of <node>",
+	privs = {worldedit=true},
+	require_pos = 1,
+	parse = check_torus,
+	nodes_needed = function(name, radius, tr, node)
+		return math.ceil((4 * math.pi * (radius ^ 3)) / 3) --volume of sphere
+	end,
+	func = function(name, radius, tr, node)
+		local count = worldedit.torus(worldedit.pos1[name], radius, tr, node)
+		worldedit.player_notify(name, count .. " nodes added")
+	end,
+})
+
 
 worldedit.register_command("sphere", {
 	params = "<radius> <node>",

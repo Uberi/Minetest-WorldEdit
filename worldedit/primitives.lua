@@ -45,10 +45,49 @@ function worldedit.cube(pos, width, height, length, node_name, hollow)
 	return count
 end
 
+--- Adds a torus of `node_name` centered at `pos`
+-- @param pos Position to center torus at.
+-- @param radius Torus radius.
+-- @param tube_radius Torus tube radius.
+-- @param node_name Name of node to make torus of.
+-- @param hollow Whether the torus should be hollow.
+-- @return The number of nodes added.
+function worldedit.torus(pos, radius, tr, node_name, hollow)
+	local max_extent=radius+tr
+	local manip, area = mh.init_radius(pos, max_extent)
+
+	local data = mh.get_empty_data(area)
+
+	-- Fill selected area with node
+	local node_id = minetest.get_content_id(node_name)
+	local min_hor_radius, max_hor_radius = max_extent * (max_extent - 1), max_extent * (max_extent + 1)
+	local offset_x, offset_y, offset_z = pos.x - area.MinEdge.x, pos.y - area.MinEdge.y, pos.z - area.MinEdge.z
+	local stride_z, stride_y = area.zstride, area.ystride
+	local count = 0
+	for z = -max_extent, max_extent do
+		local new_z = (z + offset_z) * stride_z + 1
+		for y = -tr, tr do
+			local new_y = new_z + (y + offset_y) * stride_y
+			for x = -max_extent, max_extent do
+				local check_1= x * x + z * z
+				if check_1 <= max_hor_radius then
+					local i = new_y + (x + offset_x)
+					data[i] = node_id
+					count = count + 1
+				end
+			end
+		end
+	end
+
+	mh.finish(manip, data)
+
+	return count
+end
+
 --- Adds a sphere of `node_name` centered at `pos`.
 -- @param pos Position to center sphere at.
 -- @param radius Sphere radius.
--- @param node_name Name of node to make shere of.
+-- @param node_name Name of node to make sphere of.
 -- @param hollow Whether the sphere should be hollow.
 -- @return The number of nodes added.
 function worldedit.sphere(pos, radius, node_name, hollow)
