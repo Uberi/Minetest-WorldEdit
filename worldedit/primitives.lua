@@ -71,11 +71,23 @@ function worldedit.torus(pos, radius, tr, node_name, hollow)
 		for y = -tr, tr do
 			local new_y = new_z + (y + offset_y) * stride_y
 			for x = -radius_out, radius_out do
-				local check_1= x * x + z * z
-				if check_1 <= max_hor_radius and check_1 >= min_hor_radius then
-					local i = new_y + (x + offset_x)
-					data[i] = node_id
-					count = count + 1
+				local dxz2= x * x + z * z
+				if dxz2 <= max_hor_radius and dxz2 >= min_hor_radius then
+					local dxz=math.sqrt(dxz2)
+					local rx=x/dxz
+					local rz=z/dxz
+					local xc=radius*rx
+					local zc=radius*rz
+					local yc=0
+					local dx=xc-x
+					local dy=yc-y
+					local dz=zc-z
+					local dist_from_tube_center = math.sqrt(dx*dx+dy*dy+dz*dz)
+					if( dist_from_tube_center <= tr ) then
+						local i = new_y + (x + offset_x)
+						data[i] = node_id
+						count = count + 1
+					end
 				end
 			end
 		end
