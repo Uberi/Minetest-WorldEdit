@@ -53,24 +53,26 @@ end
 -- @param hollow Whether the torus should be hollow.
 -- @return The number of nodes added.
 function worldedit.torus(pos, radius, tr, node_name, hollow)
-	local max_extent=radius+tr
-	local manip, area = mh.init_radius(pos, max_extent)
+	local radius_out=radius+tr
+	local radius_in=radius-tr
+	local manip, area = mh.init_radius(pos, radius_out)
 
 	local data = mh.get_empty_data(area)
 
 	-- Fill selected area with node
 	local node_id = minetest.get_content_id(node_name)
-	local min_hor_radius, max_hor_radius = max_extent * (max_extent - 1), max_extent * (max_extent + 1)
+	local max_hor_radius = radius_out * (radius_out - 1), radius_out * (radius_out + 1)
+	local min_hor_radius = radius_in * (radius_in - 1), radius_in * (radius_in + 1)
 	local offset_x, offset_y, offset_z = pos.x - area.MinEdge.x, pos.y - area.MinEdge.y, pos.z - area.MinEdge.z
 	local stride_z, stride_y = area.zstride, area.ystride
 	local count = 0
-	for z = -max_extent, max_extent do
+	for z = -radius_out, radius_out do
 		local new_z = (z + offset_z) * stride_z + 1
 		for y = -tr, tr do
 			local new_y = new_z + (y + offset_y) * stride_y
-			for x = -max_extent, max_extent do
+			for x = -radius_out, radius_out do
 				local check_1= x * x + z * z
-				if check_1 <= max_hor_radius then
+				if check_1 <= max_hor_radius and check_1 >= min_hor_radius then
 					local i = new_y + (x + offset_x)
 					data[i] = node_id
 					count = count + 1
