@@ -52,7 +52,7 @@ end
 -- @param node_name Name of node to make torus of.
 -- @param hollow Whether the torus should be hollow.
 -- @return The number of nodes added.
-function worldedit.torus(pos, radius, tr, node_name, hollow)
+function worldedit.torus(pos, radius, tr, node_name)
 	local radius_out=radius+tr
 	local radius_in=radius-tr
 	local manip, area = mh.init_radius(pos, radius_out)

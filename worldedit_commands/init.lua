@@ -698,7 +698,12 @@ local check_torus = function(param)
 	if not node then
 		return false, "invalid node name: " .. nodename
 	end
-	return true, tonumber(radius), tonumber(tr), node
+	local n_radius= tonumber(radius)
+	local tr = tonumber(tr)
+	if tr>n_radius then
+		return false, "Thickness cannot be greater than radius"
+	end
+	return true, radius, tr, node
 end
 
 
@@ -737,7 +742,7 @@ worldedit.register_command("torus", {
 	require_pos = 1,
 	parse = check_torus,
 	nodes_needed = function(name, radius, tr, node)
-		return math.ceil((4 * math.pi * (radius ^ 3)) / 3) --volume of sphere
+		return math.ceil( 2 * math.pi * math.pi * radius *tr *tr)
 	end,
 	func = function(name, radius, tr, node)
 		local count = worldedit.torus(worldedit.pos1[name], radius, tr, node)
