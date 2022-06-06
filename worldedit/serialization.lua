@@ -114,11 +114,14 @@ function worldedit.serialize(pos1, pos2)
 	return LATEST_SERIALIZATION_HEADER .. result, count
 end
 
--- Contains code based on [table.save/table.load](http://lua-users.org/wiki/SaveTableToFile)
--- by ChillCode, available under the MIT license.
 local function deserialize_workaround(content)
 	local nodes
 	if not minetest.global_exists("jit") then
+		nodes = minetest.deserialize(content, true)
+	elseif not content:match("^%s*return%s*{") then
+		-- The data doesn't look like we expect it to so we can't apply the workaround.
+		-- hope for the best
+		minetest.log("warning", "WorldEdit: deserializing data but can't apply LuaJIT workaround")
 		nodes = minetest.deserialize(content, true)
 	else
 		-- XXX: This is a filthy hack that works surprisingly well
@@ -130,7 +133,7 @@ local function deserialize_workaround(content)
 		local startpos, startpos1 = 1, 1
 		local endpos
 		while true do -- go through each individual node entry (except the last)
-			startpos, endpos = escaped:find("},%s*{", startpos)
+			startpos, endpos = escaped:find("}%s*,%s*{", startpos)
 			if not startpos then
 				break
 			end
