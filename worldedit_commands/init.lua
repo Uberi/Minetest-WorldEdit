@@ -490,7 +490,7 @@ minetest.register_on_punchnode(function(pos, node, puncher)
 			worldedit.player_notify(name, "position 2 set to " .. minetest.pos_to_string(pos))
 		elseif worldedit.set_pos[name] == "prob" then --setting Minetest schematic node probabilities
 			worldedit.prob_pos[name] = pos
-			minetest.show_formspec(puncher:get_player_name(), "prob_val_enter", "field[text;;]")
+			minetest.show_formspec(name, "prob_val_enter", "field[text;;]")
 		end
 	end
 end)
@@ -1644,11 +1644,18 @@ worldedit.register_command("mtschemprob", {
 })
 
 minetest.register_on_player_receive_fields(function(player, formname, fields)
-	if formname == "prob_val_enter" and not (fields.text == "" or fields.text == nil) then
+	if formname == "prob_val_enter" then
 		local name = player:get_player_name()
-		local prob_entry = {pos=worldedit.prob_pos[name], prob=tonumber(fields.text)}
-		local index = table.getn(worldedit.prob_list[name]) + 1
-		worldedit.prob_list[name][index] = prob_entry
+		local problist = worldedit.prob_list[name]
+		if problist == nil then
+			return
+		end
+		local e = {pos=worldedit.prob_pos[name], prob=tonumber(fields.text)}
+		if e.pos == nil or e.prob == nil or e.prob < 0 or e.prob > 256 then
+			worldedit.player_notify(name, "invalid node probability given, not saved")
+			return
+		end
+		problist[#problist+1] = e
 	end
 end)
 
