@@ -42,7 +42,7 @@ Example:
 worldedit.register_gui_handler = function(identifier, handler)
 	local enabled = true
 	minetest.register_on_player_receive_fields(function(player, formname, fields)
-		if not enabled then return false end
+		if not enabled or formname ~= "" or fields.worldedit_gui then return false end
 		enabled = false
 		minetest.after(0.2, function() enabled = true end)
 		local name = player:get_player_name()
