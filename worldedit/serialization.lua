@@ -115,14 +115,14 @@ function worldedit.serialize(pos1, pos2)
 end
 
 local function deserialize_workaround(content)
-	local nodes
+	local nodes, err
 	if not minetest.global_exists("jit") then
-		nodes = minetest.deserialize(content, true)
+		nodes, err = minetest.deserialize(content, true)
 	elseif not content:match("^%s*return%s*{") then
 		-- The data doesn't look like we expect it to so we can't apply the workaround.
 		-- hope for the best
 		minetest.log("warning", "WorldEdit: deserializing data but can't apply LuaJIT workaround")
-		nodes = minetest.deserialize(content, true)
+		nodes, err = minetest.deserialize(content, true)
 	else
 		-- XXX: This is a filthy hack that works surprisingly well
 		-- in LuaJIT, `minetest.deserialize` will fail due to the register limit
@@ -132,18 +132,27 @@ local function deserialize_workaround(content)
 		local escaped = content:gsub("\\\\", "@@"):gsub("\\\"", "@@"):gsub("(\"[^\"]*\")", function(s) return string.rep("@", #s) end)
 		local startpos, startpos1 = 1, 1
 		local endpos
+		local entry
 		while true do -- go through each individual node entry (except the last)
 			startpos, endpos = escaped:find("}%s*,%s*{", startpos)
 			if not startpos then
 				break
 			end
 			local current = content:sub(startpos1, startpos)
-			local entry = minetest.deserialize("return " .. current, true)
+			entry, err = minetest.deserialize("return " .. current, true)
+			if not entry then
+				break
+			end
 			table.insert(nodes, entry)
 			startpos, startpos1 = endpos, endpos
 		end
-		local entry = minetest.deserialize("return " .. content:sub(startpos1), true) -- process the last entry
-		table.insert(nodes, entry)
+		if not err then
+			entry = minetest.deserialize("return " .. content:sub(startpos1), true) -- process the last entry
+			table.insert(nodes, entry)
+		end
+	end
+	if err then
+		minetest.log("warning", "WorldEdit: deserialize: " .. err)
 	end
 	return nodes
 end
