@@ -226,6 +226,39 @@ local function check_filename(name)
 	return name:find("^[%w%s%^&'@{}%[%],%$=!%-#%(%)%%%.%+~_]+$") ~= nil
 end
 
+local function open_schematic(name, param)
+	-- find the file in the world path
+	local testpaths = {
+		minetest.get_worldpath() .. "/schems/" .. param,
+		minetest.get_worldpath() .. "/schems/" .. param .. ".we",
+		minetest.get_worldpath() .. "/schems/" .. param .. ".wem",
+	}
+	local file, err
+	for index, path in ipairs(testpaths) do
+		file, err = io.open(path, "rb")
+		if not err then
+			break
+		end
+	end
+	if err then
+		worldedit.player_notify(name, "Could not open file \"" .. param .. "\"")
+		return
+	end
+	local value = file:read("*a")
+	file:close()
+
+	local version = worldedit.read_header(value)
+	if version == nil or version == 0 then
+		worldedit.player_notify(name, "File is invalid!")
+		return
+	elseif version > worldedit.LATEST_SERIALIZATION_VERSION then
+		worldedit.player_notify(name, "Schematic was created with a newer version of WorldEdit.")
+		return
+	end
+
+	return value
+end
+
 
 worldedit.register_command("about", {
 	privs = {},
@@ -1415,28 +1448,15 @@ worldedit.register_command("allocate", {
 	func = function(name, param)
 		local pos = worldedit.pos1[name]
 
-		local filename = minetest.get_worldpath() .. "/schems/" .. param .. ".we"
-		local file, err = io.open(filename, "rb")
-		if err ~= nil then
-			worldedit.player_notify(name, "could not open file \"" .. filename .. "\"")
-			return
+		local value = open_schematic(name, param)
+		if not value then
+			return false
 		end
-		local value = file:read("*a")
-		file:close()
 
-		local version = worldedit.read_header(value)
-		if version == nil or version == 0 then
-			worldedit.player_notify(name, "File is invalid!")
-			return
-		elseif version > worldedit.LATEST_SERIALIZATION_VERSION then
-			worldedit.player_notify(name, "File was created with newer version of WorldEdit!")
-			return
-		end
 		local nodepos1, nodepos2, count = worldedit.allocate(pos, value)
-
 		if not nodepos1 then
 			worldedit.player_notify(name, "Schematic empty, nothing allocated")
-			return
+			return false
 		end
 
 		worldedit.pos1[name] = nodepos1
@@ -1464,46 +1484,16 @@ worldedit.register_command("load", {
 	func = function(name, param)
 		local pos = worldedit.pos1[name]
 
-		if param == "" then
-			worldedit.player_notify(name, "invalid usage: " .. param)
-			return
-		end
-		if not string.find(param, "^[%w \t.,+-_=!@#$%%^&*()%[%]{};'\"]+$") then
-			worldedit.player_notify(name, "invalid file name: " .. param)
-			return
-		end
-
-		--find the file in the world path
-		local testpaths = {
-			minetest.get_worldpath() .. "/schems/" .. param,
-			minetest.get_worldpath() .. "/schems/" .. param .. ".we",
-			minetest.get_worldpath() .. "/schems/" .. param .. ".wem",
-		}
-		local file, err
-		for index, path in ipairs(testpaths) do
-			file, err = io.open(path, "rb")
-			if not err then
-				break
-			end
-		end
-		if err then
-			worldedit.player_notify(name, "could not open file \"" .. param .. "\"")
-			return
-		end
-		local value = file:read("*a")
-		file:close()
-
-		local version = worldedit.read_header(value)
-		if version == nil or version == 0 then
-			worldedit.player_notify(name, "File is invalid!")
-			return
-		elseif version > worldedit.LATEST_SERIALIZATION_VERSION then
-			worldedit.player_notify(name, "File was created with newer version of WorldEdit!")
-			return
+		local value = open_schematic(name, param)
+		if not value then
+			return false
 		end
 
 		local count = worldedit.deserialize(pos, value)
-
+		if count == nil then
+			worldedit.player_notify(name, "Loading failed!")
+			return false
+		end
 		worldedit.player_notify(name, count .. " nodes loaded")
 	end,
 })
