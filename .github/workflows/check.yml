@@ -1,12 +1,12 @@
 on: [push, pull_request]
-name: Check & Release
+name: Check
 
 jobs:
   lint:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
     - name: apt
       run: sudo apt-get install -y luarocks
     - name: luacheck install
