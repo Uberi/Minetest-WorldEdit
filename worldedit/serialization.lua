@@ -66,7 +66,7 @@ function worldedit.serialize(pos1, pos2)
 		has_meta[hash_node_position(meta_positions[i])] = true
 	end
 
-	local pos = {x=pos1.x, y=0, z=0}
+	local pos = vector.new(pos1.x, 0, 0)
 	local count = 0
 	local result = {}
 	while pos.x <= pos2.x do
@@ -235,9 +235,7 @@ function worldedit.allocate_with_nodes(origin_pos, nodes)
 		if y > pos2y then pos2y = y end
 		if z > pos2z then pos2z = z end
 	end
-	local pos1 = {x=pos1x, y=pos1y, z=pos1z}
-	local pos2 = {x=pos2x, y=pos2y, z=pos2z}
-	return pos1, pos2, #nodes
+	return vector.new(pos1x, pos1y, pos1z), vector.new(pos2x, pos2y, pos2z), #nodes
 end
 
 

@@ -87,10 +87,10 @@ do
 	-- Returns an usable area [pos1, pos2] that does not overlap previous ones
 	area.get = function(sizex, sizey, sizez)
 		local size
-		if sizey == nil or sizez == nil then
-			size = {x=sizex, y=sizex, z=sizex}
+		if sizey == nil and sizez == nil then
+			size = vector.new(sizex, sizex, sizex)
 		else
-			size = {x=sizex, y=sizey, z=sizez}
+			size = vector.new(sizex, sizey, sizez)
 		end
 		local pos1 = vector.add(areamin, off)
 		local pos2 = vector.subtract(vector.add(pos1, size), 1)
@@ -425,7 +425,7 @@ do
 	local fmt51 = '{[r2]=0,x=%d,y=%d,z=%d,name=r%d}'
 	local fmt52 = '{x=%d,y=%d,z=%d,name=_[%d]}'
 	local test_data = {
-		-- used by WorldEdit 0.4.2.1 (first public release)
+		-- used by WorldEdit 0.2 (first public release)
 		{
 			name = "v1", ver = 1,
 			gen = function(pat)
@@ -560,7 +560,7 @@ worldedit.run_tests = function()
 	for x = 0, math.floor(wanted.x/16) do
 	for y = 0, math.floor(wanted.y/16) do
 	for z = 0, math.floor(wanted.z/16) do
-		assert(minetest.forceload_block({x=x*16, y=y*16, z=z*16}, true))
+		assert(minetest.forceload_block(vector.new(x*16, y*16, z*16), true))
 	end
 	end
 	end

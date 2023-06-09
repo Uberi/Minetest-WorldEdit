@@ -488,7 +488,7 @@ worldedit.register_command("fixedpos", {
 		if found == nil then
 			return false
 		end
-		return true, flag, {x=tonumber(x), y=tonumber(y), z=tonumber(z)}
+		return true, flag, vector.new(tonumber(x), tonumber(y), tonumber(z))
 	end,
 	func = function(name, flag, pos)
 		if flag == "set1" then
@@ -1047,7 +1047,7 @@ worldedit.register_command("stack2", {
 			return false, "invalid increments: " .. param
 		end
 
-		return true, tonumber(repetitions), {x=tonumber(x), y=tonumber(y), z=tonumber(z)}
+		return true, tonumber(repetitions), vector.new(tonumber(x), tonumber(y), tonumber(z))
 	end,
 	nodes_needed = function(name, repetitions, offset)
 		return check_region(name) * repetitions
@@ -1219,13 +1219,16 @@ worldedit.register_command("drain", {
 		-- TODO: make an API function for this
 		local count = 0
 		local pos1, pos2 = worldedit.sort_pos(worldedit.pos1[name], worldedit.pos2[name])
+
+		local get_node, remove_node = minetest.get_node, minetest.remove_node
 		for x = pos1.x, pos2.x do
 		for y = pos1.y, pos2.y do
 		for z = pos1.z, pos2.z do
-			local n = minetest.get_node({x=x, y=y, z=z}).name
+			local p = vector.new(x, y, z)
+			local n = get_node(p).name
 			local d = minetest.registered_nodes[n]
-			if d ~= nil and (d["drawtype"] == "liquid" or d["drawtype"] == "flowingliquid") then
-				minetest.remove_node({x=x, y=y, z=z})
+			if d ~= nil and (d.drawtype == "liquid" or d.drawtype == "flowingliquid") then
+				remove_node(p)
 				count = count + 1
 			end
 		end
@@ -1263,13 +1266,15 @@ local function clearcut(pos1, pos2)
 	local count = 0
 	local prev, any
 
+	local get_node, remove_node = minetest.get_node, minetest.remove_node
 	for x = pos1.x, pos2.x do
 	for z = pos1.z, pos2.z do
 		prev = false
 		any = false
 		-- first pass: remove floating nodes that would be left over
 		for y = pos1.y, pos2.y do
-			local n = minetest.get_node({x=x, y=y, z=z}).name
+			local pos = vector.new(x, y, z)
+			local n = get_node(pos).name
 			if plants[n] then
 				prev = true
 				any = true
@@ -1277,7 +1282,7 @@ local function clearcut(pos1, pos2)
 				local def = minetest.registered_nodes[n] or {}
 				local groups = def.groups or {}
 				if groups.attached_node or (def.buildable_to and groups.falling_node) then
-					minetest.remove_node({x=x, y=y, z=z})
+					remove_node(pos)
 					count = count + 1
 				else
 					prev = false
@@ -1288,9 +1293,10 @@ local function clearcut(pos1, pos2)
 		-- second pass: remove plants, top-to-bottom to avoid item drops
 		if any then
 			for y = pos2.y, pos1.y, -1 do
-				local n = minetest.get_node({x=x, y=y, z=z}).name
+				local pos = vector.new(x, y, z)
+				local n = get_node(pos).name
 				if plants[n] then
-					minetest.remove_node({x=x, y=y, z=z})
+					remove_node(pos)
 					count = count + 1
 				end
 			end

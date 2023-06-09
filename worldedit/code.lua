@@ -31,7 +31,7 @@ function worldedit.luatransform(pos1, pos2, code)
 
 	worldedit.keep_loaded(pos1, pos2)
 
-	local pos = {x=pos1.x, y=0, z=0}
+	local pos = vector.new(pos1.x, 0, 0)
 	while pos.x <= pos2.x do
 		pos.y = pos1.y
 		while pos.y <= pos2.y do

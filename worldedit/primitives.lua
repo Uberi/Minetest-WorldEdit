@@ -20,7 +20,7 @@ function worldedit.cube(pos, width, height, length, node_name, hollow)
 
 	-- Add cube
 	local node_id = minetest.get_content_id(node_name)
-	local stride = {x=1, y=area.ystride, z=area.zstride}
+	local stride = vector.new(1, area.ystride, area.zstride)
 	local offset = vector.subtract(basepos, area.MinEdge)
 	local count = 0
 
@@ -149,7 +149,7 @@ function worldedit.cylinder(pos, axis, length, radius1, radius2, node_name, holl
 	end
 
 	-- Handle negative lengths
-	local current_pos = {x=pos.x, y=pos.y, z=pos.z}
+	local current_pos = vector.new(pos)
 	if length < 0 then
 		length = -length
 		current_pos[axis] = current_pos[axis] - length
@@ -162,7 +162,7 @@ function worldedit.cylinder(pos, axis, length, radius1, radius2, node_name, holl
 
 	-- Add desired shape (anything inbetween cylinder & cone)
 	local node_id = minetest.get_content_id(node_name)
-	local stride = {x=1, y=area.ystride, z=area.zstride}
+	local stride = vector.new(1, area.ystride, area.zstride)
 	local offset = {
 		x = current_pos.x - area.MinEdge.x,
 		y = current_pos.y - area.MinEdge.y,
@@ -225,7 +225,7 @@ function worldedit.pyramid(pos, axis, height, node_name, hollow)
 
 	-- Add pyramid
 	local node_id = minetest.get_content_id(node_name)
-	local stride = {x=1, y=area.ystride, z=area.zstride}
+	local stride = vector.new(1, area.ystride, area.zstride)
 	local offset = {
 		x = pos.x - area.MinEdge.x,
 		y = pos.y - area.MinEdge.y,
@@ -271,7 +271,7 @@ function worldedit.spiral(pos, length, height, spacer, node_name)
 
 	-- Set up variables
 	local node_id = minetest.get_content_id(node_name)
-	local stride = {x=1, y=area.ystride, z=area.zstride}
+	local stride = vector.new(1, area.ystride, area.zstride)
 	local offset_x, offset_y, offset_z = pos.x - area.MinEdge.x, pos.y - area.MinEdge.y, pos.z - area.MinEdge.z
 	local i = offset_z * stride.z + offset_y * stride.y + offset_x + 1
 

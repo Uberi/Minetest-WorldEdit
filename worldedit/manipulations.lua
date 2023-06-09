@@ -128,7 +128,7 @@ function worldedit.stack2(pos1, pos2, direction, amount, finished)
 	direction = table.copy(direction)
 
 	local i = 0
-	local translated = {x=0, y=0, z=0}
+	local translated = vector.new()
 	local function step()
 		translated.x = translated.x + direction.x
 		translated.y = translated.y + direction.y
@@ -155,7 +155,7 @@ function worldedit.copy(pos1, pos2, axis, amount)
 	-- Decide if we need to copy stuff backwards (only applies to metadata)
 	local backwards = amount > 0 and amount < (pos2[axis] - pos1[axis] + 1)
 
-	local off = {x=0, y=0, z=0}
+	local off = vector.new()
 	off[axis] = amount
 	return worldedit.copy2(pos1, pos2, off, backwards)
 end
@@ -170,7 +170,7 @@ function worldedit.copy2(pos1, pos2, off, meta_backwards)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 
 	local src_manip, src_area = mh.init(pos1, pos2)
-	local src_stride = {x=1, y=src_area.ystride, z=src_area.zstride}
+	local src_stride = vector.new(1, src_area.ystride, src_area.zstride)
 	local src_offset = vector.subtract(pos1, src_area.MinEdge)
 
 	local dpos1 = vector.add(pos1, off)
@@ -178,7 +178,7 @@ function worldedit.copy2(pos1, pos2, off, meta_backwards)
 	local dim = vector.add(vector.subtract(pos2, pos1), 1)
 
 	local dst_manip, dst_area = mh.init(dpos1, dpos2)
-	local dst_stride = {x=1, y=dst_area.ystride, z=dst_area.zstride}
+	local dst_stride = vector.new(1, dst_area.ystride, dst_area.zstride)
 	local dst_offset = vector.subtract(dpos1, dst_area.MinEdge)
 
 	local function do_copy(src_data, dst_data)
@@ -226,7 +226,7 @@ function worldedit.copy2(pos1, pos2, off, meta_backwards)
 	for z = dim.z-1, 0, -1 do
 		for y = dim.y-1, 0, -1 do
 			for x = dim.x-1, 0, -1 do
-				local pos = {x=pos1.x+x, y=pos1.y+y, z=pos1.z+z}
+				local pos = vector.new(pos1.x+x, pos1.y+y, pos1.z+z)
 				local meta = get_meta(pos):to_table()
 				pos = vector.add(pos, off)
 				get_meta(pos):from_table(meta)
@@ -237,7 +237,7 @@ function worldedit.copy2(pos1, pos2, off, meta_backwards)
 	for z = 0, dim.z-1 do
 		for y = 0, dim.y-1 do
 			for x = 0, dim.x-1 do
-				local pos = {x=pos1.x+x, y=pos1.y+y, z=pos1.z+z}
+				local pos = vector.new(pos1.x+x, pos1.y+y, pos1.z+z)
 				local meta = get_meta(pos):to_table()
 				pos = vector.add(pos, off)
 				get_meta(pos):from_table(meta)
@@ -286,21 +286,21 @@ function worldedit.move(pos1, pos2, axis, amount)
 	end
 
 	-- Copy stuff to new location
-	local off = {x=0, y=0, z=0}
+	local off = vector.new()
 	off[axis] = amount
 	worldedit.copy2(pos1, pos2, off, backwards)
 	-- Nuke old area
 	if not overlap then
-		nuke_area({x=0, y=0, z=0}, dim)
+		nuke_area(vector.new(), dim)
 	else
 		-- Source and destination region are overlapping, which means we can't
 		-- blindly delete the [pos1, pos2] area
 		local leftover = vector.new(dim) -- size of the leftover slice
 		leftover[axis] = math.abs(amount)
 		if amount > 0 then
-			nuke_area({x=0, y=0, z=0}, leftover)
+			nuke_area(vector.new(), leftover)
 		else
-			local top = {x=0, y=0, z=0} -- offset of the leftover slice from pos1
+			local top = vector.new() -- offset of the leftover slice from pos1
 			top[axis] = dim[axis] - math.abs(amount)
 			nuke_area(top, leftover)
 		end
@@ -358,7 +358,7 @@ function worldedit.stretch(pos1, pos2, stretch_x, stretch_y, stretch_z)
 	for i = 1, stretch_x * stretch_y * stretch_z do
 		nodes[i] = placeholder_node
 	end
-	local schematic = {size={x=stretch_x, y=stretch_y, z=stretch_z}, data=nodes}
+	local schematic = {size=vector.new(stretch_x, stretch_y, stretch_z), data=nodes}
 
 	local size_x, size_y, size_z = stretch_x - 1, stretch_y - 1, stretch_z - 1
 
@@ -369,8 +369,8 @@ function worldedit.stretch(pos1, pos2, stretch_x, stretch_y, stretch_z)
 	}
 	worldedit.keep_loaded(pos1, new_pos2)
 
-	local pos = {x=pos2.x, y=0, z=0}
-	local big_pos = {x=0, y=0, z=0}
+	local pos = vector.new(pos2.x, 0, 0)
+	local big_pos = vector.new()
 	while pos.x >= pos1.x do
 		pos.y = pos2.y
 		while pos.y >= pos1.y do
@@ -436,16 +436,16 @@ function worldedit.transpose(pos1, pos2, axis1, axis2)
 	end
 
 	-- Calculate the new position 2 after transposition
-	local new_pos2 = {x=pos2.x, y=pos2.y, z=pos2.z}
+	local new_pos2 = vector.new(pos2)
 	new_pos2[axis1] = pos1[axis1] + extent2
 	new_pos2[axis2] = pos1[axis2] + extent1
 
-	local upper_bound = {x=pos2.x, y=pos2.y, z=pos2.z}
+	local upper_bound = vector.new(pos2)
 	if upper_bound[axis1] < new_pos2[axis1] then upper_bound[axis1] = new_pos2[axis1] end
 	if upper_bound[axis2] < new_pos2[axis2] then upper_bound[axis2] = new_pos2[axis2] end
 	worldedit.keep_loaded(pos1, upper_bound)
 
-	local pos = {x=pos1.x, y=0, z=0}
+	local pos = vector.new(pos1.x, 0, 0)
 	local get_node, get_meta, set_node = minetest.get_node,
 			minetest.get_meta, minetest.set_node
 	while pos.x <= pos2.x do
@@ -485,7 +485,7 @@ function worldedit.flip(pos1, pos2, axis)
 	worldedit.keep_loaded(pos1, pos2)
 
 	--- TODO: Flip the region slice by slice along the flip axis using schematic method.
-	local pos = {x=pos1.x, y=0, z=0}
+	local pos = vector.new(pos1.x, 0, 0)
 	local start = pos1[axis] + pos2[axis]
 	pos2[axis] = pos1[axis] + math.floor((pos2[axis] - pos1[axis]) / 2)
 	local get_node, get_meta, set_node = minetest.get_node,
@@ -584,7 +584,7 @@ function worldedit.orient(pos1, pos2, angle)
 
 	local count = 0
 	local get_node, swap_node = minetest.get_node, minetest.swap_node
-	local pos = {x=pos1.x, y=0, z=0}
+	local pos = vector.new(pos1.x, 0, 0)
 	while pos.x <= pos2.x do
 		pos.y = pos1.y
 		while pos.y <= pos2.y do
@@ -650,13 +650,12 @@ function worldedit.clear_objects(pos1, pos2)
 	end
 
 	-- Offset positions to include full nodes (positions are in the center of nodes)
-	local pos1x, pos1y, pos1z = pos1.x - 0.5, pos1.y - 0.5, pos1.z - 0.5
-	local pos2x, pos2y, pos2z = pos2.x + 0.5, pos2.y + 0.5, pos2.z + 0.5
+	pos1 = vector.add(pos1, -0.5)
+	pos2 = vector.add(pos1, 0.5)
 
 	local count = 0
 	if minetest.get_objects_in_area then
-		local objects = minetest.get_objects_in_area({x=pos1x, y=pos1y, z=pos1z},
-			{x=pos2x, y=pos2y, z=pos2z})
+		local objects = minetest.get_objects_in_area(pos1, pos2)
 
 		for _, obj in pairs(objects) do
 			if should_delete(obj) then
@@ -670,21 +669,21 @@ function worldedit.clear_objects(pos1, pos2)
 	-- Fallback implementation via get_objects_inside_radius
 	-- Center of region
 	local center = {
-		x = pos1x + ((pos2x - pos1x) / 2),
-		y = pos1y + ((pos2y - pos1y) / 2),
-		z = pos1z + ((pos2z - pos1z) / 2)
+		x = pos1.x + ((pos2.x - pos1.x) / 2),
+		y = pos1.y + ((pos2.y - pos1.y) / 2),
+		z = pos1.z + ((pos2.z - pos1.z) / 2)
 	}
 	-- Bounding sphere radius
 	local radius = math.sqrt(
-			(center.x - pos1x) ^ 2 +
-			(center.y - pos1y) ^ 2 +
-			(center.z - pos1z) ^ 2)
+			(center.x - pos1.x) ^ 2 +
+			(center.y - pos1.y) ^ 2 +
+			(center.z - pos1.z) ^ 2)
 	for _, obj in pairs(minetest.get_objects_inside_radius(center, radius)) do
 		if should_delete(obj) then
 			local pos = obj:get_pos()
-			if pos.x >= pos1x and pos.x <= pos2x and
-					pos.y >= pos1y and pos.y <= pos2y and
-					pos.z >= pos1z and pos.z <= pos2z then
+			if pos.x >= pos1.x and pos.x <= pos2.x and
+					pos.y >= pos1.y and pos.y <= pos2.y and
+					pos.z >= pos1.z and pos.z <= pos2.z then
 				-- Inside region
 				obj:remove()
 				count = count + 1
