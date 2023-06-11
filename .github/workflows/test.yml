@@ -1,11 +1,11 @@
-name: test
-
+name: "Test"
 on: [push, pull_request]
 
 jobs:
   test:
+    name: "Unittests"
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Run tests
       run: MINETEST_VER=latest ./.util/run_tests.sh
