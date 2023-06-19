@@ -45,14 +45,14 @@ local function chatcommand_handler(cmd_name, name, param)
 	if def.nodes_needed then
 		local count = def.nodes_needed(name, unpack(parsed))
 		safe_region(name, count, function()
-			local _, msg = def.func(name, unpack(parsed))
+			local success, msg = def.func(name, unpack(parsed))
 			if msg then
 				minetest.chat_send_player(name, msg)
 			end
 		end)
 	else
 		-- no "safe region" check
-		local _, msg = def.func(name, unpack(parsed))
+		local success, msg = def.func(name, unpack(parsed))
 		if msg then
 			minetest.chat_send_player(name, msg)
 		end
@@ -1382,7 +1382,7 @@ worldedit.register_command("restore", {
 })
 
 local function detect_misaligned_schematic(name, pos1, pos2)
-	pos1 = worldedit.sort_pos(pos1, pos2)
+	pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 	-- Check that allocate/save can position the schematic correctly
 	-- The expected behaviour is that the (0,0,0) corner of the schematic stays
 	-- sat pos1, this only works when the minimum position is actually present
