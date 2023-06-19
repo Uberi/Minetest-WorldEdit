@@ -160,7 +160,7 @@ end
 --- Loads the schematic in `value` into a node list in the latest format.
 -- @return A node list in the latest format, or nil on failure.
 local function load_schematic(value)
-	local version, header, content = worldedit.read_header(value)
+	local version, _, content = worldedit.read_header(value)
 	local nodes = {}
 	if version == 1 or version == 2 then -- Original flat table format
 		local tables = minetest.deserialize(content, true)
