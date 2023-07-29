@@ -101,7 +101,7 @@ end
 local function deferred_execution(next_one, finished)
 	-- Allocate 100% of server step for execution (might lag a little)
 	local allocated_usecs =
-		tonumber(minetest.settings:get("dedicated_server_step")) * 1000000
+		tonumber(minetest.settings:get("dedicated_server_step"):split(" ")[1]) * 1000000
 	local function f()
 		local deadline = minetest.get_us_time() + allocated_usecs
 		repeat
