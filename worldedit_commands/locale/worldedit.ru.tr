@@ -1,0 +1,91 @@
+# textdomain: worldedit
+
+### init.lua ###
+Can use WorldEdit commands=Возможность редактировать мир с помощью команд WorldEdit
+
+no region selected=не выделен регион
+no position 1 selected=не установлена позиция региона 1
+invalid usage=не верное использование команды
+Could not open file "@1"=Не удаётся открыть файл "@1"
+Invalid file format!=Не верный формат файла!
+
+Get information about the WorldEdit mod=Вывести информацию о WorldEdit
+WorldEdit @1 is available on this server. Type //help to get a list of commands, or get more information at https://github.com/Uberi/Minetest-WorldEdit=WorldEdit @1 доступен на этом сервере. Наберите команду //help чтобы увидеть список команд, больше информации по ссылке https://github.com/Uberi/Minetest-WorldEdit
+Get help for WorldEdit commands=Вывести информацию об использовании команд WorldEdit
+You are not allowed to use any WorldEdit commands.=У вас нет привилегий, чтобы использовать команды WorldEdit.
+Available commands: @1@nUse '//help <cmd>' to get more information, or '//help all' to list everything.=Доступные команды: @1@nИспользуйте '//help <cmd>' для получения информации по команде или '//help all' для вывода подсказок по всем командам.
+Available commands:@n=Доступные команды:@n
+Command not available: =Команда не найдена:
+Enable or disable node inspection=Включить/отключить инспекцию блоков
+inspector: inspection enabled for @1, currently facing the @2 axis=inspector: инспекция включена для @1, текущий взор в направлении оси @2
+inspector: inspection disabled=inspector: инспекция отключена
+inspector: @1 at @2 (param1=@3, param2=@4, received light=@5) punched facing the @6 axis=inspector: @1 в @2 (param1=@3, param2=@4, received light=@5) ударен по поверхности @6
+Reset the region so that it is empty=Сбросить выделение области
+Show markers at the region positions=Отобразить маркеры выделенной области
+Hide markers if currently shown=Скрыть маркеры выделенной области
+Set WorldEdit region position 1 to the player's location=Установить маркер 1 для WorldEdit-региона в месте нахождения игрока
+Set WorldEdit region position 2 to the player's location=Установить маркер 2 для WorldEdit-региона в месте нахождения игрока
+Set WorldEdit region, WorldEdit position 1, or WorldEdit position 2 by punching nodes, or display the current WorldEdit region=Выделить WorldEdit-регион или установить маркеры для WorldEdit-региона, либо отобразить уже выбранную область
+unknown subcommand: =неизвестная подкоманда:
+select positions by punching two nodes=выберите позиции, ударив по блокам
+select position @1 by punching a node=выберите позицию @1, ударив по блоку
+position @1 not set=позиция @1 не установлена
+Set a WorldEdit region position to the position at (<x>, <y>, <z>)=Установить маркер для WorldEdit в позиции (<x>, <y>, <z>)
+position @1 set to @2=позиция @1 установлена в @2
+Display the volume of the current WorldEdit region=Вывести информацию об объёме текущей выделенной области WorldEdit (кол-во нод, размеры)
+Remove all MapBlocks (16x16x16) containing the selected area from the map=Удалить MapBlocks (16x16x16), содержащие выбранную область
+Area deleted.=Область удалена.
+There was an error during deletion of the area.=Что-то пошло не так при удалении области.
+Set the current WorldEdit region to <node>=Заполнить выбранный WorldEdit-регион указанным типом блоков
+invalid node name: @1=неверное название блока: @1
+@1 nodes set=@1 блок(а/ов) установленно
+Set param2 of all nodes in the current WorldEdit region to <param2>=Проставить param2 для всех блоков в текущем WorldEdit-регионе
+Param2 is out of range (must be between 0 and 255 inclusive!)=Значение param2 должно быть от 0 до 255 (включительно!)
+@1 nodes altered=изменено @1 блок(а/ов)
+Fill the current WorldEdit region with a random mix of <node1>, ...=Заполнить выбранный WorldEdit-регион смесью указанных типов блоков
+invalid search node name: @1=неверное название блока-поиска: @1
+invalid replace node name: @1=неверное название блока-замены: @1
+Replace all instances of <search node> with <replace node> in the current WorldEdit region=Заменить все блоки <search node> на <replace node> в выбранной WorldEdit-области
+Replace all nodes other than <search node> with <replace node> in the current WorldEdit region=Заменить все блоки, кроме <search node>, на <replace node> в выбранной WorldEdit-области
+Add a hollow cube with its ground level centered at WorldEdit position 1 with dimensions <width> x <height> x <length>, composed of <node>.=Установить полый куб с центром нижней грани в позиции 1 и указанными размерами, состоящий из блоков <node>.
+@1 nodes added=добавлен(о) @1 блок(а/ов)
+Add a cube with its ground level centered at WorldEdit position 1 with dimensions <width> x <height> x <length>, composed of <node>.=Установить куб с центром нижней грани в позиции 1 и указанными размерами, состоящий из блоков <node>.
+Add hollow sphere centered at WorldEdit position 1 with radius <radius>, composed of <node>=Установить полую сферу с центром в WorldEdit-позиции 1 радиусом <radius>, состоящую из блоков <node>
+Add sphere centered at WorldEdit position 1 with radius <radius>, composed of <node>=Установить сферу с центром в WorldEdit-позиции 1 радиусом <radius>, состоящую из блоков <node>
+Add hollow dome centered at WorldEdit position 1 with radius <radius>, composed of <node>=Установить полый купол с центром в WorldEdit-позиции 1 радиусом <radius>, состоящий из блоков <node>
+Add dome centered at WorldEdit position 1 with radius <radius>, composed of <node>=Установить купол с центром в WorldEdit-позиции 1 радиусом <radius>, состоящий из блоков <node>
+Add hollow cylinder at WorldEdit position 1 along the given axis with length <length>, base radius <radius1> (and top radius [radius2]), composed of <node>=Установить полый цилиндр вдоль указанной оси, с центром в позиции 1, высотой/длинной <length>, с радиусом основания <radius> (и радиусом вершины [radius 2]), состоящий из блоков <node>
+Add cylinder at WorldEdit position 1 along the given axis with length <length>, base radius <radius1> (and top radius [radius2]), composed of <node>=Установить цилиндр вдоль указанной оси, с центром в позиции 1, высотой/длинной <length>, с радиусом основания <radius> (и радиусом вершины [radius 2]), состоящий из блоков <node>
+Add hollow pyramid centered at WorldEdit position 1 along the given axis with height <height>, composed of <node>=Установить полую пирамиду вдоль указанной оси, с центром в WorldEdit-позиции 1 высотой <height>, состоящую из блоков <node>
+Add pyramid centered at WorldEdit position 1 along the given axis with height <height>, composed of <node>=Установить пирамиду вдоль указанной оси, с центром в WorldEdit-позиции 1 высотой <height>, состоящую из блоков <node>
+Add spiral centered at WorldEdit position 1 with side length <length>, height <height>, space between walls <space>, composed of <node>=Установить спираль с центром в WorldEdit-позиции 1 шириной <length>, высотой <height> и с расстоянием между витками <space>, состоящую из блоков <node>
+Copy the current WorldEdit region along the given axis by <amount> nodes=Копировать текущий WorldEdit-регион со смещением вдоль указанной оси (x/y/z) на <amount> блоков
+Move the current WorldEdit region along the given axis by <amount> nodes=Переместить текущий WorldEdit-регион вдоль указанной оси (x/y/z) на <amount> блоков
+Stack the current WorldEdit region along the given axis <count> times=Размножить текущий WorldEdit-регион вдоль указанной оси <count> раз
+Stack the current WorldEdit region <count> times by offset <x>, <y>, <z>=Размножить текущий WorldEdit-регион <count> раз с шагом <x>, <y>, <z> по соответствующим осям
+Scale the current WorldEdit positions and region by a factor of <stretchx>, <stretchy>, <stretchz> along the X, Y, and Z axes, repectively, with position 1 as the origin=Масштабировать текущий WorldEdit-регион с коэффициентами <stretchx>, <stretchy>, <stretchz> вдоль осей X, Y и Z, используя WorldEdit-позицию 1 в качестве точки отсчёта
+Transpose the current WorldEdit region along the given axes=Транспонировать текущий WorldEdit-регион по заданным осям.
+Flip the current WorldEdit region along the given axis=Перевернуть/Отразить текущий WorldEdit-регион вдоль указанной оси
+Rotate the current WorldEdit region around the given axis by angle <angle> (90 degree increment)=Повернуть текущий WorldEdit-регион вокруг оси <axis> на угол <angle> (шаг - 90 градусов)
+Rotate oriented nodes in the current WorldEdit region around the Y axis by angle <angle> (90 degree increment)=Повернуть блоки в текущем WorldEdit-регионе вокруг оси Y на угол <angle> (шаг - 90 градусов)
+Fix the lighting in the current WorldEdit region=Исправить освещение в текущем WorldEdit-регионе
+Remove any fluid node within the current WorldEdit region=Удалить любые жидкости в текущем WorldEdit-регионе
+Remove any plant, tree or foliage-like nodes in the selected region=Удалить любые растения, деревья или листье-подобные ноды в текущем WorldEdit-регионе
+Hide all nodes in the current WorldEdit region non-destructively=Скрыть узлы текущего WorldEdit-региона, не удаляя их
+Suppress all <node> in the current WorldEdit region non-destructively=Скрыть все блоки <node> в текущем WorldEdit-регионе, не удаляя их
+Highlight <node> in the current WorldEdit region by hiding everything else non-destructively=Скрыть все блоки, кроме <node>, в текущем WorldEdit-регионе, не удаляя их
+Restores nodes hidden with WorldEdit in the current WorldEdit region=Восстановить скрытые WorldEdit'ом узлы в текущем WorldEdit-регионе
+Warning: The schematic contains excessive free space and WILL be misaligned when allocated or loaded. To avoid this, shrink your area to cover exactly the nodes to be saved.=Предупреждение: Схема содержит слишком много свободного места и будет смещена при размещении или загрузке. Чтобы избежать этого, уменьшите область так, чтобы она охватывала именно те узлы, которые необходимо сохранить.
+Save the current WorldEdit region to "(world folder)/schems/<file>.we"=Сохранить текущий WorldEdit-регион в файл "(world folder)/schems/<file>.we"
+Set the region defined by nodes from "(world folder)/schems/<file>.we" as the current WorldEdit region=Установить область, определённую узлами из "(world folder)/schems/<file>.we", как текущий WorldEdit-регион
+Load nodes from "(world folder)/schems/<file>[.we[m]]" with position 1 of the current WorldEdit region as the origin=Загрузить регион из "(world folder)/schems/<file>[.we[m]]" с WorldEdit-позицией 1 в качестве точки отсчёта
+Executes <code> as a Lua chunk in the global namespace=Выполнить <code> как Lua-код в глобальном пространстве имён
+Executes <code> as a Lua chunk in the global namespace with the variable pos available, for each node in the current WorldEdit region=Выполнить <code> как Lua-код в глобальном пространстве имён, с доступом к переменным позиций для каждого блока в текущем WordEdit-регионе
+Save the current WorldEdit region using the Minetest Schematic format to "(world folder)/schems/<filename>.mts"=Сохранить текущий WorldEdit-регион с использованием сжатия в формат Minetest Schematic в файл "(world folder)/schems/<filename>.mts"
+Load nodes from "(world folder)/schems/<file>.mts" with position 1 of the current WorldEdit region as the origin=Загрузить блоки из "(world folder)/schems/<file>.mts" с WorldEdit-позицией 1 в качестве точки отсчёта
+Begins node probability entry for Minetest schematics, gets the nodes that have probabilities set, or ends node probability entry=Начать запись вероятностей для Minetest Schematic, ударяя по блокам, закончить запись вероятностей или вывести уже записанные вероятности
+Clears all objects within the WorldEdit region=Очистить все объекты в текущем WorldEdit-регионе
+
+### safe.lua ###
+Confirm a pending operation=Подтвердить отложенную операцию
+Abort a pending operation=Отклонить отложенную операцию

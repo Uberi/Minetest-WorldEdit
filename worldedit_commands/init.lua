@@ -1,4 +1,6 @@
-minetest.register_privilege("worldedit", "Can use WorldEdit commands")
+local S = minetest.get_translator("worldedit")
+
+minetest.register_privilege("worldedit", S("Can use WorldEdit commands"))
 
 worldedit.pos1 = {}
 worldedit.pos2 = {}
@@ -24,13 +26,13 @@ local function chatcommand_handler(cmd_name, name, param)
 	if def.require_pos == 2 then
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
 		if pos1 == nil or pos2 == nil then
-			worldedit.player_notify(name, "no region selected")
+			worldedit.player_notify(name, S("no region selected"))
 			return
 		end
 	elseif def.require_pos == 1 then
 		local pos1 = worldedit.pos1[name]
 		if pos1 == nil then
-			worldedit.player_notify(name, "no position 1 selected")
+			worldedit.player_notify(name, S("no position 1 selected"))
 			return
 		end
 	end
@@ -38,7 +40,7 @@ local function chatcommand_handler(cmd_name, name, param)
 	local parsed = {def.parse(param)}
 	local success = table.remove(parsed, 1)
 	if not success then
-		worldedit.player_notify(name, parsed[1] or "invalid usage")
+		worldedit.player_notify(name, parsed[1] or S("invalid usage"))
 		return
 	end
 
@@ -241,7 +243,7 @@ local function open_schematic(name, param)
 		end
 	end
 	if err then
-		worldedit.player_notify(name, "Could not open file \"" .. param .. "\"")
+		worldedit.player_notify(name, S("Could not open file \"@1\"", param))
 		return
 	end
 	local value = file:read("*a")
@@ -249,7 +251,7 @@ local function open_schematic(name, param)
 
 	local version = worldedit.read_header(value)
 	if version == nil or version == 0 then
-		worldedit.player_notify(name, "File is invalid!")
+		worldedit.player_notify(name, S("Invalid file format!"))
 		return
 	elseif version > worldedit.LATEST_SERIALIZATION_VERSION then
 		worldedit.player_notify(name, "Schematic was created with a newer version of WorldEdit.")
@@ -263,12 +265,12 @@ end
 worldedit.register_command("about", {
 	privs = {},
 	params = "",
-	description = "Get information about the WorldEdit mod",
+	description = S("Get information about the WorldEdit mod"),
 	func = function(name)
-		worldedit.player_notify(name, "WorldEdit " .. worldedit.version_string..
+		worldedit.player_notify(name, S("WorldEdit @1"..
 			" is available on this server. Type //help to get a list of "..
 			"commands, or get more information at "..
-			"https://github.com/Uberi/Minetest-WorldEdit")
+			"https://github.com/Uberi/Minetest-WorldEdit", worldedit.version_string))
 	end,
 })
 
@@ -276,7 +278,7 @@ worldedit.register_command("about", {
 worldedit.register_command("help", {
 	privs = {},
 	params = "[all/<cmd>]",
-	description = "Get help for WorldEdit commands",
+	description = S("Get help for WorldEdit commands"),
 	parse = function(param)
 		return true, param
 	end,
@@ -293,7 +295,7 @@ worldedit.register_command("help", {
 		end
 
 		if not minetest.check_player_privs(name, "worldedit") then
-			return false, "You are not allowed to use any WorldEdit commands."
+			return false, S("You are not allowed to use any WorldEdit commands.")
 		end
 		if param == "" then
 			local cmds = {}
@@ -303,9 +305,9 @@ worldedit.register_command("help", {
 				end
 			end
 			table.sort(cmds)
-			return true, "Available commands: " .. table.concat(cmds, " ") .. "\n"
+			return true, S("Available commands: @1@n"
 					.. "Use '//help <cmd>' to get more information,"
-					.. " or '//help all' to list everything."
+					.. " or '//help all' to list everything.", table.concat(cmds, " "))
 		elseif param == "all" then
 			local cmds = {}
 			for cmd, def in pairs(worldedit.registered_commands) do
@@ -314,11 +316,11 @@ worldedit.register_command("help", {
 				end
 			end
 			table.sort(cmds)
-			return true, "Available commands:\n"..table.concat(cmds, "\n")
+			return true, S("Available commands:@n") .. table.concat(cmds, "\n")
 		else
 			local def = worldedit.registered_commands[param]
 			if not def then
-				return false, "Command not available: " .. param
+				return false, S("Command not available: ") .. param
 			else
 				return true, format_help_line(param, def)
 			end
@@ -328,7 +330,7 @@ worldedit.register_command("help", {
 
 worldedit.register_command("inspect", {
 	params = "[on/off/1/0/true/false/yes/no/enable/disable]",
-	description = "Enable or disable node inspection",
+	description = S("Enable or disable node inspection"),
 	privs = {worldedit=true},
 	parse = function(param)
 		if param == "on" or param == "1" or param == "true" or param == "yes" or param == "enable" or param == "" then
@@ -342,11 +344,14 @@ worldedit.register_command("inspect", {
 		if enable then
 			worldedit.inspect[name] = true
 			local axis, sign = worldedit.player_axis(name)
-			worldedit.player_notify(name, string.format("inspector: inspection enabled for %s, currently facing the %s axis",
-				name, axis .. (sign > 0 and "+" or "-")))
+			worldedit.player_notify(name, S(
+				"inspector: inspection enabled for @1, currently facing the @2 axis",
+				name,
+				axis .. (sign > 0 and "+" or "-")
+			))
 		else
 			worldedit.inspect[name] = nil
-			worldedit.player_notify(name, "inspector: inspection disabled")
+			worldedit.player_notify(name, S("inspector: inspection disabled"))
 		end
 	end,
 })
@@ -371,15 +376,22 @@ minetest.register_on_punchnode(function(pos, node, puncher)
 	local name = puncher:get_player_name()
 	if worldedit.inspect[name] then
 		local axis, sign = worldedit.player_axis(name)
-		local message = string.format("inspector: %s at %s (param1=%d, param2=%d, received light=%d) punched facing the %s axis",
-			node.name, minetest.pos_to_string(pos), node.param1, node.param2, get_node_rlight(pos), axis .. (sign > 0 and "+" or "-"))
+		local message = S(
+			S("inspector: @1 at @2 (param1=@3, param2=@4, received light=@5) punched facing the @6 axis"),
+			node.name,
+			minetest.pos_to_string(pos),
+			node.param1,
+			node.param2,
+			get_node_rlight(pos),
+			axis .. (sign > 0 and "+" or "-")
+		)
 		worldedit.player_notify(name, message)
 	end
 end)
 
 worldedit.register_command("reset", {
 	params = "",
-	description = "Reset the region so that it is empty",
+	description = S("Reset the region so that it is empty"),
 	privs = {worldedit=true},
 	func = function(name)
 		worldedit.pos1[name] = nil
@@ -394,7 +406,7 @@ worldedit.register_command("reset", {
 
 worldedit.register_command("mark", {
 	params = "",
-	description = "Show markers at the region positions",
+	description = S("Show markers at the region positions"),
 	privs = {worldedit=true},
 	func = function(name)
 		worldedit.marker_update(name)
@@ -404,7 +416,7 @@ worldedit.register_command("mark", {
 
 worldedit.register_command("unmark", {
 	params = "",
-	description = "Hide markers if currently shown",
+	description = S("Hide markers if currently shown"),
 	privs = {worldedit=true},
 	func = function(name)
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
@@ -419,60 +431,60 @@ worldedit.register_command("unmark", {
 
 worldedit.register_command("pos1", {
 	params = "",
-	description = "Set WorldEdit region position 1 to the player's location",
+	description = S("Set WorldEdit region position 1 to the player's location"),
 	privs = {worldedit=true},
 	func = function(name)
 		local pos = minetest.get_player_by_name(name):get_pos()
 		pos.x, pos.y, pos.z = math.floor(pos.x + 0.5), math.floor(pos.y + 0.5), math.floor(pos.z + 0.5)
 		worldedit.pos1[name] = pos
 		worldedit.mark_pos1(name)
-		worldedit.player_notify(name, "position 1 set to " .. minetest.pos_to_string(pos))
+		worldedit.player_notify(name, S("position @1 set to @2", 1, minetest.pos_to_string(pos)))
 	end,
 })
 
 worldedit.register_command("pos2", {
 	params = "",
-	description = "Set WorldEdit region position 2 to the player's location",
+	description = S("Set WorldEdit region position 2 to the player's location"),
 	privs = {worldedit=true},
 	func = function(name)
 		local pos = minetest.get_player_by_name(name):get_pos()
 		pos.x, pos.y, pos.z = math.floor(pos.x + 0.5), math.floor(pos.y + 0.5), math.floor(pos.z + 0.5)
 		worldedit.pos2[name] = pos
 		worldedit.mark_pos2(name)
-		worldedit.player_notify(name, "position 2 set to " .. minetest.pos_to_string(pos))
+		worldedit.player_notify(name, S("position @1 set to @2", 2, minetest.pos_to_string(pos)))
 	end,
 })
 
 worldedit.register_command("p", {
 	params = "set/set1/set2/get",
-	description = "Set WorldEdit region, WorldEdit position 1, or WorldEdit position 2 by punching nodes, or display the current WorldEdit region",
+	description = S("Set WorldEdit region, WorldEdit position 1, or WorldEdit position 2 by punching nodes, or display the current WorldEdit region"),
 	privs = {worldedit=true},
 	parse = function(param)
 		if param == "set" or param == "set1" or param == "set2" or param == "get" then
 			return true, param
 		end
-		return false, "unknown subcommand: " .. param
+		return false, S("unknown subcommand: ") .. param
 	end,
 	func = function(name, param)
 		if param == "set" then --set both WorldEdit positions
 			worldedit.set_pos[name] = "pos1"
-			worldedit.player_notify(name, "select positions by punching two nodes")
+			worldedit.player_notify(name, S("select positions by punching two nodes"))
 		elseif param == "set1" then --set WorldEdit position 1
 			worldedit.set_pos[name] = "pos1only"
-			worldedit.player_notify(name, "select position 1 by punching a node")
+			worldedit.player_notify(name, S("select position @1 by punching a node", 1))
 		elseif param == "set2" then --set WorldEdit position 2
 			worldedit.set_pos[name] = "pos2"
-			worldedit.player_notify(name, "select position 2 by punching a node")
+			worldedit.player_notify(name, S("select position @1 by punching a node", 2))
 		elseif param == "get" then --display current WorldEdit positions
 			if worldedit.pos1[name] ~= nil then
 				worldedit.player_notify(name, "position 1: " .. minetest.pos_to_string(worldedit.pos1[name]))
 			else
-				worldedit.player_notify(name, "position 1 not set")
+				worldedit.player_notify(name, S("position @1 not set", 1))
 			end
 			if worldedit.pos2[name] ~= nil then
 				worldedit.player_notify(name, "position 2: " .. minetest.pos_to_string(worldedit.pos2[name]))
 			else
-				worldedit.player_notify(name, "position 2 not set")
+				worldedit.player_notify(name, S("position @1 not set", 2))
 			end
 		end
 	end,
@@ -480,7 +492,7 @@ worldedit.register_command("p", {
 
 worldedit.register_command("fixedpos", {
 	params = "set1/set2 <x> <y> <z>",
-	description = "Set a WorldEdit region position to the position at (<x>, <y>, <z>)",
+	description = S("Set a WorldEdit region position to the position at (<x>, <y>, <z>)"),
 	privs = {worldedit=true},
 	parse = function(param)
 		local found, _, flag, x, y, z = param:find("^(set[12])%s+([+-]?%d+)%s+([+-]?%d+)%s+([+-]?%d+)$")
@@ -493,11 +505,11 @@ worldedit.register_command("fixedpos", {
 		if flag == "set1" then
 			worldedit.pos1[name] = pos
 			worldedit.mark_pos1(name)
-			worldedit.player_notify(name, "position 1 set to " .. minetest.pos_to_string(pos))
+			worldedit.player_notify(name, S("position @1 set to @2", 1, minetest.pos_to_string(pos)))
 		else --flag == "set2"
 			worldedit.pos2[name] = pos
 			worldedit.mark_pos2(name)
-			worldedit.player_notify(name, "position 2 set to " .. minetest.pos_to_string(pos))
+			worldedit.player_notify(name, S("position @1 set to @2", 2, minetest.pos_to_string(pos)))
 		end
 	end,
 })
@@ -509,17 +521,17 @@ minetest.register_on_punchnode(function(pos, node, puncher)
 			worldedit.pos1[name] = pos
 			worldedit.mark_pos1(name)
 			worldedit.set_pos[name] = "pos2" --set position 2 on the next invocation
-			worldedit.player_notify(name, "position 1 set to " .. minetest.pos_to_string(pos))
+			worldedit.player_notify(name, S("position @1 set to @2", 1, minetest.pos_to_string(pos)))
 		elseif worldedit.set_pos[name] == "pos1only" then --setting position 1 only
 			worldedit.pos1[name] = pos
 			worldedit.mark_pos1(name)
 			worldedit.set_pos[name] = nil --finished setting positions
-			worldedit.player_notify(name, "position 1 set to " .. minetest.pos_to_string(pos))
+			worldedit.player_notify(name, S("position @1 set to @2", 1, minetest.pos_to_string(pos)))
 		elseif worldedit.set_pos[name] == "pos2" then --setting position 2
 			worldedit.pos2[name] = pos
 			worldedit.mark_pos2(name)
 			worldedit.set_pos[name] = nil --finished setting positions
-			worldedit.player_notify(name, "position 2 set to " .. minetest.pos_to_string(pos))
+			worldedit.player_notify(name, S("position @1 set to @2", 2, minetest.pos_to_string(pos)))
 		elseif worldedit.set_pos[name] == "prob" then --setting Minetest schematic node probabilities
 			worldedit.prob_pos[name] = pos
 			minetest.show_formspec(name, "prob_val_enter", "field[text;;]")
@@ -529,7 +541,7 @@ end)
 
 worldedit.register_command("volume", {
 	params = "",
-	description = "Display the volume of the current WorldEdit region",
+	description = S("Display the volume of the current WorldEdit region"),
 	privs = {worldedit=true},
 	require_pos = 2,
 	func = function(name)
@@ -546,7 +558,7 @@ worldedit.register_command("volume", {
 
 worldedit.register_command("deleteblocks", {
 	params = "",
-	description = "remove all MapBlocks (16x16x16) containing the selected area from the map",
+	description = S("Remove all MapBlocks (16x16x16) containing the selected area from the map"),
 	privs = {worldedit=true},
 	require_pos = 2,
 	nodes_needed = check_region,
@@ -554,35 +566,35 @@ worldedit.register_command("deleteblocks", {
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
 		local success = minetest.delete_area(pos1, pos2)
 		if success then
-			worldedit.player_notify(name, "Area deleted.")
+			worldedit.player_notify(name, S("Area deleted."))
 		else
-			worldedit.player_notify(name, "There was an error during deletion of the area.")
+			worldedit.player_notify(name, S("There was an error during deletion of the area."))
 		end
 	end,
 })
 
 worldedit.register_command("set", {
 	params = "<node>",
-	description = "Set the current WorldEdit region to <node>",
+	description = S("Set the current WorldEdit region to <node>"),
 	privs = {worldedit=true},
 	require_pos = 2,
 	parse = function(param)
 		local node = worldedit.normalize_nodename(param)
 		if not node then
-			return false, "invalid node name: " .. param
+			return false, S("invalid node name: @1", param)
 		end
 		return true, node
 	end,
 	nodes_needed = check_region,
 	func = function(name, node)
 		local count = worldedit.set(worldedit.pos1[name], worldedit.pos2[name], node)
-		worldedit.player_notify(name, count .. " nodes set")
+		worldedit.player_notify(name, S("@1 nodes set", count))
 	end,
 })
 
 worldedit.register_command("param2", {
 	params = "<param2>",
-	description = "Set param2 of all nodes in the current WorldEdit region to <param2>",
+	description = S("Set param2 of all nodes in the current WorldEdit region to <param2>"),
 	privs = {worldedit=true},
 	require_pos = 2,
 	parse = function(param)
@@ -590,20 +602,20 @@ worldedit.register_command("param2", {
 		if not param2 then
 			return false
 		elseif param2 < 0 or param2 > 255 then
-			return false, "Param2 is out of range (must be between 0 and 255 inclusive!)"
+			return false, S("Param2 is out of range (must be between 0 and 255 inclusive!)")
 		end
 		return true, param2
 	end,
 	nodes_needed = check_region,
 	func = function(name, param2)
 		local count = worldedit.set_param2(worldedit.pos1[name], worldedit.pos2[name], param2)
-		worldedit.player_notify(name, count .. " nodes altered")
+		worldedit.player_notify(name, S("@1 nodes altered", count))
 	end,
 })
 
 worldedit.register_command("mix", {
 	params = "<node1> [count1] <node2> [count2] ...",
-	description = "Fill the current WorldEdit region with a random mix of <node1>, ...",
+	description = S("Fill the current WorldEdit region with a random mix of <node1>, ..."),
 	privs = {worldedit=true},
 	require_pos = 2,
 	parse = function(param)
@@ -617,7 +629,7 @@ worldedit.register_command("mix", {
 			else
 				local node = worldedit.normalize_nodename(nodename)
 				if not node then
-					return false, "invalid node name: " .. nodename
+					return false, S("invalid node name: @1", nodename)
 				end
 				nodes[#nodes + 1] = node
 			end
@@ -631,7 +643,7 @@ worldedit.register_command("mix", {
 	func = function(name, nodes)
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
 		local count = worldedit.set(pos1, pos2, nodes)
-		worldedit.player_notify(name, count .. " nodes set")
+		worldedit.player_notify(name, S("@1 nodes set", count))
 	end,
 })
 
@@ -642,18 +654,18 @@ local check_replace = function(param)
 	end
 	local newsearchnode = worldedit.normalize_nodename(searchnode)
 	if not newsearchnode then
-		return false, "invalid search node name: " .. searchnode
+		return false, S("invalid search node name: @1", searchnode)
 	end
 	local newreplacenode = worldedit.normalize_nodename(replacenode)
 	if not newreplacenode then
-		return false, "invalid replace node name: " .. replacenode
+		return false, S("invalid replace node name: @1", replacenode)
 	end
 	return true, newsearchnode, newreplacenode
 end
 
 worldedit.register_command("replace", {
 	params = "<search node> <replace node>",
-	description = "Replace all instances of <search node> with <replace node> in the current WorldEdit region",
+	description = S("Replace all instances of <search node> with <replace node> in the current WorldEdit region"),
 	privs = {worldedit=true},
 	require_pos = 2,
 	parse = check_replace,
@@ -686,14 +698,14 @@ local check_cube = function(param)
 	end
 	local node = worldedit.normalize_nodename(nodename)
 	if not node then
-		return false, "invalid node name: " .. nodename
+		return false, S("invalid node name: @1", nodename)
 	end
 	return true, tonumber(w), tonumber(h), tonumber(l), node
 end
 
 worldedit.register_command("hollowcube", {
 	params = "<width> <height> <length> <node>",
-	description = "Add a hollow cube with its ground level centered at WorldEdit position 1 with dimensions <width> x <height> x <length>, composed of <node>.",
+	description = S("Add a hollow cube with its ground level centered at WorldEdit position 1 with dimensions <width> x <height> x <length>, composed of <node>."),
 	privs = {worldedit=true},
 	require_pos = 1,
 	parse = check_cube,
@@ -702,13 +714,13 @@ worldedit.register_command("hollowcube", {
 	end,
 	func = function(name, w, h, l, node)
 		local count = worldedit.cube(worldedit.pos1[name], w, h, l, node, true)
-		worldedit.player_notify(name, count .. " nodes added")
+		worldedit.player_notify(name, S("@1 nodes added", count))
 	end,
 })
 
 worldedit.register_command("cube", {
 	params = "<width> <height> <length> <node>",
-	description = "Add a cube with its ground level centered at WorldEdit position 1 with dimensions <width> x <height> x <length>, composed of <node>.",
+	description = S("Add a cube with its ground level centered at WorldEdit position 1 with dimensions <width> x <height> x <length>, composed of <node>."),
 	privs = {worldedit=true},
 	require_pos = 1,
 	parse = check_cube,
@@ -717,7 +729,7 @@ worldedit.register_command("cube", {
 	end,
 	func = function(name, w, h, l, node)
 		local count = worldedit.cube(worldedit.pos1[name], w, h, l, node)
-		worldedit.player_notify(name, count .. " nodes added")
+		worldedit.player_notify(name, S("@1 nodes added", count))
 	end,
 })
 
@@ -728,14 +740,14 @@ local check_sphere = function(param)
 	end
 	local node = worldedit.normalize_nodename(nodename)
 	if not node then
-		return false, "invalid node name: " .. nodename
+		return false, S("invalid node name: @1", nodename)
 	end
 	return true, tonumber(radius), node
 end
 
 worldedit.register_command("hollowsphere", {
 	params = "<radius> <node>",
-	description = "Add hollow sphere centered at WorldEdit position 1 with radius <radius>, composed of <node>",
+	description = S("Add hollow sphere centered at WorldEdit position 1 with radius <radius>, composed of <node>"),
 	privs = {worldedit=true},
 	require_pos = 1,
 	parse = check_sphere,
@@ -744,13 +756,13 @@ worldedit.register_command("hollowsphere", {
 	end,
 	func = function(name, radius, node)
 		local count = worldedit.sphere(worldedit.pos1[name], radius, node, true)
-		worldedit.player_notify(name, count .. " nodes added")
+		worldedit.player_notify(name, S("@1 nodes added", count))
 	end,
 })
 
 worldedit.register_command("sphere", {
 	params = "<radius> <node>",
-	description = "Add sphere centered at WorldEdit position 1 with radius <radius>, composed of <node>",
+	description = S("Add sphere centered at WorldEdit position 1 with radius <radius>, composed of <node>"),
 	privs = {worldedit=true},
 	require_pos = 1,
 	parse = check_sphere,
@@ -759,7 +771,7 @@ worldedit.register_command("sphere", {
 	end,
 	func = function(name, radius, node)
 		local count = worldedit.sphere(worldedit.pos1[name], radius, node)
-		worldedit.player_notify(name, count .. " nodes added")
+		worldedit.player_notify(name, S("@1 nodes added", count))
 	end,
 })
 
@@ -770,14 +782,14 @@ local check_dome = function(param)
 	end
 	local node = worldedit.normalize_nodename(nodename)
 	if not node then
-		return false, "invalid node name: " .. nodename
+		return false, S("invalid node name: @1", nodename)
 	end
 	return true, tonumber(radius), node
 end
 
 worldedit.register_command("hollowdome", {
 	params = "<radius> <node>",
-	description = "Add hollow dome centered at WorldEdit position 1 with radius <radius>, composed of <node>",
+	description = S("Add hollow dome centered at WorldEdit position 1 with radius <radius>, composed of <node>"),
 	privs = {worldedit=true},
 	require_pos = 1,
 	parse = check_dome,
@@ -786,13 +798,13 @@ worldedit.register_command("hollowdome", {
 	end,
 	func = function(name, radius, node)
 		local count = worldedit.dome(worldedit.pos1[name], radius, node, true)
-		worldedit.player_notify(name, count .. " nodes added")
+		worldedit.player_notify(name, S("@1 nodes added", count))
 	end,
 })
 
 worldedit.register_command("dome", {
 	params = "<radius> <node>",
-	description = "Add dome centered at WorldEdit position 1 with radius <radius>, composed of <node>",
+	description = S("Add dome centered at WorldEdit position 1 with radius <radius>, composed of <node>"),
 	privs = {worldedit=true},
 	require_pos = 1,
 	parse = check_dome,
@@ -801,7 +813,7 @@ worldedit.register_command("dome", {
 	end,
 	func = function(name, radius, node)
 		local count = worldedit.dome(worldedit.pos1[name], radius, node)
-		worldedit.player_notify(name, count .. " nodes added")
+		worldedit.player_notify(name, S("@1 nodes added", count))
 	end,
 })
 
@@ -818,7 +830,7 @@ local check_cylinder = function(param)
 	end
 	local node = worldedit.normalize_nodename(nodename)
 	if not node then
-		return false, "invalid node name: " .. nodename
+		return false, S("invalid node name: @1", nodename)
 	end
 	return true, axis, tonumber(length), tonumber(radius1), tonumber(radius2), node
 end
@@ -840,13 +852,13 @@ worldedit.register_command("hollowcylinder", {
 			length = length * sign
 		end
 		local count = worldedit.cylinder(worldedit.pos1[name], axis, length, radius1, radius2, node, true)
-		worldedit.player_notify(name, count .. " nodes added")
+		worldedit.player_notify(name, S("@1 nodes added", count))
 	end,
 })
 
 worldedit.register_command("cylinder", {
 	params = "x/y/z/? <length> <radius1> [radius2] <node>",
-	description = "Add cylinder at WorldEdit position 1 along the given axis with length <length>, base radius <radius1> (and top radius [radius2]), composed of <node>",
+	description = S("Add cylinder at WorldEdit position 1 along the given axis with length <length>, base radius <radius1> (and top radius [radius2]), composed of <node>"),
 	privs = {worldedit=true},
 	require_pos = 1,
 	parse = check_cylinder,
@@ -861,7 +873,7 @@ worldedit.register_command("cylinder", {
 			length = length * sign
 		end
 		local count = worldedit.cylinder(worldedit.pos1[name], axis, length, radius1, radius2, node)
-		worldedit.player_notify(name, count .. " nodes added")
+		worldedit.player_notify(name, S("@1 nodes added", count))
 	end,
 })
 
@@ -872,14 +884,14 @@ local check_pyramid = function(param)
 	end
 	local node = worldedit.normalize_nodename(nodename)
 	if not node then
-		return false, "invalid node name: " .. nodename
+		return false, S("invalid node name: @1", nodename)
 	end
 	return true, axis, tonumber(height), node
 end
 
 worldedit.register_command("hollowpyramid", {
 	params = "x/y/z/? <height> <node>",
-	description = "Add hollow pyramid centered at WorldEdit position 1 along the given axis with height <height>, composed of <node>",
+	description = S("Add hollow pyramid centered at WorldEdit position 1 along the given axis with height <height>, composed of <node>"),
 	privs = {worldedit=true},
 	require_pos = 1,
 	parse = check_pyramid,
@@ -893,13 +905,13 @@ worldedit.register_command("hollowpyramid", {
 			height = height * sign
 		end
 		local count = worldedit.pyramid(worldedit.pos1[name], axis, height, node, true)
-		worldedit.player_notify(name, count .. " nodes added")
+		worldedit.player_notify(name, S("@1 nodes added", count))
 	end,
 })
 
 worldedit.register_command("pyramid", {
 	params = "x/y/z/? <height> <node>",
-	description = "Add pyramid centered at WorldEdit position 1 along the given axis with height <height>, composed of <node>",
+	description = S("Add pyramid centered at WorldEdit position 1 along the given axis with height <height>, composed of <node>"),
 	privs = {worldedit=true},
 	require_pos = 1,
 	parse = check_pyramid,
@@ -913,13 +925,13 @@ worldedit.register_command("pyramid", {
 			height = height * sign
 		end
 		local count = worldedit.pyramid(worldedit.pos1[name], axis, height, node)
-		worldedit.player_notify(name, count .. " nodes added")
+		worldedit.player_notify(name, S("@1 nodes added", count))
 	end,
 })
 
 worldedit.register_command("spiral", {
 	params = "<length> <height> <space> <node>",
-	description = "Add spiral centered at WorldEdit position 1 with side length <length>, height <height>, space between walls <space>, composed of <node>",
+	description = S("Add spiral centered at WorldEdit position 1 with side length <length>, height <height>, space between walls <space>, composed of <node>"),
 	privs = {worldedit=true},
 	require_pos = 1,
 	parse = function(param)
@@ -929,7 +941,7 @@ worldedit.register_command("spiral", {
 		end
 		local node = worldedit.normalize_nodename(nodename)
 		if not node then
-			return false, "invalid node name: " .. nodename
+			return false, S("invalid node name: @1", nodename)
 		end
 		return true, tonumber(length), tonumber(height), tonumber(space), node
 	end,
@@ -938,13 +950,13 @@ worldedit.register_command("spiral", {
 	end,
 	func = function(name, length, height, space, node)
 		local count = worldedit.spiral(worldedit.pos1[name], length, height, space, node)
-		worldedit.player_notify(name, count .. " nodes added")
+		worldedit.player_notify(name, S("@1 nodes added", count))
 	end,
 })
 
 worldedit.register_command("copy", {
 	params = "x/y/z/? <amount>",
-	description = "Copy the current WorldEdit region along the given axis by <amount> nodes",
+	description = S("Copy the current WorldEdit region along the given axis by <amount> nodes"),
 	privs = {worldedit=true},
 	require_pos = 2,
 	parse = function(param)
@@ -971,7 +983,7 @@ worldedit.register_command("copy", {
 
 worldedit.register_command("move", {
 	params = "x/y/z/? <amount>",
-	description = "Move the current WorldEdit region along the given axis by <amount> nodes",
+	description = S("Move the current WorldEdit region along the given axis by <amount> nodes"),
 	privs = {worldedit=true},
 	require_pos = 2,
 	parse = function(param)
@@ -1003,7 +1015,7 @@ worldedit.register_command("move", {
 
 worldedit.register_command("stack", {
 	params = "x/y/z/? <count>",
-	description = "Stack the current WorldEdit region along the given axis <count> times",
+	description = S("Stack the current WorldEdit region along the given axis <count> times"),
 	privs = {worldedit=true},
 	require_pos = 2,
 	parse = function(param)
@@ -1033,7 +1045,7 @@ worldedit.register_command("stack", {
 
 worldedit.register_command("stack2", {
 	params = "<count> <x> <y> <z>",
-	description = "Stack the current WorldEdit region <count> times by offset <x>, <y>, <z>",
+	description = S("Stack the current WorldEdit region <count> times by offset <x>, <y>, <z>"),
 	privs = {worldedit=true},
 	require_pos = 2,
 	parse = function(param)
@@ -1063,7 +1075,7 @@ worldedit.register_command("stack2", {
 
 worldedit.register_command("stretch", {
 	params = "<stretchx> <stretchy> <stretchz>",
-	description = "Scale the current WorldEdit positions and region by a factor of <stretchx>, <stretchy>, <stretchz> along the X, Y, and Z axes, repectively, with position 1 as the origin",
+	description = S("Scale the current WorldEdit positions and region by a factor of <stretchx>, <stretchy>, <stretchz> along the X, Y, and Z axes, repectively, with position 1 as the origin"),
 	privs = {worldedit=true},
 	require_pos = 2,
 	parse = function(param)
@@ -1095,7 +1107,7 @@ worldedit.register_command("stretch", {
 
 worldedit.register_command("transpose", {
 	params = "x/y/z/? x/y/z/?",
-	description = "Transpose the current WorldEdit region along the given axes",
+	description = S("Transpose the current WorldEdit region along the given axes"),
 	privs = {worldedit=true},
 	require_pos = 2,
 	parse = function(param)
@@ -1125,7 +1137,7 @@ worldedit.register_command("transpose", {
 
 worldedit.register_command("flip", {
 	params = "x/y/z/?",
-	description = "Flip the current WorldEdit region along the given axis",
+	description = S("Flip the current WorldEdit region along the given axis"),
 	privs = {worldedit=true},
 	require_pos = 2,
 	parse = function(param)
@@ -1144,7 +1156,7 @@ worldedit.register_command("flip", {
 
 worldedit.register_command("rotate", {
 	params = "x/y/z/? <angle>",
-	description = "Rotate the current WorldEdit region around the given axis by angle <angle> (90 degree increment)",
+	description = S("Rotate the current WorldEdit region around the given axis by angle <angle> (90 degree increment)"),
 	privs = {worldedit=true},
 	require_pos = 2,
 	parse = function(param)
@@ -1175,7 +1187,7 @@ worldedit.register_command("rotate", {
 
 worldedit.register_command("orient", {
 	params = "<angle>",
-	description = "Rotate oriented nodes in the current WorldEdit region around the Y axis by angle <angle> (90 degree increment)",
+	description = S("Rotate oriented nodes in the current WorldEdit region around the Y axis by angle <angle> (90 degree increment)"),
 	privs = {worldedit=true},
 	require_pos = 2,
 	parse = function(param)
@@ -1198,7 +1210,7 @@ worldedit.register_command("orient", {
 
 worldedit.register_command("fixlight", {
 	params = "",
-	description = "Fix the lighting in the current WorldEdit region",
+	description = S("Fix the lighting in the current WorldEdit region"),
 	privs = {worldedit=true},
 	require_pos = 2,
 	nodes_needed = check_region,
@@ -1210,7 +1222,7 @@ worldedit.register_command("fixlight", {
 
 worldedit.register_command("drain", {
 	params = "",
-	description = "Remove any fluid node within the current WorldEdit region",
+	description = S("Remove any fluid node within the current WorldEdit region"),
 	privs = {worldedit=true},
 	require_pos = 2,
 	nodes_needed = check_region,
@@ -1308,7 +1320,7 @@ end
 
 worldedit.register_command("clearcut", {
 	params = "",
-	description = "Remove any plant, tree or foilage-like nodes in the selected region",
+	description = S("Remove any plant, tree or foliage-like nodes in the selected region"),
 	privs = {worldedit=true},
 	require_pos = 2,
 	nodes_needed = check_region,
@@ -1321,7 +1333,7 @@ worldedit.register_command("clearcut", {
 
 worldedit.register_command("hide", {
 	params = "",
-	description = "Hide all nodes in the current WorldEdit region non-destructively",
+	description = S("Hide all nodes in the current WorldEdit region non-destructively"),
 	privs = {worldedit=true},
 	require_pos = 2,
 	nodes_needed = check_region,
@@ -1333,13 +1345,13 @@ worldedit.register_command("hide", {
 
 worldedit.register_command("suppress", {
 	params = "<node>",
-	description = "Suppress all <node> in the current WorldEdit region non-destructively",
+	description = S("Suppress all <node> in the current WorldEdit region non-destructively"),
 	privs = {worldedit=true},
 	require_pos = 2,
 	parse = function(param)
 		local node = worldedit.normalize_nodename(param)
 		if not node then
-			return false, "invalid node name: " .. param
+			return false, S("invalid node name: @1", param)
 		end
 		return true, node
 	end,
@@ -1352,13 +1364,13 @@ worldedit.register_command("suppress", {
 
 worldedit.register_command("highlight", {
 	params = "<node>",
-	description = "Highlight <node> in the current WorldEdit region by hiding everything else non-destructively",
+	description = S("Highlight <node> in the current WorldEdit region by hiding everything else non-destructively"),
 	privs = {worldedit=true},
 	require_pos = 2,
 	parse = function(param)
 		local node = worldedit.normalize_nodename(param)
 		if not node then
-			return false, "invalid node name: " .. param
+			return false, S("invalid node name: @1", param)
 		end
 		return true, node
 	end,
@@ -1371,7 +1383,7 @@ worldedit.register_command("highlight", {
 
 worldedit.register_command("restore", {
 	params = "",
-	description = "Restores nodes hidden with WorldEdit in the current WorldEdit region",
+	description = S("Restores nodes hidden with WorldEdit in the current WorldEdit region"),
 	privs = {worldedit=true},
 	require_pos = 2,
 	nodes_needed = check_region,
@@ -1400,7 +1412,7 @@ end
 
 worldedit.register_command("save", {
 	params = "<file>",
-	description = "Save the current WorldEdit region to \"(world folder)/schems/<file>.we\"",
+	description = S("Save the current WorldEdit region to \"(world folder)/schems/<file>.we\""),
 	privs = {worldedit=true},
 	require_pos = 2,
 	parse = function(param)
@@ -1438,7 +1450,7 @@ worldedit.register_command("save", {
 
 worldedit.register_command("allocate", {
 	params = "<file>",
-	description = "Set the region defined by nodes from \"(world folder)/schems/<file>.we\" as the current WorldEdit region",
+	description = S("Set the region defined by nodes from \"(world folder)/schems/<file>.we\" as the current WorldEdit region"),
 	privs = {worldedit=true},
 	require_pos = 1,
 	parse = function(param)
@@ -1474,7 +1486,7 @@ worldedit.register_command("allocate", {
 
 worldedit.register_command("load", {
 	params = "<file>",
-	description = "Load nodes from \"(world folder)/schems/<file>[.we[m]]\" with position 1 of the current WorldEdit region as the origin",
+	description = S("Load nodes from \"(world folder)/schems/<file>[.we[m]]\" with position 1 of the current WorldEdit region as the origin"),
 	privs = {worldedit=true},
 	require_pos = 1,
 	parse = function(param)
@@ -1505,7 +1517,7 @@ worldedit.register_command("load", {
 
 worldedit.register_command("lua", {
 	params = "<code>",
-	description = "Executes <code> as a Lua chunk in the global namespace",
+	description = S("Executes <code> as a Lua chunk in the global namespace"),
 	privs = {worldedit=true, server=true},
 	parse = function(param)
 		return true, param
@@ -1524,7 +1536,7 @@ worldedit.register_command("lua", {
 
 worldedit.register_command("luatransform", {
 	params = "<code>",
-	description = "Executes <code> as a Lua chunk in the global namespace with the variable pos available, for each node in the current WorldEdit region",
+	description = S("Executes <code> as a Lua chunk in the global namespace with the variable pos available, for each node in the current WorldEdit region"),
 	privs = {worldedit=true, server=true},
 	require_pos = 2,
 	parse = function(param)
@@ -1545,8 +1557,8 @@ worldedit.register_command("luatransform", {
 
 worldedit.register_command("mtschemcreate", {
 	params = "<file>",
-	description = "Save the current WorldEdit region using the Minetest "..
-		"Schematic format to \"(world folder)/schems/<filename>.mts\"",
+	description = S("Save the current WorldEdit region using the Minetest "..
+		"Schematic format to \"(world folder)/schems/<filename>.mts\""),
 	privs = {worldedit=true},
 	require_pos = 2,
 	parse = function(param)
@@ -1579,7 +1591,7 @@ worldedit.register_command("mtschemcreate", {
 
 worldedit.register_command("mtschemplace", {
 	params = "<file>",
-	description = "Load nodes from \"(world folder)/schems/<file>.mts\" with position 1 of the current WorldEdit region as the origin",
+	description = S("Load nodes from \"(world folder)/schems/<file>.mts\" with position 1 of the current WorldEdit region as the origin"),
 	privs = {worldedit=true},
 	require_pos = 1,
 	parse = function(param)
@@ -1606,7 +1618,7 @@ worldedit.register_command("mtschemplace", {
 
 worldedit.register_command("mtschemprob", {
 	params = "start/finish/get",
-	description = "Begins node probability entry for Minetest schematics, gets the nodes that have probabilities set, or ends node probability entry",
+	description = S("Begins node probability entry for Minetest schematics, gets the nodes that have probabilities set, or ends node probability entry"),
 	privs = {worldedit=true},
 	parse = function(param)
 		if param ~= "start" and param ~= "finish" and param ~= "get" then
@@ -1656,7 +1668,7 @@ end)
 
 worldedit.register_command("clearobjects", {
 	params = "",
-	description = "Clears all objects within the WorldEdit region",
+	description = S("Clears all objects within the WorldEdit region"),
 	privs = {worldedit=true},
 	require_pos = 2,
 	nodes_needed = check_region,
