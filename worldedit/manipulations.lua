@@ -649,7 +649,7 @@ function worldedit.clear_objects(pos1, pos2)
 
 	-- Offset positions to include full nodes (positions are in the center of nodes)
 	pos1 = vector.add(pos1, -0.5)
-	pos2 = vector.add(pos1, 0.5)
+	pos2 = vector.add(pos2, 0.5)
 
 	local count = 0
 	if minetest.get_objects_in_area then
@@ -676,7 +676,8 @@ function worldedit.clear_objects(pos1, pos2)
 			(center.x - pos1.x) ^ 2 +
 			(center.y - pos1.y) ^ 2 +
 			(center.z - pos1.z) ^ 2)
-	for _, obj in pairs(minetest.get_objects_inside_radius(center, radius)) do
+	local objects = minetest.get_objects_inside_radius(center, radius)
+	for _, obj in pairs(objects) do
 		if should_delete(obj) then
 			local pos = obj:get_pos()
 			if pos.x >= pos1.x and pos.x <= pos2.x and
