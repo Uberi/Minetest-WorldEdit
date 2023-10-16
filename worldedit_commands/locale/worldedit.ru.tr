@@ -10,7 +10,7 @@ Could not open file "@1"=Не удаётся открыть файл "@1"
 Invalid file format!=Не верный формат файла!
 
 Get information about the WorldEdit mod=Вывести информацию о WorldEdit
-WorldEdit @1 is available on this server. Type //help to get a list of commands, or get more information at https://github.com/Uberi/Minetest-WorldEdit=WorldEdit @1 доступен на этом сервере. Наберите команду //help чтобы увидеть список команд, больше информации по ссылке https://github.com/Uberi/Minetest-WorldEdit
+WorldEdit @1 is available on this server. Type //help to get a list of commands, or get more information at @2=WorldEdit @1 доступен на этом сервере. Наберите команду //help чтобы увидеть список команд, больше информации по ссылке @2
 Get help for WorldEdit commands=Вывести информацию об использовании команд WorldEdit
 You are not allowed to use any WorldEdit commands.=У вас нет привилегий, чтобы использовать команды WorldEdit.
 Available commands: @1@nUse '//help <cmd>' to get more information, or '//help all' to list everything.=Доступные команды: @1@nИспользуйте '//help <cmd>' для получения информации по команде или '//help all' для вывода подсказок по всем командам.

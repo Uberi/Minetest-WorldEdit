@@ -269,8 +269,10 @@ worldedit.register_command("about", {
 	func = function(name)
 		worldedit.player_notify(name, S("WorldEdit @1"..
 			" is available on this server. Type //help to get a list of "..
-			"commands, or get more information at "..
-			"https://github.com/Uberi/Minetest-WorldEdit", worldedit.version_string))
+			"commands, or get more information at @2",
+			worldedit.version_string,
+			"https://github.com/Uberi/Minetest-WorldEdit"
+		))
 	end,
 })
 
@@ -377,7 +379,7 @@ minetest.register_on_punchnode(function(pos, node, puncher)
 	if worldedit.inspect[name] then
 		local axis, sign = worldedit.player_axis(name)
 		local message = S(
-			"inspector: @1 at @2 (param1=@3, param2=@4, received light=@5) punched facing the @6 axis",
+			S("inspector: @1 at @2 (param1=@3, param2=@4, received light=@5) punched facing the @6 axis"),
 			node.name,
 			minetest.pos_to_string(pos),
 			node.param1,
