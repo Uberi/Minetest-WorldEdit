@@ -1,0 +1,91 @@
+# textdomain: worldedit
+
+### init.lua ###
+Can use WorldEdit commands=
+
+no region selected=
+no position 1 selected=
+invalid usage=
+Could not open file "@1"=
+Invalid file format!=
+
+Get information about the WorldEdit mod=
+WorldEdit @1 is available on this server. Type //help to get a list of commands, or get more information at @2=
+Get help for WorldEdit commands=
+You are not allowed to use any WorldEdit commands.=
+Available commands: @1@nUse '//help <cmd>' to get more information, or '//help all' to list everything.=
+Available commands:@n=
+Command not available: =
+Enable or disable node inspection=
+inspector: inspection enabled for @1, currently facing the @2 axis=
+inspector: inspection disabled=
+inspector: @1 at @2 (param1=@3, param2=@4, received light=@5) punched facing the @6 axis=inspector: @1 в @2 (param1=@3, param2=@4, received light=
+Reset the region so that it is empty=
+Show markers at the region positions=
+Hide markers if currently shown=
+Set WorldEdit region position @1 to the player's location=
+Set WorldEdit region, WorldEdit position 1, or WorldEdit position 2 by punching nodes, or display the current WorldEdit region=
+unknown subcommand: =
+select positions by punching two nodes=
+select position @1 by punching a node=
+position @1: @2=
+position @1 not set=
+Set a WorldEdit region position to the position at (<x>, <y>, <z>)=
+position @1 set to @2=
+Display the volume of the current WorldEdit region=
+Remove all MapBlocks (16x16x16) containing the selected area from the map=
+Area deleted.=
+There was an error during deletion of the area.=
+Set the current WorldEdit region to <node>=
+invalid node name: @1=
+@1 nodes set=
+Set param2 of all nodes in the current WorldEdit region to <param2>=
+Param2 is out of range (must be between 0 and 255 inclusive!)=
+@1 nodes altered=
+Fill the current WorldEdit region with a random mix of <node1>, ...=
+invalid search node name: @1=
+invalid replace node name: @1=
+Replace all instances of <search node> with <replace node> in the current WorldEdit region=
+Replace all nodes other than <search node> with <replace node> in the current WorldEdit region=
+Add a hollow cube with its ground level centered at WorldEdit position 1 with dimensions <width> x <height> x <length>, composed of <node>.=
+@1 nodes added=
+Add a cube with its ground level centered at WorldEdit position 1 with dimensions <width> x <height> x <length>, composed of <node>.=
+Add hollow sphere centered at WorldEdit position 1 with radius <radius>, composed of <node>=
+Add sphere centered at WorldEdit position 1 with radius <radius>, composed of <node>=
+Add hollow dome centered at WorldEdit position 1 with radius <radius>, composed of <node>=
+Add dome centered at WorldEdit position 1 with radius <radius>, composed of <node>=
+Add hollow cylinder at WorldEdit position 1 along the given axis with length <length>, base radius <radius1> (and top radius [radius2]), composed of <node>=
+Add cylinder at WorldEdit position 1 along the given axis with length <length>, base radius <radius1> (and top radius [radius2]), composed of <node>=
+Add hollow pyramid centered at WorldEdit position 1 along the given axis with height <height>, composed of <node>=
+Add pyramid centered at WorldEdit position 1 along the given axis with height <height>, composed of <node>=
+Add spiral centered at WorldEdit position 1 with side length <length>, height <height>, space between walls <space>, composed of <node>=
+Copy the current WorldEdit region along the given axis by <amount> nodes=
+Move the current WorldEdit region along the given axis by <amount> nodes=
+Stack the current WorldEdit region along the given axis <count> times=
+Stack the current WorldEdit region <count> times by offset <x>, <y>, <z>=
+Scale the current WorldEdit positions and region by a factor of <stretchx>, <stretchy>, <stretchz> along the X, Y, and Z axes, repectively, with position 1 as the origin=
+Transpose the current WorldEdit region along the given axes=
+Flip the current WorldEdit region along the given axis=
+Rotate the current WorldEdit region around the given axis by angle <angle> (90 degree increment)=
+Rotate oriented nodes in the current WorldEdit region around the Y axis by angle <angle> (90 degree increment)=
+Fix the lighting in the current WorldEdit region=
+Remove any fluid node within the current WorldEdit region=
+Remove any plant, tree or foliage-like nodes in the selected region=
+Hide all nodes in the current WorldEdit region non-destructively=
+Suppress all <node> in the current WorldEdit region non-destructively=
+Highlight <node> in the current WorldEdit region by hiding everything else non-destructively=
+Restores nodes hidden with WorldEdit in the current WorldEdit region=
+Warning: The schematic contains excessive free space and WILL be misaligned when allocated or loaded. To avoid this, shrink your area to cover exactly the nodes to be saved.=
+Save the current WorldEdit region to "(world folder)/schems/<file>.we"=
+Set the region defined by nodes from "(world folder)/schems/<file>.we" as the current WorldEdit region=
+Load nodes from "(world folder)/schems/<file>[.we[m]]" with position 1 of the current WorldEdit region as the origin=
+Executes <code> as a Lua chunk in the global namespace=
+Executes <code> as a Lua chunk in the global namespace with the variable pos available, for each node in the current WorldEdit region=
+Save the current WorldEdit region using the Minetest Schematic format to "(world folder)/schems/<filename>.mts"=
+Load nodes from "(world folder)/schems/<file>.mts" with position 1 of the current WorldEdit region as the origin=
+Begins node probability entry for Minetest schematics, gets the nodes that have probabilities set, or ends node probability entry=
+Clears all objects within the WorldEdit region=
+
+### safe.lua ###
+Confirm a pending operation=
+Abort a pending operation=
