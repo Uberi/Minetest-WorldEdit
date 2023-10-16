@@ -433,7 +433,7 @@ worldedit.register_command("unmark", {
 
 worldedit.register_command("pos1", {
 	params = "",
-	description = S("Set WorldEdit region position 1 to the player's location"),
+	description = S("Set WorldEdit region position @1 to the player's location", 1),
 	privs = {worldedit=true},
 	func = function(name)
 		local pos = minetest.get_player_by_name(name):get_pos()
@@ -446,7 +446,7 @@ worldedit.register_command("pos1", {
 
 worldedit.register_command("pos2", {
 	params = "",
-	description = S("Set WorldEdit region position 2 to the player's location"),
+	description = S("Set WorldEdit region position @1 to the player's location", 2),
 	privs = {worldedit=true},
 	func = function(name)
 		local pos = minetest.get_player_by_name(name):get_pos()

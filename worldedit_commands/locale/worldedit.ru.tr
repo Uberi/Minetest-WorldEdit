@@ -23,8 +23,7 @@ inspector: @1 at @2 (param1=@3, param2=@4, received light=@5) punched facing the
 Reset the region so that it is empty=Сбросить выделение области
 Show markers at the region positions=Отобразить маркеры выделенной области
 Hide markers if currently shown=Скрыть маркеры выделенной области
-Set WorldEdit region position 1 to the player's location=Установить маркер 1 для WorldEdit-региона в месте нахождения игрока
-Set WorldEdit region position 2 to the player's location=Установить маркер 2 для WorldEdit-региона в месте нахождения игрока
+Set WorldEdit region position @1 to the player's location=Установить маркер @1 для WorldEdit-региона в месте нахождения игрока
 Set WorldEdit region, WorldEdit position 1, or WorldEdit position 2 by punching nodes, or display the current WorldEdit region=Выделить WorldEdit-регион или установить маркеры для WorldEdit-региона, либо отобразить уже выбранную область
 unknown subcommand: =неизвестная подкоманда:
 select positions by punching two nodes=выберите позиции, ударив по блокам
