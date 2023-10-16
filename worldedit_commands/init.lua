@@ -479,12 +479,12 @@ worldedit.register_command("p", {
 			worldedit.player_notify(name, S("select position @1 by punching a node", 2))
 		elseif param == "get" then --display current WorldEdit positions
 			if worldedit.pos1[name] ~= nil then
-				worldedit.player_notify(name, "position 1: " .. minetest.pos_to_string(worldedit.pos1[name]))
+				worldedit.player_notify(name, S("position @1: @2", 1, minetest.pos_to_string(worldedit.pos1[name])))
 			else
 				worldedit.player_notify(name, S("position @1 not set", 1))
 			end
 			if worldedit.pos2[name] ~= nil then
-				worldedit.player_notify(name, "position 2: " .. minetest.pos_to_string(worldedit.pos2[name]))
+				worldedit.player_notify(name, S("position @1: @2", 2, minetest.pos_to_string(worldedit.pos2[name])))
 			else
 				worldedit.player_notify(name, S("position @1 not set", 2))
 			end

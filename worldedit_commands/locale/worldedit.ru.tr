@@ -29,6 +29,7 @@ Set WorldEdit region, WorldEdit position 1, or WorldEdit position 2 by punching 
 unknown subcommand: =неизвестная подкоманда:
 select positions by punching two nodes=выберите позиции, ударив по блокам
 select position @1 by punching a node=выберите позицию @1, ударив по блоку
+position @1: @2=позиция @1: @2
 position @1 not set=позиция @1 не установлена
 Set a WorldEdit region position to the position at (<x>, <y>, <z>)=Установить маркер для WorldEdit в позиции (<x>, <y>, <z>)
 position @1 set to @2=позиция @1 установлена в @2
