@@ -11,7 +11,7 @@ local function safe_region(name, count, callback)
 
 	--save callback to call later
 	safe_region_callback[name] = callback
-	worldedit.player_notify(name, "WARNING: this operation could affect up to " .. count .. " nodes; type //y to continue or //n to cancel")
+	worldedit.player_notify(name, S("WARNING: this operation could affect up to @1 nodes; type //y to continue or //n to cancel", count))
 end
 
 local function reset_pending(name)
@@ -24,7 +24,7 @@ minetest.register_chatcommand("/y", {
 	func = function(name)
 		local callback = safe_region_callback[name]
 		if not callback then
-			worldedit.player_notify(name, "no operation pending")
+			worldedit.player_notify(name, S("no operation pending"))
 			return
 		end
 
@@ -38,7 +38,7 @@ minetest.register_chatcommand("/n", {
 	description = S("Abort a pending operation"),
 	func = function(name)
 		if not safe_region_callback[name] then
-			worldedit.player_notify(name, "no operation pending")
+			worldedit.player_notify(name, S("no operation pending"))
 			return
 		end
 

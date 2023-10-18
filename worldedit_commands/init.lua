@@ -254,7 +254,7 @@ local function open_schematic(name, param)
 		worldedit.player_notify(name, S("Invalid file format!"))
 		return
 	elseif version > worldedit.LATEST_SERIALIZATION_VERSION then
-		worldedit.player_notify(name, "Schematic was created with a newer version of WorldEdit.")
+		worldedit.player_notify(name, S("Schematic was created with a newer version of WorldEdit."))
 		return
 	end
 
@@ -402,7 +402,7 @@ worldedit.register_command("reset", {
 		worldedit.set_pos[name] = nil
 		--make sure the user does not try to confirm an operation after resetting pos:
 		reset_pending(name)
-		worldedit.player_notify(name, "region reset")
+		worldedit.player_notify(name, S("region reset"))
 	end,
 })
 
@@ -412,7 +412,7 @@ worldedit.register_command("mark", {
 	privs = {worldedit=true},
 	func = function(name)
 		worldedit.marker_update(name)
-		worldedit.player_notify(name, "region marked")
+		worldedit.player_notify(name, S("region marked"))
 	end,
 })
 
@@ -427,7 +427,7 @@ worldedit.register_command("unmark", {
 		worldedit.marker_update(name)
 		worldedit.pos1[name] = pos1
 		worldedit.pos2[name] = pos2
-		worldedit.player_notify(name, "region unmarked")
+		worldedit.player_notify(name, S("region unmarked"))
 	end,
 })
 
@@ -465,7 +465,7 @@ worldedit.register_command("p", {
 		if param == "set" or param == "set1" or param == "set2" or param == "get" then
 			return true, param
 		end
-		return false, S("unknown subcommand: ") .. param
+		return false, S("unknown subcommand: @1", param)
 	end,
 	func = function(name, param)
 		if param == "set" then --set both WorldEdit positions
@@ -551,10 +551,13 @@ worldedit.register_command("volume", {
 
 		local volume = worldedit.volume(pos1, pos2)
 		local abs = math.abs
-		worldedit.player_notify(name, "current region has a volume of " .. volume .. " nodes ("
-			.. abs(pos2.x - pos1.x) + 1 .. "*"
-			.. abs(pos2.y - pos1.y) + 1 .. "*"
-			.. abs(pos2.z - pos1.z) + 1 .. ")")
+		worldedit.player_notify(name, S(
+			"current region has a volume of @1 nodes (@2*@3*@4)",
+			volume,
+			abs(pos2.x - pos1.x) + 1,
+			abs(pos2.y - pos1.y) + 1,
+			abs(pos2.z - pos1.z) + 1
+		))
 	end,
 })
 
@@ -675,7 +678,7 @@ worldedit.register_command("replace", {
 	func = function(name, search_node, replace_node)
 		local count = worldedit.replace(worldedit.pos1[name], worldedit.pos2[name],
 				search_node, replace_node)
-		worldedit.player_notify(name, count .. " nodes replaced")
+		worldedit.player_notify(name, S("@1 nodes replaced", count))
 	end,
 })
 
@@ -689,7 +692,7 @@ worldedit.register_command("replaceinverse", {
 	func = function(name, search_node, replace_node)
 		local count = worldedit.replace(worldedit.pos1[name], worldedit.pos2[name],
 				search_node, replace_node, true)
-		worldedit.player_notify(name, count .. " nodes replaced")
+		worldedit.player_notify(name, S("@1 nodes replaced", count))
 	end,
 })
 
@@ -839,7 +842,7 @@ end
 
 worldedit.register_command("hollowcylinder", {
 	params = "x/y/z/? <length> <radius1> [radius2] <node>",
-	description = "Add hollow cylinder at WorldEdit position 1 along the given axis with length <length>, base radius <radius1> (and top radius [radius2]), composed of <node>",
+	description = S("Add hollow cylinder at WorldEdit position 1 along the given axis with length <length>, base radius <radius1> (and top radius [radius2]), composed of <node>"),
 	privs = {worldedit=true},
 	require_pos = 1,
 	parse = check_cylinder,
@@ -979,7 +982,7 @@ worldedit.register_command("copy", {
 		end
 
 		local count = worldedit.copy(worldedit.pos1[name], worldedit.pos2[name], axis, amount)
-		worldedit.player_notify(name, count .. " nodes copied")
+		worldedit.player_notify(name, S("@1 nodes copied", count))
 	end,
 })
 
@@ -1011,7 +1014,7 @@ worldedit.register_command("move", {
 		pos1[axis] = pos1[axis] + amount
 		pos2[axis] = pos2[axis] + amount
 		worldedit.marker_update(name)
-		worldedit.player_notify(name, count .. " nodes moved")
+		worldedit.player_notify(name, S("@1 nodes moved", count))
 	end,
 })
 
@@ -1040,7 +1043,7 @@ worldedit.register_command("stack", {
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
 		local count = worldedit.volume(pos1, pos2) * math.abs(repetitions)
 		worldedit.stack(pos1, pos2, axis, repetitions, function()
-			worldedit.player_notify(name, count .. " nodes stacked")
+			worldedit.player_notify(name, S("@1 nodes stacked", count))
 		end)
 	end,
 })
@@ -1053,11 +1056,11 @@ worldedit.register_command("stack2", {
 	parse = function(param)
 		local repetitions, incs = param:match("(%d+)%s*(.+)")
 		if repetitions == nil then
-			return false, "invalid count: " .. param
+			return false, S("invalid count: @1", param)
 		end
 		local x, y, z = incs:match("([+-]?%d+) ([+-]?%d+) ([+-]?%d+)")
 		if x == nil then
-			return false, "invalid increments: " .. param
+			return false, S("invalid increments: @1", param)
 		end
 
 		return true, tonumber(repetitions), vector.new(tonumber(x), tonumber(y), tonumber(z))
@@ -1069,7 +1072,7 @@ worldedit.register_command("stack2", {
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
 		local count = worldedit.volume(pos1, pos2) * repetitions
 		worldedit.stack2(pos1, pos2, offset, repetitions, function()
-			worldedit.player_notify(name, count .. " nodes stacked")
+			worldedit.player_notify(name, S("@1 nodes stacked", count))
 		end)
 	end,
 })
@@ -1087,7 +1090,7 @@ worldedit.register_command("stretch", {
 		end
 		stretchx, stretchy, stretchz = tonumber(stretchx), tonumber(stretchy), tonumber(stretchz)
 		if stretchx == 0 or stretchy == 0 or stretchz == 0 then
-			return false, "invalid scaling factors: " .. param
+			return false, S("invalid scaling factors: @1", param)
 		end
 		return true, stretchx, stretchy, stretchz
 	end,
@@ -1103,7 +1106,7 @@ worldedit.register_command("stretch", {
 		worldedit.pos2[name] = pos2
 		worldedit.marker_update(name)
 
-		worldedit.player_notify(name, count .. " nodes stretched")
+		worldedit.player_notify(name, S("@1 nodes stretched", count))
 	end,
 })
 
@@ -1117,7 +1120,7 @@ worldedit.register_command("transpose", {
 		if found == nil then
 			return false
 		elseif axis1 == axis2 then
-			return false, "invalid usage: axes must be different"
+			return false, S("invalid usage: axes must be different")
 		end
 		return true, axis1, axis2
 	end,
@@ -1133,7 +1136,7 @@ worldedit.register_command("transpose", {
 		worldedit.pos2[name] = pos2
 		worldedit.marker_update(name)
 
-		worldedit.player_notify(name, count .. " nodes transposed")
+		worldedit.player_notify(name, S("@1 nodes transposed", count))
 	end,
 })
 
@@ -1152,7 +1155,7 @@ worldedit.register_command("flip", {
 	func = function(name, param)
 		if param == "?" then param = worldedit.player_axis(name) end
 		local count = worldedit.flip(worldedit.pos1[name], worldedit.pos2[name], param)
-		worldedit.player_notify(name, count .. " nodes flipped")
+		worldedit.player_notify(name, S("@1 nodes flipped", count))
 	end,
 })
 
@@ -1168,7 +1171,7 @@ worldedit.register_command("rotate", {
 		end
 		angle = tonumber(angle)
 		if angle % 90 ~= 0 or angle % 360 == 0 then
-			return false, "invalid usage: angle must be multiple of 90"
+			return false, S("invalid usage: angle must be multiple of 90")
 		end
 		return true, axis, angle
 	end,
@@ -1183,7 +1186,7 @@ worldedit.register_command("rotate", {
 		worldedit.pos2[name] = pos2
 		worldedit.marker_update(name)
 
-		worldedit.player_notify(name, count .. " nodes rotated")
+		worldedit.player_notify(name, S("@1 nodes rotated", count))
 	end,
 })
 
@@ -1199,14 +1202,14 @@ worldedit.register_command("orient", {
 		end
 		angle = tonumber(angle)
 		if angle % 90 ~= 0 then
-			return false, "invalid usage: angle must be multiple of 90"
+			return false, S("invalid usage: angle must be multiple of 90")
 		end
 		return true, angle
 	end,
 	nodes_needed = check_region,
 	func = function(name, angle)
 		local count = worldedit.orient(worldedit.pos1[name], worldedit.pos2[name], angle)
-		worldedit.player_notify(name, count .. " nodes oriented")
+		worldedit.player_notify(name, S("@1 nodes oriented", count))
 	end,
 })
 
@@ -1218,7 +1221,7 @@ worldedit.register_command("fixlight", {
 	nodes_needed = check_region,
 	func = function(name)
 		local count = worldedit.fixlight(worldedit.pos1[name], worldedit.pos2[name])
-		worldedit.player_notify(name, count .. " nodes updated")
+		worldedit.player_notify(name, S("@1 nodes updated", count))
 	end,
 })
 
@@ -1247,7 +1250,7 @@ worldedit.register_command("drain", {
 		end
 		end
 		end
-		worldedit.player_notify(name, count .. " nodes updated")
+		worldedit.player_notify(name, S("@1 nodes updated", count))
 	end,
 })
 
@@ -1329,7 +1332,7 @@ worldedit.register_command("clearcut", {
 	func = function(name)
 		local pos1, pos2 = worldedit.sort_pos(worldedit.pos1[name], worldedit.pos2[name])
 		local count = clearcut(pos1, pos2)
-		worldedit.player_notify(name, count .. " nodes removed")
+		worldedit.player_notify(name, S("@1 nodes removed", count))
 	end,
 })
 
@@ -1341,7 +1344,7 @@ worldedit.register_command("hide", {
 	nodes_needed = check_region,
 	func = function(name)
 		local count = worldedit.hide(worldedit.pos1[name], worldedit.pos2[name])
-		worldedit.player_notify(name, count .. " nodes hidden")
+		worldedit.player_notify(name, S("@1 nodes hidden", count))
 	end,
 })
 
@@ -1360,7 +1363,7 @@ worldedit.register_command("suppress", {
 	nodes_needed = check_region,
 	func = function(name, node)
 		local count = worldedit.suppress(worldedit.pos1[name], worldedit.pos2[name], node)
-		worldedit.player_notify(name, count .. " nodes suppressed")
+		worldedit.player_notify(name, S("@1 nodes suppressed", count))
 	end,
 })
 
@@ -1379,7 +1382,7 @@ worldedit.register_command("highlight", {
 	nodes_needed = check_region,
 	func = function(name, node)
 		local count = worldedit.highlight(worldedit.pos1[name], worldedit.pos2[name], node)
-		worldedit.player_notify(name, count .. " nodes highlighted")
+		worldedit.player_notify(name, S("@1 nodes highlighted", count))
 	end,
 })
 
@@ -1391,7 +1394,7 @@ worldedit.register_command("restore", {
 	nodes_needed = check_region,
 	func = function(name)
 		local count = worldedit.restore(worldedit.pos1[name], worldedit.pos2[name])
-		worldedit.player_notify(name, count .. " nodes restored")
+		worldedit.player_notify(name, S("@1 nodes restored", count))
 	end,
 })
 
@@ -1405,9 +1408,9 @@ local function detect_misaligned_schematic(name, pos1, pos2)
 	local have_node_at_origin = node.name ~= "air" and node.name ~= "ignore"
 	if not have_node_at_origin then
 		worldedit.player_notify(name,
-			"Warning: The schematic contains excessive free space and WILL be "..
+			S("Warning: The schematic contains excessive free space and WILL be "..
 			"misaligned when allocated or loaded. To avoid this, shrink your "..
-			"area to cover exactly the nodes to be saved."
+			"area to cover exactly the nodes to be saved.")
 		)
 	end
 end
@@ -1422,7 +1425,7 @@ worldedit.register_command("save", {
 			return false
 		end
 		if not check_filename(param) then
-			return false, "Disallowed file name: " .. param
+			return false, S("Disallowed file name: @1", param)
 		end
 		return true, param
 	end,
@@ -1439,14 +1442,14 @@ worldedit.register_command("save", {
 		local filename = path .. "/" .. param .. ".we"
 		local file, err = io.open(filename, "wb")
 		if err ~= nil then
-			worldedit.player_notify(name, "Could not save file to \"" .. filename .. "\"")
+			worldedit.player_notify(name, S("Could not save file to \"@1\"", filename))
 			return
 		end
 		file:write(result)
 		file:flush()
 		file:close()
 
-		worldedit.player_notify(name, count .. " nodes saved")
+		worldedit.player_notify(name, S("@1 nodes saved"))
 	end,
 })
 
@@ -1460,7 +1463,7 @@ worldedit.register_command("allocate", {
 			return false
 		end
 		if not check_filename(param) then
-			return false, "Disallowed file name: " .. param
+			return false, S("Disallowed file name: @1", param)
 		end
 		return true, param
 	end,
@@ -1474,7 +1477,7 @@ worldedit.register_command("allocate", {
 
 		local nodepos1, nodepos2, count = worldedit.allocate(pos, value)
 		if not nodepos1 then
-			worldedit.player_notify(name, "Schematic empty, nothing allocated")
+			worldedit.player_notify(name, S("Schematic empty, nothing allocated"))
 			return false
 		end
 
@@ -1482,7 +1485,7 @@ worldedit.register_command("allocate", {
 		worldedit.pos2[name] = nodepos2
 		worldedit.marker_update(name)
 
-		worldedit.player_notify(name, count .. " nodes allocated")
+		worldedit.player_notify(name, S("@1 nodes allocated", count))
 	end,
 })
 
@@ -1496,7 +1499,7 @@ worldedit.register_command("load", {
 			return false
 		end
 		if not check_filename(param) then
-			return false, "Disallowed file name: " .. param
+			return false, S("Disallowed file name: @1", param)
 		end
 		return true, param
 	end,
@@ -1510,10 +1513,10 @@ worldedit.register_command("load", {
 
 		local count = worldedit.deserialize(pos, value)
 		if count == nil then
-			worldedit.player_notify(name, "Loading failed!")
+			worldedit.player_notify(name, S("Loading failed!"))
 			return false
 		end
-		worldedit.player_notify(name, count .. " nodes loaded")
+		worldedit.player_notify(name, S("@1 nodes loaded", count))
 	end,
 })
 
@@ -1568,7 +1571,7 @@ worldedit.register_command("mtschemcreate", {
 			return false
 		end
 		if not check_filename(param) then
-			return false, "Disallowed file name: " .. param
+			return false, S("Disallowed file name: @1", param)
 		end
 		return true, param
 	end,
@@ -1583,9 +1586,9 @@ worldedit.register_command("mtschemcreate", {
 				worldedit.pos2[name], worldedit.prob_list[name],
 				filename)
 		if ret == nil then
-			worldedit.player_notify(name, "Failed to create Minetest schematic")
+			worldedit.player_notify(name, S("Failed to create Minetest schematic"))
 		else
-			worldedit.player_notify(name, "Saved Minetest schematic to " .. param)
+			worldedit.player_notify(name, S("Saved Minetest schematic to @1", param))
 		end
 		worldedit.prob_list[name] = {}
 	end,
@@ -1601,7 +1604,7 @@ worldedit.register_command("mtschemplace", {
 			return false
 		end
 		if not check_filename(param) then
-			return false, "Disallowed file name: " .. param
+			return false, S("Disallowed file name: @1", param)
 		end
 		return true, param
 	end,
@@ -1610,10 +1613,9 @@ worldedit.register_command("mtschemplace", {
 
 		local path = minetest.get_worldpath() .. "/schems/" .. param .. ".mts"
 		if minetest.place_schematic(pos, path) == nil then
-			worldedit.player_notify(name, "failed to place Minetest schematic")
+			worldedit.player_notify(name, S("failed to place Minetest schematic"))
 		else
-			worldedit.player_notify(name, "placed Minetest schematic " .. param ..
-				" at " .. minetest.pos_to_string(pos))
+			worldedit.player_notify(name, S("placed Minetest schematic @1 at @2", param, minetest.pos_to_string(pos)))
 		end
 	end,
 })
@@ -1624,7 +1626,7 @@ worldedit.register_command("mtschemprob", {
 	privs = {worldedit=true},
 	parse = function(param)
 		if param ~= "start" and param ~= "finish" and param ~= "get" then
-			return false, "unknown subcommand: " .. param
+			return false, S("unknown subcommand: @1", param)
 		end
 		return true, param
 	end,
@@ -1632,10 +1634,10 @@ worldedit.register_command("mtschemprob", {
 		if param == "start" then --start probability setting
 			worldedit.set_pos[name] = "prob"
 			worldedit.prob_list[name] = {}
-			worldedit.player_notify(name, "select Minetest schematic probability values by punching nodes")
+			worldedit.player_notify(name, S("select Minetest schematic probability values by punching nodes"))
 		elseif param == "finish" then --finish probability setting
 			worldedit.set_pos[name] = nil
-			worldedit.player_notify(name, "finished Minetest schematic probability selection")
+			worldedit.player_notify(name, S("finished Minetest schematic probability selection"))
 		elseif param == "get" then --get all nodes that had probabilities set on them
 			local text = ""
 			local problist = worldedit.prob_list[name]
@@ -1646,7 +1648,7 @@ worldedit.register_command("mtschemprob", {
 				local prob = math.floor(((v.prob / 256) * 100) * 100 + 0.5) / 100
 				text = text .. minetest.pos_to_string(v.pos) .. ": " .. prob .. "% | "
 			end
-			worldedit.player_notify(name, "currently set node probabilities:")
+			worldedit.player_notify(name, S("currently set node probabilities:"))
 			worldedit.player_notify(name, text)
 		end
 	end,
@@ -1661,7 +1663,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 		end
 		local e = {pos=worldedit.prob_pos[name], prob=tonumber(fields.text)}
 		if e.pos == nil or e.prob == nil or e.prob < 0 or e.prob > 256 then
-			worldedit.player_notify(name, "invalid node probability given, not saved")
+			worldedit.player_notify(name, S("invalid node probability given, not saved"))
 			return
 		end
 		problist[#problist+1] = e
@@ -1676,6 +1678,6 @@ worldedit.register_command("clearobjects", {
 	nodes_needed = check_region,
 	func = function(name)
 		local count = worldedit.clear_objects(worldedit.pos1[name], worldedit.pos2[name])
-		worldedit.player_notify(name, count .. " objects cleared")
+		worldedit.player_notify(name, S("@1 objects cleared", count))
 	end,
 })
