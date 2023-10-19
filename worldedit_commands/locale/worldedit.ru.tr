@@ -1,4 +1,4 @@
-# textdomain: worldedit
+# textdomain: worldedit_commands
 
 ### init.lua ###
 Can use WorldEdit commands=Возможность редактировать мир с помощью команд WorldEdit
@@ -137,9 +137,9 @@ Abort a pending operation=Отклонить отложенную операци
 Outset the selected region.=Расширить выделение региона.
 Invalid direction: @1=Недопустимое направление: @1
 Invalid number of arguments=Недопустимое количество аргументов
-Region outset by @1 blocks=Регион расширен на @1 блок(а/ов)
+Region outset by @1 nodes=Регион расширен на @1 нод(у/ы)
 Inset the selected region.=Сузить выделение региона.
-Region inset by @1 blocks=Регион сужен на @1 блок(а/ов)
+Region inset by @1 nodes=Регион сужен на @1 нод(у/ы)
 Shifts the selection area without moving its contents=Сдвинуть выделение региона без перемещения его содержимого
 Invalid if looking straight up or down=Недопустимо, если смотреть прямо вверх или вниз
 Region shifted by @1 nodes=Регион сдвинут на @1 нод(у/ы)
@@ -148,4 +148,8 @@ Region expanded by @1 nodes=Регион увеличен на @1 нод(у/ы)
 Contracts the selection in the selected absolute or relative axis=Уменьшить выделение региона по выбранной абсолютной или относительной оси
 Region contracted by @1 nodes=Регион уменьшен на @1 нод(у/ы)
 Select a cube with side length <size> around position 1 and run <command> on region=Выделить куб с длиной стороны <size> вокруг позиции 1 и запустите <команду> в области
+invalid usage: //@1 cannot be used with cubeapply=недопустимое использование: //@1 не может быть применено в cubeapply
 Missing privileges: @1=Отсутствуют привилегии: @1
+
+### wand.lua ###
+WorldEdit Wand tool@nLeft-click to set 1st position, right-click to set 2nd=Инструмент WorldEdit Wand@nЛевая кнопка мыши, чтобы установить 1-ю позицию, правая кнопка мыши, чтобы установить 2-ю

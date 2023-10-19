@@ -1,4 +1,4 @@
-local S = minetest.get_translator("worldedit")
+local S = minetest.get_translator("worldedit_commands")
 
 local safe_region_callback = {}
 

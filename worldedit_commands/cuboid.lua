@@ -1,4 +1,4 @@
-local S = minetest.get_translator("worldedit")
+local S = minetest.get_translator("worldedit_commands")
 
 worldedit.register_command("outset", {
 	params = "[h/v] <amount>",
@@ -34,7 +34,7 @@ worldedit.register_command("outset", {
 		end
 
 		worldedit.marker_update(name)
-		return true, S("Region outset by @1 blocks", amount)
+		return true, S("Region outset by @1 nodes", amount)
       end,
 })
 
@@ -71,7 +71,7 @@ worldedit.register_command("inset", {
 		end
 
 		worldedit.marker_update(name)
-		return true, S("Region inset by @1 blocks", amount)
+		return true, S("Region inset by @1 nodes", amount)
       end,
 })
 
@@ -232,7 +232,7 @@ worldedit.register_command("cubeapply", {
 		end
 		local cmddef = worldedit.registered_commands[cmd]
 		if cmddef == nil or cmddef.require_pos ~= 2 then
-			return false, "invalid usage: //" .. cmd .. " cannot be used with cubeapply"
+			return false, S("invalid usage: //@1 cannot be used with cubeapply", cmd)
 		end
 		-- run parsing of target command
 		local parsed = {cmddef.parse(args)}

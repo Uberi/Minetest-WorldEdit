@@ -1,4 +1,4 @@
-local S = minetest.get_translator("worldedit")
+local S = minetest.get_translator("worldedit_commands")
 
 minetest.register_privilege("worldedit", S("Can use WorldEdit commands"))
 
@@ -1449,7 +1449,7 @@ worldedit.register_command("save", {
 		file:flush()
 		file:close()
 
-		worldedit.player_notify(name, S("@1 nodes saved"))
+		worldedit.player_notify(name, S("@1 nodes saved", count))
 	end,
 })
 
