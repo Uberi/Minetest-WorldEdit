@@ -1,15 +1,27 @@
 # textdomain: worldedit_commands
-
-### init.lua ###
+Outset the selected region.=
+Invalid direction: @1=
+Invalid number of arguments=
+Region outset by @1 nodes=
+Inset the selected region.=
+Region inset by @1 nodes=
+Shifts the selection area without moving its contents=
+Invalid if looking straight up or down=
+Region shifted by @1 nodes=
+Expands the selection in the selected absolute or relative axis=
+Region expanded by @1 nodes=
+Contracts the selection in the selected absolute or relative axis=
+Region contracted by @1 nodes=
+Select a cube with side length <size> around position 1 and run <command> on region=
+invalid usage: //@1 cannot be used with cubeapply=
+Missing privileges: @1=
 Can use WorldEdit commands=
-
 no region selected=
 no position 1 selected=
 invalid usage=
 Could not open file "@1"=
 Invalid file format!=
 Schematic was created with a newer version of WorldEdit.=
-
 Get information about the WorldEdit mod=
 WorldEdit @1 is available on this server. Type //help to get a list of commands, or get more information at @2=
 Get help for WorldEdit commands=
@@ -20,7 +32,7 @@ Command not available: =
 Enable or disable node inspection=
 inspector: inspection enabled for @1, currently facing the @2 axis=
 inspector: inspection disabled=
-inspector: @1 at @2 (param1=@3, param2=@4, received light=@5) punched facing the @6 axis=inspector: @1 в @2 (param1=@3, param2=@4, received light=
+inspector: @1 at @2 (param1@=@3, param2@=@4, received light@=@5) punched facing the @6 axis=
 Reset the region so that it is empty=
 region reset=
 Show markers at the region positions=
@@ -28,6 +40,7 @@ region marked=
 Hide markers if currently shown=
 region unmarked=
 Set WorldEdit region position @1 to the player's location=
+position @1 set to @2=
 Set WorldEdit region, WorldEdit position 1, or WorldEdit position 2 by punching nodes, or display the current WorldEdit region=
 unknown subcommand: @1=
 select positions by punching two nodes=
@@ -35,7 +48,6 @@ select position @1 by punching a node=
 position @1: @2=
 position @1 not set=
 Set a WorldEdit region position to the position at (<x>, <y>, <z>)=
-position @1 set to @2=
 Display the volume of the current WorldEdit region=
 current region has a volume of @1 nodes (@2*@3*@4)=
 Remove all MapBlocks (16x16x16) containing the selected area from the map=
@@ -126,30 +138,8 @@ currently set node probabilities:=
 invalid node probability given, not saved=
 Clears all objects within the WorldEdit region=
 @1 objects cleared=
-
-### safe.lua ###
 WARNING: this operation could affect up to @1 nodes; type //y to continue or //n to cancel=
 Confirm a pending operation=
 no operation pending=
 Abort a pending operation=
-
-### cuboid.lua ###
-Outset the selected region.=
-Invalid direction: @1=
-Invalid number of arguments=
-Region outset by @1 nodes=
-Inset the selected region.=
-Region inset by @1 nodes=
-Shifts the selection area without moving its contents=
-Invalid if looking straight up or down=
-Region shifted by @1 nodes=
-Expands the selection in the selected absolute or relative axis=
-Region expanded by @1 nodes=
-Contracts the selection in the selected absolute or relative axis=
-Region contracted by @1 nodes=
-Select a cube with side length <size> around position 1 and run <command> on region=
-invalid usage: //@1 cannot be used with cubeapply=
-Missing privileges: @1=
-
-### wand.lua ###
-WorldEdit Wand tool@\nLeft-click to set 1st position, right-click to set 2nd=
+WorldEdit Wand tool@nLeft-click to set 1st position, right-click to set 2nd=

@@ -684,7 +684,7 @@ worldedit.register_command("replace", {
 
 worldedit.register_command("replaceinverse", {
 	params = "<search node> <replace node>",
-	description = "Replace all nodes other than <search node> with <replace node> in the current WorldEdit region",
+	description = S("Replace all nodes other than <search node> with <replace node> in the current WorldEdit region"),
 	privs = {worldedit=true},
 	require_pos = 2,
 	parse = check_replace,

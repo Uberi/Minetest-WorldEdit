@@ -20,7 +20,7 @@ Command not available: =Команда не найдена:
 Enable or disable node inspection=Включить/отключить инспекцию блоков
 inspector: inspection enabled for @1, currently facing the @2 axis=inspector: инспекция включена для @1, текущий взор в направлении оси @2
 inspector: inspection disabled=inspector: инспекция отключена
-inspector: @1 at @2 (param1=@3, param2=@4, received light=@5) punched facing the @6 axis=inspector: @1 в @2 (param1=@3, param2=@4, received light=@5) ударен по поверхности @6
+inspector: @1 at @2 (param1@=@3, param2@=@4, received light@=@5) punched facing the @6 axis=inspector: @1 в @2 (param1@=@3, param2@=@4, received light@=@5) ударен по поверхности @6
 Reset the region so that it is empty=Сбросить выделение области
 region reset=регион сброшен
 Show markers at the region positions=Отобразить маркеры выделенной области
