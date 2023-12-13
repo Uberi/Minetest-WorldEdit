@@ -379,7 +379,7 @@ minetest.register_on_punchnode(function(pos, node, puncher)
 	if worldedit.inspect[name] then
 		local axis, sign = worldedit.player_axis(name)
 		local message = S(
-			S("inspector: @1 at @2 (param1=@3, param2=@4, received light=@5) punched facing the @6 axis"),
+			"inspector: @1 at @2 (param1=@3, param2=@4, received light=@5) punched facing the @6 axis",
 			node.name,
 			minetest.pos_to_string(pos),
 			node.param1,
