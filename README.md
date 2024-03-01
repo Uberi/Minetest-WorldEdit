@@ -2,7 +2,7 @@ WorldEdit v1.3
 ==============
 The ultimate in-game world editing tool for [Minetest](http://minetest.net/)! Tons of functionality to help with building, fixing, and more.
 
-For more information, see the [forum topic](https://forum.minetest.net/viewtopic.php?id=572) at the Minetest forums.
+For more information, see the [forum topic](https://forum.minetest.net/viewtopic.php?t=572) at the Minetest forums.
 
 # New users should see the [tutorial](Tutorial.md).
 
