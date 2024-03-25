@@ -3,8 +3,14 @@ on: [push, pull_request]
 
 jobs:
   test:
-    name: "Unit Tests"
+    name: "Unit Tests ${{ matrix.cfg.image }}"
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      matrix:
+        cfg:
+          - { image: 'registry.gitlab.com/minetest/minetest/server:5.5.1', mtg: false }
+          - { image: '', mtg: true } # latest mater
     steps:
     - uses: actions/checkout@v4
 
@@ -12,6 +18,9 @@ jobs:
       with:
         repository: 'minetest/minetest_game'
         path: minetest_game
+      if: ${{ matrix.cfg.mtg }}
 
     - name: Run tests
       run: ./.util/run_tests.sh --docker
+      env:
+        DOCKER_IMAGE: "${{ matrix.cfg.image }}"
