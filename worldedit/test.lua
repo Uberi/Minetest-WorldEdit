@@ -560,7 +560,7 @@ worldedit.run_tests = function()
 	for x = 0, math.floor(wanted.x/16) do
 	for y = 0, math.floor(wanted.y/16) do
 	for z = 0, math.floor(wanted.z/16) do
-		assert(minetest.forceload_block(vector.new(x*16, y*16, z*16), true))
+		assert(minetest.forceload_block(vector.new(x*16, y*16, z*16), true, -1))
 	end
 	end
 	end
