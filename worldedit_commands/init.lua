@@ -1528,13 +1528,13 @@ worldedit.register_command("lua", {
 		return true, param
 	end,
 	func = function(name, param)
-		local err = worldedit.lua(param)
-		if err then
-			worldedit.player_notify(name, "code error: " .. err)
-			minetest.log("action", name.." tried to execute "..param)
+		local good, ret = worldedit.lua(param, name)
+		if good then
+			worldedit.player_notify(name, "code successfully executed, returns with " .. ret, false)
+			minetest.log("action", name .. " executed " .. param)
 		else
-			worldedit.player_notify(name, "code successfully executed", false)
-			minetest.log("action", name.." executed "..param)
+			worldedit.player_notify(name, "code error: " .. dump(ret))
+			minetest.log("action", name .. " tried to execute " .. param)
 		end
 	end,
 })

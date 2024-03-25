@@ -1,6 +1,7 @@
 read_globals = {"minetest", "vector", "VoxelArea", "ItemStack",
 	"table",
-	"unified_inventory", "sfinv", "smart_inventory", "inventory_plus"
+	"unified_inventory", "sfinv", "smart_inventory", "inventory_plus",
+	"dump"
 }
 globals = {"worldedit"}
 -- Ignore these errors until someone decides to fix them

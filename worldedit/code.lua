@@ -3,16 +3,22 @@
 
 --- Executes `code` as a Lua chunk in the global namespace.
 -- @return An error message if the code fails, or nil on success.
-function worldedit.lua(code)
-	local func, err = loadstring(code)
-	if not func then  -- Syntax error
-		return err
+function worldedit.lua(code, name)
+	local factory, err = loadstring("return function(p) " .. code .. " end")
+	if not factory then  -- Syntax error
+		return false, err
 	end
-	local good, err = pcall(func)
-	if not good then  -- Runtime error
-		return err
+	local func=factory()
+	local player=minetest.get_player_by_name(name)
+	local p={name=name, player=player}
+	if player then
+		p["pos"]=vector.round(player:get_pos())
 	end
-	return nil
+	local good, err = pcall(func, p)
+	if good then
+		err=dump(err)
+	end
+	return good, err
 end
 
 
