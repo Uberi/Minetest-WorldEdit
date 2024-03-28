@@ -640,11 +640,8 @@ function worldedit.clear_objects(pos1, pos2)
 
 	local function should_delete(obj)
 		-- Avoid players and WorldEdit entities
-		if obj:is_player() then
-			return false
-		end
 		local entity = obj:get_luaentity()
-		return not entity or not entity.name:find("^worldedit:")
+		return not (entity and entity.name:find("^worldedit:"))
 	end
 
 	-- Offset positions to include full nodes (positions are in the center of nodes)
@@ -691,4 +688,3 @@ function worldedit.clear_objects(pos1, pos2)
 	end
 	return count
 end
-
