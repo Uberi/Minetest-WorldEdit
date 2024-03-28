@@ -227,11 +227,17 @@ Code
 ----
 Contained in code.lua, this module allows arbitrary Lua code to be used with WorldEdit.
 
-### error = worldedit.lua(code)
+### error = worldedit.lua(code,name)
 
-Executes `code` as a Lua chunk in the global namespace.
+the given code gets encapsulated into a function with parameters `name`, `player`, pos`
+where
+ * `name` is a playername or `nil`
+ * `player` is the player object of the above player if applicable, otherwise `nil`
+ * `pos` is the position of the aforementioned player (if applicable, otherwise `nil`) rounded to integers
 
-Returns an error if the code fails or nil otherwise.
+the resulting function is then executed as a Lua chunk in the global namespace.
+
+The return is a tuple of success and return of the function converted to a string, which in turn serves as an error messsage in case of a failure
 
 ### error = worldedit.luatransform(pos1, pos2, code)
 
