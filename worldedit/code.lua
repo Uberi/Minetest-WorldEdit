@@ -4,6 +4,9 @@
 --- Executes `code` as a Lua chunk in the global namespace.
 -- @return An error message if the code fails, or nil on success.
 function worldedit.lua(code, name)
+	if string.sub(code,1,1)=="=" then
+		code="return "..string.sub(code,2)
+	end
 	local factory, err = loadstring("return function(p) " .. code .. " end")
 	if not factory then  -- Syntax error
 		return false, err
