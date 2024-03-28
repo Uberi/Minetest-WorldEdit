@@ -1530,7 +1530,11 @@ worldedit.register_command("lua", {
 	func = function(name, param)
 		local good, ret = worldedit.lua(param, name)
 		if good then
-			worldedit.player_notify(name, "code successfully executed, returns with " .. ret, false)
+			if ret ~= "nil" then
+				worldedit.player_notify(name, "code successfully executed, returns with " .. ret, false)
+			else
+				worldedit.player_notify(name, "code successfully executed", false)
+			end
 			minetest.log("action", name .. " executed " .. param)
 		else
 			worldedit.player_notify(name, "code error: " .. dump(ret))
