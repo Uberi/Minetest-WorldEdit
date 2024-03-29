@@ -640,6 +640,9 @@ function worldedit.clear_objects(pos1, pos2)
 
 	local function should_delete(obj)
 		-- Avoid players and WorldEdit entities
+		if obj:is_player() then
+			return false
+		end
 		local entity = obj:get_luaentity()
 		return not (entity and entity.name:find("^worldedit:"))
 	end
