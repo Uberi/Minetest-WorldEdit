@@ -6,10 +6,10 @@
 --  * name (the name of the player issuing the //lua command)
 --  * player (the player object of the above player if applicable)
 --  * pos (the position of the aforementioned player (if applicable) rounded to integers
--- @return tuple of success, return of code as string (error message in case of failure)
+-- @return string in case of error, tuple of nil, return of code as string in case of success
 function worldedit.lua(code, name)
-	if string.sub(code,1,1)=="=" then
-		code="return "..string.sub(code,2)
+	if string.sub(code, 1, 1) == "=" then
+		code = "return " .. string.sub(code, 2)
 	end
 	local factory, err = loadstring("return function(name, player, pos) " .. code .. " end")
 	if not factory then  -- Syntax error
