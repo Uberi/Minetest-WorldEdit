@@ -13,22 +13,22 @@ function worldedit.lua(code, name)
 	end
 	local factory, err = loadstring("return function(name, player, pos) " .. code .. " end")
 	if not factory then  -- Syntax error
-		return false, err
+		return err
 	end
 	local func=factory()
 	local player
 	if name then
-		player=minetest.get_player_by_name(name)
+		player = minetest.get_player_by_name(name)
 	end
 	local pos
 	if player then
-		pos=vector.round(player:get_pos())
+		pos = vector.round(player:get_pos())
 	end
 	local good, err = pcall(func, name, player, pos)
 	if good then
-		err=dump(err)
+		return nil, dump(err)
 	end
-	return good, err
+	return err
 end
 
 
