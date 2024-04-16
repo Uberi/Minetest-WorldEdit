@@ -241,7 +241,6 @@ end
 
 --- Loads the nodes represented by string `value` at position `origin_pos`.
 -- @return The number of nodes deserialized.
-local registered_nodes = minetest.registered_nodes
 function worldedit.deserialize(origin_pos, value)
 	local nodes = load_schematic(value)
 	if not nodes then return nil end
@@ -252,6 +251,7 @@ function worldedit.deserialize(origin_pos, value)
 
 	local origin_x, origin_y, origin_z = origin_pos.x, origin_pos.y, origin_pos.z
 	local add_node, get_meta = minetest.add_node, minetest.get_meta
+	local registered_nodes = minetest.registered_nodes
 	for i, entry in ipairs(nodes) do
 		if registered_nodes[entry.name] then
 			entry.x, entry.y, entry.z = origin_x + entry.x, origin_y + entry.y, origin_z + entry.z
