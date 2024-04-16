@@ -251,12 +251,15 @@ function worldedit.deserialize(origin_pos, value)
 
 	local origin_x, origin_y, origin_z = origin_pos.x, origin_pos.y, origin_pos.z
 	local add_node, get_meta = minetest.add_node, minetest.get_meta
+	local registered_nodes = minetest.registered_nodes
 	for i, entry in ipairs(nodes) do
-		entry.x, entry.y, entry.z = origin_x + entry.x, origin_y + entry.y, origin_z + entry.z
-		-- Entry acts as both position and node
-		add_node(entry, entry)
-		if entry.meta then
-			get_meta(entry):from_table(entry.meta)
+		if registered_nodes[entry.name] then
+			entry.x, entry.y, entry.z = origin_x + entry.x, origin_y + entry.y, origin_z + entry.z
+			-- Entry acts as both position and node
+			add_node(entry, entry)
+			if entry.meta then
+				get_meta(entry):from_table(entry.meta)
+			end
 		end
 	end
 	return #nodes
