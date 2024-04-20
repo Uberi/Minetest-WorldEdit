@@ -13,9 +13,7 @@ worldedit.mark_pos1 = function(name, region_too)
 		worldedit.marker1[name] = nil
 	end
 	if pos1 ~= nil then
-		--make area stay loaded
-		local manip = minetest.get_voxel_manip()
-		manip:read_from_map(pos1, pos1)
+		worldedit.keep_loaded(pos1, pos1)
 
 		--add marker
 		worldedit.marker1[name] = minetest.add_entity(pos1, "worldedit:pos1", init_sentinel)
@@ -37,9 +35,7 @@ worldedit.mark_pos2 = function(name, region_too)
 		worldedit.marker2[name] = nil
 	end
 	if pos2 ~= nil then
-		--make area stay loaded
-		local manip = minetest.get_voxel_manip()
-		manip:read_from_map(pos2, pos2)
+		worldedit.keep_loaded(pos2, pos2)
 
 		--add marker
 		worldedit.marker2[name] = minetest.add_entity(pos2, "worldedit:pos2", init_sentinel)
@@ -77,9 +73,8 @@ worldedit.mark_region = function(name)
 		local thickness = 0.2
 		local sizex, sizey, sizez = (1 + pos2.x - pos1.x) / 2, (1 + pos2.y - pos1.y) / 2, (1 + pos2.z - pos1.z) / 2
 
-		--make area stay loaded
-		local manip = minetest.get_voxel_manip()
-		manip:read_from_map(pos1, pos2)
+		-- TODO maybe we could skip this actually?
+		worldedit.keep_loaded(pos1, pos2)
 
 		local markers = {}
 
