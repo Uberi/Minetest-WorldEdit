@@ -16,6 +16,13 @@ minetest.register_tool(":worldedit:wand", {
 	stack_max = 1, -- there is no need to have more than one
 	liquids_pointable = true, -- ground with only water on can be selected as well
 
+	-- ignore marker cube so the clicking on the position markers works reliably
+	pointabilities = {
+		objects = {
+			["worldedit:region_cube"] = false
+		}
+	},
+
 	on_use = function(itemstack, placer, pointed_thing)
 		if placer == nil or pointed_thing == nil then return end
 		local name = placer:get_player_name()
