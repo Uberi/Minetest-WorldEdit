@@ -19,6 +19,7 @@ Can use WorldEdit commands=
 no region selected=
 no position 1 selected=
 invalid usage=
+ERROR: the operation was cancelled because the region has changed.=
 Could not open file "@1"=
 Invalid file format!=
 Schematic was created with a newer version of WorldEdit.=

@@ -20,6 +20,21 @@ end
 
 worldedit.registered_commands = {}
 
+local function copy_state(which, name)
+	if which == 0 then
+		return {}
+	elseif which == 1 then
+		return {
+			worldedit.pos1[name] and vector.copy(worldedit.pos1[name])
+		}
+	else
+		return {
+			worldedit.pos1[name] and vector.copy(worldedit.pos1[name]),
+			worldedit.pos2[name] and vector.copy(worldedit.pos2[name])
+		}
+	end
+end
+
 local function chatcommand_handler(cmd_name, name, param)
 	local def = assert(worldedit.registered_commands[cmd_name])
 
@@ -44,21 +59,34 @@ local function chatcommand_handler(cmd_name, name, param)
 		return
 	end
 
-	if def.nodes_needed then
-		local count = def.nodes_needed(name, unpack(parsed))
-		safe_region(name, count, function()
-			local _, msg = def.func(name, unpack(parsed))
-			if msg then
-				minetest.chat_send_player(name, msg)
-			end
-		end)
-	else
-		-- no "safe region" check
+	local run = function()
 		local _, msg = def.func(name, unpack(parsed))
 		if msg then
 			minetest.chat_send_player(name, msg)
 		end
 	end
+
+	if not def.nodes_needed then
+		-- no safe region check
+		run()
+		return
+	end
+
+	local count = def.nodes_needed(name, unpack(parsed))
+	local old_state = copy_state(def.require_pos, name)
+	safe_region(name, count, function()
+		local state = copy_state(def.require_pos, name)
+		local ok = true
+		for i, v in ipairs(state) do
+			ok = ok and ( (v == nil and old_state[i] == nil) or vector.equals(v, old_state[i]) )
+		end
+		if not ok then
+			worldedit.player_notify(name, S("ERROR: the operation was cancelled because the region has changed."))
+			return
+		end
+
+		run()
+	end)
 end
 
 -- Registers a chatcommand for WorldEdit
@@ -66,7 +94,7 @@ end
 -- def = {
 --     privs = {}, -- Privileges needed
 --     params = "", -- Human readable parameter list (optional)
---         -- setting params = "" will automatically provide a parse() if not given
+--         -- if params = "" then a parse() implementation will automatically be provided
 --     description = "", -- Description
 --     require_pos = 0, -- Number of positions required to be set (optional)
 --     parse = function(param)

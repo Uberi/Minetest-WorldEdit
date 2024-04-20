@@ -30,6 +30,7 @@ Can use WorldEdit commands=Kann WorldEdit-Befehle benutzen
 no region selected=Kein Gebiet ausgewählt
 no position 1 selected=Keine Position 1 ausgewählt
 invalid usage=Ungültige Verwendung
+ERROR: the operation was cancelled because the region has changed.=FEHLER: Der Vorgang wurde abgebrochen, weil das Gebiet verändert wurde.
 Could not open file "@1"=Konnte die Datei „@1“ nicht öffnen
 Invalid file format!=Ungültiges Dateiformat!
 Schematic was created with a newer version of WorldEdit.=Schematic wurde mit einer neueren Version von WorldEdit erstellt.
