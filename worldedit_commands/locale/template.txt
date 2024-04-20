@@ -26,6 +26,7 @@ Schematic was created with a newer version of WorldEdit.=
 Get information about the WorldEdit mod=
 WorldEdit @1 is available on this server. Type @2 to get a list of commands, or find more information at @3=
 Get help for WorldEdit commands=
+alias to @1=
 You are not allowed to use any WorldEdit commands.=
 Available commands: @1@nUse '@2' to get more information, or '@3' to list everything.=
 Available commands:@n=

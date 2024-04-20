@@ -37,6 +37,7 @@ Schematic was created with a newer version of WorldEdit.=Schematic wurde mit ein
 Get information about the WorldEdit mod=Informationen über den WorldEdit-Mod erhalten.
 WorldEdit @1 is available on this server. Type @2 to get a list of commands, or find more information at @3=WorldEdit @1 ist auf diesem Server verfügbar. Nutzen Sie @2, um eine Liste der Befehle zu erhalten, oder finden Sie weitere Informationen unter @3
 Get help for WorldEdit commands=Hilfe für WorldEdit-Befehle erhalten
+alias to @1=Alias für @1
 You are not allowed to use any WorldEdit commands.=Ihnen ist nicht erlaubt WorldEdit-Befehle zu nutzen.
 Available commands: @1@nUse '@2' to get more information, or '@3' to list everything.=Verfügbare Befehle: @1@n„@2“ benutzen, um mehr Informationen zu erhalten, oder „@3“, um alles aufzulisten.
 Available commands:@n=Verfügbare Befehle:@n

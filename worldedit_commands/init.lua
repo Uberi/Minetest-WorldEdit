@@ -114,6 +114,7 @@ end
 function worldedit.register_command(name, def)
 	local def = table.copy(def)
 	assert(name and #name > 0)
+	def.name = name
 	assert(def.privs)
 	def.require_pos = def.require_pos or 0
 	assert(def.require_pos >= 0 and def.require_pos < 3)
@@ -129,6 +130,9 @@ function worldedit.register_command(name, def)
 	--[[if def.require_pos == 2 and not def.nodes_needed then
 		minetest.log("warning", "//" .. name .. " might be missing nodes_needed")
 	end--]]
+
+	-- disable further modification
+	setmetatable(def, {__newindex = {}})
 
 	minetest.register_chatcommand("/" .. name, {
 		privs = def.privs,
@@ -304,7 +308,7 @@ worldedit.register_command("about", {
 	end,
 })
 
--- mostly copied from builtin/chatcommands.lua with minor modifications
+-- initially copied from builtin/chatcommands.lua
 worldedit.register_command("help", {
 	privs = {},
 	params = "[all/<cmd>]",
@@ -315,11 +319,16 @@ worldedit.register_command("help", {
 	func = function(name, param)
 		local function format_help_line(cmd, def)
 			local msg = minetest.colorize("#00ffff", "//"..cmd)
-			if def.params and def.params ~= "" then
-				msg = msg .. " " .. def.params
-			end
-			if def.description and def.description ~= "" then
-				msg = msg .. ": " .. def.description
+			if def.name ~= cmd then
+				msg = msg .. ": " .. S("alias to @1",
+					minetest.colorize("#00ffff", "//"..def.name))
+			else
+				if def.params and def.params ~= "" then
+					msg = msg .. " " .. def.params
+				end
+				if def.description and def.description ~= "" then
+					msg = msg .. ": " .. def.description
+				end
 			end
 			return msg
 		end
