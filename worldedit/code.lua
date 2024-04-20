@@ -23,7 +23,6 @@ function worldedit.lua(code, name)
 	local good, err = pcall(func, name, player, pos)
 	if not good then -- Runtime error
 		return tostring(err)
-		
 	end
 	return nil, dump(err)
 end
