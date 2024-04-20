@@ -4,31 +4,28 @@
 --- Executes `code` as a Lua chunk in the global namespace.
 -- the code will be encapsulated into a function with parameters
 --  * name (the name of the player issuing the //lua command)
---  * player (the player object of the above player if applicable)
---  * pos (the position of the aforementioned player (if applicable) rounded to integers
+--  * player (the player object of the player)
+--  * pos (the position of the player rounded to integers)
 -- @return string in case of error, tuple of nil, return of code as string in case of success
 function worldedit.lua(code, name)
-	if string.sub(code, 1, 1) == "=" then
-		code = "return " .. string.sub(code, 2)
-	end
-	local factory, err = loadstring("return function(name, player, pos) " .. code .. " end")
-	if not factory then  -- Syntax error
+	local factory, err = loadstring("return function(name, player, pos)\n" .. code .. "\nend")
+	if not factory then -- Syntax error
 		return err
 	end
-	local func=factory()
-	local player
+	local func = factory()
+	local player, pos
 	if name then
 		player = minetest.get_player_by_name(name)
-	end
-	local pos
-	if player then
-		pos = vector.round(player:get_pos())
+		if player then
+			pos = vector.round(player:get_pos())
+		end
 	end
 	local good, err = pcall(func, name, player, pos)
-	if good then
-		return nil, dump(err)
+	if not good then -- Runtime error
+		return tostring(err)
+		
 	end
-	return err
+	return nil, dump(err)
 end
 
 
