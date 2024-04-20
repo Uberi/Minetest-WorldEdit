@@ -296,9 +296,9 @@ worldedit.register_command("about", {
 	description = S("Get information about the WorldEdit mod"),
 	func = function(name)
 		worldedit.player_notify(name, S("WorldEdit @1"..
-			" is available on this server. Type //help to get a list of "..
-			"commands, or get more information at @2",
-			worldedit.version_string,
+			" is available on this server. Type @2 to get a list of "..
+			"commands, or find more information at @3",
+			worldedit.version_string, minetest.colorize("#00ffff", "//help"),
 			"https://github.com/Uberi/Minetest-WorldEdit"
 		))
 	end,
@@ -335,9 +335,11 @@ worldedit.register_command("help", {
 				end
 			end
 			table.sort(cmds)
+			local help = minetest.colorize("#00ffff", "//help")
 			return true, S("Available commands: @1@n"
-					.. "Use '//help <cmd>' to get more information,"
-					.. " or '//help all' to list everything.", table.concat(cmds, " "))
+					.. "Use '@2' to get more information,"
+					.. " or '@3' to list everything.",
+					table.concat(cmds, " "), help .. " <cmd>", help .. " all")
 		elseif param == "all" then
 			local cmds = {}
 			for cmd, def in pairs(worldedit.registered_commands) do

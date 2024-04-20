@@ -232,7 +232,8 @@ worldedit.register_command("cubeapply", {
 		end
 		local cmddef = worldedit.registered_commands[cmd]
 		if cmddef == nil or cmddef.require_pos ~= 2 then
-			return false, S("invalid usage: //@1 cannot be used with cubeapply", cmd)
+			return false, S("invalid usage: @1 cannot be used with cubeapply",
+				minetest.colorize("#00ffff", "//"..cmd))
 		end
 		-- run parsing of target command
 		local parsed = {cmddef.parse(args)}

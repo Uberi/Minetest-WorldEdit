@@ -101,7 +101,7 @@ worldedit.register_command("brush", {
 		else
 			local cmddef = worldedit.registered_commands[cmd]
 			if cmddef == nil or cmddef.require_pos ~= 1 then
-				worldedit.player_notify(name, "//" .. cmd .. " cannot be used with brushes")
+				worldedit.player_notify(name, minetest.colorize("#00ffff", "//"..cmd) .. " cannot be used with brushes")
 				return
 			end
 

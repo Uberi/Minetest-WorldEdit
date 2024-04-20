@@ -11,10 +11,10 @@ Invalid file format!=Не верный формат файла!
 Schematic was created with a newer version of WorldEdit.=Схема была создана с использованием более новой версии WorldEdit.
 
 Get information about the WorldEdit mod=Вывести информацию о WorldEdit
-WorldEdit @1 is available on this server. Type //help to get a list of commands, or get more information at @2=WorldEdit @1 доступен на этом сервере. Наберите команду //help чтобы увидеть список команд, больше информации по ссылке @2
+WorldEdit @1 is available on this server. Type @2 to get a list of commands, or get more information at @3=WorldEdit @1 доступен на этом сервере. Наберите команду @2 чтобы увидеть список команд, больше информации по ссылке @3
 Get help for WorldEdit commands=Вывести информацию об использовании команд WorldEdit
 You are not allowed to use any WorldEdit commands.=У вас нет привилегий, чтобы использовать команды WorldEdit.
-Available commands: @1@nUse '//help <cmd>' to get more information, or '//help all' to list everything.=Доступные команды: @1@nИспользуйте '//help <cmd>' для получения информации по команде или '//help all' для вывода подсказок по всем командам.
+Available commands: @1@nUse '@2' to get more information, or '@3' to list everything.=Доступные команды: @1@nИспользуйте '@2' для получения информации по команде или '@3' для вывода подсказок по всем командам.
 Available commands:@n=Доступные команды:@n
 Command not available: =Команда не найдена:
 Enable or disable node inspection=Включить/отключить инспекцию блоков
@@ -128,7 +128,7 @@ Clears all objects within the WorldEdit region=Очистить все объе�
 @1 objects cleared=очищено @1 объектов
 
 ### safe.lua ###
-WARNING: this operation could affect up to @1 nodes; type //y to continue or //n to cancel=ПРЕДУПРЕЖДЕНИЕ: эта операция может затронуть до @1 нод; введите //y для продолжения или //n для отмены
+WARNING: this operation could affect up to @1 nodes; type @2 to continue or @3 to cancel=ПРЕДУПРЕЖДЕНИЕ: эта операция может затронуть до @1 нод; введите @2 для продолжения или @3 для отмены
 Confirm a pending operation=Подтвердить отложенную операцию
 no operation pending=нет ожидающей операции
 Abort a pending operation=Отклонить отложенную операцию
@@ -148,7 +148,7 @@ Region expanded by @1 nodes=Регион увеличен на @1 нод(у/ы)
 Contracts the selection in the selected absolute or relative axis=Уменьшить выделение региона по выбранной абсолютной или относительной оси
 Region contracted by @1 nodes=Регион уменьшен на @1 нод(у/ы)
 Select a cube with side length <size> around position 1 and run <command> on region=Выделить куб с длиной стороны <size> вокруг позиции 1 и запустите <команду> в области
-invalid usage: //@1 cannot be used with cubeapply=недопустимое использование: //@1 не может быть применено в cubeapply
+invalid usage: @1 cannot be used with cubeapply=недопустимое использование: @1 не может быть применено в cubeapply
 Missing privileges: @1=Отсутствуют привилегии: @1
 
 ### wand.lua ###
