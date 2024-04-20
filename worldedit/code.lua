@@ -51,7 +51,7 @@ function worldedit.luatransform(pos1, pos2, code)
 			while pos.z <= pos2.z do
 				local good, err = pcall(func, pos)
 				if not good then -- Runtime error
-					return err
+					return tostring(err)
 				end
 				pos.z = pos.z + 1
 			end

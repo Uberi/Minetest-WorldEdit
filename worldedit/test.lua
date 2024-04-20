@@ -542,6 +542,43 @@ do
 	end
 end
 
+
+register_test("Code")
+register_test("worldedit.lua", function()
+	-- syntax error
+	local err, ret = worldedit.lua("?")
+	assert(ret == nil)
+	assert(err:find("unexpected symbol"))
+
+	-- runtime error
+	local err, ret = worldedit.lua("error(1234)")
+	assert(ret == nil)
+	assert(err:find("1234"))
+
+	-- normal operation
+	local err, ret = worldedit.lua("return name..tostring(player == nil)..tostring(pos == nil)", "nobody")
+	assert(err == nil)
+	assert(ret == "\"nobodytruetrue\"")
+end)
+
+register_test("worldedit.luatransform", function()
+	local pos1, pos2 = area.get(2)
+
+	-- syntax error
+	local err = worldedit.luatransform(pos1, pos2, "?")
+	assert(err:find("unexpected symbol"))
+
+	-- runtime error
+	local err = worldedit.luatransform(pos1, pos2, "error(2345)")
+	assert(err:find("2345"))
+
+	-- normal operation
+	local err = worldedit.luatransform(pos1, pos2,
+		"minetest.swap_node(pos, {name=" .. ("%q"):format(testnode1) .. "})")
+	assert(err == nil)
+	check.filled(pos1, pos1, testnode1)
+end)
+
 ---------------------
 -- Main function
 ---------------------
