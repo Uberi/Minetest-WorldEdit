@@ -34,7 +34,7 @@ minetest.register_tool(":worldedit:wand", {
 			local entity = pointed_thing.ref:get_luaentity()
 			if entity and entity.name == "worldedit:pos2" then
 				-- set pos1 = pos2
-				worldedit.pos1[name] = worldedit.pos2[name]
+				worldedit.pos1[name] = vector.copy(worldedit.pos2[name])
 				worldedit.mark_pos1(name)
 			end
 		end
@@ -59,7 +59,7 @@ minetest.register_tool(":worldedit:wand", {
 		local entity = pointed_thing.ref:get_luaentity()
 		if entity and entity.name == "worldedit:pos1" then
 			-- set pos2 = pos1
-			worldedit.pos2[name] = worldedit.pos1[name]
+			worldedit.pos2[name] = vector.copy(worldedit.pos1[name])
 			worldedit.mark_pos2(name)
 		end
 		return itemstack -- nothing consumed, nothing changed

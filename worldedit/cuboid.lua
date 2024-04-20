@@ -64,6 +64,8 @@ worldedit.cuboid_shift = function(name, axis, amount)
 		return false, "undefined cuboid"
 	end
 
+	assert(not rawequal(pos1, pos2)) -- vectors must not alias
+
 	if axis == 'x' then
 		worldedit.pos1[name].x = pos1.x + amount
 		worldedit.pos2[name].x = pos2.x + amount
