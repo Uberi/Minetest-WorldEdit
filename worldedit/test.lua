@@ -71,6 +71,9 @@ do
 	end
 	-- Reset area contents and state
 	area.clear = function()
+		if off and vector.equals(off, vec(0, 0, 0)) then
+			return
+		end
 		local vmanip = minetest.get_voxel_manip(areamin, areamax)
 		local vpos1, vpos2 = vmanip:get_emerged_area()
 		local vcount = (vpos2.x - vpos1.x + 1) * (vpos2.y - vpos1.y + 1) * (vpos2.z - vpos1.z + 1)
@@ -88,9 +91,9 @@ do
 	area.get = function(sizex, sizey, sizez)
 		local size
 		if sizey == nil and sizez == nil then
-			size = vector.new(sizex, sizex, sizex)
+			size = vec(sizex, sizex, sizex)
 		else
-			size = vector.new(sizex, sizey, sizez)
+			size = vec(sizex, sizey, sizez)
 		end
 		local pos1 = vector.add(areamin, off)
 		local pos2 = vector.subtract(vector.add(pos1, size), 1)
@@ -241,8 +244,8 @@ end
 register_test("Internal self-test")
 register_test("is area loaded?", function()
 	local pos1, _ = area.get(1)
-	assert(get_node(pos1).name == "air")
-end, {dry=true})
+	assert(get_node(pos1).name == air)
+end)
 
 register_test("area.split", function()
 	for i = 2, 6 do
@@ -255,7 +258,7 @@ register_test("area.split", function()
 			assert((half1.z - pos1.z) == (pos2.z - half2.z)) -- divided equally
 		end
 	end
-end, {dry=true})
+end)
 
 register_test("check.filled", function()
 	local pos1, pos2 = area.get(1, 2, 1)
@@ -338,7 +341,7 @@ register_test("worldedit.copy", function()
 	check.filled(pos1, vecw(axis, b + 1, pos2), testnode1)
 	check.filled(vecw(axis, b + 2, pos1), pos2, testnode1)
 	check.filled(vecw(axis, b + 4, pos1), vector.add(pos2, vecw(axis, n)), testnode2)
-	check.filled2(m, "air")
+	check.filled2(m, air)
 end)
 
 register_test("worldedit.copy2", function()
@@ -353,8 +356,8 @@ register_test("worldedit.copy2", function()
 
 	check.pattern(pos1, pos2, pattern)
 	check.pattern(pos1_, pos2_, pattern)
-	check.filled2(m1, "air")
-	check.filled2(m2, "air")
+	check.filled2(m1, air)
+	check.filled2(m2, air)
 end)
 
 register_test("worldedit.move (overlap)", function()
@@ -366,9 +369,9 @@ register_test("worldedit.move (overlap)", function()
 	place_pattern(pos1, pos2, pattern)
 	worldedit.move(pos1, pos2, axis, n)
 
-	check.filled(pos1, vecw(axis, pos1[axis] + n - 1, pos2), "air")
+	check.filled(pos1, vecw(axis, pos1[axis] + n - 1, pos2), air)
 	check.pattern(vecw(axis, pos1[axis] + n, pos1), vecw(axis, pos2[axis] + n, pos2), pattern)
-	check.filled2(m, "air")
+	check.filled2(m, air)
 end)
 
 register_test("worldedit.move", function()
@@ -380,9 +383,9 @@ register_test("worldedit.move", function()
 	place_pattern(pos1, pos2, pattern)
 	worldedit.move(pos1, pos2, axis, n)
 
-	check.filled(pos1, pos2, "air")
+	check.filled(pos1, pos2, air)
 	check.pattern(vecw(axis, pos1[axis] + n, pos1), vecw(axis, pos2[axis] + n, pos2), pattern)
-	check.filled2(m, "air")
+	check.filled2(m, air)
 end)
 
 -- TODO: the rest (also testing param2 + metadata)
@@ -454,7 +457,7 @@ do
 		{
 			name = "v3", ver = 3,
 			gen = function(pat)
-				assert(pat[2] == "air")
+				assert(pat[2] == air)
 				return table.concat({
 				"0 0 0 " .. pat[1] .. " 0 0",
 				"0 1 0 " .. pat[3] .. " 0 0",
@@ -527,7 +530,7 @@ do
 			local pos1, pos2 = area.get(2)
 			local m = area.margin(1)
 
-			local pat = {testnode3, "air", testnode2}
+			local pat = {testnode3, air, testnode2}
 			local value = e.gen(pat)
 			assert(type(value) == "string")
 
@@ -537,7 +540,7 @@ do
 			assert(count ~= nil and count > 0)
 
 			check.pattern(pos1, pos2, pat)
-			check.filled2(m, "air")
+			check.filled2(m, air)
 		end)
 	end
 end
@@ -597,7 +600,7 @@ worldedit.run_tests = function()
 	for x = 0, math.floor(wanted.x/16) do
 	for y = 0, math.floor(wanted.y/16) do
 	for z = 0, math.floor(wanted.z/16) do
-		assert(minetest.forceload_block(vector.new(x*16, y*16, z*16), true, -1))
+		assert(minetest.forceload_block(vec(x*16, y*16, z*16), true, -1))
 	end
 	end
 	end
@@ -609,9 +612,7 @@ worldedit.run_tests = function()
 				local s = "---- " .. test.name .. " "
 				print(s .. string.rep("-", 60 - #s))
 			else
-				if not test.dry then
-					area.clear()
-				end
+				area.clear()
 				local ok, err = pcall(test.func)
 				print(string.format("%-60s %s", test.name, ok and "pass" or "FAIL"))
 				if not ok then
