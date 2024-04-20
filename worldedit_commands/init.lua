@@ -1555,16 +1555,27 @@ worldedit.register_command("lua", {
 	description = S("Executes <code> as a Lua chunk in the global namespace"),
 	privs = {worldedit=true, server=true},
 	parse = function(param)
+		if param == "" then
+			return false
+		end
 		return true, param
 	end,
 	func = function(name, param)
-		local err = worldedit.lua(param)
-		if err then
-			worldedit.player_notify(name, "code error: " .. err)
-			minetest.log("action", name.." tried to execute "..param)
+		-- shorthand like in the Lua interpreter
+		if param:sub(1, 1) == "=" then
+			param = "return " .. param:sub(2)
+		end
+		local err, ret = worldedit.lua(param, name)
+		if err == nil then
+			minetest.log("action", name .. " executed " .. param)
+			if ret ~= "nil" then
+				worldedit.player_notify(name, "code successfully executed, returned " .. ret)
+			else
+				worldedit.player_notify(name, "code successfully executed")
+			end
 		else
-			worldedit.player_notify(name, "code successfully executed", false)
-			minetest.log("action", name.." executed "..param)
+			minetest.log("action", name .. " tried to execute " .. param)
+			worldedit.player_notify(name, "code error: " .. err)
 		end
 	end,
 })
