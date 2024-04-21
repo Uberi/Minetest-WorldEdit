@@ -1,7 +1,8 @@
+-- TODO: don't shit individual variables into the globals
+
 ---------------------
 -- Helpers
 ---------------------
-
 local vec = vector.new
 local vecw = function(axis, n, base)
 	local ret = vec(base)
@@ -16,9 +17,9 @@ local set_node = minetest.set_node
 -- Nodes
 ---------------------
 local air = "air"
-local testnode1
-local testnode2
-local testnode3
+rawset(_G, "testnode1", "")
+rawset(_G, "testnode2", "")
+rawset(_G, "testnode3", "")
 -- Loads nodenames to use for tests
 local function init_nodes()
 	testnode1 = minetest.registered_aliases["mapgen_stone"]
@@ -27,7 +28,7 @@ local function init_nodes()
 	assert(testnode1 and testnode2 and testnode3)
 end
 -- Writes repeating pattern into given area
-local function place_pattern(pos1, pos2, pattern)
+rawset(_G, "place_pattern", function(pos1, pos2, pattern)
 	local pos = vec()
 	local node = {name=""}
 	local i = 1
@@ -43,14 +44,14 @@ local function place_pattern(pos1, pos2, pattern)
 	end
 	end
 	end
-end
+end)
 
 
 ---------------------
 -- Area management
 ---------------------
 assert(minetest.get_mapgen_setting("mg_name") == "singlenode")
-local area = {}
+rawset(_G, "area", {})
 do
 	local areamin, areamax
 	local off
@@ -151,7 +152,7 @@ end
 ---------------------
 -- Checks
 ---------------------
-local check = {}
+rawset(_G, "check", {})
 -- Check that all nodes in [pos1, pos2] are the node(s) specified
 check.filled = function(pos1, pos2, nodes)
 	if type(nodes) == "string" then
@@ -218,7 +219,7 @@ end
 -- The actual tests
 ---------------------
 local tests = {}
-local function register_test(name, func, opts)
+worldedit.register_test = function(name, func, opts)
 	assert(type(name) == "string")
 	assert(func == nil or type(func) == "function")
 	if not opts then
@@ -230,6 +231,7 @@ local function register_test(name, func, opts)
 	opts.func = func
 	table.insert(tests, opts)
 end
+local register_test = worldedit.register_test
 -- How this works:
 --   register_test registers a test with a name and function
 --   The function should return if the test passes or otherwise cause a Lua error
@@ -279,270 +281,10 @@ register_test("pattern", function()
 end)
 
 
-register_test("Generic node manipulations")
-register_test("worldedit.set", function()
-	local pos1, pos2 = area.get(10)
-	local m = area.margin(1)
-
-	worldedit.set(pos1, pos2, testnode1)
-
-	check.filled(pos1, pos2, testnode1)
-	check.filled2(m, air)
-end)
-
-register_test("worldedit.set mix", function()
-	local pos1, pos2 = area.get(10)
-	local m = area.margin(1)
-
-	worldedit.set(pos1, pos2, {testnode1, testnode2})
-
-	check.filled(pos1, pos2, {testnode1, testnode2})
-	check.filled2(m, air)
-end)
-
-register_test("worldedit.replace", function()
-	local pos1, pos2 = area.get(10)
-	local half1, half2 = area.split(pos1, pos2)
-
-	worldedit.set(pos1, half1, testnode1)
-	worldedit.set(half2, pos2, testnode2)
-	worldedit.replace(pos1, pos2, testnode1, testnode3)
-
-	check.not_filled(pos1, pos2, testnode1)
-	check.filled(pos1, half1, testnode3)
-	check.filled(half2, pos2, testnode2)
-end)
-
-register_test("worldedit.replace inverse", function()
-	local pos1, pos2 = area.get(10)
-	local half1, half2 = area.split(pos1, pos2)
-
-	worldedit.set(pos1, half1, testnode1)
-	worldedit.set(half2, pos2, testnode2)
-	worldedit.replace(pos1, pos2, testnode1, testnode3, true)
-
-	check.filled(pos1, half1, testnode1)
-	check.filled(half2, pos2, testnode3)
-end)
-
--- FIXME?: this one looks overcomplicated
-register_test("worldedit.copy", function()
-	local pos1, pos2 = area.get(4)
-	local axis, n = area.dir(2)
-	local m = area.margin(1)
-	local b = pos1[axis]
-
-	-- create one slice with testnode1, one with testnode2
-	worldedit.set(pos1, vecw(axis, b + 1, pos2), testnode1)
-	worldedit.set(vecw(axis, b + 2, pos1), pos2, testnode2)
-	worldedit.copy(pos1, pos2, axis, n)
-
-	-- should have three slices now
-	check.filled(pos1, vecw(axis, b + 1, pos2), testnode1)
-	check.filled(vecw(axis, b + 2, pos1), pos2, testnode1)
-	check.filled(vecw(axis, b + 4, pos1), vector.add(pos2, vecw(axis, n)), testnode2)
-	check.filled2(m, air)
-end)
-
-register_test("worldedit.copy2", function()
-	local pos1, pos2 = area.get(6)
-	local m1 = area.margin(1)
-	local pos1_, pos2_ = area.get(6)
-	local m2 = area.margin(1)
-
-	local pattern = {testnode1, testnode2, testnode3, testnode1, testnode2}
-	place_pattern(pos1, pos2, pattern)
-	worldedit.copy2(pos1, pos2, vector.subtract(pos1_, pos1))
-
-	check.pattern(pos1, pos2, pattern)
-	check.pattern(pos1_, pos2_, pattern)
-	check.filled2(m1, air)
-	check.filled2(m2, air)
-end)
-
-register_test("worldedit.move (overlap)", function()
-	local pos1, pos2 = area.get(7)
-	local axis, n = area.dir(2)
-	local m = area.margin(1)
-
-	local pattern = {testnode2, testnode1, testnode2, testnode3, testnode3}
-	place_pattern(pos1, pos2, pattern)
-	worldedit.move(pos1, pos2, axis, n)
-
-	check.filled(pos1, vecw(axis, pos1[axis] + n - 1, pos2), air)
-	check.pattern(vecw(axis, pos1[axis] + n, pos1), vecw(axis, pos2[axis] + n, pos2), pattern)
-	check.filled2(m, air)
-end)
-
-register_test("worldedit.move", function()
-	local pos1, pos2 = area.get(10)
-	local axis, n = area.dir(10)
-	local m = area.margin(1)
-
-	local pattern = {testnode1, testnode3, testnode3, testnode2}
-	place_pattern(pos1, pos2, pattern)
-	worldedit.move(pos1, pos2, axis, n)
-
-	check.filled(pos1, pos2, air)
-	check.pattern(vecw(axis, pos1[axis] + n, pos1), vecw(axis, pos2[axis] + n, pos2), pattern)
-	check.filled2(m, air)
-end)
-
--- TODO: the rest (also testing param2 + metadata)
-
-register_test("Schematics")
-register_test("worldedit.read_header", function()
-	local value = '5,foo,BAR,-1,234:the content'
-	local version, header, content = worldedit.read_header(value)
-	assert(version == 5)
-	assert(#header == 4)
-	assert(header[1] == "foo" and header[2] == "BAR")
-	assert(header[3] == "-1" and header[4] == "234")
-	assert(content == "the content")
-end)
-
-register_test("worldedit.allocate", function()
-	local value = '3:-1 0 0 dummy 0 0\n0 0 4 dummy 0 0\n0 1 0 dummy 0 0'
-	local pos1, pos2, count = worldedit.allocate(vec(1, 1, 1), value)
-	assert(vector.equals(pos1, vec(0, 1, 1)))
-	assert(vector.equals(pos2, vec(1, 2, 5)))
-	assert(count == 3)
-end)
-
-do
-	local function output_weird(numbers, body)
-		local s = {"return {"}
-		for _, parts in ipairs(numbers) do
-			s[#s+1] = "{"
-			for _, n in ipairs(parts) do
-				s[#s+1] = string.format("   {%d},", n)
-			end
-			s[#s+1] = "},"
-		end
-		return table.concat(s, "\n") .. table.concat(body, "\n") .. "}"
-	end
-	local fmt1p = '{\n   ["x"]=%d,\n   ["y"]=%d,\n   ["z"]=%d,\n},'
-	local fmt1n = '{\n   ["name"]="%s",\n},'
-	local fmt4 = '{ ["x"] = %d, ["y"] = %d, ["z"] = %d, ["meta"] = { ["fields"] = {  }, ["inventory"] = {  } }, ["param2"] = 0, ["param1"] = 0, ["name"] = "%s" }'
-	local fmt5 = '{ ["x"] = %d, ["y"] = %d, ["z"] = %d, ["name"] = "%s" }'
-	local fmt51 = '{[r2]=0,x=%d,y=%d,z=%d,name=r%d}'
-	local fmt52 = '{x=%d,y=%d,z=%d,name=_[%d]}'
-	local test_data = {
-		-- used by WorldEdit 0.2 (first public release)
-		{
-			name = "v1", ver = 1,
-			gen = function(pat)
-				local numbers = {
-					{2, 3, 4, 5, 6},
-					{7, 8}, {9, 10}, {11, 12},
-					{13, 14}, {15, 16}
-				}
-				return output_weird(numbers, {
-					fmt1p:format(0, 0, 0),
-					fmt1n:format(pat[1]),
-					fmt1p:format(0, 1, 0),
-					fmt1n:format(pat[3]),
-					fmt1p:format(1, 1, 0),
-					fmt1n:format(pat[1]),
-					fmt1p:format(1, 0, 1),
-					fmt1n:format(pat[3]),
-					fmt1p:format(0, 1, 1),
-					fmt1n:format(pat[1]),
-				})
-			end
-		},
-
-		-- v2: missing because I couldn't find any code in my archives that actually wrote this format
-
-		{
-			name = "v3", ver = 3,
-			gen = function(pat)
-				assert(pat[2] == air)
-				return table.concat({
-				"0 0 0 " .. pat[1] .. " 0 0",
-				"0 1 0 " .. pat[3] .. " 0 0",
-				"1 1 0 " .. pat[1] .. " 0 0",
-				"1 0 1 " .. pat[3] .. " 0 0",
-				"0 1 1 " .. pat[1] .. " 0 0",
-				}, "\n")
-			end
-		},
-
-		{
-			name = "v4", ver = 4,
-			gen = function(pat)
-				return table.concat({
-				"return { " .. fmt4:format(0, 0, 0, pat[1]),
-				fmt4:format(0, 1, 0, pat[3]),
-				fmt4:format(1, 1, 0, pat[1]),
-				fmt4:format(1, 0, 1, pat[3]),
-				fmt4:format(0, 1, 1, pat[1]) .. " }",
-				}, ", ")
-			end
-		},
-
-		-- like v4 but no meta and param (if empty)
-		{
-			name = "v5 (pre-5.6)", ver = 5,
-			gen = function(pat)
-				return table.concat({
-				"5:return { " .. fmt5:format(0, 0, 0, pat[1]),
-				fmt5:format(0, 1, 0, pat[3]),
-				fmt5:format(1, 1, 0, pat[1]),
-				fmt5:format(1, 0, 1, pat[3]),
-				fmt5:format(0, 1, 1, pat[1]) .. " }",
-				}, ", ")
-			end
-		},
-
-		-- reworked engine serialization in 5.6
-		{
-			name = "v5 (5.6)", ver = 5,
-			gen = function(pat)
-				return table.concat({
-				'5:r1="' .. pat[1] .. '";r2="param1";r3="' .. pat[3] .. '";return {'
-				.. fmt51:format(0, 0, 0, 1),
-				fmt51:format(0, 1, 0, 3),
-				fmt51:format(1, 1, 0, 1),
-				fmt51:format(1, 0, 1, 3),
-				fmt51:format(0, 1, 1, 1) .. "}",
-				}, ",")
-			end
-		},
-
-		-- small changes on engine side again
-		{
-			name = "v5 (post-5.7)", ver = 5,
-			gen = function(pat)
-				return table.concat({
-				'5:local _={};_[1]="' .. pat[1] .. '";_[3]="' .. pat[3] .. '";return {'
-				.. fmt52:format(0, 0, 0, 1),
-				fmt52:format(0, 1, 0, 3),
-				fmt52:format(1, 1, 0, 1),
-				fmt52:format(1, 0, 1, 3),
-				fmt52:format(0, 1, 1, 1) .. "}",
-				}, ",")
-			end
-		},
-	}
-	for _, e in ipairs(test_data) do
-		register_test("worldedit.deserialize " .. e.name, function()
-			local pos1, pos2 = area.get(2)
-			local m = area.margin(1)
-
-			local pat = {testnode3, air, testnode2}
-			local value = e.gen(pat)
-			assert(type(value) == "string")
-
-			local version = worldedit.read_header(value)
-			assert(version == e.ver, "version: got " .. tostring(version) .. " expected " .. e.ver)
-			local count = worldedit.deserialize(pos1, value)
-			assert(count ~= nil and count > 0)
-
-			check.pattern(pos1, pos2, pat)
-			check.filled2(m, air)
-		end)
-	end
+for _, name in ipairs({
+	"manipulations", "schematic"
+}) do
+	dofile(minetest.get_modpath("worldedit") .. "/test/" .. name .. ".lua")
 end
 
 
