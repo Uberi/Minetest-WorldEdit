@@ -1,0 +1,12 @@
+# textdomain: worldedit_brush
+This brush is not bound, use @1 to bind a command to it.=Dieser Pinsel ist nicht konfiguriert, nutzen Sie @1 um ein Befehl an ihn zu binden.
+Missing privileges: @1=Fehlende Privilegien: @1
+Too far away.=Zu weit weg.
+WorldEdit Brush=WorldEdit-Pinsel
+Assign command to WorldEdit brush item or clear assignment using 'none'=Befehl an WorldEdit-Pinsel binden oder Zuweisung mittels 'none' aufheben
+Not holding brush item.=Kein Pinsel in der Hand.
+Brush assignment cleared.=Pinsel-Zuweisung aufgehoben.
+@1 cannot be used with brushes=@1 kann nicht mit Pinseln verwendet werden
+invalid usage=Ungültige Verwendung
+Error with command: @1=Befehl ist fehlerhaft: @1
+Brush assigned to command: @1=Pinsel an Befehl gebunden: @1

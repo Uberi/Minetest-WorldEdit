@@ -1,0 +1,12 @@
+# textdomain: worldedit_brush
+This brush is not bound, use @1 to bind a command to it.=
+Missing privileges: @1=
+Too far away.=
+WorldEdit Brush=
+Assign command to WorldEdit brush item or clear assignment using 'none'=
+Not holding brush item.=
+Brush assignment cleared.=
+@1 cannot be used with brushes=
+invalid usage=
+Error with command: @1=
+Brush assigned to command: @1=
