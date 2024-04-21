@@ -3,6 +3,7 @@ local S = minetest.get_translator("worldedit_commands")
 worldedit.register_command("outset", {
 	params = "[h/v] <amount>",
 	description = S("Outset the selected region."),
+	category = S("Region operations"),
 	privs = {worldedit=true},
 	require_pos = 2,
 	parse = function(param)
@@ -42,6 +43,7 @@ worldedit.register_command("outset", {
 worldedit.register_command("inset", {
 	params = "[h/v] <amount>",
 	description = S("Inset the selected region."),
+	category = S("Region operations"),
 	privs = {worldedit=true},
 	require_pos = 2,
 	parse = function(param)
@@ -79,6 +81,7 @@ worldedit.register_command("inset", {
 worldedit.register_command("shift", {
 	params = "x/y/z/?/up/down/left/right/front/back [+/-]<amount>",
 	description = S("Shifts the selection area without moving its contents"),
+	category = S("Region operations"),
 	privs = {worldedit=true},
 	require_pos = 2,
 	parse = function(param)
@@ -114,6 +117,7 @@ worldedit.register_command("shift", {
 worldedit.register_command("expand", {
 	params = "[+/-]x/y/z/?/up/down/left/right/front/back <amount> [reverse amount]",
 	description = S("Expands the selection in the selected absolute or relative axis"),
+	category = S("Region operations"),
 	privs = {worldedit=true},
 	require_pos = 2,
 	parse = function(param)
@@ -163,6 +167,7 @@ worldedit.register_command("expand", {
 worldedit.register_command("contract", {
 	params = "[+/-]x/y/z/?/up/down/left/right/front/back <amount> [reverse amount]",
 	description = S("Contracts the selection in the selected absolute or relative axis"),
+	category = S("Region operations"),
 	privs = {worldedit=true},
 	require_pos = 2,
 	parse = function(param)
