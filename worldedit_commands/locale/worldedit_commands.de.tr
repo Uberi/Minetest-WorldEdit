@@ -46,7 +46,7 @@ Command not available: =Befehl nicht verfügbar:
 Enable or disable node inspection=Inspizieren von Blöcken ein- oder ausschalten
 inspector: inspection enabled for @1, currently facing the @2 axis=Inspektur: für @1 aktiviert, aktuell der @2-Achse zugewandt
 inspector: inspection disabled=Inspektur: deaktiviert
-inspector: @1 at @2 (param1@=@3, param2@=@4, received light@=@5) punched facing the @6 axis=Inspektur: @1 bei @2 (param1@=@3, param2@=@4, einfallendes Licht@=@5), der @6-Achse zugewandt, gehauen
+inspector: @1 at @2 (param1@=@3, param2@=@4, received light@=@5) punched facing the @6 axis=Inspektur: @1 bei @2 (param1@=@3, param2@=@4, einfallendes Licht@=@5), der „@6“-Achse zugewandt, gehauen
 Reset the region so that it is empty=Gebiet zurücksetzen, sodass es leer ist
 region reset=Gebiet zurückgesetzt
 Show markers at the region positions=Markierungen bei den Gebietsposition anzeigen
