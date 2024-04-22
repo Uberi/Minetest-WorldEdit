@@ -174,7 +174,12 @@ end
 
 -- Determines the axis in which a player is facing, returning an axis ("x", "y", or "z") and the sign (1 or -1)
 function worldedit.player_axis(name)
-	local dir = minetest.get_player_by_name(name):get_look_dir()
+	local player = minetest.get_player_by_name(name)
+	if not player then
+		-- we promised to return something valid...
+		return "y", -1
+	end
+	local dir = player:get_look_dir()
 	local x, y, z = math.abs(dir.x), math.abs(dir.y), math.abs(dir.z)
 	if x > y then
 		if x > z then

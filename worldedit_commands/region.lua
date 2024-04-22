@@ -113,9 +113,9 @@ worldedit.register_command("pos1", {
 	category = S("Region operations"),
 	privs = {worldedit=true},
 	func = function(name)
-		local pos = minetest.get_player_by_name(name):get_pos()
-		pos.x, pos.y, pos.z = math.floor(pos.x + 0.5), math.floor(pos.y + 0.5), math.floor(pos.z + 0.5)
-		set_pos1(name, pos)
+		local player = minetest.get_player_by_name(name)
+		if not player then return end
+		set_pos1(name, vector.round(player:get_pos()))
 	end,
 })
 
@@ -125,9 +125,9 @@ worldedit.register_command("pos2", {
 	category = S("Region operations"),
 	privs = {worldedit=true},
 	func = function(name)
-		local pos = minetest.get_player_by_name(name):get_pos()
-		pos.x, pos.y, pos.z = math.floor(pos.x + 0.5), math.floor(pos.y + 0.5), math.floor(pos.z + 0.5)
-		set_pos2(name, pos)
+		local player = minetest.get_player_by_name(name)
+		if not player then return end
+		set_pos2(name, vector.round(player:get_pos()))
 	end,
 })
 

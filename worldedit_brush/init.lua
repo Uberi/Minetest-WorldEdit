@@ -84,7 +84,9 @@ worldedit.register_command("brush", {
 		return true, cmd, params
 	end,
 	func = function(name, cmd, params)
-		local itemstack = minetest.get_player_by_name(name):get_wielded_item()
+		local player = minetest.get_player_by_name(name)
+		if not player then return end
+		local itemstack = player:get_wielded_item()
 		if itemstack == nil or itemstack:get_name() ~= "worldedit:brush" then
 			return false, S("Not holding brush item.")
 		end
@@ -115,6 +117,6 @@ worldedit.register_command("brush", {
 				minetest.registered_tools["worldedit:brush"].description .. ": " .. fullcmd)
 			worldedit.player_notify(name, S("Brush assigned to command: @1", fullcmd), "ok")
 		end
-		minetest.get_player_by_name(name):set_wielded_item(itemstack)
+		player:set_wielded_item(itemstack)
 	end,
 })
