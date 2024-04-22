@@ -140,7 +140,7 @@ local function execute_worldedit_command(command_name, player_name, params)
 	assert(chatcmd, "unknown command: " .. command_name)
 	local _, msg = chatcmd.func(player_name, params)
 	if msg then
-		worldedit.player_notify(player_name, msg)
+		minetest.chat_send_player(player_name, msg)
 	end
 end
 

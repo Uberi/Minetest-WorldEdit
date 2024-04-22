@@ -24,10 +24,10 @@ worldedit.register_command("inspect", {
 				"inspector: inspection enabled for @1, currently facing the @2 axis",
 				name,
 				axis .. (sign > 0 and "+" or "-")
-			))
+			), "info")
 		else
 			worldedit.inspect[name] = nil
-			worldedit.player_notify(name, S("inspector: inspection disabled"))
+			worldedit.player_notify(name, S("inspector: inspection disabled"), "info")
 		end
 	end,
 })
@@ -61,7 +61,7 @@ minetest.register_on_punchnode(function(pos, node, puncher)
 			get_node_rlight(pos),
 			axis .. (sign > 0 and "+" or "-")
 		)
-		worldedit.player_notify(name, message)
+		worldedit.player_notify(name, message, "info")
 	end
 end)
 
@@ -73,7 +73,7 @@ worldedit.register_command("mark", {
 	privs = {worldedit=true},
 	func = function(name)
 		worldedit.marker_update(name)
-		worldedit.player_notify(name, S("region marked"))
+		return true, S("region marked")
 	end,
 })
 
@@ -89,9 +89,23 @@ worldedit.register_command("unmark", {
 		worldedit.marker_update(name)
 		worldedit.pos1[name] = pos1
 		worldedit.pos2[name] = pos2
-		worldedit.player_notify(name, S("region unmarked"))
+		return true, S("region unmarked")
 	end,
 })
+
+local function set_pos1(name, pos)
+	assert(pos)
+	worldedit.pos1[name] = pos
+	worldedit.mark_pos1(name)
+	worldedit.player_notify(name, S("position @1 set to @2", 1, minetest.pos_to_string(pos)), "ok")
+end
+
+local function set_pos2(name, pos)
+	assert(pos)
+	worldedit.pos2[name] = pos
+	worldedit.mark_pos2(name)
+	worldedit.player_notify(name, S("position @1 set to @2", 2, minetest.pos_to_string(pos)), "ok")
+end
 
 worldedit.register_command("pos1", {
 	params = "",
@@ -101,9 +115,7 @@ worldedit.register_command("pos1", {
 	func = function(name)
 		local pos = minetest.get_player_by_name(name):get_pos()
 		pos.x, pos.y, pos.z = math.floor(pos.x + 0.5), math.floor(pos.y + 0.5), math.floor(pos.z + 0.5)
-		worldedit.pos1[name] = pos
-		worldedit.mark_pos1(name)
-		worldedit.player_notify(name, S("position @1 set to @2", 1, minetest.pos_to_string(pos)))
+		set_pos1(name, pos)
 	end,
 })
 
@@ -115,9 +127,7 @@ worldedit.register_command("pos2", {
 	func = function(name)
 		local pos = minetest.get_player_by_name(name):get_pos()
 		pos.x, pos.y, pos.z = math.floor(pos.x + 0.5), math.floor(pos.y + 0.5), math.floor(pos.z + 0.5)
-		worldedit.pos2[name] = pos
-		worldedit.mark_pos2(name)
-		worldedit.player_notify(name, S("position @1 set to @2", 2, minetest.pos_to_string(pos)))
+		set_pos2(name, pos)
 	end,
 })
 
@@ -133,26 +143,31 @@ worldedit.register_command("p", {
 		return false, S("unknown subcommand: @1", param)
 	end,
 	func = function(name, param)
+		local msg
 		if param == "set" then --set both WorldEdit positions
 			worldedit.set_pos[name] = "pos1"
-			worldedit.player_notify(name, S("select positions by punching two nodes"))
+			msg = S("select positions by punching two nodes")
 		elseif param == "set1" then --set WorldEdit position 1
 			worldedit.set_pos[name] = "pos1only"
-			worldedit.player_notify(name, S("select position @1 by punching a node", 1))
+			msg = S("select position @1 by punching a node", 1)
 		elseif param == "set2" then --set WorldEdit position 2
 			worldedit.set_pos[name] = "pos2"
-			worldedit.player_notify(name, S("select position @1 by punching a node", 2))
+			msg = S("select position @1 by punching a node", 2)
 		elseif param == "get" then --display current WorldEdit positions
 			if worldedit.pos1[name] ~= nil then
-				worldedit.player_notify(name, S("position @1: @2", 1, minetest.pos_to_string(worldedit.pos1[name])))
+				msg = S("position @1: @2", 1, minetest.pos_to_string(worldedit.pos1[name]))
 			else
-				worldedit.player_notify(name, S("position @1 not set", 1))
+				msg = S("position @1 not set", 1)
 			end
+			msg = msg .. "\n"
 			if worldedit.pos2[name] ~= nil then
-				worldedit.player_notify(name, S("position @1: @2", 2, minetest.pos_to_string(worldedit.pos2[name])))
+				msg = msg .. S("position @1: @2", 2, minetest.pos_to_string(worldedit.pos2[name]))
 			else
-				worldedit.player_notify(name, S("position @1 not set", 2))
+				msg = msg .. S("position @1 not set", 2)
 			end
+		end
+		if msg then
+			worldedit.player_notify(name, msg, "info")
 		end
 	end,
 })
@@ -171,13 +186,9 @@ worldedit.register_command("fixedpos", {
 	end,
 	func = function(name, flag, pos)
 		if flag == "set1" then
-			worldedit.pos1[name] = pos
-			worldedit.mark_pos1(name)
-			worldedit.player_notify(name, S("position @1 set to @2", 1, minetest.pos_to_string(pos)))
+			set_pos1(name, pos)
 		else --flag == "set2"
-			worldedit.pos2[name] = pos
-			worldedit.mark_pos2(name)
-			worldedit.player_notify(name, S("position @1 set to @2", 2, minetest.pos_to_string(pos)))
+			set_pos2(name, pos)
 		end
 	end,
 })
@@ -186,20 +197,14 @@ minetest.register_on_punchnode(function(pos, node, puncher)
 	local name = puncher:get_player_name()
 	if name ~= "" and worldedit.set_pos[name] ~= nil then --currently setting position
 		if worldedit.set_pos[name] == "pos1" then --setting position 1
-			worldedit.pos1[name] = pos
-			worldedit.mark_pos1(name)
+			set_pos1(name, pos)
 			worldedit.set_pos[name] = "pos2" --set position 2 on the next invocation
-			worldedit.player_notify(name, S("position @1 set to @2", 1, minetest.pos_to_string(pos)))
 		elseif worldedit.set_pos[name] == "pos1only" then --setting position 1 only
-			worldedit.pos1[name] = pos
-			worldedit.mark_pos1(name)
+			set_pos1(name, pos)
 			worldedit.set_pos[name] = nil --finished setting positions
-			worldedit.player_notify(name, S("position @1 set to @2", 1, minetest.pos_to_string(pos)))
 		elseif worldedit.set_pos[name] == "pos2" then --setting position 2
-			worldedit.pos2[name] = pos
-			worldedit.mark_pos2(name)
+			set_pos2(name, pos)
 			worldedit.set_pos[name] = nil --finished setting positions
-			worldedit.player_notify(name, S("position @1 set to @2", 2, minetest.pos_to_string(pos)))
 		elseif worldedit.set_pos[name] == "prob" then --setting Minetest schematic node probabilities
 			worldedit.prob_pos[name] = pos
 			minetest.show_formspec(name, "prob_val_enter", "field[text;;]")
@@ -224,6 +229,6 @@ worldedit.register_command("volume", {
 			abs(pos2.x - pos1.x) + 1,
 			abs(pos2.y - pos1.y) + 1,
 			abs(pos2.z - pos1.z) + 1
-		))
+		), "info")
 	end,
 })

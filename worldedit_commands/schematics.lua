@@ -26,7 +26,7 @@ local function open_schematic(name, param)
 		end
 	end
 	if err then
-		worldedit.player_notify(name, S("Could not open file \"@1\"", param))
+		worldedit.player_notify(name, S("Could not open file \"@1\"", param), "error")
 		return
 	end
 	local value = file:read("*a")
@@ -34,10 +34,10 @@ local function open_schematic(name, param)
 
 	local version = worldedit.read_header(value)
 	if version == nil or version == 0 then
-		worldedit.player_notify(name, S("Invalid file format!"))
+		worldedit.player_notify(name, S("Invalid file format!"), "error")
 		return
 	elseif version > worldedit.LATEST_SERIALIZATION_VERSION then
-		worldedit.player_notify(name, S("Schematic was created with a newer version of WorldEdit."))
+		worldedit.player_notify(name, S("Schematic was created with a newer version of WorldEdit."), "error")
 		return
 	end
 
@@ -90,14 +90,13 @@ worldedit.register_command("save", {
 		local filename = path .. "/" .. param .. ".we"
 		local file, err = io.open(filename, "wb")
 		if err ~= nil then
-			worldedit.player_notify(name, S("Could not save file to \"@1\"", filename))
-			return
+			return false, S("Could not save file to \"@1\"", filename)
 		end
 		file:write(result)
 		file:flush()
 		file:close()
 
-		worldedit.player_notify(name, S("@1 nodes saved", count))
+		return true, S("@1 nodes saved", count)
 	end,
 })
 
@@ -126,15 +125,14 @@ worldedit.register_command("allocate", {
 
 		local nodepos1, nodepos2, count = worldedit.allocate(pos, value)
 		if not nodepos1 then
-			worldedit.player_notify(name, S("Schematic empty, nothing allocated"))
-			return false
+			return false, S("Schematic empty, nothing allocated")
 		end
 
 		worldedit.pos1[name] = nodepos1
 		worldedit.pos2[name] = nodepos2
 		worldedit.marker_update(name)
 
-		worldedit.player_notify(name, S("@1 nodes allocated", count))
+		return true, S("@1 nodes allocated", count)
 	end,
 })
 
@@ -163,10 +161,9 @@ worldedit.register_command("load", {
 
 		local count = worldedit.deserialize(pos, value)
 		if count == nil then
-			worldedit.player_notify(name, S("Loading failed!"))
-			return false
+			return false, S("Loading failed!")
 		end
-		worldedit.player_notify(name, S("@1 nodes loaded", count))
+		return true, S("@1 nodes loaded", count)
 	end,
 })
 
@@ -197,12 +194,11 @@ worldedit.register_command("mtschemcreate", {
 		local ret = minetest.create_schematic(worldedit.pos1[name],
 				worldedit.pos2[name], worldedit.prob_list[name],
 				filename)
-		if ret == nil then
-			worldedit.player_notify(name, S("Failed to create Minetest schematic"))
-		else
-			worldedit.player_notify(name, S("Saved Minetest schematic to @1", param))
-		end
 		worldedit.prob_list[name] = {}
+		if ret == nil then
+			return false, S("Failed to create Minetest schematic")
+		end
+		return true, S("Saved Minetest schematic to @1", param)
 	end,
 })
 
@@ -226,10 +222,10 @@ worldedit.register_command("mtschemplace", {
 
 		local path = minetest.get_worldpath() .. "/schems/" .. param .. ".mts"
 		if minetest.place_schematic(pos, path) == nil then
-			worldedit.player_notify(name, S("failed to place Minetest schematic"))
-		else
-			worldedit.player_notify(name, S("placed Minetest schematic @1 at @2", param, minetest.pos_to_string(pos)))
+			return false, S("failed to place Minetest schematic")
 		end
+		return true, S("placed Minetest schematic @1 at @2",
+			param, minetest.pos_to_string(pos))
 	end,
 })
 
@@ -248,10 +244,10 @@ worldedit.register_command("mtschemprob", {
 		if param == "start" then --start probability setting
 			worldedit.set_pos[name] = "prob"
 			worldedit.prob_list[name] = {}
-			worldedit.player_notify(name, S("select Minetest schematic probability values by punching nodes"))
+			worldedit.player_notify(name, S("select Minetest schematic probability values by punching nodes"), "info")
 		elseif param == "finish" then --finish probability setting
 			worldedit.set_pos[name] = nil
-			worldedit.player_notify(name, S("finished Minetest schematic probability selection"))
+			worldedit.player_notify(name, S("finished Minetest schematic probability selection"), "info")
 		elseif param == "get" then --get all nodes that had probabilities set on them
 			local text = ""
 			local problist = worldedit.prob_list[name]
@@ -262,8 +258,7 @@ worldedit.register_command("mtschemprob", {
 				local prob = math.floor(((v.prob / 256) * 100) * 100 + 0.5) / 100
 				text = text .. minetest.pos_to_string(v.pos) .. ": " .. prob .. "% | "
 			end
-			worldedit.player_notify(name, S("currently set node probabilities:"))
-			worldedit.player_notify(name, text)
+			worldedit.player_notify(name, S("currently set node probabilities:") .. "\n" .. text, "info")
 		end
 	end,
 })
@@ -277,7 +272,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 		end
 		local e = {pos=worldedit.prob_pos[name], prob=tonumber(fields.text)}
 		if e.pos == nil or e.prob == nil or e.prob < 0 or e.prob > 256 then
-			worldedit.player_notify(name, S("invalid node probability given, not saved"))
+			worldedit.player_notify(name, S("invalid node probability given, not saved"), "error")
 			return
 		end
 		problist[#problist+1] = e

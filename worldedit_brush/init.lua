@@ -9,7 +9,7 @@ local brush_on_use = function(itemstack, placer)
 	if cmd == "" then
 		worldedit.player_notify(name,
 			S("This brush is not bound, use @1 to bind a command to it.",
-			minetest.colorize("#00ffff", "//brush")))
+			minetest.colorize("#00ffff", "//brush")), "info")
 		return false
 	end
 
@@ -19,7 +19,7 @@ local brush_on_use = function(itemstack, placer)
 	local has_privs, missing_privs = minetest.check_player_privs(name, cmddef.privs)
 	if not has_privs then
 		worldedit.player_notify(name,
-			S("Missing privileges: @1", table.concat(missing_privs, ", ")))
+			S("Missing privileges: @1", table.concat(missing_privs, ", ")), "error")
 		return false
 	end
 
@@ -29,7 +29,7 @@ local brush_on_use = function(itemstack, placer)
 	local ray = minetest.raycast(raybegin, rayend, false, true)
 	local pointed_thing = ray:next()
 	if pointed_thing == nil then
-		worldedit.player_notify(name, S("Too far away."))
+		worldedit.player_notify(name, S("Too far away."), "error")
 		return false
 	end
 
@@ -38,16 +38,16 @@ local brush_on_use = function(itemstack, placer)
 	worldedit.pos2[name] = nil
 	worldedit.marker_update(name)
 
-	-- this isn't really clean...
-	local player_notify_old = worldedit.player_notify
-	worldedit.player_notify = function(name, msg)
-		if string.match(msg, "^%d") then return end -- discard "1234 nodes added."
-		return player_notify_old(name, msg)
-	end
-
 	assert(cmddef.require_pos < 2)
 	local parsed = {cmddef.parse(meta:get_string("params"))}
 	if not table.remove(parsed, 1) then return false end -- shouldn't happen
+
+	-- discard success messages
+	local player_notify_old = worldedit.player_notify
+	worldedit.player_notify = function(name, msg, typ)
+		if typ == "ok" then return end
+		return player_notify_old(name, msg, typ)
+	end
 
 	minetest.log("action", string.format("%s uses WorldEdit brush (//%s) at %s",
 		name, cmd, minetest.pos_to_string(pointed_thing.under)))
@@ -86,29 +86,26 @@ worldedit.register_command("brush", {
 	func = function(name, cmd, params)
 		local itemstack = minetest.get_player_by_name(name):get_wielded_item()
 		if itemstack == nil or itemstack:get_name() ~= "worldedit:brush" then
-			worldedit.player_notify(name, S("Not holding brush item."))
-			return
+			return false, S("Not holding brush item.")
 		end
 
 		cmd = cmd:lower()
 		local meta = itemstack:get_meta()
 		if cmd == "none" then
 			meta:from_table(nil)
-			worldedit.player_notify(name, S("Brush assignment cleared."))
+			worldedit.player_notify(name, S("Brush assignment cleared."), "ok")
 		else
 			local cmddef = worldedit.registered_commands[cmd]
 			if cmddef == nil or cmddef.require_pos ~= 1 then
-				worldedit.player_notify(name, S("@1 cannot be used with brushes",
-					minetest.colorize("#00ffff", "//"..cmd)))
-				return
+				return false, S("@1 cannot be used with brushes",
+					minetest.colorize("#00ffff", "//"..cmd))
 			end
 
 			-- Try parsing command params so we can give the user feedback
 			local ok, err = cmddef.parse(params)
 			if not ok then
 				err = err or S("invalid usage")
-				worldedit.player_notify(name, S("Error with command: @1", err))
-				return
+				return false, S("Error with command: @1", err)
 			end
 
 			meta:set_string("command", cmd)
@@ -116,7 +113,7 @@ worldedit.register_command("brush", {
 			local fullcmd = minetest.colorize("#00ffff", "//"..cmd) .. " " .. params
 			meta:set_string("description",
 				minetest.registered_tools["worldedit:brush"].description .. ": " .. fullcmd)
-			worldedit.player_notify(name, S("Brush assigned to command: @1", fullcmd))
+			worldedit.player_notify(name, S("Brush assigned to command: @1", fullcmd), "ok")
 		end
 		minetest.get_player_by_name(name):set_wielded_item(itemstack)
 	end,

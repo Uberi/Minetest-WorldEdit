@@ -25,7 +25,7 @@ worldedit.register_command("hollowcube", {
 	end,
 	func = function(name, w, h, l, node)
 		local count = worldedit.cube(worldedit.pos1[name], w, h, l, node, true)
-		worldedit.player_notify(name, S("@1 nodes added", count))
+		return true, S("@1 nodes added", count)
 	end,
 })
 
@@ -41,7 +41,7 @@ worldedit.register_command("cube", {
 	end,
 	func = function(name, w, h, l, node)
 		local count = worldedit.cube(worldedit.pos1[name], w, h, l, node)
-		worldedit.player_notify(name, S("@1 nodes added", count))
+		return true, S("@1 nodes added", count)
 	end,
 })
 
@@ -69,7 +69,7 @@ worldedit.register_command("hollowsphere", {
 	end,
 	func = function(name, radius, node)
 		local count = worldedit.sphere(worldedit.pos1[name], radius, node, true)
-		worldedit.player_notify(name, S("@1 nodes added", count))
+		return true, S("@1 nodes added", count)
 	end,
 })
 
@@ -85,7 +85,7 @@ worldedit.register_command("sphere", {
 	end,
 	func = function(name, radius, node)
 		local count = worldedit.sphere(worldedit.pos1[name], radius, node)
-		worldedit.player_notify(name, S("@1 nodes added", count))
+		return true, S("@1 nodes added", count)
 	end,
 })
 
@@ -113,7 +113,7 @@ worldedit.register_command("hollowdome", {
 	end,
 	func = function(name, radius, node)
 		local count = worldedit.dome(worldedit.pos1[name], radius, node, true)
-		worldedit.player_notify(name, S("@1 nodes added", count))
+		return true, S("@1 nodes added", count)
 	end,
 })
 
@@ -129,7 +129,7 @@ worldedit.register_command("dome", {
 	end,
 	func = function(name, radius, node)
 		local count = worldedit.dome(worldedit.pos1[name], radius, node)
-		worldedit.player_notify(name, S("@1 nodes added", count))
+		return true, S("@1 nodes added", count)
 	end,
 })
 
@@ -169,7 +169,7 @@ worldedit.register_command("hollowcylinder", {
 			length = length * sign
 		end
 		local count = worldedit.cylinder(worldedit.pos1[name], axis, length, radius1, radius2, node, true)
-		worldedit.player_notify(name, S("@1 nodes added", count))
+		return true, S("@1 nodes added", count)
 	end,
 })
 
@@ -191,7 +191,7 @@ worldedit.register_command("cylinder", {
 			length = length * sign
 		end
 		local count = worldedit.cylinder(worldedit.pos1[name], axis, length, radius1, radius2, node)
-		worldedit.player_notify(name, S("@1 nodes added", count))
+		return true, S("@1 nodes added", count)
 	end,
 })
 
@@ -224,7 +224,7 @@ worldedit.register_command("hollowpyramid", {
 			height = height * sign
 		end
 		local count = worldedit.pyramid(worldedit.pos1[name], axis, height, node, true)
-		worldedit.player_notify(name, S("@1 nodes added", count))
+		return true, S("@1 nodes added", count)
 	end,
 })
 
@@ -245,7 +245,7 @@ worldedit.register_command("pyramid", {
 			height = height * sign
 		end
 		local count = worldedit.pyramid(worldedit.pos1[name], axis, height, node)
-		worldedit.player_notify(name, S("@1 nodes added", count))
+		return true, S("@1 nodes added", count)
 	end,
 })
 
@@ -271,6 +271,6 @@ worldedit.register_command("spiral", {
 	end,
 	func = function(name, length, height, space, node)
 		local count = worldedit.spiral(worldedit.pos1[name], length, height, space, node)
-		worldedit.player_notify(name, S("@1 nodes added", count))
+		return true, S("@1 nodes added", count)
 	end,
 })

@@ -16,9 +16,9 @@ worldedit.register_command("deleteblocks", {
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
 		local success = minetest.delete_area(pos1, pos2)
 		if success then
-			worldedit.player_notify(name, S("Area deleted."))
+			return true, S("Area deleted.")
 		else
-			worldedit.player_notify(name, S("There was an error during deletion of the area."))
+			return false, S("There was an error during deletion of the area.")
 		end
 	end,
 })
@@ -32,7 +32,7 @@ worldedit.register_command("clearobjects", {
 	nodes_needed = check_region,
 	func = function(name)
 		local count = worldedit.clear_objects(worldedit.pos1[name], worldedit.pos2[name])
-		worldedit.player_notify(name, S("@1 objects cleared", count))
+		return true, S("@1 objects cleared", count)
 	end,
 })
 
@@ -52,7 +52,7 @@ worldedit.register_command("set", {
 	nodes_needed = check_region,
 	func = function(name, node)
 		local count = worldedit.set(worldedit.pos1[name], worldedit.pos2[name], node)
-		worldedit.player_notify(name, S("@1 nodes set", count))
+		return true, S("@1 nodes set", count)
 	end,
 })
 
@@ -74,7 +74,7 @@ worldedit.register_command("param2", {
 	nodes_needed = check_region,
 	func = function(name, param2)
 		local count = worldedit.set_param2(worldedit.pos1[name], worldedit.pos2[name], param2)
-		worldedit.player_notify(name, S("@1 nodes altered", count))
+		return true, S("@1 nodes altered", count)
 	end,
 })
 
@@ -109,7 +109,7 @@ worldedit.register_command("mix", {
 	func = function(name, nodes)
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
 		local count = worldedit.set(pos1, pos2, nodes)
-		worldedit.player_notify(name, S("@1 nodes set", count))
+		return true, S("@1 nodes set", count)
 	end,
 })
 
@@ -140,7 +140,7 @@ worldedit.register_command("replace", {
 	func = function(name, search_node, replace_node)
 		local count = worldedit.replace(worldedit.pos1[name], worldedit.pos2[name],
 				search_node, replace_node)
-		worldedit.player_notify(name, S("@1 nodes replaced", count))
+		return true, S("@1 nodes replaced", count)
 	end,
 })
 
@@ -155,7 +155,7 @@ worldedit.register_command("replaceinverse", {
 	func = function(name, search_node, replace_node)
 		local count = worldedit.replace(worldedit.pos1[name], worldedit.pos2[name],
 				search_node, replace_node, true)
-		worldedit.player_notify(name, S("@1 nodes replaced", count))
+		return true, S("@1 nodes replaced", count)
 	end,
 })
 
@@ -168,7 +168,7 @@ worldedit.register_command("fixlight", {
 	nodes_needed = check_region,
 	func = function(name)
 		local count = worldedit.fixlight(worldedit.pos1[name], worldedit.pos2[name])
-		worldedit.player_notify(name, S("@1 nodes updated", count))
+		return true, S("@1 nodes updated", count)
 	end,
 })
 
@@ -198,7 +198,7 @@ worldedit.register_command("drain", {
 		end
 		end
 		end
-		worldedit.player_notify(name, S("@1 nodes updated", count))
+		return true, S("@1 nodes updated", count)
 	end,
 })
 
@@ -281,7 +281,7 @@ worldedit.register_command("clearcut", {
 	func = function(name)
 		local pos1, pos2 = worldedit.sort_pos(worldedit.pos1[name], worldedit.pos2[name])
 		local count = clearcut(pos1, pos2)
-		worldedit.player_notify(name, S("@1 nodes removed", count))
+		return true, S("@1 nodes removed", count)
 	end,
 })
 
@@ -294,7 +294,7 @@ worldedit.register_command("hide", {
 	nodes_needed = check_region,
 	func = function(name)
 		local count = worldedit.hide(worldedit.pos1[name], worldedit.pos2[name])
-		worldedit.player_notify(name, S("@1 nodes hidden", count))
+		return true, S("@1 nodes hidden", count)
 	end,
 })
 
@@ -314,7 +314,7 @@ worldedit.register_command("suppress", {
 	nodes_needed = check_region,
 	func = function(name, node)
 		local count = worldedit.suppress(worldedit.pos1[name], worldedit.pos2[name], node)
-		worldedit.player_notify(name, S("@1 nodes suppressed", count))
+		return true, S("@1 nodes suppressed", count)
 	end,
 })
 
@@ -334,7 +334,7 @@ worldedit.register_command("highlight", {
 	nodes_needed = check_region,
 	func = function(name, node)
 		local count = worldedit.highlight(worldedit.pos1[name], worldedit.pos2[name], node)
-		worldedit.player_notify(name, S("@1 nodes highlighted", count))
+		return true, S("@1 nodes highlighted", count)
 	end,
 })
 
@@ -347,6 +347,6 @@ worldedit.register_command("restore", {
 	nodes_needed = check_region,
 	func = function(name)
 		local count = worldedit.restore(worldedit.pos1[name], worldedit.pos2[name])
-		worldedit.player_notify(name, S("@1 nodes restored", count))
+		return true, S("@1 nodes restored", count)
 	end,
 })

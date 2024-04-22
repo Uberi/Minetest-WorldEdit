@@ -29,7 +29,7 @@ worldedit.register_command("copy", {
 		end
 
 		local count = worldedit.copy(worldedit.pos1[name], worldedit.pos2[name], axis, amount)
-		worldedit.player_notify(name, S("@1 nodes copied", count))
+		return true, S("@1 nodes copied", count)
 	end,
 })
 
@@ -62,7 +62,7 @@ worldedit.register_command("move", {
 		pos1[axis] = pos1[axis] + amount
 		pos2[axis] = pos2[axis] + amount
 		worldedit.marker_update(name)
-		worldedit.player_notify(name, S("@1 nodes moved", count))
+		return true, S("@1 nodes moved", count)
 	end,
 })
 
@@ -92,7 +92,7 @@ worldedit.register_command("stack", {
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
 		local count = worldedit.volume(pos1, pos2) * math.abs(repetitions)
 		worldedit.stack(pos1, pos2, axis, repetitions, function()
-			worldedit.player_notify(name, S("@1 nodes stacked", count))
+			worldedit.player_notify(name, S("@1 nodes stacked", count), "ok")
 		end)
 	end,
 })
@@ -122,7 +122,7 @@ worldedit.register_command("stack2", {
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
 		local count = worldedit.volume(pos1, pos2) * repetitions
 		worldedit.stack2(pos1, pos2, offset, repetitions, function()
-			worldedit.player_notify(name, S("@1 nodes stacked", count))
+			worldedit.player_notify(name, S("@1 nodes stacked", count), "ok")
 		end)
 	end,
 })
@@ -156,7 +156,7 @@ worldedit.register_command("stretch", {
 		worldedit.pos2[name] = pos2
 		worldedit.marker_update(name)
 
-		worldedit.player_notify(name, S("@1 nodes stretched", count))
+		return true, S("@1 nodes stretched", count)
 	end,
 })
 
@@ -187,7 +187,7 @@ worldedit.register_command("transpose", {
 		worldedit.pos2[name] = pos2
 		worldedit.marker_update(name)
 
-		worldedit.player_notify(name, S("@1 nodes transposed", count))
+		return true, S("@1 nodes transposed", count)
 	end,
 })
 
@@ -207,7 +207,7 @@ worldedit.register_command("flip", {
 	func = function(name, param)
 		if param == "?" then param = worldedit.player_axis(name) end
 		local count = worldedit.flip(worldedit.pos1[name], worldedit.pos2[name], param)
-		worldedit.player_notify(name, S("@1 nodes flipped", count))
+		return true, S("@1 nodes flipped", count)
 	end,
 })
 
@@ -239,7 +239,7 @@ worldedit.register_command("rotate", {
 		worldedit.pos2[name] = pos2
 		worldedit.marker_update(name)
 
-		worldedit.player_notify(name, S("@1 nodes rotated", count))
+		return true, S("@1 nodes rotated", count)
 	end,
 })
 
@@ -263,7 +263,7 @@ worldedit.register_command("orient", {
 	nodes_needed = check_region,
 	func = function(name, angle)
 		local count = worldedit.orient(worldedit.pos1[name], worldedit.pos2[name], angle)
-		worldedit.player_notify(name, S("@1 nodes oriented", count))
+		return true, S("@1 nodes oriented", count)
 	end,
 })
 

@@ -264,7 +264,7 @@ worldedit.register_gui_handler("worldedit_gui", function(name, fields)
 			--ensure player has permission to perform action
 			local has_privs, missing_privs = minetest.check_player_privs(name, entry.privs)
 			if not has_privs then
-				worldedit.player_notify(name, "you are not allowed to use this function (missing privileges: " .. table.concat(missing_privs, ", ") .. ")")
+				worldedit.player_notify(name, "you are not allowed to use this function (missing privileges: " .. table.concat(missing_privs, ", ") .. ")", "error")
 				return false
 			end
 			if entry.on_select then

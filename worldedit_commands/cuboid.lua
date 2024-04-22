@@ -249,14 +249,14 @@ worldedit.register_command("cubeapply", {
 	end,
 	nodes_needed = function(name, sidex, sidey, sidez, cmd, parsed)
 		-- its not possible to defer to the target command at this point
+		-- FIXME: why not?
 		return sidex * sidey * sidez
 	end,
 	func = function(name, sidex, sidey, sidez, cmd, parsed)
 		local cmddef = assert(worldedit.registered_commands[cmd])
 		local success, missing_privs = minetest.check_player_privs(name, cmddef.privs)
 		if not success then
-			worldedit.player_notify(name, S("Missing privileges: @1", table.concat(missing_privs, ", ")))
-			return
+			return false, S("Missing privileges: @1", table.concat(missing_privs, ", "))
 		end
 
 		-- update region to be the cuboid the user wanted
