@@ -209,23 +209,26 @@ worldedit.register_command("mtschemplace", {
 	privs = {worldedit=true},
 	require_pos = 1,
 	parse = function(param)
-		if param == "" then
-			return false
+		local found, _, filename, rotation = param:find("^(.+)%s+([012789]+)$")
+		if found == nil then
+			filename = param
+		elseif rotation ~= "0" and rotation ~= "90" and rotation ~= "180" and rotation ~= "270" then
+			return false, S("Invalid rotation: @1", rotation)
 		end
-		if not check_filename(param) then
-			return false, S("Disallowed file name: @1", param)
+		if not check_filename(filename) then
+			return false, S("Disallowed file name: @1", filename)
 		end
-		return true, param
+		return true, filename, rotation
 	end,
-	func = function(name, param)
+	func = function(name, filename, rotation)
 		local pos = worldedit.pos1[name]
 
-		local path = minetest.get_worldpath() .. "/schems/" .. param .. ".mts"
-		if minetest.place_schematic(pos, path) == nil then
+		local path = minetest.get_worldpath() .. "/schems/" .. filename .. ".mts"
+		if minetest.place_schematic(pos, path, rotation) == nil then
 			return false, S("failed to place Minetest schematic")
 		end
 		return true, S("placed Minetest schematic @1 at @2",
-			param, minetest.pos_to_string(pos))
+			filename, minetest.pos_to_string(pos))
 	end,
 })
 

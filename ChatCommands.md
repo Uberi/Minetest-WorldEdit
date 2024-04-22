@@ -428,11 +428,12 @@ Save the current WorldEdit region using the Minetest Schematic format to "(world
     //mtschemcreate some random filename
     //mtschemcreate huge_base
 
-### `//mtschemplace <file>`
+### `//mtschemplace <file> [rotation]`
 
 Load nodes from "(world folder)/schems/`<file>`.mts" with position 1 of the current WorldEdit region as the origin.
+Valid values for `[rotation]` are 0, 90, 180 and 270.
 
-    //mtschemplace some random filename
+    //mtschemplace a_tree 270
     //mtschemplace huge_base
 
 ### `//mtschemprob start/finish/get`
