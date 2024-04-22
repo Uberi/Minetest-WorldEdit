@@ -172,6 +172,37 @@ worldedit.register_command("fixlight", {
 	end,
 })
 
+local drain_cache
+
+local function drain(pos1, pos2)
+	if drain_cache == nil then
+		drain_cache = {}
+		for name, d in pairs(minetest.registered_nodes) do
+			if d.drawtype == "liquid" or d.drawtype == "flowingliquid" then
+				drain_cache[name] = true
+			end
+		end
+	end
+
+	pos1, pos2 = worldedit.sort_pos(pos1, pos2)
+	local count = 0
+
+	local get_node, remove_node = minetest.get_node, minetest.remove_node
+	for x = pos1.x, pos2.x do
+	for y = pos1.y, pos2.y do
+	for z = pos1.z, pos2.z do
+		local p = vector.new(x, y, z)
+		local n = get_node(p).name
+		if drain_cache[n] then
+			remove_node(p)
+			count = count + 1
+		end
+	end
+	end
+	end
+	return count
+end
+
 worldedit.register_command("drain", {
 	params = "",
 	description = S("Remove any fluid node within the current WorldEdit region"),
@@ -180,24 +211,7 @@ worldedit.register_command("drain", {
 	require_pos = 2,
 	nodes_needed = check_region,
 	func = function(name)
-		-- TODO: make an API function for this
-		local count = 0
-		local pos1, pos2 = worldedit.sort_pos(worldedit.pos1[name], worldedit.pos2[name])
-
-		local get_node, remove_node = minetest.get_node, minetest.remove_node
-		for x = pos1.x, pos2.x do
-		for y = pos1.y, pos2.y do
-		for z = pos1.z, pos2.z do
-			local p = vector.new(x, y, z)
-			local n = get_node(p).name
-			local d = minetest.registered_nodes[n]
-			if d ~= nil and (d.drawtype == "liquid" or d.drawtype == "flowingliquid") then
-				remove_node(p)
-				count = count + 1
-			end
-		end
-		end
-		end
+		local count = drain(worldedit.pos1[name], worldedit.pos2[name])
 		return true, S("@1 nodes updated", count)
 	end,
 })
