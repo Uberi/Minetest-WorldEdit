@@ -27,7 +27,7 @@ function worldedit.cube(pos, width, height, length, node_name, hollow)
 	if hollow then
 		iterfunc = mh.iterp_hollowcuboid(area, basepos, endpos)
 	else
-		iterfunc = area:iter(basepos, endpos)
+		iterfunc = area:iterp(basepos, endpos)
 	end
 
 	for vi in iterfunc do
