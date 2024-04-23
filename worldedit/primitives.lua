@@ -16,7 +16,8 @@ function worldedit.cube(pos, width, height, length, node_name, hollow)
 	-- Set up voxel manipulator
 	local basepos = vector.subtract(pos,
 		{x = math.floor(width / 2), y = 0, z = math.floor(length / 2)})
-	local endpos = vector.add(basepos, {x=width, y=height, z=length})
+	local endpos = vector.add(basepos,
+		{x = width - 1, y = height - 1, z = length - 1})
 	local manip, area = mh.init(basepos, endpos)
 	local data = mh.get_empty_data(area)
 
@@ -32,7 +33,7 @@ function worldedit.cube(pos, width, height, length, node_name, hollow)
 
 	for vi in iterfunc do
 		data[vi] = node_id
-		count = count+1
+		count = count + 1
 	end
 
 	mh.finish(manip, data)
