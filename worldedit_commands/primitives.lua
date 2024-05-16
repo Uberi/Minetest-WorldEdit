@@ -1,14 +1,14 @@
 local S = minetest.get_translator("worldedit_commands")
 
 
-local check_cube = function(param)
+local check_cube = function(param, playername)
 	local found, _, w, h, l, nodename = param:find("^(%d+)%s+(%d+)%s+(%d+)%s+(.+)$")
 	if found == nil then
 		return false
 	end
-	local node = worldedit.normalize_nodename(nodename)
+	local node, err = worldedit.normalize_nodename(nodename, playername)
 	if not node then
-		return false, S("invalid node name: @1", nodename)
+		return false, err
 	end
 	return true, tonumber(w), tonumber(h), tonumber(l), node
 end
@@ -45,14 +45,14 @@ worldedit.register_command("cube", {
 	end,
 })
 
-local check_sphere = function(param)
+local check_sphere = function(param, playername)
 	local found, _, radius, nodename = param:find("^(%d+)%s+(.+)$")
 	if found == nil then
 		return false
 	end
-	local node = worldedit.normalize_nodename(nodename)
+	local node, err = worldedit.normalize_nodename(nodename, playername)
 	if not node then
-		return false, S("invalid node name: @1", nodename)
+		return false, err
 	end
 	return true, tonumber(radius), node
 end
@@ -89,14 +89,14 @@ worldedit.register_command("sphere", {
 	end,
 })
 
-local check_dome = function(param)
+local check_dome = function(param, playername)
 	local found, _, radius, nodename = param:find("^(%d+)%s+(.+)$")
 	if found == nil then
 		return false
 	end
-	local node = worldedit.normalize_nodename(nodename)
+	local node, err = worldedit.normalize_nodename(nodename, playername)
 	if not node then
-		return false, S("invalid node name: @1", nodename)
+		return false, err
 	end
 	return true, tonumber(radius), node
 end
@@ -133,7 +133,7 @@ worldedit.register_command("dome", {
 	end,
 })
 
-local check_cylinder = function(param)
+local check_cylinder = function(param, playername)
 	-- two radii
 	local found, _, axis, length, radius1, radius2, nodename = param:find("^([xyz%?])%s+([+-]?%d+)%s+(%d+)%s+(%d+)%s+(.+)$")
 	if found == nil then
@@ -144,9 +144,9 @@ local check_cylinder = function(param)
 	if found == nil then
 		return false
 	end
-	local node = worldedit.normalize_nodename(nodename)
+	local node, err = worldedit.normalize_nodename(nodename, playername)
 	if not node then
-		return false, S("invalid node name: @1", nodename)
+		return false, err
 	end
 	return true, axis, tonumber(length), tonumber(radius1), tonumber(radius2), node
 end
@@ -195,14 +195,14 @@ worldedit.register_command("cylinder", {
 	end,
 })
 
-local check_pyramid = function(param)
+local check_pyramid = function(param, playername)
 	local found, _, axis, height, nodename = param:find("^([xyz%?])%s+([+-]?%d+)%s+(.+)$")
 	if found == nil then
 		return false
 	end
-	local node = worldedit.normalize_nodename(nodename)
+	local node, err = worldedit.normalize_nodename(nodename, playername)
 	if not node then
-		return false, S("invalid node name: @1", nodename)
+		return false, err
 	end
 	return true, axis, tonumber(height), node
 end
@@ -255,14 +255,14 @@ worldedit.register_command("spiral", {
 	category = S("Shapes"),
 	privs = {worldedit=true},
 	require_pos = 1,
-	parse = function(param)
+	parse = function(param, playername)
 		local found, _, length, height, space, nodename = param:find("^(%d+)%s+(%d+)%s+(%d+)%s+(.+)$")
 		if found == nil then
 			return false
 		end
-		local node = worldedit.normalize_nodename(nodename)
+		local node, err = worldedit.normalize_nodename(nodename, playername)
 		if not node then
-			return false, S("invalid node name: @1", nodename)
+			return false, err
 		end
 		return true, tonumber(length), tonumber(height), tonumber(space), node
 	end,
