@@ -218,7 +218,7 @@ worldedit.register_command("cubeapply", {
 	description = S("Select a cube with side length <size> around position 1 and run <command> on region"),
 	privs = {worldedit=true},
 	require_pos = 1,
-	parse = function(param)
+	parse = function(param, playername)
 		local found, _, sidex, sidey, sidez, cmd, args =
 			param:find("^(%d+)%s+(%d+)%s+(%d+)%s+([^%s]+)%s*(.*)$")
 		if found == nil then
@@ -241,7 +241,7 @@ worldedit.register_command("cubeapply", {
 				minetest.colorize("#00ffff", "//"..cmd))
 		end
 		-- run parsing of target command
-		local parsed = {cmddef.parse(args)}
+		local parsed = {cmddef.parse(args, playername)}
 		if not table.remove(parsed, 1) then
 			return false, parsed[1]
 		end

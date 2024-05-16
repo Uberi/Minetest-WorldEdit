@@ -39,7 +39,7 @@ local brush_on_use = function(itemstack, placer)
 	worldedit.marker_update(name)
 
 	assert(cmddef.require_pos < 2)
-	local parsed = {cmddef.parse(meta:get_string("params"))}
+	local parsed = {cmddef.parse(meta:get_string("params"), name)}
 	if not table.remove(parsed, 1) then return false end -- shouldn't happen
 
 	-- discard success messages
@@ -104,7 +104,7 @@ worldedit.register_command("brush", {
 			end
 
 			-- Try parsing command params so we can give the user feedback
-			local ok, err = cmddef.parse(params)
+			local ok, err = cmddef.parse(params, name)
 			if not ok then
 				err = err or S("invalid usage")
 				return false, S("Error with command: @1", err)
