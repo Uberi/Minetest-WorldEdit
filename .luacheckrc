@@ -1,9 +1,17 @@
-read_globals = {"minetest", "vector", "VoxelArea", "ItemStack",
-	"table",
+read_globals = {
+	"minetest", "VoxelArea", "ItemStack",
 	"unified_inventory", "sfinv", "smart_inventory", "inventory_plus",
-	"dump"
+	"dump",
+
+	table = {fields = {"copy", "indexof", "insert_all"}},
+	vector = {fields = {
+		-- as of 5.0
+		"new", "direction", "distance", "length", "normalize", "floor", "round",
+		"apply", "equals", "sort", "add", "subtract", "multiply", "divide"
+	}},
 }
 globals = {"worldedit"}
+
 -- Ignore these errors until someone decides to fix them
 ignore = {"212", "213", "411", "412", "421", "422", "431", "432", "631"}
 
