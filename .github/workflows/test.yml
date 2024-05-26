@@ -9,6 +9,7 @@ jobs:
     strategy:
       matrix:
         cfg:
+          - { image: 'registry.gitlab.com/minetest/minetest/server:5.0.1', mtg: false }
           - { image: 'registry.gitlab.com/minetest/minetest/server:5.5.1', mtg: false }
           - { image: '', mtg: true } # latest mater
     steps:
