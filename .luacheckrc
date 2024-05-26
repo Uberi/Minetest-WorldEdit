@@ -7,7 +7,9 @@ read_globals = {
 	vector = {fields = {
 		-- as of 5.0
 		"new", "direction", "distance", "length", "normalize", "floor", "round",
-		"apply", "equals", "sort", "add", "subtract", "multiply", "divide"
+		"apply", "equals", "sort", "add", "subtract", "multiply", "divide",
+		-- polyfilled
+		"copy"
 	}},
 }
 globals = {"worldedit"}
@@ -15,6 +17,9 @@ globals = {"worldedit"}
 -- Ignore these errors until someone decides to fix them
 ignore = {"212", "213", "411", "412", "421", "422", "431", "432", "631"}
 
+files["worldedit/common.lua"] = {
+	globals = {"vector"},
+}
 files["worldedit/test"] = {
 	read_globals = {"testnode1", "testnode2", "testnode3", "area", "check", "place_pattern"},
 }

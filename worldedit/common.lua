@@ -1,6 +1,15 @@
 --- Common functions [INTERNAL].  All of these functions are internal!
 -- @module worldedit.common
 
+-- Polyfill for vector.copy (added in 5.5.0)
+if not vector.copy then
+	local vnew = vector.new
+	vector.copy = function(v)
+		return vnew(v.x, v.y, v.z)
+	end
+end
+
+
 --- Copies and modifies positions `pos1` and `pos2` so that each component of
 -- `pos1` is less than or equal to the corresponding component of `pos2`.
 -- Returns the new positions.
