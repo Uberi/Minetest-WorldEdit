@@ -14,8 +14,8 @@ end
 -- `pos1` is less than or equal to the corresponding component of `pos2`.
 -- Returns the new positions.
 function worldedit.sort_pos(pos1, pos2)
-	pos1 = vector.new(pos1.x, pos1.y, pos1.z)
-	pos2 = vector.new(pos2.x, pos2.y, pos2.z)
+	pos1 = vector.copy(pos1)
+	pos2 = vector.copy(pos2)
 	if pos1.x > pos2.x then
 		pos2.x, pos1.x = pos1.x, pos2.x
 	end
@@ -84,7 +84,7 @@ function mh.get_empty_data(area)
 	-- only partially modified aren't overwriten.
 	local data = {}
 	local c_ignore = minetest.get_content_id("ignore")
-	for i = 1, worldedit.volume(area.MinEdge, area.MaxEdge) do
+	for i = 1, area:getVolume() do
 		data[i] = c_ignore
 	end
 	return data

@@ -80,7 +80,7 @@ worldedit.mark_region = function(name)
 
 		--XY plane markers
 		for _, z in ipairs({pos1.z - 0.5, pos2.z + 0.5}) do
-			local entpos = {x=pos1.x + sizex - 0.5, y=pos1.y + sizey - 0.5, z=z}
+			local entpos = vector.new(pos1.x + sizex - 0.5, pos1.y + sizey - 0.5, z)
 			local marker = minetest.add_entity(entpos, "worldedit:region_cube", init_sentinel)
 			if marker ~= nil then
 				marker:set_properties({
@@ -94,7 +94,7 @@ worldedit.mark_region = function(name)
 
 		--YZ plane markers
 		for _, x in ipairs({pos1.x - 0.5, pos2.x + 0.5}) do
-			local entpos = {x=x, y=pos1.y + sizey - 0.5, z=pos1.z + sizez - 0.5}
+			local entpos = vector.new(x, pos1.y + sizey - 0.5, pos1.z + sizez - 0.5)
 			local marker = minetest.add_entity(entpos, "worldedit:region_cube", init_sentinel)
 			if marker ~= nil then
 				marker:set_properties({
