@@ -45,10 +45,15 @@ function worldedit.get_axis_others(axis)
 end
 
 
+-- Create a vmanip and read the area from map, this causes all
+-- MapBlocks to be loaded into memory synchronously.
+-- This doesn't actually *keep* them loaded, unlike the name implies.
 function worldedit.keep_loaded(pos1, pos2)
-	-- Create a vmanip and read the area from map, this
-	-- causes all MapBlocks to be loaded into memory synchronously.
-	-- This doesn't actually *keep* them loaded, unlike the name implies.
+	-- rough estimate, a MapNode is 4 bytes in the engine
+	if worldedit.volume(pos1, pos2) > 268400000 then
+		print("[WorldEdit] Requested to load an area bigger than 1GB, refusing. The subsequent operation may fail.")
+		return
+	end
 	if minetest.load_area then
 		-- same effect but without unnecessary data copying
 		minetest.load_area(pos1, pos2)
