@@ -1,11 +1,13 @@
 local S = minetest.get_translator("worldedit_commands")
 
+local safe_region_limit = tonumber(minetest.settings:get("worldedit_safe_region_limit") or "20000")
+
 local safe_region_callback = {}
 
 --`count` is the number of nodes that would possibly be modified
 --`callback` is a callback to run when the user confirms
 local function safe_region(name, count, callback)
-	if count < 20000 then
+	if safe_region_limit <= 0 or count < safe_region_limit then
 		return callback()
 	end
 

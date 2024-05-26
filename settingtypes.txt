@@ -1,0 +1,4 @@
+#    For operations that potentially affect more than the specified amount of nodes
+#    WorldEdit will require additional confirmation via //y before proceeding.
+#    Set to 0 to disable the confirmation in all cases.
+worldedit_safe_region_limit (Limit for safe region warning) int 20000
