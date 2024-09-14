@@ -57,23 +57,24 @@ worldedit.register_command("set", {
 })
 
 worldedit.register_command("param2", {
-	params = "<param2>",
-	description = S("Set param2 of all nodes in the current WorldEdit region to <param2>"),
+	params = "<param2> [node]",
+	description = S("Set param2 of all or specified nodes in the current WorldEdit region to <param2>"),
 	category = S("Node manipulation"),
 	privs = {worldedit=true},
 	require_pos = 2,
 	parse = function(param)
-		local param2 = tonumber(param)
+		local param2, node = param:match("^(%d+) (%S+)$")
+		param2 = tonumber(param2) or tonumber(param)
 		if not param2 then
 			return false
 		elseif param2 < 0 or param2 > 255 then
 			return false, S("Param2 is out of range (must be between 0 and 255 inclusive!)")
 		end
-		return true, param2
+		return true, param2, node
 	end,
 	nodes_needed = check_region,
-	func = function(name, param2)
-		local count = worldedit.set_param2(worldedit.pos1[name], worldedit.pos2[name], param2)
+	func = function(name, param2, node)
+		local count = worldedit.set_param2(worldedit.pos1[name], worldedit.pos2[name], param2, node)
 		return true, S("@1 nodes altered", count)
 	end,
 })
