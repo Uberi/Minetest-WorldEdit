@@ -1,5 +1,5 @@
 # textdomain: worldedit_brush
-This brush is not bound, use @1 to bind a command to it.=Dieser Pinsel ist nicht konfiguriert, nutzen Sie @1, um ein Befehl an ihn zu binden.
+This brush is not bound, use @1 to bind a command to it.=Dieser Pinsel ist nicht konfiguriert, nutzen Sie @1, um einen Befehl an ihn zu binden.
 Missing privileges: @1=Fehlende Privilegien: @1
 Too far away.=Zu weit weg.
 WorldEdit Brush=WorldEdit-Pinsel
