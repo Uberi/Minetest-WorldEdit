@@ -244,25 +244,28 @@ worldedit.register_command("rotate", {
 })
 
 worldedit.register_command("orient", {
-	params = "<angle>",
-	description = S("Rotate oriented nodes in the current WorldEdit region around the Y axis by angle <angle> (90 degree increment)"),
+	params = "<operation> x/y/z/? [<angle>]",
+	description = S("Change orientation of all oriented nodes in the current WorldEdit region performing <operation> (rotate or flip) around the <axis> axis by angle <angle> (90 degree increment, unused for flip operation)"),
 	category = S("Transformations"),
 	privs = {worldedit=true},
 	require_pos = 2,
 	parse = function(param)
-		local found, _, angle = param:find("^([+-]?%d+)$")
-		if found == nil then
-			return false
+		local operation, axis, angle = unpack(param:split(" "))
+		--~ return true, operation, axis, angle
+		if (operation == 'flip' or operation == 'rotate') and (axis == 'x' or axis == 'y' or axis == 'z' or axis == '?') then
+			if operation == 'rotate' then
+				angle = tonumber(angle) or 90
+				if angle % 90 ~= 0 then
+					return false, S("invalid usage: angle must be multiple of 90")
+				end
+			end
+			return true, operation, axis, angle
 		end
-		angle = tonumber(angle)
-		if angle % 90 ~= 0 then
-			return false, S("invalid usage: angle must be multiple of 90")
-		end
-		return true, angle
 	end,
 	nodes_needed = check_region,
-	func = function(name, angle)
-		local count = worldedit.orient(worldedit.pos1[name], worldedit.pos2[name], angle)
+	func = function(name, operation, axis, angle)
+		if axis == "?" then axis = worldedit.player_axis(name) end
+		local count = worldedit.orient(worldedit.pos1[name], worldedit.pos2[name], operation, axis, angle)
 		return true, S("@1 nodes oriented", count)
 	end,
 })
