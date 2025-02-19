@@ -244,8 +244,8 @@ worldedit.register_command("rotate", {
 })
 
 worldedit.register_command("orient", {
-	params = "<operation> x/y/z/? [<angle>]",
-	description = S("Change orientation of all oriented nodes in the current WorldEdit region performing <operation> (rotate or flip) around the <axis> axis by angle <angle> (90 degree increment, unused for flip operation)"),
+	params = "rotate|flip x/y/z/? [<angle>]",
+	description = S("Rotate nodes in the current editing area in their orientation around an axis <axis> by 90° steps <angle> or mirror (flip) their orientation along an axis <axis>."),
 	category = S("Transformations"),
 	privs = {worldedit=true},
 	require_pos = 2,
