@@ -398,9 +398,7 @@ function worldedit.orient(pos1, pos2, operation, axis, angle)
 				if def then
 					if def.paramtype2 == "wallmounted" then
 						node.param2 = wallmounted_substitution[node.param2]
-						local meta = get_meta(pos):to_table()
-						set_node(pos, node)
-						get_meta(pos):from_table(meta)
+						swap_node(pos, node)
 						count = count + 1
 					elseif def.paramtype2 == "facedir" then
 						node.param2 = facedir_substitution[node.param2]
