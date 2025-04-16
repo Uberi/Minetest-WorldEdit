@@ -354,6 +354,12 @@ end
 -- @param angle Angle in degrees (90 degree increments only).
 -- @return The number of nodes oriented.
 function worldedit.orient(pos1, pos2, operation, axis, angle)
+	if axis == nil then --assume old api usage with with signature (pos1, pos2, angle)
+		angle = operation
+		operation = "rotate"
+		axis = "y"
+	end
+	
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 	local registered_nodes = minetest.registered_nodes
 
