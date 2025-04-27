@@ -42,7 +42,7 @@ local function chatcommand_handler(cmd_name, name, param)
 		end
 	end
 
-	local parsed = {def.parse(param)}
+	local parsed = {def.parse(param, name)}
 	local success = table.remove(parsed, 1)
 	if not success then
 		worldedit.player_notify(name, parsed[1] or S("invalid usage"), "error")

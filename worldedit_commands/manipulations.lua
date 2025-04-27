@@ -42,10 +42,10 @@ worldedit.register_command("set", {
 	category = S("Node manipulation"),
 	privs = {worldedit=true},
 	require_pos = 2,
-	parse = function(param)
-		local node = worldedit.normalize_nodename(param)
+	parse = function(param, player)
+		local node, err = worldedit.normalize_nodename(param, player)
 		if not node then
-			return false, S("invalid node name: @1", param)
+			return false, err
 		end
 		return true, node
 	end,
@@ -84,7 +84,7 @@ worldedit.register_command("mix", {
 	category = S("Node manipulation"),
 	privs = {worldedit=true},
 	require_pos = 2,
-	parse = function(param)
+	parse = function(param, playername)
 		local nodes = {}
 		for nodename in param:gmatch("[^%s]+") do
 			if tonumber(nodename) ~= nil and #nodes > 0 then
@@ -93,9 +93,9 @@ worldedit.register_command("mix", {
 					nodes[#nodes + 1] = last_node
 				end
 			else
-				local node = worldedit.normalize_nodename(nodename)
+				local node, err = worldedit.normalize_nodename(nodename, playername)
 				if not node then
-					return false, S("invalid node name: @1", nodename)
+					return false, err
 				end
 				nodes[#nodes + 1] = node
 			end
@@ -113,18 +113,18 @@ worldedit.register_command("mix", {
 	end,
 })
 
-local check_replace = function(param)
+local check_replace = function(param, playername)
 	local found, _, searchnode, replacenode = param:find("^([^%s]+)%s+(.+)$")
 	if found == nil then
 		return false
 	end
-	local newsearchnode = worldedit.normalize_nodename(searchnode)
+	local newsearchnode, err = worldedit.normalize_nodename(searchnode, playername)
 	if not newsearchnode then
-		return false, S("invalid search node name: @1", searchnode)
+		return false, err
 	end
-	local newreplacenode = worldedit.normalize_nodename(replacenode)
+	local newreplacenode, err = worldedit.normalize_nodename(replacenode, playername)
 	if not newreplacenode then
-		return false, S("invalid replace node name: @1", replacenode)
+		return false, err
 	end
 	return true, newsearchnode, newreplacenode
 end
@@ -318,10 +318,10 @@ worldedit.register_command("suppress", {
 	category = S("Node manipulation"),
 	privs = {worldedit=true},
 	require_pos = 2,
-	parse = function(param)
-		local node = worldedit.normalize_nodename(param)
+	parse = function(param, playername)
+		local node, err = worldedit.normalize_nodename(param, playername)
 		if not node then
-			return false, S("invalid node name: @1", param)
+			return false, err
 		end
 		return true, node
 	end,
@@ -338,10 +338,10 @@ worldedit.register_command("highlight", {
 	category = S("Node manipulation"),
 	privs = {worldedit=true},
 	require_pos = 2,
-	parse = function(param)
-		local node = worldedit.normalize_nodename(param)
+	parse = function(param, playername)
+		local node, err = worldedit.normalize_nodename(param, playername)
 		if not node then
-			return false, S("invalid node name: @1", param)
+			return false, err
 		end
 		return true, node
 	end,
