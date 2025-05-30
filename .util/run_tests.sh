@@ -11,9 +11,9 @@ if [ "$1" == "--docker" ]; then
 	command -v docker >/dev/null || { echo "Docker is not installed." >&2; exit 1; }
 	[ -d minetest_game ] || echo "A source checkout of minetest_game was not found. This can fail if your docker image does not ship a game." >&2;
 else
-	mtserver=$(command -v minetestserver)
-	[[ -z "$mtserver" && -x ../../bin/minetestserver ]] && mtserver=../../bin/minetestserver
-	[ -z "$mtserver" ] && { echo "To run the test outside of Docker, an installation of minetestserver is required." >&2; exit 1; }
+	mtserver=$(command -v luantiserver)
+	[[ -z "$mtserver" && -x ../../bin/luantiserver ]] && mtserver=../../bin/luantiserver
+	[ -z "$mtserver" ] && { echo "To run the test outside of Docker, an installation of luantiserver is required." >&2; exit 1; }
 fi
 
 mkdir $worldpath
@@ -22,7 +22,7 @@ printf '%s\n' worldedit_run_tests=true max_forceloaded_blocks=9999 >$confpath
 
 if [ -z "$mtserver" ]; then
 	chmod -R 777 $tempdir
-	[ -z "$DOCKER_IMAGE" ] && DOCKER_IMAGE="ghcr.io/minetest/minetest:master"
+	[ -n "$DOCKER_IMAGE" ] || { echo "Missing DOCKER_IMAGE env variable" >&2; exit 1; }
 	vol=(
 		-v "$confpath":/etc/minetest/minetest.conf
 		-v "$tempdir":/var/lib/minetest/.minetest

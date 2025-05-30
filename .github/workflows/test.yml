@@ -11,13 +11,14 @@ jobs:
         cfg:
           - { image: 'registry.gitlab.com/minetest/minetest/server:5.0.1', mtg: false }
           - { image: 'registry.gitlab.com/minetest/minetest/server:5.5.1', mtg: false }
-          - { image: '', mtg: true } # latest mater
+          - { image: 'ghcr.io/minetest/minetest:5.10.0', mtg: true }
+          - { image: 'ghcr.io/luanti-org/luanti', mtg: true } # latest git
     steps:
     - uses: actions/checkout@v4
 
     - uses: actions/checkout@v4
       with:
-        repository: 'minetest/minetest_game'
+        repository: 'luanti-org/minetest_game'
         path: minetest_game
       if: ${{ matrix.cfg.mtg }}
 
