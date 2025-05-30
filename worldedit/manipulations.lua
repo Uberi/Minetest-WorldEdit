@@ -56,8 +56,7 @@ function worldedit.set_param2(pos1, pos2, param2)
 
 	-- Update map
 	manip:set_param2_data(param2_data)
-	manip:write_to_map()
-	manip:update_map()
+	mh.finish(manip)
 
 	return worldedit.volume(pos1, pos2)
 end
@@ -269,8 +268,10 @@ function worldedit.fixlight(pos1, pos2)
 	local pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 
 	local vmanip = minetest.get_voxel_manip(pos1, pos2)
-	vmanip:write_to_map()
-	vmanip:update_map() -- this updates the lighting
+	vmanip:write_to_map() -- this updates the lighting
+	if vmanip.close ~= nil then
+		vmanip:close()
+	end
 
 	return worldedit.volume(pos1, pos2)
 end

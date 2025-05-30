@@ -133,7 +133,9 @@ function mh.finish(manip, data)
 		manip:set_data(data)
 	end
 	manip:write_to_map()
-	manip:update_map()
+	if manip.close ~= nil then
+		manip:close() -- explicitly free memory
+	end
 end
 
 
