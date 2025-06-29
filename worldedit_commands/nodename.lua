@@ -1,3 +1,5 @@
+local S = minetest.get_translator("worldedit_commands")
+
 -- Strips any kind of escape codes (translation, colors) from a string
 -- https://github.com/minetest/minetest/blob/53dd7819277c53954d1298dfffa5287c306db8d0/src/util/string.cpp#L777
 local function strip_escapes(input)
@@ -32,10 +34,33 @@ end
 
 local description_cache = nil
 
--- normalizes node "description" `nodename`, returning a string (or nil)
-worldedit.normalize_nodename = function(nodename)
+-- normalizes node "description" `nodename`. Return a string (or nil), with the second return value being the error message if the first value is nil.
+-- playername contain the name of the player. It may be nil, in which case it won’t detect the wielded item when appropriate
+worldedit.normalize_nodename = function(nodename, playername)
 	nodename = nodename:gsub("^%s*(.-)%s*$", "%1") -- strip spaces
 	if nodename == "" then return nil end
+
+	if nodename == "wielded" or nodename == "w" then
+		if not playername then
+			return nil, S("no player executing command")
+		end
+
+		local player = minetest.get_player_by_name(playername)
+		if not player then
+			return nil, S("no player found: @1", playername)
+		end
+
+		local wielded = player:get_wielded_item()
+		if not wielded then
+			return nil, S("no wielded item: @1", playername)
+		end
+		
+		if minetest.registered_nodes[wielded:get_name()] then
+			return wielded:get_name()
+		else
+			return nil, S("not a node: @1", wielded:get_name())
+		end
+	end
 
 	local fullname = ItemStack({name=nodename}):get_name() -- resolve aliases
 	if minetest.registered_nodes[fullname] or fullname == "air" then -- full name
@@ -76,10 +101,15 @@ worldedit.normalize_nodename = function(nodename)
 	for key, value in pairs(description_cache) do
 		if value:find(nodename, 1, true) ~= nil then
 			if match ~= nil then
-				return nil
+				return nil, S("invalid node name: @1", nodename)
 			end
 			match = key -- substring description match (only if no ambiguities)
 		end
 	end
-	return match
+
+	if match then
+		return match
+	end
+
+	return nil, S("invalid node name: @1", nodename)
 end
