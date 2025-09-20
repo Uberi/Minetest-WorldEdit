@@ -1,4 +1,4 @@
---- WorldEdit mod for the Minetest engine
+--- WorldEdit mod for the Luanti engine
 -- @module worldedit
 -- @release 1.3
 -- @copyright 2012 sfan5, Anthony Zhang (Uberi/Temperest), and Brett O'Donnell (cornernote)

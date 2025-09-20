@@ -5,7 +5,7 @@
 ---------------------
 local vec = vector.new
 local vecw = function(axis, n, base)
-	local ret = vec(base)
+	local ret = vector.copy(base)
 	ret[axis] = n
 	return ret
 end

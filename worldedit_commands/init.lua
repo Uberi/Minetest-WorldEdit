@@ -25,6 +25,15 @@ local function copy_state(which, name)
 	end
 end
 
+local function compare_state(state, old_state)
+	for i, v in ipairs(state) do
+		if not (v == nil and old_state[i] == nil) and not vector.equals(v, old_state[i]) then
+			return false
+		end
+	end
+	return true
+end
+
 local function chatcommand_handler(cmd_name, name, param)
 	local def = assert(worldedit.registered_commands[cmd_name])
 
@@ -66,11 +75,7 @@ local function chatcommand_handler(cmd_name, name, param)
 	local old_state = copy_state(def.require_pos, name)
 	safe_region(name, count, function()
 		local state = copy_state(def.require_pos, name)
-		local ok = true
-		for i, v in ipairs(state) do
-			ok = ok and ( (v == nil and old_state[i] == nil) or vector.equals(v, old_state[i]) )
-		end
-		if not ok then
+		if not compare_state(state, old_state) then
 			worldedit.player_notify(name, S("ERROR: the operation was cancelled because the region has changed."), "error")
 			return
 		end
@@ -111,6 +116,7 @@ function worldedit.register_command(name, def)
 	def.require_pos = def.require_pos or 0
 	assert(def.require_pos >= 0 and def.require_pos < 3)
 	if def.params == "" and not def.parse then
+		-- FIXME: shouldn't this check for param to be empty?
 		def.parse = function(param) return true end
 	else
 		assert(def.parse)
@@ -124,7 +130,7 @@ function worldedit.register_command(name, def)
 	end--]]
 
 	-- disable further modification
-	setmetatable(def, {__newindex = {}})
+	setmetatable(def, {__newindex = function() end})
 
 	minetest.register_chatcommand("/" .. name, {
 		privs = def.privs,
@@ -172,7 +178,9 @@ function worldedit.player_notify(name, message, typ)
 	minetest.chat_send_player(name, table.concat(t, " "))
 end
 
--- Determines the axis in which a player is facing, returning an axis ("x", "y", or "z") and the sign (1 or -1)
+-- Determines the axis in which a player is facing
+-- @return axis ("x", "y", or "z") and the sign (1 or -1)
+-- @note Not part of API
 function worldedit.player_axis(name)
 	local player = minetest.get_player_by_name(name)
 	if not player then
@@ -200,7 +208,7 @@ worldedit.register_command("about", {
 		worldedit.player_notify(name, S("WorldEdit @1"..
 			" is available on this server. Type @2 to get a list of "..
 			"commands, or find more information at @3",
-			worldedit.version_string, minetest.colorize("#00ffff", "//help"),
+			worldedit.version_string, minetest.colorize("#0ff", "//help"),
 			"https://github.com/Uberi/Minetest-WorldEdit"
 		), "info")
 	end,
@@ -209,10 +217,10 @@ worldedit.register_command("about", {
 -- initially copied from builtin/chatcommands.lua
 local function help_command(name, param)
 	local function format_help_line(cmd, def, follow_alias)
-		local msg = minetest.colorize("#00ffff", "//"..cmd)
+		local msg = minetest.colorize("#0ff", "//"..cmd)
 		if def.name ~= cmd then
 			msg = msg .. ": " .. S("alias to @1",
-				minetest.colorize("#00ffff", "//"..def.name))
+				minetest.colorize("#0ff", "//"..def.name))
 			if follow_alias then
 				msg = msg .. "\n" .. format_help_line(def.name, def)
 			end
@@ -255,7 +263,7 @@ local function help_command(name, param)
 			end
 		end
 		table.sort(list)
-		local help = minetest.colorize("#00ffff", "//help")
+		local help = minetest.colorize("#0ff", "//help")
 		return true, S("Available commands: @1@n"
 				.. "Use '@2' to get more information,"
 				.. " or '@3' to list everything.",

@@ -107,7 +107,13 @@ Display the volume of the current WorldEdit region.
 
 ### `//deleteblocks`
 
-Delete the MapBlocks (16x16x16 units) that contain the selected region. This means that mapgen will be invoked for that area. As only whole MapBlocks get removed, the deleted area is usually larger than the selected one. Also, mapgen can trigger mechanisms like mud reflow or cavegen, which affects nodes (up to 112 nodes away) outside the MapBlock, so dont use this near buildings. Note that active entities are not part of a MapBlock and do not get deleted.
+Delete the MapBlocks (16x16x16 units) that contain the selected region.
+
+This means that mapgen will run again for that area.
+As only whole MapBlocks get removed, the deleted area is usually larger than the selected one.
+Also, mapgen can trigger mechanisms like mud reflow or cavegen, which affects nodes (up to 112 nodes away) outside the MapBlock,
+so dont use this near buildings.
+Note that entities are not part of a MapBlock and will not get deleted (use `//clearobjects`).
 
     //deleteblocks
 
@@ -354,7 +360,9 @@ Removes any fluid node within the current WorldEdit region.
 ### `//clearcut`
 
 Removes any plant, tree or foilage-like nodes in the selected region.
+
 The idea is to remove anything that isn't part of the terrain, leaving a "natural" empty space ready for building.
+However note that this relies on heuristics.
 
     //clearcut
 
@@ -440,6 +448,7 @@ Valid values for `[rotation]` are 0, 90, 180 and 270.
 ### `//mtschemprob start/finish/get`
 
 After using `//mtschemprob start` all nodes punched will bring up a text field where a probablity can be entered.
+
 This mode can be left with `//mtschemprob finish`. `//mtschemprob get` will display the probabilities saved for the nodes.
 
     //mtschemprob get
@@ -492,6 +501,7 @@ or vertically in the y axis using `v`.
 Assigns the given `<command>` to the currently held brush item, it will be ran with the first pointed solid node (as determined via raycast) as
 WorldEdit position 1 when using that specific brush item.
 Passing `none` instead clears the command assigned to the currently held brush item.
+
 Note that this functionality requires the `worldedit_brush` mod enabled.
 
 		//brush cube 8 8 8 Cobblestone
@@ -502,6 +512,7 @@ Note that this functionality requires the `worldedit_brush` mod enabled.
 
 Selects a cube with side length of `<size>` around the WorldEdit position 1 and runs the given `<command>` on the newly selected region.
 If `<sizex>`, `<sizey>` and `<sizez>` are given, they instead specify the length of the cuboid in X, Y, Z direction.
+
 This is mostly useful for brushes since it allows commands such as `//replace` to be ran, but it can also be used standalone.
 
 		//cubeapply 10 replaceinverse air default:water_source

@@ -9,7 +9,7 @@ local brush_on_use = function(itemstack, placer)
 	if cmd == "" then
 		worldedit.player_notify(name,
 			S("This brush is not bound, use @1 to bind a command to it.",
-			minetest.colorize("#00ffff", "//brush")), "info")
+			minetest.colorize("#0ff", "//brush")), "info")
 		return false
 	end
 
@@ -100,7 +100,7 @@ worldedit.register_command("brush", {
 			local cmddef = worldedit.registered_commands[cmd]
 			if cmddef == nil or cmddef.require_pos ~= 1 then
 				return false, S("@1 cannot be used with brushes",
-					minetest.colorize("#00ffff", "//"..cmd))
+					minetest.colorize("#0ff", "//"..cmd))
 			end
 
 			-- Try parsing command params so we can give the user feedback
@@ -112,7 +112,7 @@ worldedit.register_command("brush", {
 
 			meta:set_string("command", cmd)
 			meta:set_string("params", params)
-			local fullcmd = minetest.colorize("#00ffff", "//"..cmd) .. " " .. params
+			local fullcmd = minetest.colorize("#0ff", "//"..cmd) .. " " .. params
 			meta:set_string("description",
 				minetest.registered_tools["worldedit:brush"].description .. ": " .. fullcmd)
 			worldedit.player_notify(name, S("Brush assigned to command: @1", fullcmd), "ok")

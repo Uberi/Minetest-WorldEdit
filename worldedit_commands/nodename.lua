@@ -1,6 +1,4 @@
--- Strips any kind of escape codes (translation, colors) from a string
--- https://github.com/minetest/minetest/blob/53dd7819277c53954d1298dfffa5287c306db8d0/src/util/string.cpp#L777
-local function strip_escapes(input)
+local strip_escapes = minetest.strip_escapes or function(input)
 	local s = function(idx) return input:sub(idx, idx) end
 	local out = ""
 	local i = 1
@@ -22,12 +20,14 @@ local function strip_escapes(input)
 		end
 		i = i + 1
 	end
-	--print(("%q -> %q"):format(input, out))
 	return out
 end
 
 local function string_endswith(full, part)
-	return full:find(part, 1, true) == #full - #part + 1
+	if #full < #part then
+		return false
+	end
+	return full:sub(-#part) == part
 end
 
 local description_cache = nil
@@ -35,7 +35,9 @@ local description_cache = nil
 -- normalizes node "description" `nodename`, returning a string (or nil)
 worldedit.normalize_nodename = function(nodename)
 	nodename = nodename:gsub("^%s*(.-)%s*$", "%1") -- strip spaces
-	if nodename == "" then return nil end
+	if nodename == "" then
+		return nil
+	end
 
 	local fullname = ItemStack({name=nodename}):get_name() -- resolve aliases
 	if minetest.registered_nodes[fullname] or fullname == "air" then -- full name
@@ -51,9 +53,12 @@ worldedit.normalize_nodename = function(nodename)
 
 	if description_cache == nil then
 		-- cache stripped descriptions
+		-- Note: since we don't handle translations this will work only in the original
+		-- language of the description (English)
 		description_cache = {}
-		for key, value in pairs(minetest.registered_nodes) do
-			local desc = strip_escapes(value.description):gsub("\n.*", "", 1):lower()
+		for key, def in pairs(minetest.registered_nodes) do
+			local desc = def.short_description or (def.description or ""):gsub("\n.*", "", 1)
+			desc = strip_escapes(desc):lower()
 			if desc ~= "" then
 				description_cache[key] = desc
 			end

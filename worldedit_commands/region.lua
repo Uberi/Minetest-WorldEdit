@@ -95,6 +95,7 @@ worldedit.register_command("unmark", {
 
 local function set_pos1(name, pos)
 	assert(pos)
+	pos = vector.round(pos)
 	worldedit.pos1[name] = pos
 	worldedit.mark_pos1(name)
 	worldedit.player_notify(name, S("position @1 set to @2", 1, minetest.pos_to_string(pos)), "ok")
@@ -102,6 +103,7 @@ end
 
 local function set_pos2(name, pos)
 	assert(pos)
+	pos = vector.round(pos)
 	worldedit.pos2[name] = pos
 	worldedit.mark_pos2(name)
 	worldedit.player_notify(name, S("position @1 set to @2", 2, minetest.pos_to_string(pos)), "ok")
@@ -115,7 +117,7 @@ worldedit.register_command("pos1", {
 	func = function(name)
 		local player = minetest.get_player_by_name(name)
 		if not player then return end
-		set_pos1(name, vector.round(player:get_pos()))
+		set_pos1(name, player:get_pos())
 	end,
 })
 
@@ -127,7 +129,7 @@ worldedit.register_command("pos2", {
 	func = function(name)
 		local player = minetest.get_player_by_name(name)
 		if not player then return end
-		set_pos2(name, vector.round(player:get_pos()))
+		set_pos2(name, player:get_pos())
 	end,
 })
 

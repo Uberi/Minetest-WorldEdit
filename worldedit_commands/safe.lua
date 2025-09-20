@@ -20,8 +20,8 @@ local function safe_region(name, count, callback)
 		count_str = minetest.colorize("#f33", count_str:sub(1, -7)) .. count_str:sub(-6, -1)
 	end
 
-	local yes_cmd = minetest.colorize("#00ffff", "//y")
-	local no_cmd = minetest.colorize("#00ffff", "//n")
+	local yes_cmd = minetest.colorize("#0ff", "//y")
+	local no_cmd = minetest.colorize("#0ff", "//n")
 	local msg = S("WARNING: this operation could affect up to @1 nodes; type @2 to continue or @3 to cancel",
 		count_str, yes_cmd, no_cmd)
 	worldedit.player_notify(name, msg, "info")
