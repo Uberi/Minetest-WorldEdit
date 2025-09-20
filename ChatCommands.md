@@ -99,6 +99,8 @@ Set the WorldEdit region position 1 or 2 to the position (`<x>`, `<y>`, `<z>`).
     //fixedpos set1 -30 5 28
     //fixedpos set2 1004 -200 432
 
+Note that the `~` syntax can be used here to indicate a coordinate relative to the player.
+
 ### `//volume`
 
 Display the volume of the current WorldEdit region.

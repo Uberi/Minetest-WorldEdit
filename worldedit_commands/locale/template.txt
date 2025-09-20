@@ -51,6 +51,7 @@ select position @1 by punching a node=
 position @1: @2=
 position @1 not set=
 Set a WorldEdit region position to the position at (<x>, <y>, <z>)=
+invalid position=
 Display the volume of the current WorldEdit region=
 current region has a volume of @1 nodes (@2*@3*@4)=
 Remove all MapBlocks (16x16x16) containing the selected area from the map=

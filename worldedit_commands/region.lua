@@ -180,13 +180,18 @@ worldedit.register_command("fixedpos", {
 	category = S("Region operations"),
 	privs = {worldedit=true},
 	parse = function(param)
-		local found, _, flag, x, y, z = param:find("^(set[12])%s+([+-]?%d+)%s+([+-]?%d+)%s+([+-]?%d+)$")
-		if found == nil then
+		local found, _, flag, x, y, z = param:find("^(set[12])%s+(~?[+-]?%d+)%s+(~?[+-]?%d+)%s+(~?[+-]?%d+)$")
+		if not found then
 			return false
 		end
-		return true, flag, vector.new(tonumber(x), tonumber(y), tonumber(z))
+		return true, flag, x, y, z
 	end,
-	func = function(name, flag, pos)
+	func = function(name, flag, x, y, z)
+		-- Parse here, since player name isn't known in parse()
+		local pos = worldedit.parse_coordinates(x, y, z, name)
+		if not pos then
+			return false, S("invalid position")
+		end
 		if flag == "set1" then
 			set_pos1(name, pos)
 		else --flag == "set2"

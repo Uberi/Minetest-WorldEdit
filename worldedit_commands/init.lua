@@ -199,6 +199,23 @@ function worldedit.player_axis(name)
 	return "z", dir.z > 0 and 1 or -1
 end
 
+-- Wrapper for the engine's parse_coordinates
+-- @return vector or nil
+-- @note Not part of API
+function worldedit.parse_coordinates(x, y, z, player_name)
+	local relpos
+	local player = minetest.get_player_by_name(player_name or "")
+	if player then
+		relpos = player:get_pos()
+	end
+	-- we don't bother to support ~ in the fallback path here
+	if not minetest.parse_coordinates then
+		x, y, z = tonumber(x), tonumber(y), tonumber(z)
+		return x and y and z and vector.new(x, y, z)
+	end
+	return minetest.parse_coordinates(x, y, z, relpos)
+end
+
 
 worldedit.register_command("about", {
 	privs = {},

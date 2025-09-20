@@ -62,6 +62,7 @@ select position @1 by punching a node=Wählen Sie Position @1 durch Hauen eines 
 position @1: @2=Position @1: @2
 position @1 not set=Position @1 ist nicht gesetzt
 Set a WorldEdit region position to the position at (<x>, <y>, <z>)=Eine Position des WorldEdit-Gebiets auf (<x>, <y>, <z>) setzen
+invalid position=Ungültige Position
 Display the volume of the current WorldEdit region=Volumen des aktuellen WorldEdit-Gebiets anzeigen
 current region has a volume of @1 nodes (@2*@3*@4)=Das aktuelle Gebiet hat ein Volumen von @1 Blöcken (@2×@3×@4)
 Remove all MapBlocks (16x16x16) containing the selected area from the map=Alle Kartenblöcke (16×16×16) entfernen, die das gewählte Gebiet enthalten
