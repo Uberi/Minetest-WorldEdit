@@ -2,6 +2,10 @@
 tempdir=$(mktemp -d)
 confpath=$tempdir/minetest.conf
 worldpath=$tempdir/world
+modlist=(
+	worldedit
+	worldedit_commands
+)
 trap 'rm -rf "$tempdir"' EXIT
 
 [ -f worldedit/mod.conf ] || { echo "Must be run in modpack root folder." >&2; exit 1; }
@@ -26,15 +30,19 @@ if [ -z "$mtserver" ]; then
 	vol=(
 		-v "$confpath":/etc/minetest/minetest.conf
 		-v "$tempdir":/var/lib/minetest/.minetest
-		-v "$PWD/worldedit":/var/lib/minetest/.minetest/world/worldmods/worldedit
 	)
+	for mod in "${modlist[@]}"; do
+		vol+=(-v "$PWD/$mod":/var/lib/minetest/.minetest/world/worldmods/$mod)
+	done
 	[ -d minetest_game ] && vol+=(
 		-v "$PWD/minetest_game":/var/lib/minetest/.minetest/games/minetest_game
 	)
 	docker run --rm -i "${vol[@]}" "$DOCKER_IMAGE"
 else
 	mkdir $worldpath/worldmods
-	ln -s "$PWD/worldedit" $worldpath/worldmods/worldedit
+	for mod in "${modlist[@]}"; do
+		ln -s "$PWD/$mod" $worldpath/worldmods/$mod
+	done
 	$mtserver --config "$confpath" --world "$worldpath" --logfile /dev/null
 fi
 

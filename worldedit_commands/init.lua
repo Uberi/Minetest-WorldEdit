@@ -152,6 +152,10 @@ do
 	}) do
 		dofile(modpath .. "/" .. name .. ".lua")
 	end
+
+	if worldedit.register_test then
+		dofile(modpath .. "/test/init.lua")
+	end
 end
 
 
@@ -344,4 +348,3 @@ worldedit.register_command("reset", {
 		return true, S("region reset")
 	end,
 })
-
