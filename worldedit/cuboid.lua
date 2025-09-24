@@ -1,3 +1,6 @@
+-- FIXME: worldedit.pos1/2 is a concept of worldedit_commands only, so these functions here
+-- are actually misplaced.
+
 -- Expands or contracts the cuboid in all axes by amount (positive or negative)
 worldedit.cuboid_volumetric_expand = function(name, amount)
 	local pos1 = worldedit.pos1[name]
@@ -185,62 +188,4 @@ worldedit.marker_get_closest_to_axis = function(name, axis, direction)
 	else
 		return nil
 	end
-end
-
-
--- Translates up, down, left, right, front, back to their corresponding axes and
--- directions according to faced direction
-worldedit.translate_direction = function(name, direction)
-	local axis, dir = worldedit.player_axis(name)
-	local resaxis, resdir
-
-	if direction == "up" then
-		return 'y', 1
-	end
-
-	if direction == "down" then
-		return 'y', -1
-	end
-
-	if direction == "front" then
-		if axis == "y" then
-			resaxis = nil
-			resdir = nil
-		else
-			resaxis = axis
-			resdir = dir
-		end
-	end
-
-	if direction == "back" then
-		if axis == "y" then
-			resaxis = nil
-			resdir = nil
-		else
-			resaxis = axis
-			resdir = -dir
-		end
-	end
-
-	if direction == "left" then
-		if axis == 'x' then
-			resaxis = 'z'
-			resdir = dir
-		elseif axis == 'z' then
-			resaxis = 'x'
-			resdir = -dir
-		end
-	end
-
-	if direction == "right" then
-		if axis == 'x' then
-			resaxis = 'z'
-			resdir = -dir
-		elseif axis == 'z' then
-			resaxis = 'x'
-			resdir = dir
-		end
-	end
-
-	return resaxis, resdir
 end

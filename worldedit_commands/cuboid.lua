@@ -1,5 +1,7 @@
 local S = minetest.get_translator("worldedit_commands")
 
+local VALID_DIR = worldedit.valid_directions
+
 worldedit.register_command("outset", {
 	params = "[h/v] <amount>",
 	description = S("Outset the selected region."),
@@ -7,7 +9,7 @@ worldedit.register_command("outset", {
 	privs = {worldedit=true},
 	require_pos = 2,
 	parse = function(param)
-		local find, _, dir, amount = param:find("(%a*)%s*([+-]?%d+)")
+		local find, _, dir, amount = param:find("^(%a*)%s+([+-]?%d+)$")
 		if find == nil then
 			return false
 		end
@@ -47,7 +49,7 @@ worldedit.register_command("inset", {
 	privs = {worldedit=true},
 	require_pos = 2,
 	parse = function(param)
-		local find, _, dir, amount = param:find("(%a*)%s*([+-]?%d+)")
+		local find, _, dir, amount = param:find("^(%a*)%s+([+-]?%d+)$")
 		if find == nil then
 			return false
 		end
@@ -79,29 +81,21 @@ worldedit.register_command("inset", {
 
 
 worldedit.register_command("shift", {
-	params = "x/y/z/?/up/down/left/right/front/back [+/-]<amount>",
+	params = tostring(VALID_DIR) .. " [+/-]<amount>",
 	description = S("Shifts the selection area without moving its contents"),
 	category = S("Region operations"),
 	privs = {worldedit=true},
 	require_pos = 2,
 	parse = function(param)
-		local find, _, direction, amount = param:find("([%?%l]+)%s*([+-]?%d+)")
-		if find == nil then
+		local find, _, direction, amount = param:find("^([^%s]+)%s+([+-]?%d+)$")
+		if find == nil or not VALID_DIR[direction] then
 			return false
 		end
 
 		return true, direction, tonumber(amount)
 	end,
 	func = function(name, direction, amount)
-		local axis, dir
-		if direction == "x" or direction == "y" or direction == "z" then
-			axis, dir = direction, 1
-		elseif direction == "?" then
-			axis, dir = worldedit.player_axis(name)
-		else
-			axis, dir = worldedit.translate_direction(name, direction)
-		end
-
+		local axis, dir = worldedit.player_direction(name, direction)
 		if axis == nil or dir == nil then
 			return false, S("Invalid if looking straight up or down")
 		end
@@ -115,15 +109,15 @@ worldedit.register_command("shift", {
 
 
 worldedit.register_command("expand", {
-	params = "[+/-]x/y/z/?/up/down/left/right/front/back <amount> [reverse amount]",
+	params = "[+/-]" .. tostring(VALID_DIR) .. " <amount> [reverse amount]",
 	description = S("Expands the selection in the selected absolute or relative axis"),
 	category = S("Region operations"),
 	privs = {worldedit=true},
 	require_pos = 2,
 	parse = function(param)
 		local find, _, sign, direction, amount,
-				rev_amount = param:find("([+-]?)([%?%l]+)%s*(%d+)%s*(%d*)")
-		if find == nil then
+				rev_amount = param:find("^([+-]?)([^%s]+)%s+(%d+)%s*(%d*)$")
+		if find == nil or not VALID_DIR[direction] then
 			return false
 		end
 
@@ -134,24 +128,10 @@ worldedit.register_command("expand", {
 		return true, sign, direction, tonumber(amount), tonumber(rev_amount)
 	end,
 	func = function(name, sign, direction, amount, rev_amount)
-		local absolute = direction:find("[xyz?]")
-		local dir, axis
-
-		if absolute == nil then
-			axis, dir = worldedit.translate_direction(name, direction)
-
-			if axis == nil or dir == nil then
-				return false, S("Invalid if looking straight up or down")
-			end
-		else
-			if direction == "?" then
-				axis, dir = worldedit.player_axis(name)
-			else
-				axis = direction
-				dir = 1
-			end
+		local axis, dir = worldedit.player_direction(name, direction)
+		if axis == nil or dir == nil then
+			return false, S("Invalid if looking straight up or down")
 		end
-
 		if sign == "-" then
 			dir = -dir
 		end
@@ -165,15 +145,15 @@ worldedit.register_command("expand", {
 
 
 worldedit.register_command("contract", {
-	params = "[+/-]x/y/z/?/up/down/left/right/front/back <amount> [reverse amount]",
+	params = "[+/-]" .. tostring(VALID_DIR) .. " [reverse amount]",
 	description = S("Contracts the selection in the selected absolute or relative axis"),
 	category = S("Region operations"),
 	privs = {worldedit=true},
 	require_pos = 2,
 	parse = function(param)
 		local find, _, sign, direction, amount,
-				rev_amount = param:find("([+-]?)([%?%l]+)%s*(%d+)%s*(%d*)")
-		if find == nil then
+				rev_amount = param:find("^([+-]?)([^%s]+)%s+(%d+)%s*(%d*)$")
+		if find == nil or not VALID_DIR[direction] then
 			return false
 		end
 
@@ -184,24 +164,10 @@ worldedit.register_command("contract", {
 		return true, sign, direction, tonumber(amount), tonumber(rev_amount)
 	end,
 	func = function(name, sign, direction, amount, rev_amount)
-		local absolute = direction:find("[xyz?]")
-		local dir, axis
-
-		if absolute == nil then
-			axis, dir = worldedit.translate_direction(name, direction)
-
-			if axis == nil or dir == nil then
-				return false, S("Invalid if looking straight up or down")
-			end
-		else
-			if direction == "?" then
-				axis, dir = worldedit.player_axis(name)
-			else
-				axis = direction
-				dir = 1
-			end
+		local axis, dir = worldedit.player_direction(name, direction)
+		if axis == nil or dir == nil then
+			return false, S("Invalid if looking straight up or down")
 		end
-
 		if sign == "-" then
 			dir = -dir
 		end

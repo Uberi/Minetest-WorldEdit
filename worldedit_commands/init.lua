@@ -143,22 +143,6 @@ function worldedit.register_command(name, def)
 	worldedit.registered_commands[name] = def
 end
 
-
-do
-	local modpath = minetest.get_modpath("worldedit_commands")
-	for _, name in ipairs({
-		"code", "cuboid", "manipulations", "marker", "nodename", "primitives",
-		"region", "schematics", "transform", "wand"
-	}) do
-		dofile(modpath .. "/" .. name .. ".lua")
-	end
-
-	if worldedit.register_test then
-		dofile(modpath .. "/test/init.lua")
-	end
-end
-
-
 -- Notifies a player of something related to WorldEdit.
 -- Message types:
 -- "error" = An operation did not work as expected.
@@ -203,7 +187,63 @@ function worldedit.player_axis(name)
 	return "z", dir.z > 0 and 1 or -1
 end
 
--- Wrapper for the engine's parse_coordinates
+-- Look-up table of valid directions (for worldedit.player_direction)
+-- Can be stringified for usage in help texts
+-- @note Not part of API
+worldedit.valid_directions = setmetatable({
+	x = true, y = true, z = true,
+	["?"] = true,
+	up = true, down = true,
+	front = true, back = true,
+	left = true, right = true,
+}, {
+	__tostring = function()
+		return "x/y/z/?/up/down/left/right/front/back"
+	end
+})
+
+-- Accepts a valid directions as above
+-- @return axis ("x", "y", or "z") and the sign (1 or -1) *or* nil for invalid combinations
+-- @note Not part of API
+worldedit.player_direction = function(name, str)
+	if str == "x" or str == "y" or str == "z" then
+		return str, 1
+	elseif str == "up" then
+		return "y", 1
+	elseif str == "down" then
+		return "y", -1
+	end
+
+	local axis, dir = worldedit.player_axis(name)
+
+	if str == "?" then
+		return axis, dir
+	elseif str == "front" then
+		if axis ~= "y" then
+			return axis, dir
+		end
+	elseif str == "back" then
+		if axis ~= "y" then
+			return axis, -dir
+		end
+	elseif str == "left" then
+		if axis == "x" then
+			return "z", dir
+		elseif axis == "z" then
+			return "x", -dir
+		end
+	elseif str == "right" then
+		if axis == "x" then
+			return "z", -dir
+		elseif axis == "z" then
+			return "x", dir
+		end
+	end
+
+	return nil, nil
+end
+
+-- Wrapper for the engine"s parse_coordinates
 -- @return vector or nil
 -- @note Not part of API
 function worldedit.parse_coordinates(x, y, z, player_name)
@@ -348,3 +388,18 @@ worldedit.register_command("reset", {
 		return true, S("region reset")
 	end,
 })
+
+-- Load the other parts
+do
+	local modpath = minetest.get_modpath("worldedit_commands")
+	for _, name in ipairs({
+		"code", "cuboid", "manipulations", "marker", "nodename", "primitives",
+		"region", "schematics", "transform", "wand"
+	}) do
+		dofile(modpath .. "/" .. name .. ".lua")
+	end
+
+	if worldedit.register_test then
+		dofile(modpath .. "/test/init.lua")
+	end
+end

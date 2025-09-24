@@ -63,6 +63,31 @@ register_test("//inset", make_parsing_test("inset", {
 	"v foo",
 }))
 
+register_test("//shift", make_parsing_test("shift", {
+	"x 1",
+	"x -4",
+	"back 1",
+	"? 1",
+}, {
+	"+z 1212",
+	"-z 9",
+	"xx -5",
+	"?? 123",
+}))
+
+register_test("//expand", make_parsing_test("expand", {
+	"x 1",
+	"z 1 2",
+	"? 1",
+	"+? 1",
+	"+left 1",
+	"-right 1",
+}, {
+	"x -4",
+	"? 4 -333",
+	"stupid 5 5",
+}))
+
 register_test("//cubeapply", make_parsing_test("cubeapply", {
 	"2 orient 90",
 	"2 3 4 orient 90",
