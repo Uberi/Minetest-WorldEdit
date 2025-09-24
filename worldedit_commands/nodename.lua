@@ -34,7 +34,7 @@ local description_cache = nil
 
 -- normalizes node "description" `nodename`, returning a string (or nil)
 worldedit.normalize_nodename = function(nodename)
-	nodename = nodename:gsub("^%s*(.-)%s*$", "%1") -- strip spaces
+	nodename = nodename:trim()
 	if nodename == "" then
 		return nil
 	end

@@ -51,6 +51,7 @@ local function chatcommand_handler(cmd_name, name, param)
 		end
 	end
 
+	param = param:trim()
 	local parsed = {def.parse(param)}
 	local success = table.remove(parsed, 1)
 	if not success then
@@ -116,8 +117,9 @@ function worldedit.register_command(name, def)
 	def.require_pos = def.require_pos or 0
 	assert(def.require_pos >= 0 and def.require_pos < 3)
 	if def.params == "" and not def.parse then
-		-- FIXME: shouldn't this check for param to be empty?
-		def.parse = function(param) return true end
+		def.parse = function(param)
+			return param == ""
+		end
 	else
 		assert(def.parse)
 	end
