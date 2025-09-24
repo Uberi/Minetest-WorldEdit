@@ -395,8 +395,8 @@ worldedit.register_command("reset", {
 do
 	local modpath = minetest.get_modpath("worldedit_commands")
 	for _, name in ipairs({
-		"code", "cuboid", "manipulations", "marker", "nodename", "primitives",
-		"region", "schematics", "transform", "wand"
+		"code", "cuboid_funcs", "cuboid", "manipulations", "marker", "nodename",
+		"primitives", "region", "schematics", "transform", "wand"
 	}) do
 		dofile(modpath .. "/" .. name .. ".lua")
 	end
