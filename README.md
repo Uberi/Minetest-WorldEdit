@@ -1,30 +1,32 @@
 WorldEdit v1.3
 ==============
-The ultimate in-game world editing tool for [Minetest](http://minetest.net/)! Tons of functionality to help with building, fixing, and more.
+The ultimate in-game world editing tool for [Luanti](https://www.luanti.org/)! Tons of functionality to help with building, fixing, and more.
 
-For more information, see the [forum topic](https://forum.minetest.net/viewtopic.php?t=572) at the Minetest forums.
+For more information, see the [forum topic](https://forum.luanti.org/viewtopic.php?t=572) at the Luanti forums.
 
-# New users should see the [tutorial](Tutorial.md).
+**New users should see the [tutorial](Tutorial.md).**
 
-![Screenshot](http://i.imgur.com/lwhodrv.png)
+![Screenshot](https://i.imgur.com/lwhodrv.png)
 
 Installing
 ----------
+[![ContentDB](https://content.luanti.org/packages/sfan5/worldedit/shields/downloads/)](https://content.luanti.org/packages/sfan5/worldedit/)
 
-There is a nice installation guide over at the [Minetest Wiki](http://wiki.minetest.com/wiki/Installing_mods). Here is a short summary:
+Head over to ContentDB **⇈** to install it directly.
 
-1. Download the mod from the [official releases page](https://github.com/Uberi/Minetest-WorldEdit/releases). The download links are labelled "Source Code". If you are using Windows, you'll want to download the ZIP version.
-2. You should have a file named `Minetest-WorldEdit-x.x.zip`.
-3. Extract this file using your archiver of choice. If you are using Windows, open the ZIP file and move the folder inside to a safe place outside of the ZIP file.
-4. Make sure that you now have a folder with a file named README.md inside it. If you just have another folder inside this folder, use the nested folder instead.
-5. Move this folder into the `MINETEST_FOLDER/mods` folder, where `MINETEST_FOLDER` is the folder Minetest is located in.
-6. Open Minetest to a world selection screen.
-7. Select a world you want to use WorldEdit in by left clicking on it once and press the **Configure** button.
-8. You should have a mod selection screen. Select the one named something like `Minetest-WorldEdit` by left clicking once and press the **Enable Modpack** button.
-9. Press the **Save** button. You can now use WorldEdit in that world. Repeat steps 7 to 9 to enable WorldEdit for other worlds too.
+Otherwise, you may install it manually:
 
-If you are having trouble, try asking for help in the [IRC channel](https://web.libera.chat/#minetest) (faster but may not always have helpers online)
-or ask on the [forum topic](https://forum.minetest.net/viewtopic.php?id=572) (slower but more likely to get help).
+1. Download the ZIP file from the [here](https://github.com/Uberi/Minetest-WorldEdit/archive/refs/heads/master.zip) (rolling release version)
+2. You should have a file named `Minetest-WorldEdit-xxxx.zip`.
+3. Extract this file. If you are using Windows, open the ZIP file and move the folder inside to a safe place outside of the ZIP file.
+4. Make sure that you now have a folder with a file called "README.md" inside it. If you just have another folder inside this folder, use the nested folder instead.
+5. Move this folder into the `mods` folder of your Luanti installation.
+6. Open Luanti to a world selection screen.
+7. Select a world you want to use WorldEdit in by left clicking on it once and press the *Configure* button.
+8. You should have a mod selection screen. Double-click on the entry named something like `Minetest-WorldEdit`, which will enable it.
+9. Press the *Save* button. You can now use WorldEdit in that world. Repeat steps 7 to 9 to enable WorldEdit for other worlds too.
+
+If you prefer to have a "stable" release, take a look at the [releases page](https://github.com/Uberi/Minetest-WorldEdit/releases).
 
 Usage
 -----
@@ -50,7 +52,8 @@ The chat interface adds many chat commands that perform various WorldEdit powere
 
 Compatibility
 -------------
-This mod supports Minetest versions 5.0 and newer. Older versions of WorldEdit may work with older versions of Minetest, but are not recommended or supported.
+This mod supports Luanti (or Minetest) versions 5.0 and newer.
+Older versions of WorldEdit are not recommended or supported, and may be **insecure**.
 
 WorldEdit works quite well with other mods and does not have any known mod conflicts.
 
@@ -58,7 +61,8 @@ WorldEdit GUI requires one of [sfinv](https://github.com/minetest/minetest_game/
 [Unified Inventory](https://forum.minetest.net/viewtopic.php?t=12767),
 [Inventory++](https://forum.minetest.net/viewtopic.php?id=6204) or [Smart Inventory](https://forum.minetest.net/viewtopic.php?t=16597).
 
-If you use any other inventory manager mods, note that they may conflict with the WorldEdit GUI. If this is the case, it may be necessary to disable them.
+If you use any other inventory manager mods, note that they may conflict with the WorldEdit GUI.
+If this is the case, it may be necessary to disable them.
 
 WorldEdit API
 -------------
@@ -72,7 +76,7 @@ This API is documented in the [WorldEdit API Reference](WorldEdit%20API.md).
 
 Axes
 ----
-The coordinate system is the same as that used by Minetest; positive Y is upwards, positive X is rightwards, and positive Z is forwards, if a player is facing North (positive Z axis).
+The coordinate system is the same as that used by Luanti; positive Y is upwards, positive X is rightwards, and positive Z is forwards, if a player is facing North (positive Z axis).
 
 When an axis is specified in a WorldEdit chat command, it is specified as one of the following values: `x`, `y`, `z`, or `?`.
 
@@ -140,7 +144,7 @@ The ordering of the values and minor aspects of the syntax, such as trailing com
 
 The WorldEdit Schematic format is accessed via the WorldEdit API, or WorldEdit serialization chat commands such as `//serialize` and `//deserialize`.
 
-The second is the Minetest Schematic format (MTS). The details of this format may be found in the Minetest documentation and are out of the scope of this document.
+The second is the *Minetest Schematic format (MTS)*. The details of this format may be found in the Luanti documentation and are out of the scope of this document.
 Access to this format is done via specialized MTS commands such as `//mtschemcreate` and `//mtschemplace`.
 
 Authors
