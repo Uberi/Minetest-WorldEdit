@@ -1,32 +1,38 @@
 local S = minetest.get_translator("worldedit_commands")
 
+local VALID_DIR = worldedit.valid_directions
+
 local function check_region(name)
 	return worldedit.volume(worldedit.pos1[name], worldedit.pos2[name])
 end
 
+local function parse_copylike(param)
+	local found, _, direction, amount = param:find("^([^%s]+)%s+([+-]?%d+)$")
+	if found == nil or not VALID_DIR[direction] then
+		return false
+	end
+	if tonumber(amount) == 0 then
+		return false
+	end
+	return true, direction, tonumber(amount)
+end
 
 worldedit.register_command("copy", {
-	params = "x/y/z/? <amount>",
+	params = tostring(VALID_DIR) .. " <amount>",
 	description = S("Copy the current WorldEdit region along the given axis by <amount> nodes"),
 	category = S("Transformations"),
 	privs = {worldedit=true},
 	require_pos = 2,
-	parse = function(param)
-		local found, _, axis, amount = param:find("^([xyz%?])%s+([+-]?%d+)$")
-		if found == nil then
-			return false
-		end
-		return true, axis, tonumber(amount)
-	end,
-	nodes_needed = function(name, axis, amount)
+	parse = parse_copylike,
+	nodes_needed = function(name, direction, amount)
 		return check_region(name) * 2
 	end,
-	func = function(name, axis, amount)
-		if axis == "?" then
-			local sign
-			axis, sign = worldedit.player_axis(name)
-			amount = amount * sign
+	func = function(name, direction, amount)
+		local axis, sign = worldedit.player_direction(name, direction)
+		if not axis or not sign then
+			return false, S("Invalid if looking straight up or down")
 		end
+		amount = amount * sign
 
 		local count = worldedit.copy(worldedit.pos1[name], worldedit.pos2[name], axis, amount)
 		return true, S("@1 nodes copied", count)
@@ -34,27 +40,21 @@ worldedit.register_command("copy", {
 })
 
 worldedit.register_command("move", {
-	params = "x/y/z/? <amount>",
+	params = tostring(VALID_DIR) .. " <amount>",
 	description = S("Move the current WorldEdit region along the given axis by <amount> nodes"),
 	category = S("Transformations"),
 	privs = {worldedit=true},
 	require_pos = 2,
-	parse = function(param)
-		local found, _, axis, amount = param:find("^([xyz%?])%s+([+-]?%d+)$")
-		if found == nil then
-			return false
-		end
-		return true, axis, tonumber(amount)
-	end,
-	nodes_needed = function(name, axis, amount)
+	parse = parse_copylike,
+	nodes_needed = function(name, direction, amount)
 		return check_region(name) * 2
 	end,
-	func = function(name, axis, amount)
-		if axis == "?" then
-			local sign
-			axis, sign = worldedit.player_axis(name)
-			amount = amount * sign
+	func = function(name, direction, amount)
+		local axis, sign = worldedit.player_direction(name, direction)
+		if not axis or not sign then
+			return false, S("Invalid if looking straight up or down")
 		end
+		amount = amount * sign
 
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
 		local count = worldedit.move(pos1, pos2, axis, amount)
@@ -67,27 +67,21 @@ worldedit.register_command("move", {
 })
 
 worldedit.register_command("stack", {
-	params = "x/y/z/? <count>",
+	params = tostring(VALID_DIR) .. " <count>",
 	description = S("Stack the current WorldEdit region along the given axis <count> times"),
 	category = S("Transformations"),
 	privs = {worldedit=true},
 	require_pos = 2,
-	parse = function(param)
-		local found, _, axis, repetitions = param:find("^([xyz%?])%s+([+-]?%d+)$")
-		if found == nil then
-			return false
-		end
-		return true, axis, tonumber(repetitions)
-	end,
-	nodes_needed = function(name, axis, repetitions)
+	parse = parse_copylike,
+	nodes_needed = function(name, direction, repetitions)
 		return check_region(name) * math.abs(repetitions)
 	end,
-	func = function(name, axis, repetitions)
-		if axis == "?" then
-			local sign
-			axis, sign = worldedit.player_axis(name)
-			repetitions = repetitions * sign
+	func = function(name, direction, repetitions)
+		local axis, sign = worldedit.player_direction(name, direction)
+		if not axis or not sign then
+			return false, S("Invalid if looking straight up or down")
 		end
+		repetitions = repetitions * sign
 
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
 		local count = worldedit.volume(pos1, pos2) * math.abs(repetitions)
@@ -149,9 +143,10 @@ worldedit.register_command("stretch", {
 	end,
 	func = function(name, stretchx, stretchy, stretchz)
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
-		local count, pos1, pos2 = worldedit.stretch(pos1, pos2, stretchx, stretchy, stretchz)
+		local count
+		count, pos1, pos2 = worldedit.stretch(pos1, pos2, stretchx, stretchy, stretchz)
 
-		--reset markers to scaled positions
+		-- reset markers to scaled positions
 		worldedit.pos1[name] = pos1
 		worldedit.pos2[name] = pos2
 		worldedit.marker_update(name)
@@ -180,9 +175,10 @@ worldedit.register_command("transpose", {
 		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
 		if axis1 == "?" then axis1 = worldedit.player_axis(name) end
 		if axis2 == "?" then axis2 = worldedit.player_axis(name) end
-		local count, pos1, pos2 = worldedit.transpose(pos1, pos2, axis1, axis2)
+		local count
+		count, pos1, pos2 = worldedit.transpose(pos1, pos2, axis1, axis2)
 
-		--reset markers to transposed positions
+		-- reset markers to transposed positions
 		worldedit.pos1[name] = pos1
 		worldedit.pos2[name] = pos2
 		worldedit.marker_update(name)
@@ -192,49 +188,58 @@ worldedit.register_command("transpose", {
 })
 
 worldedit.register_command("flip", {
-	params = "x/y/z/?",
+	params = tostring(VALID_DIR),
 	description = S("Flip the current WorldEdit region along the given axis"),
 	category = S("Transformations"),
 	privs = {worldedit=true},
 	require_pos = 2,
 	parse = function(param)
-		if param ~= "x" and param ~= "y" and param ~= "z" and param ~= "?" then
+		if not VALID_DIR[param] then
 			return false
 		end
 		return true, param
 	end,
 	nodes_needed = check_region,
 	func = function(name, param)
-		if param == "?" then param = worldedit.player_axis(name) end
-		local count = worldedit.flip(worldedit.pos1[name], worldedit.pos2[name], param)
+		local axis = worldedit.player_direction(name, param)
+		if axis == nil then
+			return false, S("Invalid if looking straight up or down")
+		end
+
+		local count = worldedit.flip(worldedit.pos1[name], worldedit.pos2[name], axis)
 		return true, S("@1 nodes flipped", count)
 	end,
 })
 
 worldedit.register_command("rotate", {
-	params = "x/y/z/? <angle>",
+	params = tostring(VALID_DIR) .. " <angle>",
 	description = S("Rotate the current WorldEdit region around the given axis by angle <angle> (90 degree increment)"),
 	category = S("Transformations"),
 	privs = {worldedit=true},
 	require_pos = 2,
 	parse = function(param)
-		local found, _, axis, angle = param:find("^([xyz%?])%s+([+-]?%d+)$")
-		if found == nil then
+		local found, _, direction, angle = param:find("^([^%s]+)%s+([+-]?%d+)$")
+		if found == nil or not VALID_DIR[direction] then
 			return false
 		end
 		angle = tonumber(angle)
 		if angle % 90 ~= 0 or angle % 360 == 0 then
 			return false, S("invalid usage: angle must be multiple of 90")
 		end
-		return true, axis, angle
+		return true, direction, angle
 	end,
 	nodes_needed = check_region,
-	func = function(name, axis, angle)
-		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
-		if axis == "?" then axis = worldedit.player_axis(name) end
-		local count, pos1, pos2 = worldedit.rotate(pos1, pos2, axis, angle)
+	func = function(name, direction, angle)
+		local axis = worldedit.player_direction(name, direction)
+		if axis == nil then
+			return false, S("Invalid if looking straight up or down")
+		end
 
-		--reset markers to rotated positions
+		local pos1, pos2 = worldedit.pos1[name], worldedit.pos2[name]
+		local count
+		count, pos1, pos2 = worldedit.rotate(pos1, pos2, axis, angle)
+
+		-- reset markers to rotated positions
 		worldedit.pos1[name] = pos1
 		worldedit.pos2[name] = pos2
 		worldedit.marker_update(name)

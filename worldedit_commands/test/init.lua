@@ -52,6 +52,35 @@ register_test("//fixedpos", make_parsing_test("fixedpos", {
 	"",
 }))
 
+register_test("//copy", make_parsing_test("copy", {
+	"x 10",
+	"right +1",
+	"? -4",
+}, {
+	"eee 1",
+	"up 0",
+	"",
+}))
+
+register_test("//rotate", make_parsing_test("rotate", {
+	"z 90",
+	"left -180",
+}, {
+	"x 0",
+	"back 77",
+	"",
+}))
+
+register_test("//flip", make_parsing_test("flip", {
+	"y",
+	"down",
+	"?",
+}, {
+	"1",
+	"",
+}))
+
+
 register_test("//inset", make_parsing_test("inset", {
 	"h 1",
 	"v 0",
@@ -61,6 +90,7 @@ register_test("//inset", make_parsing_test("inset", {
 	"x 4",
 	"xyz 5",
 	"v foo",
+	"",
 }))
 
 register_test("//shift", make_parsing_test("shift", {
@@ -73,6 +103,7 @@ register_test("//shift", make_parsing_test("shift", {
 	"-z 9",
 	"xx -5",
 	"?? 123",
+	"",
 }))
 
 register_test("//expand", make_parsing_test("expand", {
@@ -86,6 +117,7 @@ register_test("//expand", make_parsing_test("expand", {
 	"x -4",
 	"? 4 -333",
 	"stupid 5 5",
+	"",
 }))
 
 register_test("//cubeapply", make_parsing_test("cubeapply", {

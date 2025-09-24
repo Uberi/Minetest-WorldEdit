@@ -270,7 +270,7 @@ height `<height>`, space between walls `<spacer>`, composed of `<node>`.
     //spiral 5 2 1 glass
     //spiral 7 1 5 mesecons:wire_00000000_off
 
-### `//copy x/y/z/? <amount>`
+### `//copy x/y/z/?/up/down/left/right/front/back <amount>`
 
 Copy the current WorldEdit region along the given axis by `<amount>` nodes.
 
@@ -279,7 +279,7 @@ Copy the current WorldEdit region along the given axis by `<amount>` nodes.
     //copy z +4
     //copy ? 8
 
-### `//move x/y/z/? <amount>`
+### `//move x/y/z/?/up/down/left/right/front/back <amount>`
 
 Move the current WorldEdit positions and region along the given axis by `<amount>` nodes.
 
@@ -288,7 +288,7 @@ Move the current WorldEdit positions and region along the given axis by `<amount
     //move z +4
     //move ? -1
 
-### `//stack x/y/z/? <count>`
+### `//stack x/y/z/?/up/down/left/right/front/back <count>`
 
 Stack the current WorldEdit region along the given axis `<count>` times.
 
@@ -322,14 +322,14 @@ Transpose the current WorldEdit positions and region along given axes.
     //transpose y z
     //transpose ? y
 
-### `//flip x/y/z/?`
+### `//flip x/y/z/?/up/down/left/right/front/back`
 
 Flip the current WorldEdit region along the given axis.
 
     //flip x
     //flip ?
 
-### `//rotate x/y/z/? <angle>`
+### `//rotate x/y/z/?/up/down/left/right/front/back <angle>`
 
 Rotate the current WorldEdit positions and region along the given axis by angle `<angle>` (90 degree increment).
 
