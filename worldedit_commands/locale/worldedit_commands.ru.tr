@@ -152,4 +152,5 @@ invalid usage: @1 cannot be used with cubeapply=недопустимое исп�
 Missing privileges: @1=Отсутствуют привилегии: @1
 
 ### wand.lua ###
-WorldEdit Wand tool@nLeft-click to set 1st position, right-click to set 2nd=Инструмент WorldEdit Wand@nЛевая кнопка мыши, чтобы установить 1-ю позицию, правая кнопка мыши, чтобы установить 2-ю
+WorldEdit Wand tool=Инструмент WorldEdit Wand
+Left-click to set 1st position, right-click to set 2nd=Левая кнопка мыши, чтобы установить 1-ю позицию, правая кнопка мыши, чтобы установить 2-ю

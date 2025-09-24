@@ -151,4 +151,5 @@ WARNING: this operation could affect up to @1 nodes; type @2 to continue or @3 t
 Confirm a pending operation=
 no operation pending=
 Abort a pending operation=
-WorldEdit Wand tool@nLeft-click to set 1st position, right-click to set 2nd=
+WorldEdit Wand tool=
+Left-click to set 1st position, right-click to set 2nd=

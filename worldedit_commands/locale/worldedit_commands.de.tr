@@ -162,4 +162,5 @@ WARNING: this operation could affect up to @1 nodes; type @2 to continue or @3 t
 Confirm a pending operation=Einen ausstehenden Vorgang bestätigen
 no operation pending=Kein Vorgang ausstehend
 Abort a pending operation=Einen ausstehenden Vorgang abbrechen
-WorldEdit Wand tool@nLeft-click to set 1st position, right-click to set 2nd=WorldEdit-Zauberstab@nSetzen der 1. Position mit Linksklick, der 2. mit Rechtsklick
+WorldEdit Wand tool=WorldEdit-Zauberstab
+Left-click to set 1st position, right-click to set 2nd=Setzen der 1. Position mit Linksklick, der 2. mit Rechtsklick

@@ -11,7 +11,7 @@ end
 local punched_air_time = {}
 
 minetest.register_tool(":worldedit:wand", {
-	description = S("WorldEdit Wand tool\nLeft-click to set 1st position, right-click to set 2nd"),
+	description = S("WorldEdit Wand tool") .. "\n" .. S("Left-click to set 1st position, right-click to set 2nd"),
 	inventory_image = "worldedit_wand.png",
 	stack_max = 1, -- there is no need to have more than one
 	liquids_pointable = true, -- ground with only water on can be selected as well
