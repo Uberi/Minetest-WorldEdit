@@ -114,42 +114,153 @@ function worldedit.serialize(pos1, pos2)
 	return LATEST_SERIALIZATION_HEADER .. result, count
 end
 
-local function deserialize_workaround(content)
-	local nodes, err
-	if not minetest.global_exists("jit") then
-		nodes, err = minetest.deserialize(content, true)
-	elseif not content:match("^%s*return%s*{") then
-		-- The data doesn't look like we expect it to so we can't apply the workaround.
-		-- hope for the best
-		minetest.log("warning", "WorldEdit: deserializing data but can't apply LuaJIT workaround")
-		nodes, err = minetest.deserialize(content, true)
+
+-- Replace content strings while preserving their length
+local function replace_content_strings(content)
+	local escaped = content:gsub("\\\\", "@@"):gsub("\\\"", "@@"):gsub("(\"[^\"]*\")", function(s) return string.rep("@", #s) end)
+	assert(#content == #escaped)
+	return escaped
+end
+
+
+local function table_body_hack(escaped, content, startpos, node_parser)
+	-- XXX: This is a filthy hack that works surprisingly well [until it does not]
+	-- in LuaJIT, `minetest.deserialize` will fail due to the register limit
+	local nodes = {}
+
+	local startpos, startpos1 = startpos, startpos
+	local endpos
+	while true do -- go through each individual node entry (except the last)
+		startpos, endpos = escaped:find("}%s*,%s*{", startpos)
+		if not startpos then
+			break
+		end
+		local current = content:sub(startpos1, startpos)
+		local entry, err = node_parser("return " .. current)
+		if err then
+			return nil, err
+		end
+		if not entry then
+			break
+		end
+		table.insert(nodes, entry)
+		startpos, startpos1 = endpos, endpos
+	end
+
+	startpos = escaped:find("}%s*$", startpos)
+	if not startpos then
+		return nil, "Expected closing } and <eof>"
+	end
+	local final = content:sub(startpos1, startpos - 1) -- cut off the final closing "}"
+	local entry, err = node_parser("return " .. final) -- process the last entry
+	if err then
+		return nil, string.format("final: %s", err)
+	end
+	table.insert(nodes, entry)
+
+	return nodes, err
+end
+
+
+-- Try to parse the `local _ = {}; _[1] = ...` header, saving values
+-- into a table and returning it.
+local function header_hack(escaped, content)
+	-- NOTE: here we assume that the header does not contain the word
+	-- "return" in variables or as code. Since strings are
+	-- escaped, we don't care about them.
+
+	-- NOTE: empty capture () captures the current string position (a number)
+	local end_header, start_table_body = escaped:match("^.-()return%s*{()")
+	if not end_header then
+		return nil, "Could not find header and table body"
+	end
+
+	local header = content:sub(1, end_header-1)
+
+	-- not sure schematics can contain these, but this env is
+	-- here for compatibility with current core.serialize()
+	local env = {inf = math.huge, nan = 0/0}
+
+	if type(header) == "string" then
+		-- make local a "global", so it's saved in the environment
+		local str_local = "local "
+		if header:sub(1, #str_local) ~= str_local then
+			return nil, "Expected header starting with `local `"
+		end
+		header = header:sub(#str_local+1)
+
+		local header_func, err1 = loadstring(header, "@header")
+		if not header_func then
+			return nil, err1
+		end
+		setfenv(header_func, env)
+		local ok, err2 = pcall(header_func)
+		if not ok then
+			return nil, err2
+		end
 	else
-		-- XXX: This is a filthy hack that works surprisingly well
-		-- in LuaJIT, `minetest.deserialize` will fail due to the register limit
-		nodes = {}
-		content = content:gsub("^%s*return%s*{", "", 1):gsub("}%s*$", "", 1) -- remove the starting and ending values to leave only the node data
-		-- remove string contents strings while preserving their length
-		local escaped = content:gsub("\\\\", "@@"):gsub("\\\"", "@@"):gsub("(\"[^\"]*\")", function(s) return string.rep("@", #s) end)
-		local startpos, startpos1 = 1, 1
-		local endpos
-		local entry
-		while true do -- go through each individual node entry (except the last)
-			startpos, endpos = escaped:find("}%s*,%s*{", startpos)
-			if not startpos then
-				break
+		return nil, "Malformed content?"
+	end
+
+	return env, start_table_body
+end
+
+local core_deserialize = minetest.deserialize
+local function wrap_deserialize(code)
+	-- safe=true will strip any functions
+	return core_deserialize(code, true)
+end
+
+-- Try different loading methods depending on interpreter/file format
+local function deserialize_with_workaround(content)
+	local nodes, err
+	if minetest.global_exists("jit") then
+		-- NOTE: We need this workaround specificially on LuaJIT because
+		-- it has a limit of 65535 constants per function body.
+		if content:match("^%s*return%s*{") then
+			-- file created with old style serialize
+
+			local escaped = replace_content_strings(content)
+			local startpos = escaped:match("^%s*return%s*{()")
+
+			nodes, err = table_body_hack(escaped, content, startpos, wrap_deserialize)
+		elseif content:match("^local%s+_%s*=%s*{};") then
+			-- file with a "header" at the start
+
+			local escaped = replace_content_strings(content)
+			local env, value = header_hack(escaped, content)
+
+			if env ~= nil then
+				local start_table_body = value
+				local function exec_with_header(code)
+					local func, err = loadstring(code)
+					if not func then
+						return nil, err
+					end
+					setfenv(func, env)
+					local ok, value_or_err = pcall(func)
+					if not ok then
+						return nil, value_or_err
+					end
+					return value_or_err
+				end
+
+				nodes, err = table_body_hack(escaped, content, start_table_body, exec_with_header)
+			else
+				err = value
 			end
-			local current = content:sub(startpos1, startpos)
-			entry, err = minetest.deserialize("return " .. current, true)
-			if not entry then
-				break
-			end
-			table.insert(nodes, entry)
-			startpos, startpos1 = endpos, endpos
+		else
+			-- the data doesn't look like we expect it to so we can't apply the workaround
+			err = "can't recognize format"
 		end
-		if not err then
-			entry = minetest.deserialize("return " .. content:sub(startpos1), true) -- process the last entry
-			table.insert(nodes, entry)
+		if not nodes then
+			minetest.log("warning", string.format("WorldEdit: deserializing data but can't apply LuaJIT workaround: %s", err or ""))
 		end
+	end
+
+	-- fallback to default deserialize if previous attempts produced nothing
+	if not nodes then
+		nodes, err = wrap_deserialize(content)
 	end
 	if err then
 		minetest.log("warning", "WorldEdit: deserialize: " .. err)
@@ -201,7 +312,7 @@ local function load_schematic(value)
 			})
 		end
 	elseif version == 4 or version == 5 then -- Nested table format
-		nodes = deserialize_workaround(content)
+		nodes = deserialize_with_workaround(content)
 	else
 		return nil
 	end
@@ -264,4 +375,3 @@ function worldedit.deserialize(origin_pos, value)
 	end
 	return #nodes
 end
-
