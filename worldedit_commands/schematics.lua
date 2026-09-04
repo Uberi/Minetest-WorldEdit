@@ -128,6 +128,12 @@ worldedit.register_command("allocate", {
 			return false, S("Schematic empty, nothing allocated")
 		end
 
+		if not vector.equals(pos, nodepos1) then
+			worldedit.player_notify(name,
+				S("Warning: Position 1 was moved because the schematic is misaligned.")
+			)
+		end
+
 		worldedit.pos1[name] = nodepos1
 		worldedit.pos2[name] = nodepos2
 		worldedit.marker_update(name)
