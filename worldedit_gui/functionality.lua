@@ -10,6 +10,7 @@ local gui_count1 = {} --mapping of player names to a quantity (arbitrary strings
 local gui_count2 = {} --mapping of player names to a quantity (arbitrary strings may also appear as values)
 local gui_count3 = {} --mapping of player names to a quantity (arbitrary strings may also appear as values)
 local gui_angle = {} --mapping of player names to an angle (one of 90, 180, 270, representing the angle in degrees clockwise)
+local gui_operation = {} -- mapping of player names to operations (flip or rotate, see orient command)
 local gui_filename = {} --mapping of player names to file names
 local gui_param2 = {} --mapping of player names to param2 values
 
@@ -25,6 +26,7 @@ setmetatable(gui_count1,     {__index = function() return "3" end})
 setmetatable(gui_count2,     {__index = function() return "6" end})
 setmetatable(gui_count3,     {__index = function() return "4" end})
 setmetatable(gui_angle,     {__index = function() return 90 end})
+setmetatable(gui_operation, {__index = function() return 1 end})
 setmetatable(gui_filename,  {__index = function() return "building" end})
 setmetatable(gui_param2,    {__index = function() return "0" end})
 
@@ -37,6 +39,11 @@ local angle_indices = {["90 degrees"]=1, ["180 degrees"]=2, ["270 degrees"]=3}
 local angle_values = {90, 180, 270}
 setmetatable(angle_indices, {__index = function () return 1 end})
 setmetatable(angle_values, {__index = function () return 90 end})
+
+local operation_indices = {["Rotate"]=1, ["Flip"]=2}
+local operation_values = {"rotate", "flip"}
+setmetatable(operation_indices, {__index = function () return 1 end})
+setmetatable(operation_values, {__index = function () return "rotate" end})
 
 -- given multiple sets of privileges, produces a single set of privs that would have the same effect as requiring all of them at the same time
 local combine_privs = function(...)
@@ -85,6 +92,8 @@ local function copy_changes(name, fields, def)
 				into[name] = axis_indices[value]
 			elseif into == gui_angle then
 				into[name] = angle_indices[value]
+			elseif into == gui_operation then
+				into[name] = operation_indices[value]
 			else
 				into[name] = value
 			end
@@ -703,15 +712,19 @@ worldedit.register_gui_function("worldedit_gui_orient", {
 	name = "Orient",
 	privs = we_privs("orient"),
 	get_formspec = function(name)
-		local angle = gui_angle[name]
-		return "size[5,3]" .. worldedit.get_formspec_header("worldedit_gui_orient") ..
-			string.format("dropdown[0,1;2.5;worldedit_gui_orient_angle;90 degrees,180 degrees,270 degrees;%s]", angle) ..
+		local operation, axis, angle = gui_operation[name], gui_axis1[name], gui_angle[name]
+		return "size[8.5,3]" .. worldedit.get_formspec_header("worldedit_gui_orient") ..
+			string.format("dropdown[0,1;2.5;worldedit_gui_orient_operation;Rotate,Flip;%d]", operation) ..
+			string.format("dropdown[3,1;2.5;worldedit_gui_orient_axis;X axis,Y axis,Z axis,Look direction;%d]", axis) ..
+			string.format("dropdown[6,1;2.5;worldedit_gui_orient_angle;90 degrees,180 degrees,270 degrees;%s]", angle) ..
 			"button_exit[0,2.5;3,0.8;worldedit_gui_orient_submit;Orient]"
 	end,
 })
 
 worldedit.register_gui_handler("worldedit_gui_orient", function(name, fields)
 	local cg = {
+		worldedit_gui_orient_operation = gui_operation,
+		worldedit_gui_orient_axis = gui_axis1,
 		worldedit_gui_orient_angle = gui_angle,
 	}
 	local ret = handle_changes(name, "worldedit_gui_orient", fields, cg)
@@ -720,7 +733,7 @@ worldedit.register_gui_handler("worldedit_gui_orient", function(name, fields)
 		worldedit.show_page(name, "worldedit_gui_orient")
 
 		execute_worldedit_command("orient", name,
-			tostring(angle_values[gui_angle[name]]))
+			string.format("%s %s %s", operation_values[gui_operation[name]], axis_values[gui_axis1[name]], angle_values[gui_angle[name]]))
 		return true
 	end
 	return ret
