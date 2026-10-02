@@ -324,28 +324,30 @@ Transpose the current WorldEdit positions and region along given axes.
 
 ### `//flip x/y/z/?/up/down/left/right/front/back`
 
-Flip the current WorldEdit region along the given axis.
+Flip the current WorldEdit region along the given axis. Also flip the orientations of facedir and wallmounted nodes.
 
     //flip x
     //flip ?
 
 ### `//rotate x/y/z/?/up/down/left/right/front/back <angle>`
 
-Rotate the current WorldEdit positions and region along the given axis by angle `<angle>` (90 degree increment).
+Rotate the current WorldEdit positions and region along the given axis by angle `<angle>` (90 degree increment). Also rotate the orientations of facedir and wallmounted nodes.
 
     //rotate x 90
     //rotate y 180
     //rotate z 270
     //rotate ? -90
 
-### `//orient <angle>`
+### `//orient <angle> | <operation> <axis> [<angle>]`
 
-Rotate oriented nodes in the current WorldEdit region around the Y axis by angle `<angle>` (90 degree increment)
+Rotate oriented nodes around an axis by 90 degree increments, or flip their orientation along an axis.
 
+Use `rotate` or `flip` for `<operation>` and `x`, `y`, `z`, or `?` for `<axis>`. The angle defaults to 90 for rotation and is unused for flipping. A single angle retains the original behavior of rotating around the Y axis.
+
+    //orient rotate x 90
+    //orient rotate y -90
+    //orient flip x
     //orient 90
-    //orient 180
-    //orient 270
-    //orient -90
 
 ### `//fixlight`
 

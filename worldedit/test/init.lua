@@ -282,7 +282,7 @@ end)
 
 
 for _, name in ipairs({
-	"manipulations", "primitives", "schematic"
+	"manipulations", "primitives", "schematic", "transformations"
 }) do
 	dofile(minetest.get_modpath("worldedit") .. "/test/" .. name .. ".lua")
 end
