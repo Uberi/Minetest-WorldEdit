@@ -141,3 +141,23 @@ register_test("//save", make_parsing_test("save", {
 	"../../oops",
 	"",
 }))
+
+register_test("//orient", make_parsing_test("orient", {
+	"90", "-90", "0", "360",
+	"rotate x 90", "rotate y -180", "rotate z +270", "rotate ? 90",
+	"rotate x", "flip y", "flip z 0", "flip ? 90",
+}, {
+	"", "45", "90 extra", "rotate x junk", "rotate x 45",
+	"rotate x 90 extra", "rotate q 90", "flip x junk", "flip x 0 extra",
+	"unknown x 90", "rotate", "flip",
+}))
+
+register_test("//orient parsed arguments", function()
+	local parse = worldedit.registered_commands.orient.parse
+	for _, param in ipairs({"90", "rotate y 90", "rotate y"}) do
+		local ok, operation, axis, angle = parse(param)
+		assert(ok and operation == "rotate" and axis == "y" and angle == 90)
+	end
+	local ok, operation, axis, angle = parse("flip x")
+	assert(ok and operation == "flip" and axis == "x" and angle == 0)
+end)

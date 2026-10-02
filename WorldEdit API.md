@@ -90,21 +90,28 @@ Transposes a region defined by the positions `pos1` and `pos2` between the `axis
 
 Returns the number of nodes transposed, the new transposed position 1, and the new transposed position 2.
 
-### count = worldedit.flip(pos1, pos2, axis)
+### count = worldedit.flip(pos1, pos2, axis, orient_nodes)
 
 Flips a region defined by the positions `pos1` and `pos2` along the `axis` axis ("x" or "y" or "z").
 
+If `orient_nodes` is true, also flip node orientations. It defaults to false.
+
 Returns the number of nodes flipped.
 
-### count, newpos2, newpos2 = worldedit.rotate(pos1, pos2, angle)
+### count, newpos1, newpos2 = worldedit.rotate(pos1, pos2, axis, angle, orient_nodes)
 
-Rotates a region defined by the positions `pos1` and `pos2` by `angle` degrees clockwise around the y axis (supporting 90 degree increments only).
+Rotates a region defined by the positions `pos1` and `pos2` by `angle` degrees clockwise around the `axis` axis (supporting 90 degree increments only).
+
+If `orient_nodes` is true, also rotate node orientations. It defaults to false.
 
 Returns the number of nodes rotated, the new position 1, and the new position 2.
 
 ### count = worldedit.orient(pos1, pos2, angle)
+### count = worldedit.orient(pos1, pos2, operation, axis, angle)
 
-Rotates all oriented nodes in a region defined by the positions `pos1` and `pos2` by `angle` degrees clockwise (90 degree increment) around the Y axis.
+Change orientation of all oriented nodes in a region defined by the positions `pos1` and `pos2` performing `operation` (rotate or flip) around the `axis` axis by angle `angle` (90 degree increment, unused for flip operation).
+
+The three-argument form rotates around the Y axis, as before. Rotated vertical wallmounted states (param2 values 6 and 7) are preserved when no orientation mapping is available.
 
 Returns the number of nodes oriented.
 
