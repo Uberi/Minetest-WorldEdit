@@ -42,23 +42,30 @@ end
 -- @param pos1
 -- @param pos2
 -- @param param2 Value of param2 to set
+-- @param node Optional specified node to affect
 -- @return The number of nodes set.
-function worldedit.set_param2(pos1, pos2, param2)
+function worldedit.set_param2(pos1, pos2, param2, node)
 	pos1, pos2 = worldedit.sort_pos(pos1, pos2)
 
 	local manip, area = mh.init(pos1, pos2)
 	local param2_data = manip:get_param2_data()
+	local data = manip:get_data()
 
-	-- Set param2 for every node
+	local search_id = node and minetest.get_content_id(node)
+	local count = 0
+	-- Set param2 for every node or only for specified nodes
 	for i in area:iterp(pos1, pos2) do
-		param2_data[i] = param2
+		if not search_id or data[i] == search_id then
+			param2_data[i] = param2
+			count = count + 1
+		end
 	end
 
 	-- Update map
 	manip:set_param2_data(param2_data)
 	mh.finish(manip)
 
-	return worldedit.volume(pos1, pos2)
+	return count
 end
 
 --- Replaces all instances of `search_node` with `replace_node` in a region.
